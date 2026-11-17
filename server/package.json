@@ -1,0 +1,14 @@
+{
+  "name": "petri-crew-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Crew server and legal pages for the Petri app. No dependencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

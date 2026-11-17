@@ -1,0 +1,232 @@
+[
+  {
+    "id": "boot-camp",
+    "icon": "figure.2.and.child.holdinghands",
+    "unlockAtGerms": 1,
+    "title": {
+      "en": "Germ factory or boot camp?",
+      "fr": "Usine à microbes ou camp d'entraînement ?"
+    },
+    "summary": {
+      "en": "What the first year of daycare really does to a household.",
+      "fr": "Ce que la première année de garderie fait vraiment à une maisonnée."
+    },
+    "paragraphs": [
+      {
+        "en": "In 2026, five researchers who are also parents of young kids reviewed the evidence on infections in childcare. Their estimate for a one-year-old starting daycare: about 12 to 15 respiratory infections, two stomach bugs and one or two rash illnesses in the first year alone.",
+        "fr": "En 2026, cinq chercheurs, eux-mêmes parents de jeunes enfants, ont passé en revue les données sur les infections en service de garde. Leur estimation pour un enfant d'un an qui commence la garderie : environ 12 à 15 infections respiratoires, deux gastros et une ou deux maladies à éruption dans la première année seulement."
+      },
+      {
+        "en": "The reason is simple. Small immune systems are meeting most of these germs for the first time, in a room full of other small immune systems doing the same thing.",
+        "fr": "La raison est simple. De petits systèmes immunitaires rencontrent la plupart de ces microbes pour la première fois, dans une pièce pleine d'autres petits systèmes immunitaires qui font pareil."
+      },
+      {
+        "en": "The good news: it gets better every year. The same review found that children who catch everything early tend to be sick less often than their classmates once they reach school.",
+        "fr": "La bonne nouvelle : ça s'améliore chaque année. La même revue montre que les enfants qui attrapent tout très tôt sont en général moins souvent malades que leurs camarades une fois à l'école."
+      },
+      {
+        "en": "And yes, the authors say it plainly: parents get sick more often too. You are not imagining it, and you are not doing anything wrong.",
+        "fr": "Et oui, les auteurs le disent clairement : les parents tombent malades plus souvent, eux aussi. Tu n'inventes rien, et tu ne fais rien de travers."
+      }
+    ],
+    "sources": [
+      {
+        "name": "Caddy et al., Clinical Microbiology Reviews (2026)",
+        "url": "https://journals.asm.org/doi/10.1128/cmr.00253-25"
+      },
+      {
+        "name": "UCL News: Frequent infections in nursery help toddlers build up immune systems",
+        "url": "https://www.ucl.ac.uk/news/2026/mar/frequent-infections-nursery-help-toddlers-build-immune-systems"
+      }
+    ]
+  },
+  {
+    "id": "soap",
+    "icon": "hands.sparkles.fill",
+    "unlockAtGerms": 2,
+    "title": {
+      "en": "Twenty seconds of soap",
+      "fr": "Vingt secondes de savon"
+    },
+    "summary": {
+      "en": "The cheapest piece of medical equipment in your home.",
+      "fr": "L'équipement médical le moins cher de ta maison."
+    },
+    "paragraphs": [
+      {
+        "en": "Soap does not just rinse germs away. It breaks up the grease that holds them to your skin, and for many viruses it tears their outer layer apart.",
+        "fr": "Le savon ne fait pas que rincer les microbes. Il défait le gras qui les colle à ta peau et, pour bien des virus, il déchire leur enveloppe."
+      },
+      {
+        "en": "Twenty seconds is the time it takes to scrub every surface: palms, backs of hands, between the fingers and under the nails. That is about two rounds of Happy Birthday.",
+        "fr": "Vingt secondes, c'est le temps qu'il faut pour frotter partout : paumes, dos des mains, entre les doigts et sous les ongles. À peu près deux fois « Bonne fête »."
+      },
+      {
+        "en": "Hand sanitizer with at least 60 % alcohol is a good backup when there is no sink. It is weak against some germs, though, and norovirus is the famous one.",
+        "fr": "Un gel désinfectant à au moins 60 % d'alcool dépanne bien quand il n'y a pas de lavabo. Il est toutefois faible contre certains microbes, et le norovirus est le plus célèbre."
+      },
+      {
+        "en": "The moments that matter most at home: after diapers and nose wiping, before cooking or eating, and when you walk in the door.",
+        "fr": "Les moments qui comptent le plus à la maison : après une couche ou un nez mouché, avant de cuisiner ou de manger, et en rentrant."
+      }
+    ],
+    "sources": [
+      {
+        "name": "CDC: About Handwashing",
+        "url": "https://www.cdc.gov/clean-hands/about/index.html"
+      }
+    ]
+  },
+  {
+    "id": "fever",
+    "icon": "thermometer.medium",
+    "unlockAtGerms": 3,
+    "title": {
+      "en": "Fever, explained",
+      "fr": "La fièvre, expliquée"
+    },
+    "summary": {
+      "en": "Why your body turns up the heat, and when to worry.",
+      "fr": "Pourquoi ton corps monte le chauffage, et quand s'inquiéter."
+    },
+    "paragraphs": [
+      {
+        "en": "A fever is a body temperature of 38 °C (100.4 °F) or higher. It is not the illness itself. It is your immune system changing the thermostat on purpose.",
+        "fr": "La fièvre, c'est une température du corps de 38 °C ou plus. Ce n'est pas la maladie elle-même. C'est ton système immunitaire qui règle le thermostat exprès."
+      },
+      {
+        "en": "The number on the thermometer matters less than how you feel. Fever medicine is for comfort: it helps you rest and drink, and it does not make the infection last longer.",
+        "fr": "Le chiffre sur le thermomètre compte moins que ton état général. Les médicaments contre la fièvre servent au confort : ils t'aident à te reposer et à boire, sans prolonger l'infection."
+      },
+      {
+        "en": "Drink more than usual. A fever makes you lose water faster, and dehydration makes everything feel worse.",
+        "fr": "Bois plus que d'habitude. La fièvre te fait perdre de l'eau plus vite, et la déshydratation empire tout."
+      },
+      {
+        "en": "For an adult, call a health professional if a fever lasts more than 3 days, or if it comes with a stiff neck, confusion, a new rash, chest pain or trouble breathing. For a baby under 3 months, any fever means a call right away.",
+        "fr": "Pour un adulte, appelle un professionnel de la santé si la fièvre dure plus de 3 jours, ou si elle s'accompagne d'une raideur au cou, de confusion, d'une nouvelle éruption, d'une douleur à la poitrine ou d'une difficulté à respirer. Pour un bébé de moins de 3 mois, toute fièvre demande un appel immédiat."
+      }
+    ],
+    "sources": [
+      {
+        "name": "NHS: High temperature (fever) in adults",
+        "url": "https://www.nhs.uk/conditions/fever-in-adults/"
+      }
+    ]
+  },
+  {
+    "id": "antibiotics",
+    "icon": "pills.fill",
+    "unlockAtGerms": 5,
+    "title": {
+      "en": "Antibiotics: when they help",
+      "fr": "Les antibiotiques : quand ils aident"
+    },
+    "summary": {
+      "en": "They are brilliant against bacteria and useless against viruses.",
+      "fr": "Géniaux contre les bactéries, inutiles contre les virus."
+    },
+    "paragraphs": [
+      {
+        "en": "Most of what comes home from daycare is viral: colds, the flu, stomach bugs, most sore throats and most coughs. Antibiotics do nothing against any of them.",
+        "fr": "Presque tout ce qui revient de la garderie est viral : rhumes, grippe, gastros, la plupart des maux de gorge et des toux. Les antibiotiques n'y peuvent rien."
+      },
+      {
+        "en": "A few cards in your album are bacterial and do need them: strep throat, whooping cough and impetigo. That is why a test or an exam comes first.",
+        "fr": "Quelques cartes de ton album sont bactériennes et en ont besoin : la pharyngite à strepto, la coqueluche et l'impétigo. Voilà pourquoi un test ou un examen passe en premier."
+      },
+      {
+        "en": "Taking antibiotics you do not need is not harmless. They can cause side effects such as diarrhea and rashes, and every unnecessary course helps bacteria learn to resist them.",
+        "fr": "Prendre des antibiotiques sans en avoir besoin n'est pas anodin. Ils peuvent causer des effets secondaires comme la diarrhée et des éruptions, et chaque traitement inutile aide les bactéries à apprendre à leur résister."
+      },
+      {
+        "en": "When you are prescribed some, take them exactly as directed, and never use leftovers or someone else's.",
+        "fr": "Quand on t'en prescrit, prends-les exactement comme indiqué, et n'utilise jamais des restes ni ceux de quelqu'un d'autre."
+      }
+    ],
+    "sources": [
+      {
+        "name": "CDC: Antibiotic Use",
+        "url": "https://www.cdc.gov/antibiotic-use/about/index.html"
+      }
+    ]
+  },
+  {
+    "id": "contagious",
+    "icon": "clock.fill",
+    "unlockAtGerms": 8,
+    "title": {
+      "en": "How long am I contagious?",
+      "fr": "Je suis contagieux combien de temps ?"
+    },
+    "summary": {
+      "en": "A cheat sheet for the question everyone asks on day three.",
+      "fr": "Un aide-mémoire pour la question que tout le monde se pose au jour trois."
+    },
+    "paragraphs": [
+      {
+        "en": "Colds, flu, COVID-19 and RSV: you can go back to your routine when your symptoms are getting better overall and you have been fever-free for 24 hours without medicine. You may still be a little contagious, so wash your hands and keep some distance for a few more days.",
+        "fr": "Rhume, grippe, COVID-19 et VRS : tu peux reprendre ta routine quand tes symptômes s'améliorent dans l'ensemble et que tu es sans fièvre depuis 24 heures, sans médicament. Tu peux être encore un peu contagieux : lave-toi les mains et garde tes distances quelques jours de plus."
+      },
+      {
+        "en": "Stomach bugs: you are most contagious while you are sick and for the first days after. Wait 2 full days after the last symptom before cooking for anyone.",
+        "fr": "Gastros : tu es le plus contagieux pendant la maladie et dans les premiers jours qui suivent. Attends 2 jours complets après le dernier symptôme avant de cuisiner pour qui que ce soit."
+      },
+      {
+        "en": "Strep throat: once you have no fever and have taken antibiotics for 12 to 24 hours, you are generally fine to go out again.",
+        "fr": "Pharyngite à strepto : une fois sans fièvre et après 12 à 24 heures d'antibiotiques, tu peux en général ressortir."
+      },
+      {
+        "en": "Chickenpox: from a day or two before the rash until every blister has crusted over. Whooping cough: until you have had 5 days of antibiotics.",
+        "fr": "Varicelle : d'un jour ou deux avant l'éruption jusqu'à ce que toutes les cloques aient croûté. Coqueluche : jusqu'à 5 jours d'antibiotiques."
+      }
+    ],
+    "sources": [
+      {
+        "name": "CDC: Preventing spread when you're sick",
+        "url": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
+      },
+      {
+        "name": "CDC: How to Prevent Norovirus",
+        "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+      }
+    ]
+  },
+  {
+    "id": "survival-kit",
+    "icon": "cross.case.fill",
+    "unlockAtGerms": 12,
+    "title": {
+      "en": "The sick-parent survival kit",
+      "fr": "La trousse de survie du parent malade"
+    },
+    "summary": {
+      "en": "What to have in the house before the next one lands.",
+      "fr": "Quoi avoir à la maison avant que le prochain débarque."
+    },
+    "paragraphs": [
+      {
+        "en": "The shelf: a thermometer, tissues, saline spray, honey, a rehydration drink and the fever medicine your pharmacist recommends for you. Buy them while you are healthy. Nobody enjoys a pharmacy run with a fever.",
+        "fr": "La tablette : un thermomètre, des mouchoirs, un vaporisateur salin, du miel, une solution de réhydratation et le médicament contre la fièvre que ton pharmacien te recommande. Achète tout ça en santé. Personne n'aime courir à la pharmacie avec de la fièvre."
+      },
+      {
+        "en": "The freezer: two meals you can heat with one hand. Soup counts. So does anything your kid will actually eat.",
+        "fr": "Le congélateur : deux repas qui se réchauffent d'une seule main. La soupe, ça compte. Tout ce que ton enfant mange vraiment aussi."
+      },
+      {
+        "en": "The rules: lower every standard except hand washing. Screens are allowed. Pajamas are an outfit. Whoever feels least terrible is on duty.",
+        "fr": "Les règles : on baisse toutes les exigences, sauf le lavage des mains. Les écrans sont permis. Le pyjama est une tenue. Celui qui se sent le moins pire est de garde."
+      },
+      {
+        "en": "The plan: know your health line number and the nearest walk-in clinic before you need them. Help Lines in Settings keeps the numbers one tap away.",
+        "fr": "Le plan : connais le numéro de ta ligne santé et la clinique sans rendez-vous la plus proche avant d'en avoir besoin. Les lignes d'aide, dans les réglages, gardent les numéros à portée de doigt."
+      }
+    ],
+    "sources": [
+      {
+        "name": "CDC: Preventing spread when you're sick",
+        "url": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
+      }
+    ]
+  }
+]

@@ -1,0 +1,100 @@
+import Foundation
+
+/// Germ-free streak arithmetic shared by the store, badges and widgets.
+enum StreakMath {
+    static func days(from start: Date, to end: Date) -> Int {
+        let calendar = Calendar.current
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: start),
+                                           to: calendar.startOfDay(for: end)).day ?? 0
+        return max(0, days)
+    }
+
+    /// Start of the current germ-free run; nil while sick.
+    static func currentStart(data: AppData) -> Date? {
+        if data.logs.contains(where: { $0.isActive }) { return nil }
+        return data.logs.compactMap { $0.endedAt }.max() ?? data.installedAt
+    }
+
+    static func current(data: AppData, now: Date) -> Int {
+        guard let start = currentStart(data: data) else { return 0 }
+        return days(from: start, to: now)
+    }
+
+    /// Every germ-free gap so far, in chronological order.
+    static func gaps(data: AppData, now: Date) -> [Int] {
+        var result: [Int] = []
+        var cursor = data.installedAt
+        for log in data.logs.sorted(by: { $0.startedAt < $1.startedAt }) {
+            result.append(days(from: cursor, to: max(cursor, log.startedAt)))
+            cursor = max(cursor, log.endedAt ?? now)
+        }
+        if !data.logs.contains(where: { $0.isActive }) {
+            result.append(days(from: cursor, to: now))
+        }
+        return result
+    }
+
+    static func record(data: AppData, now: Date) -> Int {
+        gaps(data: data, now: now).max() ?? 0
+    }
+
+    /// The streak that ended when the current illness started.
+    static func lastRun(data: AppData, now: Date) -> Int {
+        gaps(data: data, now: now).last ?? 0
+    }
+}
+
+/// Points and badges earned by logging germs.
+enum RewardEngine {
+    static let nightShiftPoints = 50
+
+    static func bonuses(for draft: LogDraft, germ: Germ) -> [LogBonus] {
+        var result = [LogBonus(kind: .rarity, points: germ.rarity.basePoints)]
+        let hour = Calendar.current.component(.hour, from: draft.startedAt)
+        if hour >= 1 && hour < 5 {
+            result.append(LogBonus(kind: .nightShift, points: nightShiftPoints))
+        }
+        return result
+    }
+
+    static func earnedBadges(data: AppData, catalog: GermCatalog, now: Date) -> Set<String> {
+        var earned = Set<String>()
+        let logs = data.logs.sorted { $0.startedAt < $1.startedAt }
+        let calendar = Calendar.current
+
+        if !logs.isEmpty { earned.insert("patient_one") }
+        if logs.contains(where: { log in log.bonuses.contains { $0.kind == .nightShift } }) {
+            earned.insert(BadgeCatalog.nightShift)
+        }
+        if logs.contains(where: { $0.partnerSickToo }) { earned.insert("tag_team") }
+        if logs.contains(where: { $0.dayCount(now: now) >= 10 }) { earned.insert("marathon") }
+        if logs.contains(where: { log in
+            guard let end = log.endedAt else { return false }
+            return end.timeIntervalSince(log.startedAt) <= 24 * 3600
+        }) {
+            earned.insert("speedrun")
+        }
+
+        var lastSeen: [String: Date] = [:]
+        var perMonth: [String: Int] = [:]
+        for log in logs {
+            if let previous = lastSeen[log.germID], log.startedAt.timeIntervalSince(previous) <= 30 * 24 * 3600 {
+                earned.insert("boomerang")
+            }
+            lastSeen[log.germID] = log.startedAt
+            let parts = calendar.dateComponents([.year, .month], from: log.startedAt)
+            let key = "\(parts.year ?? 0)-\(parts.month ?? 0)"
+            perMonth[key, default: 0] += 1
+        }
+        if perMonth.values.contains(where: { $0 >= 3 }) { earned.insert("rough_month") }
+
+        let distinct = Set(logs.map { $0.germID }).count
+        if distinct >= 5 { earned.insert("collector") }
+        if distinct >= 12 { earned.insert("half_album") }
+        if !catalog.germs.isEmpty && distinct >= catalog.germs.count { earned.insert("full_album") }
+
+        if data.kidIllnesses.filter({ $0.outcome == .dodged }).count >= 3 { earned.insert("dodger") }
+        if StreakMath.record(data: data, now: now) >= 30 { earned.insert(BadgeCatalog.ironParent) }
+        return earned
+    }
+}

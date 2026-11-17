@@ -1,0 +1,116 @@
+name: Build IPA
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 40
+    env:
+      TZ: America/Toronto
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check repository integrity
+        run: python3 tools/check_repo.py
+
+      - name: Static checks on Swift sources
+        run: python3 tools/check_swift.py
+
+      - name: Crew server tests
+        run: node server/test.js
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          xcrun swiftc --version
+
+      - name: Typecheck every Swift file (diagnostic, lists all errors at once)
+        continue-on-error: true
+        run: |
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          STATUS=0
+          xcrun swiftc -typecheck -parse-as-library -sdk "$SDK" \
+            -target arm64-apple-ios26.2 -swift-version 5 -D PETRI_SIDELOAD \
+            -module-name Petri $(find App Shared -name '*.swift') \
+            > typecheck-app.log 2>&1 || STATUS=1
+          xcrun swiftc -typecheck -parse-as-library -application-extension -sdk "$SDK" \
+            -target arm64-apple-ios26.2 -swift-version 5 \
+            -module-name PetriWidgets $(find Widgets Shared -name '*.swift') \
+            > typecheck-widgets.log 2>&1 || STATUS=1
+          echo "===== App target: $(grep -c ' error: ' typecheck-app.log || true) error(s) ====="
+          grep ' error: ' typecheck-app.log | sort -u || true
+          echo "===== Widgets target: $(grep -c ' error: ' typecheck-widgets.log || true) error(s) ====="
+          grep ' error: ' typecheck-widgets.log | sort -u || true
+          exit $STATUS
+
+      - name: Source links (informational, lists every link that does not answer)
+        continue-on-error: true
+        run: python3 tools/check_links.py
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the Xcode project
+        run: xcodegen generate
+
+      - name: Build (unsigned, sideload flavor)
+        run: |
+          STATUS=0
+          xcodebuild build \
+            -project Petri.xcodeproj \
+            -scheme Petri \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            'SWIFT_ACTIVE_COMPILATION_CONDITIONS=$(inherited) PETRI_SIDELOAD' \
+            > build.log 2>&1 || STATUS=1
+          tail -n 25 build.log
+          if [ "$STATUS" -ne 0 ]; then
+            echo "===== Build errors ====="
+            grep -E ' error: |error: ' build.log | sort -u | head -n 200
+            exit 1
+          fi
+
+      - name: Verify the built bundle
+        run: |
+          APP="build/Build/Products/Release-iphoneos/Petri.app"
+          python3 tools/check_bundle.py "$APP"
+
+      - name: Package as .ipa
+        run: |
+          rm -rf Payload Petri.ipa
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/Petri.app Payload/
+          zip -qry Petri.ipa Payload
+          ls -lh Petri.ipa
+
+      - name: Upload the IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Petri-ipa-${{ github.run_number }}
+          path: Petri.ipa
+          if-no-files-found: error
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ github.run_number }}
+          path: |
+            build.log
+            typecheck-app.log
+            typecheck-widgets.log
+          if-no-files-found: ignore

@@ -1,0 +1,106 @@
+name: Release to TestFlight
+
+# Manual only. Needs a paid Apple Developer account and four repository secrets:
+# APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (see docs/APP-STORE.md).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Marketing version (for example 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      TZ: America/Toronto
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        run: |
+          for NAME in TEAM_ID ASC_KEY_ID ASC_ISSUER_ID; do
+            if [ -z "${!NAME}" ]; then echo "Missing secret for $NAME"; exit 1; fi
+          done
+
+      - name: Check repository integrity
+        run: |
+          python3 tools/check_repo.py --release
+          python3 tools/check_swift.py
+          node server/test.js
+
+      - name: Install the App Store Connect API key
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          printf '%s' "$ASC_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+      - name: Generate the Xcode project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -project Petri.xcodeproj \
+            -scheme Petri \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/Petri.xcarchive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            MARKETING_VERSION="${{ inputs.version }}" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            > archive.log 2>&1 || { tail -n 60 archive.log; grep ' error: ' archive.log | sort -u; exit 1; }
+          tail -n 10 archive.log
+
+      - name: Export the signed IPA
+        run: |
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>export</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build/Petri.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8 \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+          ls -lh build/export
+
+      - name: Upload to App Store Connect
+        run: |
+          xcrun altool --upload-app -f build/export/Petri.ipa -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Keep the signed IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Petri-appstore-${{ github.run_number }}
+          path: build/export/Petri.ipa
+
+      - name: Remove the API key
+        if: always()
+        run: rm -f ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
