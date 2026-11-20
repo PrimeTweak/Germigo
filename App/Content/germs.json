@@ -22,6 +22,7 @@
     "incubationMinHours": 24,
     "incubationMaxHours": 72,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "1 to 3 days after",
       "fr": "1 à 3 jours après"
@@ -540,7 +541,8 @@
       "weakness": {
         "en": "Hot lemon and honey. Never honey for a baby under 1.",
         "fr": "Citron chaud et miel. Jamais de miel pour un bébé de moins de 1 an."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -899,7 +901,8 @@
       "weakness": {
         "en": "Silence. Not whispering: actual silence.",
         "fr": "Le silence. Pas chuchoter : se taire."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -944,7 +947,8 @@
         "text": {
           "en": "Hoarse voice, or none at all",
           "fr": "Voix rauque, ou plus de voix"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "wind",
@@ -1207,6 +1211,7 @@
     "incubationMinHours": 12,
     "incubationMaxHours": 48,
     "family": "gut",
+    "microbe": "virus",
     "showsUp": {
       "en": "12 to 48 h after",
       "fr": "12 à 48 h après"
@@ -1308,7 +1313,8 @@
       "weakness": {
         "en": "Soap and water. Sanitizer barely tickles it.",
         "fr": "L'eau et le savon. Le gel le chatouille à peine."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -1560,7 +1566,8 @@
       "weakness": {
         "en": "Hands off your eyes, and your own towel.",
         "fr": "Pas touche aux yeux, et ta propre serviette."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -1691,6 +1698,7 @@
     "incubationMinHours": 48,
     "incubationMaxHours": 336,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "2 to 14 days after",
       "fr": "2 à 14 jours après"
@@ -1796,7 +1804,8 @@
       "weakness": {
         "en": "A home test, then another 48 hours later.",
         "fr": "Un test maison, puis un autre 48 heures plus tard."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -1879,7 +1888,8 @@
         "text": {
           "en": "New loss of taste or smell",
           "fr": "Perte du goût ou de l'odorat"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "moon.zzz.fill",
@@ -1951,6 +1961,7 @@
     "incubationMinHours": 96,
     "incubationMaxHours": 144,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "4 to 6 days after",
       "fr": "4 à 6 jours après"
@@ -2202,6 +2213,7 @@
     "incubationMinHours": 48,
     "incubationMaxHours": 120,
     "family": "airways",
+    "microbe": "bacterium",
     "showsUp": {
       "en": "2 to 5 days after",
       "fr": "2 à 5 jours après"
@@ -2291,7 +2303,8 @@
       "weakness": {
         "en": "A throat swab, then antibiotics. A real fix, for once.",
         "fr": "Un prélèvement de gorge, puis des antibiotiques. Un vrai remède, pour une fois."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -2429,6 +2442,7 @@
     "incubationMinHours": 24,
     "incubationMaxHours": 96,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "1 to 4 days after",
       "fr": "1 à 4 jours après"
@@ -2538,7 +2552,8 @@
       "weakness": {
         "en": "A vaccine every year. Antivirals work best within 2 days.",
         "fr": "Un vaccin chaque année. Les antiviraux agissent mieux dans les 2 premiers jours."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -2678,6 +2693,7 @@
     "tintDeep": "#B0B8F9",
     "quickPick": false,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "Depends on the type",
       "fr": "Ça dépend du type"
@@ -2783,7 +2799,8 @@
       "weakness": {
         "en": "Soap, and surfaces cleaned well. It shrugs off many disinfectants.",
         "fr": "Le savon et un bon ménage. Il résiste à bien des désinfectants."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -2915,6 +2932,7 @@
     "incubationMinHours": 72,
     "incubationMaxHours": 144,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "3 to 6 days after",
       "fr": "3 à 6 jours après"
@@ -3151,6 +3169,7 @@
     "incubationMinHours": 48,
     "incubationMaxHours": 144,
     "family": "airways",
+    "microbe": "virus",
     "showsUp": {
       "en": "2 to 6 days after",
       "fr": "2 à 6 jours après"
@@ -3386,6 +3405,7 @@
     "incubationMinHours": 24,
     "incubationMaxHours": 72,
     "family": "gut",
+    "microbe": "virus",
     "showsUp": {
       "en": "About 2 days after",
       "fr": "Environ 2 jours après"
@@ -3487,7 +3507,8 @@
       "weakness": {
         "en": "Soap after every diaper. The vaccine, for babies.",
         "fr": "Le savon après chaque couche. Le vaccin, pour les bébés."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -3613,6 +3634,7 @@
     "incubationMinHours": 72,
     "incubationMaxHours": 120,
     "family": "skin",
+    "microbe": "virus",
     "showsUp": {
       "en": "3 to 5 days after",
       "fr": "3 à 5 jours après"
@@ -3787,7 +3809,8 @@
         "text": {
           "en": "Rash on the palms and soles",
           "fr": "Éruption aux paumes et sous les pieds"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "fork.knife",
@@ -3855,6 +3878,7 @@
     "incubationMinHours": 96,
     "incubationMaxHours": 336,
     "family": "skin",
+    "microbe": "virus",
     "showsUp": {
       "en": "4 to 14 days after",
       "fr": "4 à 14 jours après"
@@ -3952,7 +3976,8 @@
       "weakness": {
         "en": "Its contagious phase ends when the rash shows up.",
         "fr": "Sa phase contagieuse finit quand l'éruption apparaît."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -4096,6 +4121,7 @@
     "tintDeep": "#DFC2A6",
     "quickPick": false,
     "family": "skin",
+    "microbe": "parasite",
     "showsUp": {
       "en": "Itching takes 4 to 6 weeks",
       "fr": "Ça pique après 4 à 6 semaines"
@@ -4189,7 +4215,8 @@
       "weakness": {
         "en": "A fine-toothed comb, good light, and the instructions to the letter.",
         "fr": "Un peigne fin, un bon éclairage et le mode d'emploi à la lettre."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -4244,7 +4271,8 @@
         "text": {
           "en": "A tickle, like something moving",
           "fr": "Un chatouillement, comme si ça bougeait"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "moon.zzz.fill",
@@ -4318,6 +4346,7 @@
     "tintDeep": "#FAD9E3",
     "quickPick": false,
     "family": "skin",
+    "microbe": "parasite",
     "showsUp": {
       "en": "Sometimes with no symptoms",
       "fr": "Parfois sans symptômes"
@@ -4451,7 +4480,8 @@
         "text": {
           "en": "Itchy bottom, mostly at night",
           "fr": "Fesses qui piquent, surtout la nuit"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "moon.zzz.fill",
@@ -4514,6 +4544,7 @@
     "tintDeep": "#F7D38F",
     "quickPick": false,
     "family": "skin",
+    "microbe": "bacterium",
     "showsUp": {
       "en": "About 10 days after",
       "fr": "Environ 10 jours après"
@@ -4611,7 +4642,8 @@
       "weakness": {
         "en": "Antibiotics, and sores kept covered.",
         "fr": "Des antibiotiques, et des plaies bien couvertes."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -4674,7 +4706,8 @@
         "text": {
           "en": "Honey-colored crusts",
           "fr": "Croûtes couleur miel"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "person.fill",
@@ -4735,6 +4768,7 @@
     "incubationMinHours": 96,
     "incubationMaxHours": 336,
     "family": "skin",
+    "microbe": "fungus",
     "showsUp": {
       "en": "4 to 14 days after",
       "fr": "4 à 14 jours après"
@@ -4832,7 +4866,8 @@
       "weakness": {
         "en": "Antifungal cream for the full 2 to 4 weeks, and dry skin.",
         "fr": "Crème antifongique pendant 2 à 4 semaines complètes, et la peau au sec."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -4884,7 +4919,8 @@
         "text": {
           "en": "Red, itchy, ring-shaped rash",
           "fr": "Éruption rouge en anneau qui pique"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "comb.fill",
@@ -4962,6 +4998,7 @@
     "incubationMinHours": 120,
     "incubationMaxHours": 504,
     "family": "airways",
+    "microbe": "bacterium",
     "showsUp": {
       "en": "5 to 21 days after",
       "fr": "5 à 21 jours après"
@@ -5063,7 +5100,8 @@
       "weakness": {
         "en": "Vaccination at every age, and antibiotics early.",
         "fr": "La vaccination à tout âge, et des antibiotiques tôt."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -5145,7 +5183,8 @@
         "text": {
           "en": "A \"whoop\" when breathing in",
           "fr": "Un « whoop » en inspirant"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "arrow.uturn.up.circle.fill",
@@ -5206,6 +5245,7 @@
     "incubationMinHours": 240,
     "incubationMaxHours": 504,
     "family": "skin",
+    "microbe": "virus",
     "showsUp": {
       "en": "10 to 21 days after",
       "fr": "10 à 21 jours après"
@@ -5311,7 +5351,8 @@
       "weakness": {
         "en": "Two vaccine doses. Short nails, no aspirin.",
         "fr": "Deux doses de vaccin. Ongles courts, pas d'aspirine."
-      }
+      },
+      "weaknessQuiz": true
     },
     "myth": {
       "claim": {
@@ -5356,7 +5397,8 @@
         "text": {
           "en": "Itchy, fluid-filled blisters",
           "fr": "Cloques remplies de liquide qui piquent"
-        }
+        },
+        "telltale": true
       },
       {
         "icon": "person.fill",

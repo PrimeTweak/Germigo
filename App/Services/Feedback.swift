@@ -9,7 +9,19 @@ enum SoundEffect: String {
     case badge
 }
 
-/// Plays short bundled sounds; follows the silent switch.
+/// From 10 PM to 7 AM: reminders wait for morning and sounds stay off, so nobody wakes up.
+enum QuietHours {
+    static let startMinute = 22 * 60
+    static let endMinute = 7 * 60
+
+    static func contains(_ date: Date) -> Bool {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+        let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
+        return minute >= startMinute || minute < endMinute
+    }
+}
+
+/// Plays short bundled sounds; follows the silent switch and the quiet hours.
 @MainActor
 final class SoundPlayer {
     static let shared = SoundPlayer()
@@ -17,7 +29,7 @@ final class SoundPlayer {
     private var players: [SoundEffect: AVAudioPlayer] = [:]
 
     func play(_ effect: SoundEffect) {
-        guard AppModel.shared.data.settings.soundsOn else { return }
+        guard AppModel.shared.data.settings.soundsOn, !QuietHours.contains(Date()) else { return }
         if players[effect] == nil, let url = Bundle.main.url(forResource: effect.rawValue, withExtension: "wav") {
             try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
             players[effect] = try? AVAudioPlayer(contentsOf: url)

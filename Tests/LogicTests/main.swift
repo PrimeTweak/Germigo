@@ -315,6 +315,21 @@ do {
     check(QuizEngine.streak(doneDays: progress.doneDays, now: day(3)) == 1, "today's quiz starts a streak")
     check(QuizEngine.streak(doneDays: progress.doneDays, now: day(4)) == 1, "the streak waits until the end of the next day")
     check(QuizEngine.streak(doneDays: progress.doneDays, now: day(5)) == 0, "a skipped day ends the streak")
+    let sickLeave = QuizEngine.sickDays(logs: [makeLog("rhino", from: day(4), to: day(4, hour: 20))], now: day(5))
+    check(QuizEngine.streak(doneDays: progress.doneDays, sickDays: sickLeave, now: day(5)) == 1,
+          "a sick day pauses the streak instead of ending it")
+    let partnerSick = QuizEngine.sickDays(logs: [makeLog("rhino", from: day(4), to: nil, sufferer: .partner)], now: day(5))
+    check(partnerSick.isEmpty, "only the parent's own sick days count as sick leave")
+
+    var typed = makeGerm("foxtrot", rarity: .common)
+    typed.microbe = .bacterium
+    typed.symptoms = [GermSymptom(icon: "eye", text: LocalizedText(en: "sign", fr: "signe"), telltale: true)]
+    let richer = QuizEngine.bank(quizGerms + [typed])
+    let antibiotics = richer.first { $0.id == "antibiotics-foxtrot" }
+    check(richer.contains { $0.id == "microbe-foxtrot" } && antibiotics?.answer == 0,
+          "a bacterium asks what is behind it, and antibiotics help")
+    check(richer.contains { $0.id == "telltale-foxtrot" }, "a telltale sign becomes a question")
+    check(richer.count == 24 + 3, "germs without the extra notes keep their four questions")
 
     var learner = makeData()
     learner.quiz = progress

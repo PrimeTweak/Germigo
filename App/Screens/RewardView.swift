@@ -16,6 +16,8 @@ struct RewardView: View {
     @State private var showShare = false
 
     private var germ: Germ { reward.germ }
+    /// The worst severity gets a softer welcome: no confetti, a word of care.
+    private var gentle: Bool { reward.log.severity >= 5 }
     private var finish: GermCardView.Finish { model.cardFinish(for: germ) }
 
     private var startFraction: Double {
@@ -87,6 +89,12 @@ struct RewardView: View {
                 .font(.subheadline)
                 .foregroundStyle(Color.white.opacity(0.65))
                 .multilineTextAlignment(.center)
+            if gentle {
+                Text(tr("Rough one. The points are banked, now go lie down."))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color(hex: Swatch.lime))
+                    .multilineTextAlignment(.center)
+            }
         }
     }
 
@@ -209,7 +217,9 @@ struct RewardView: View {
         }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 650_000_000)
-            confettiStart = Date()
+            if !gentle {
+                confettiStart = Date()
+            }
             SoundPlayer.shared.play(.reveal)
             Haptics.success()
             withAnimation(.easeOut(duration: 0.4)) {

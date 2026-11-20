@@ -5,6 +5,10 @@ enum QuizKind: String, Codable {
     case whoAmI
     case showsUp
     case lasts
+    case microbe
+    case antibiotics
+    case telltale
+    case weakness
 }
 
 /// One quiz question, built from a germ's health notes.
@@ -54,7 +58,8 @@ enum QuizEngine {
         return hash
     }
 
-    /// Every question the notes allow: a myth and a boss per germ, plus the timings the notes give in numbers.
+    /// Every question the notes allow: a myth and a boss per germ, the timings given in numbers,
+    /// the microbe behind it, and the signs and weaknesses flagged as naming the germ alone.
     static func bank(_ germs: [Germ]) -> [QuizQuestion] {
         var questions: [QuizQuestion] = []
         for germ in germs {
@@ -74,6 +79,26 @@ enum QuizEngine {
                let question = choice(id: "lasts-" + germ.id, kind: .lasts, germ: germ,
                                      prompt: tr("%@: how long does it usually last?", germ.illness.value),
                                      pool: germs.filter { $0.lastsUpToDays != nil }, text: { $0.lasts.value }) {
+                questions.append(question)
+            }
+            if let microbe = germ.microbe {
+                let kinds = Microbe.allCases
+                questions.append(QuizQuestion(id: "microbe-" + germ.id, kind: .microbe, germ: germ,
+                                              prompt: tr("%@: what's behind it?", germ.illness.value),
+                                              options: kinds.map { $0.label }, answer: kinds.firstIndex(of: microbe) ?? 0))
+                questions.append(QuizQuestion(id: "antibiotics-" + germ.id, kind: .antibiotics, germ: germ,
+                                              prompt: tr("Do antibiotics help against %@?", germ.phrase.value),
+                                              options: [tr("Yes"), tr("No")], answer: microbe.antibioticsHelp ? 0 : 1))
+            }
+            if let sign = germ.symptoms.first(where: { $0.telltale == true }),
+               let question = choice(id: "telltale-" + germ.id, kind: .telltale, germ: germ,
+                                     prompt: tr("Telltale sign: %@", sign.text.value), pool: germs, text: { $0.illness.value }) {
+                questions.append(question)
+            }
+            if germ.boss.weaknessQuiz == true,
+               let question = choice(id: "weakness-" + germ.id, kind: .weakness, germ: germ,
+                                     prompt: tr("Its weakness: %@", germ.boss.weakness.value), pool: germs,
+                                     text: { $0.illness.value }) {
                 questions.append(question)
             }
         }
@@ -166,7 +191,8 @@ enum QuizEngine {
     }
 
     /// Days in a row with the quiz done, counting yesterday's run until today's quiz is done.
-    static func streak(doneDays: [String], now: Date) -> Int {
+    /// Sick days without a quiz are sick leave: they neither count nor break the run.
+    static func streak(doneDays: [String], sickDays: Set<String> = [], now: Date) -> Int {
         let done = Set(doneDays)
         let calendar = Calendar.current
         var cursor = calendar.startOfDay(for: now)
@@ -175,12 +201,30 @@ enum QuizEngine {
             cursor = yesterday
         }
         var count = 0
-        while done.contains(dayKey(cursor)) {
-            count += 1
+        while done.contains(dayKey(cursor)) || sickDays.contains(dayKey(cursor)) {
+            if done.contains(dayKey(cursor)) {
+                count += 1
+            }
             guard let previous = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
             cursor = previous
         }
         return count
+    }
+
+    /// Every day the parent spent sick, as day keys.
+    static func sickDays(logs: [SickLog], now: Date) -> Set<String> {
+        let calendar = Calendar.current
+        var days = Set<String>()
+        for log in logs where log.sufferer.includesMe {
+            var cursor = calendar.startOfDay(for: log.startedAt)
+            let last = calendar.startOfDay(for: log.endedAt ?? now)
+            while cursor <= last {
+                days.insert(dayKey(cursor))
+                guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+                cursor = next
+            }
+        }
+        return days
     }
 
     /// The germ shown on a given day, in turn through the album.

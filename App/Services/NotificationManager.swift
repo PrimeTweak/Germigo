@@ -13,17 +13,29 @@ enum NotificationManager {
     private static let sickCheckInDays = 7
     private static let presenter = ForegroundPresenter()
 
-    /// Reminders that would ring at night wait until morning.
-    private static let nightStartMinute = 22 * 60
-    private static let nightEndMinute = 7 * 60
-
     private static var center: UNUserNotificationCenter {
         UNUserNotificationCenter.current()
     }
 
-    /// Lets reminders show as banners while the app is open.
+    /// Key of the exposure a check-in is about, in the reminder's user info.
+    static let exposureInfoKey = "exposureID"
+
+    /// Lets reminders show as banners while the app is open, and gives them their buttons.
     static func install() {
         center.delegate = presenter
+        let better = UNNotificationAction(identifier: ReminderAction.better, title: tr("I'm better"), options: [])
+        let stillSick = UNNotificationAction(identifier: ReminderAction.stillSick, title: tr("Still sick"), options: [])
+        let caught = UNNotificationAction(identifier: ReminderAction.caught, title: tr("It got me"), options: [.foreground])
+        let stillFine = UNNotificationAction(identifier: ReminderAction.stillFine, title: tr("Still fine"), options: [])
+        let dodged = UNNotificationAction(identifier: ReminderAction.dodged, title: tr("Dodged it"), options: [])
+        let categories = [
+            (ReminderCategory.sick, [better, stillSick]),
+            (ReminderCategory.windowOpens, [caught, stillFine]),
+            (ReminderCategory.windowCloses, [dodged, caught])
+        ]
+        center.setNotificationCategories(Set(categories.map { id, actions in
+            UNNotificationCategory(identifier: id, actions: actions, intentIdentifiers: [], options: [])
+        }))
     }
 
     static func requestAuthorization() async -> Bool {
@@ -48,18 +60,19 @@ enum NotificationManager {
         guard settings.checkInsOn, let window = germ.window(from: illness.startedAt) else { return }
         let now = Date()
         let opens = adjusted(window.opens)
+        let info = [exposureInfoKey: illness.id.uuidString]
         if opens > now {
             add(id: exposureKey(illness.id, "open"),
                 title: tr("%@ watch", germ.name),
                 body: tr("Your window for %@ opens now. Still fine?", germ.illness.value),
-                at: opens)
+                at: opens, category: ReminderCategory.windowOpens, info: info)
         }
         let closes = adjusted(window.closes)
         if closes > now {
             add(id: exposureKey(illness.id, "close"),
                 title: tr("Window closed"),
                 body: tr("The usual window for %@ has passed. Did you dodge it?", germ.illness.value),
-                at: closes)
+                at: closes, category: ReminderCategory.windowCloses, info: info)
         }
     }
 
@@ -84,6 +97,7 @@ enum NotificationManager {
                 content.body = dailyAdvice(germ: germ, day: dayNumber)
             }
             content.sound = .default
+            content.categoryIdentifier = ReminderCategory.sick
             var parts = calendar.dateComponents([.year, .month, .day], from: day)
             parts.hour = 9
             parts.minute = 0
@@ -157,31 +171,69 @@ enum NotificationManager {
         "exposure-" + id.uuidString + "-" + suffix
     }
 
-    private static func add(id: String, title: String, body: String, at date: Date) {
+    private static func add(id: String, title: String, body: String, at date: Date, category: String? = nil,
+                            info: [String: String] = [:]) {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
+        content.userInfo = info
+        if let category {
+            content.categoryIdentifier = category
+        }
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, date.timeIntervalSinceNow), repeats: false)
         center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
 
-    /// Moves a date that falls in the night to the next morning.
+    /// Moves a date that falls in the quiet hours to the next morning.
     private static func adjusted(_ date: Date) -> Date {
-        let calendar = Calendar.current
-        let parts = calendar.dateComponents([.hour, .minute], from: date)
-        let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-        guard minute >= nightStartMinute || minute < nightEndMinute else { return date }
-        let morning = DateComponents(hour: nightEndMinute / 60, minute: nightEndMinute % 60)
-        return calendar.nextDate(after: date, matching: morning, matchingPolicy: .nextTime) ?? date
+        guard QuietHours.contains(date) else { return date }
+        let morning = DateComponents(hour: QuietHours.endMinute / 60, minute: QuietHours.endMinute % 60)
+        return Calendar.current.nextDate(after: date, matching: morning, matchingPolicy: .nextTime) ?? date
     }
 }
 
-/// Shows a reminder as a banner when it arrives while the app is on screen.
+enum ReminderCategory {
+    static let sick = "sick-day"
+    static let windowOpens = "window-opens"
+    static let windowCloses = "window-closes"
+}
+
+enum ReminderAction {
+    static let better = "better"
+    static let stillSick = "still-sick"
+    static let caught = "caught"
+    static let stillFine = "still-fine"
+    static let dodged = "dodged"
+}
+
+/// Shows a reminder as a banner while the app is on screen, and runs the buttons under it.
 final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .sound])
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        let info = response.notification.request.content.userInfo
+        let exposureID = info[NotificationManager.exposureInfoKey] as? String
+        let action: IntentAction?
+        switch response.actionIdentifier {
+        case ReminderAction.better: action = .better
+        case ReminderAction.caught: action = exposureID.map { IntentAction.caught(exposureID: $0) }
+        case ReminderAction.stillFine: action = exposureID.map { IntentAction.stillFine(exposureID: $0) }
+        case ReminderAction.dodged: action = exposureID.map { IntentAction.dodged(exposureID: $0) }
+        default: action = nil
+        }
+        guard let action else {
+            completionHandler()
+            return
+        }
+        Task { @MainActor in
+            await IntentRelay.handler?(action)
+            completionHandler()
+        }
     }
 }
 

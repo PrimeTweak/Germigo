@@ -192,20 +192,52 @@ enum GoalEngine {
                                    progress: count, target: branch.targets[rank]))
         }
 
-        let distinct = Set(data.logs.map { $0.germID }).count
-        let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
-        let counted: [(String, Int, Int)] = [
-            ("collector", distinct, 5), ("half_album", distinct, 12), ("full_album", distinct, catalog.germs.count),
-            ("dodger", dodged, 3), (BadgeCatalog.ironParent, StreakMath.record(data: data, now: now), 30)
-        ]
-        for (id, progress, target) in counted where data.badges[id] == nil && target > 0 {
-            guard let badge = BadgeCatalog.badge(id) else { continue }
+        let counts = BadgeProgress.counts(data: data, catalog: catalog, now: now)
+        for id in ["collector", "half_album", "full_album", "dodger", BadgeCatalog.ironParent] where data.badges[id] == nil {
+            guard let badge = BadgeCatalog.badge(id), let count = counts[id], count.target > 0 else { continue }
             candidates.append(Goal(title: badge.title, detail: badge.detail, symbol: badge.symbol,
-                                   progress: progress, target: target))
+                                   progress: count.progress, target: count.target))
         }
 
         let open = candidates.filter { $0.progress < $0.target }
         return open.max { $0.fraction < $1.fraction } ?? open.first
+    }
+}
+
+// MARK: - Badge progress
+
+struct BadgeCount: Hashable {
+    let progress: Int
+    let target: Int
+
+    var fraction: Double { target == 0 ? 0 : min(1, Double(progress) / Double(target)) }
+}
+
+/// How far along the badges that count something are.
+enum BadgeProgress {
+    static func counts(data: AppData, catalog: GermCatalog, now: Date) -> [String: BadgeCount] {
+        let distinct = Set(data.logs.map { $0.germID }).count
+        let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
+        let germIDs = Set(catalog.germs.map { $0.id })
+        let articleIDs = Set(catalog.articles.map { $0.id })
+        let calendar = Calendar.current
+        var perMonth: [String: Int] = [:]
+        for log in data.logs {
+            let parts = calendar.dateComponents([.year, .month], from: log.startedAt)
+            perMonth["\(parts.year ?? 0)-\(parts.month ?? 0)", default: 0] += 1
+        }
+        return [
+            "collector": BadgeCount(progress: distinct, target: 5),
+            "half_album": BadgeCount(progress: distinct, target: 12),
+            "full_album": BadgeCount(progress: distinct, target: catalog.germs.count),
+            "dodger": BadgeCount(progress: dodged, target: 3),
+            "rough_month": BadgeCount(progress: perMonth.values.max() ?? 0, target: 3),
+            BadgeCatalog.ironParent: BadgeCount(progress: StreakMath.record(data: data, now: now), target: 30),
+            BadgeCatalog.mythBuster: BadgeCount(progress: Set(data.quiz.mythsRight).intersection(germIDs).count,
+                                                target: germIDs.count),
+            BadgeCatalog.professor: BadgeCount(progress: Set(data.readArticles).intersection(articleIDs).count,
+                                               target: articleIDs.count)
+        ]
     }
 }
 

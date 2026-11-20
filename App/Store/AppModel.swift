@@ -311,7 +311,12 @@ final class AppModel {
     }
 
     func labStreak(now: Date = Date()) -> Int {
-        QuizEngine.streak(doneDays: data.quiz.doneDays, now: now)
+        QuizEngine.streak(doneDays: data.quiz.doneDays, sickDays: QuizEngine.sickDays(logs: data.logs, now: now), now: now)
+    }
+
+    /// True while the parent is sick, which pauses the Lab streak instead of breaking it.
+    var onSickLeave: Bool {
+        activeLog?.sufferer.includesMe == true
     }
 
     /// Fixes today's questions the first time the quiz opens, so they survive a restart.
@@ -508,7 +513,7 @@ final class AppModel {
         rescheduleNotifications()
     }
 
-    /// Handles the Live Activity buttons, which run in the app process.
+    /// Handles the Live Activity and notification buttons, which run in the app process.
     func handle(_ action: IntentAction) async {
         switch action {
         case .caught(let exposureID):
@@ -525,6 +530,12 @@ final class AppModel {
                 data.kidIllnesses[index].liveDismissed = true
                 commit()
             }
+        case .dodged(let exposureID):
+            guard let id = UUID(uuidString: exposureID),
+                  data.kidIllnesses.contains(where: { $0.id == id && $0.outcome == .open }) else { return }
+            resolveExposure(id, outcome: .dodged)
+        case .better:
+            markBetter()
         }
     }
 

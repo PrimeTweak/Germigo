@@ -281,6 +281,11 @@ private struct QuizCard: View {
                       systemImage: "flame.fill")
                     .font(.subheadline)
                     .foregroundStyle(chalk.opacity(0.78))
+                if model.onSickLeave && !done {
+                    Label(tr("Sick leave: your streak waits for you."), systemImage: "bed.double.fill")
+                        .font(.subheadline)
+                        .foregroundStyle(chalk.opacity(0.78))
+                }
                 if done {
                     Text(tr("A new quiz tomorrow."))
                         .font(.subheadline.weight(.semibold))

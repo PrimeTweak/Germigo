@@ -280,7 +280,7 @@ struct SettingsScreen: View {
     }
 
     private var lookSection: some View {
-        Section(tr("Look")) {
+        Section {
             NavigationLink {
                 AppIconScreen()
             } label: {
@@ -297,6 +297,10 @@ struct SettingsScreen: View {
             Toggle(isOn: setting(\.soundsOn)) {
                 SettingsLabel(symbol: "speaker.wave.2.fill", tint: SettingsTint.look, title: tr("Sounds and Haptics"))
             }
+        } header: {
+            Text(tr("Look"))
+        } footer: {
+            Text(tr("Sounds stay off from 10 PM to 7 AM, so nobody wakes up."))
         }
     }
 

@@ -141,7 +141,7 @@ struct QuizScreen: View {
             label = tr("Myth or fact?")
             foreground = Color(hex: Swatch.grape)
             background = Color(hex: Swatch.lilacMist)
-        case .whoAmI:
+        case .whoAmI, .telltale, .weakness:
             label = tr("Who am I?")
             foreground = Color(hex: Swatch.night)
             background = Color(hex: Swatch.skyPale)
@@ -149,6 +149,14 @@ struct QuizScreen: View {
             label = tr("Timing")
             foreground = Color(hex: Swatch.forest)
             background = Color(hex: Swatch.mintAlt)
+        case .microbe:
+            label = tr("Virus or bacterium?")
+            foreground = Color(hex: Swatch.night)
+            background = Color(hex: Swatch.butter)
+        case .antibiotics:
+            label = tr("Antibiotics?")
+            foreground = Color(hex: Swatch.night)
+            background = Color(hex: Swatch.lilacPale)
         }
         return Text(label)
             .font(.caption.weight(.heavy))
@@ -334,7 +342,10 @@ struct QuizScreen: View {
         switch question.kind {
         case .showsUp, .lasts:
             return [(label: tr("Shows up"), value: germ.showsUp.value), (label: tr("Lasts"), value: germ.lasts.value)]
-        case .whoAmI, .myth:
+        case .microbe, .antibiotics:
+            guard let microbe = germ.microbe else { return [] }
+            return [(label: tr("Behind it"), value: microbe.label), (label: tr("Antibiotics"), value: microbe.antibioticsNote)]
+        case .whoAmI, .myth, .telltale, .weakness:
             return germ.facts.prefix(2).map { (label: $0.label.value, value: $0.value.value) }
         }
     }

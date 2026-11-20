@@ -27,6 +27,11 @@ enum AppConfig {
         string("PetriSupportEmail")
     }
 
+    /// Instagram requires a Meta app ID to open its Stories composer; nil hides that button.
+    static var metaAppID: String? {
+        string("PetriMetaAppID")
+    }
+
     /// The person or company that publishes the app, named in the legal pages.
     static var publisherName: String? {
         string("PetriPublisherName")

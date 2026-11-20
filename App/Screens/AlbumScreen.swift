@@ -146,11 +146,29 @@ private struct BadgesGrid: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
 
+    private func progressBar(_ count: BadgeCount, tint: Color) -> some View {
+        HStack(spacing: 8) {
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(palette.surfaceAlt)
+                    Capsule().fill(tint).frame(width: max(6, proxy.size.width * count.fraction))
+                }
+            }
+            .frame(height: 6)
+            Text(tr("%1$lld of %2$lld", min(count.progress, count.target), count.target))
+                .font(.caption.weight(.bold))
+                .monospacedDigit()
+                .foregroundStyle(palette.inkSecondary)
+        }
+    }
+
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 2)
+        let counts = BadgeProgress.counts(data: model.data, catalog: model.catalog, now: Date())
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(BadgeCatalog.all) { badge in
                 let earned = model.hasBadge(badge.id)
+                let count = earned ? nil : counts[badge.id].flatMap { $0.target > 0 ? $0 : nil }
                 VStack(alignment: .leading, spacing: 8) {
                     Image(systemName: earned ? badge.symbol : "lock.fill")
                         .font(.title3.weight(.semibold))
@@ -165,6 +183,9 @@ private struct BadgesGrid: View {
                         .foregroundStyle(palette.inkSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
+                    if let count {
+                        progressBar(count, tint: Color(hex: badge.tint))
+                    }
                 }
                 .frame(maxWidth: .infinity, minHeight: 138, alignment: .topLeading)
                 .petriCard(radius: 22, padding: 14)

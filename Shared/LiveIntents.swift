@@ -5,6 +5,8 @@ import Foundation
 enum IntentAction {
     case caught(exposureID: String)
     case stillFine(exposureID: String)
+    case dodged(exposureID: String)
+    case better
 }
 
 /// Set by the app at launch; stays nil inside the widget extension.

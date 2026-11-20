@@ -5,7 +5,7 @@ import SwiftUI
 struct SharePreviewSheet<Card: View>: View {
     let title: String
     let card: Card
-    @State private var rendered: Image?
+    @State private var rendered: UIImage?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.palette) private var palette
 
@@ -24,10 +24,19 @@ struct SharePreviewSheet<Card: View>: View {
                     .frame(width: 281, height: 499)
                     .shadow(color: Color.black.opacity(0.18), radius: 18, x: 0, y: 12)
                 if let rendered {
-                    ShareLink(item: rendered, preview: SharePreview(title, image: rendered)) {
+                    let image = Image(uiImage: rendered)
+                    ShareLink(item: image, preview: SharePreview(title, image: image)) {
                         Label(tr("Share"), systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(PillButtonStyle(kind: .ink))
+                    if let story = InstagramStories.composer {
+                        Button {
+                            InstagramStories.share(rendered, to: story)
+                        } label: {
+                            Label(tr("Instagram Stories"), systemImage: "camera.circle.fill")
+                        }
+                        .buttonStyle(PillButtonStyle(kind: .accent))
+                    }
                 } else {
                     ProgressView()
                         .frame(height: 56)
@@ -48,11 +57,27 @@ struct SharePreviewSheet<Card: View>: View {
             .task {
                 let renderer = ImageRenderer(content: card.frame(width: 360, height: 640))
                 renderer.scale = 3
-                if let image = renderer.uiImage {
-                    rendered = Image(uiImage: image)
-                }
+                rendered = renderer.uiImage
             }
         }
+    }
+}
+
+/// Sends a card to the Instagram Stories composer, once a Meta app ID is set and Instagram is installed.
+@MainActor
+enum InstagramStories {
+    static var composer: URL? {
+        guard let appID = AppConfig.metaAppID,
+              let url = URL(string: "instagram-stories://share?source_application=" + appID),
+              UIApplication.shared.canOpenURL(url) else { return nil }
+        return url
+    }
+
+    static func share(_ image: UIImage, to url: URL) {
+        guard let data = image.pngData() else { return }
+        UIPasteboard.general.setItems([["com.instagram.sharedSticker.backgroundImage": data]],
+                                      options: [.expirationDate: Date().addingTimeInterval(300)])
+        UIApplication.shared.open(url)
     }
 }
 

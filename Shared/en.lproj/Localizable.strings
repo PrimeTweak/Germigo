@@ -24,6 +24,7 @@
 "%@ suffered the most." = "%@ suffered the most.";
 "%@ watch" = "%@ watch";
 "%@: how long does it usually last?" = "%@: how long does it usually last?";
+"%@: what's behind it?" = "%@: what's behind it?";
 "%@: when do symptoms usually start?" = "%@: when do symptoms usually start?";
 "%lld day" = "%lld day";
 "%lld day without a germ" = "%lld day without a germ";
@@ -77,6 +78,8 @@
 "All germs" = "All germs";
 "Always yours" = "Always yours";
 "An outbreak radar for your group" = "An outbreak radar for your group";
+"Antibiotics" = "Antibiotics";
+"Antibiotics?" = "Antibiotics?";
 "App icon unlocked: %@" = "App icon unlocked: %@";
 "Appearance" = "Appearance";
 "Apple's standard license agreement (EULA)" = "Apple's standard license agreement (EULA)";
@@ -86,10 +89,12 @@
 "Back Up" = "Back Up";
 "Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.";
 "Backups" = "Backups";
+"Bacterium" = "Bacterium";
 "Badge unlocked: %@" = "Badge unlocked: %@";
 "Badges" = "Badges";
 "Bathroom floor" = "Bathroom floor";
 "Be kind. No offensive names, no harassment. Offenders are removed." = "Be kind. No offensive names, no harassment. Offenders are removed.";
+"Behind it" = "Behind it";
 "Better" = "Better";
 "Block" = "Block";
 "Boomerang" = "Boomerang";
@@ -99,6 +104,7 @@
 "Both parents sick at the same time" = "Both parents sick at the same time";
 "Bucket Holder" = "Bucket Holder";
 "Busiest month so far: %@." = "Busiest month so far: %@.";
+"Can help, when a doctor prescribes them" = "Can help, when a doctor prescribes them";
 "Cancel" = "Cancel";
 "Card %1$@ · %2$@ · From %3$@" = "Card %1$@ · %2$@ · From %3$@";
 "Card %@" = "Card %@";
@@ -170,6 +176,7 @@
 "Delete this entry?" = "Delete this entry?";
 "Delete this log?" = "Delete this log?";
 "Did you dodge it?" = "Did you dodge it?";
+"Do antibiotics help against %@?" = "Do antibiotics help against %@?";
 "Dodge" = "Dodge";
 "Dodged it" = "Dodged it";
 "Dodged it. +%lld Sick Points" = "Dodged it. +%lld Sick Points";
@@ -217,6 +224,7 @@
 "Fresh Host" = "Fresh Host";
 "From %1$@ · %2$@" = "From %1$@ · %2$@";
 "Full Album" = "Full Album";
+"Fungus" = "Fungus";
 "germ dodged" = "germ dodged";
 "Germ Magnet" = "Germ Magnet";
 "Germ of the day" = "Germ of the day";
@@ -262,6 +270,7 @@
 "Incoming" = "Incoming";
 "Incubating, no symptoms yet" = "Incubating, no symptoms yet";
 "Incubation watch" = "Incubation watch";
+"Instagram Stories" = "Instagram Stories";
 "Invite" = "Invite";
 "Invite code" = "Invite code";
 "Iron Parent" = "Iron Parent";
@@ -273,6 +282,7 @@
 "Itch Witness" = "Itch Witness";
 "Its countdown and reminders go with it." = "Its countdown and reminders go with it.";
 "Its points leave your total and your streak is counted again without it." = "Its points leave your total and your streak is counted again without it.";
+"Its weakness: %@" = "Its weakness: %@";
 "Join a crew" = "Join a crew";
 "Join my Petri crew \"%1$@\" with the code %2$@." = "Join my Petri crew \"%1$@\" with the code %2$@.";
 "Join the crew" = "Join the crew";
@@ -354,6 +364,7 @@
 "Night Shift unlocks with its badge. Mint unlocks after 30 days without a germ. Good luck with that." = "Night Shift unlocks with its badge. Mint unlocks after 30 days without a germ. Good luck with that.";
 "night shifts" = "night shifts";
 "Night-shift logs" = "Night-shift logs";
+"No" = "No";
 "No ads, no trackers, no third-party analytics, no data sold." = "No ads, no trackers, no third-party analytics, no data sold.";
 "No countdown for this one. The case file explains what to watch for." = "No countdown for this one. The case file explains what to watch for.";
 "No crew matches that code." = "No crew matches that code.";
@@ -391,6 +402,7 @@
 "Outbreak radar" = "Outbreak radar";
 "Outbreak Survivor" = "Outbreak Survivor";
 "Owed by" = "Owed by";
+"Parasite" = "Parasite";
 "Partner" = "Partner";
 "Pass (test build)" = "Pass (test build)";
 "Patient Infinity" = "Patient Infinity";
@@ -450,6 +462,7 @@
 "Restore Purchases" = "Restore Purchases";
 "Right!" = "Right!";
 "Rough Month" = "Rough Month";
+"Rough one. The points are banked, now go lie down." = "Rough one. The points are banked, now go lie down.";
 "Same as %@?" = "Same as %@?";
 "Same germ twice within 30 days" = "Same germ twice within 30 days";
 "Same germ, again and again. Loyal." = "Same germ, again and again. Loyal.";
@@ -480,6 +493,7 @@
 "Show %lld more" = "Show %lld more";
 "Shows up" = "Shows up";
 "Sick" = "Sick";
+"Sick leave: your streak waits for you." = "Sick leave: your streak waits for you.";
 "Sick Points" = "Sick Points";
 "Sick: %@" = "Sick: %@";
 "Sick? Hold this." = "Sick? Hold this.";
@@ -495,6 +509,7 @@
 "Something else" = "Something else";
 "Something went wrong. Try again." = "Something went wrong. Try again.";
 "Sounds and Haptics" = "Sounds and Haptics";
+"Sounds stay off from 10 PM to 7 AM, so nobody wakes up." = "Sounds stay off from 10 PM to 7 AM, so nobody wakes up.";
 "Soup Bowl" = "Soup Bowl";
 "Soup Sommelier" = "Soup Sommelier";
 "Soup, tissues, tea" = "Soup, tissues, tea";
@@ -511,6 +526,7 @@
 "Start your countdown" = "Start your countdown";
 "Started" = "Started";
 "Still fine" = "Still fine";
+"Still sick" = "Still sick";
 "Still under the weather?" = "Still under the weather?";
 "Stomach bugs" = "Stomach bugs";
 "Subscribe" = "Subscribe";
@@ -526,6 +542,7 @@
 "Tap, or swipe the card: left for myth, right for fact." = "Tap, or swipe the card: left for myth, right for fact.";
 "Tell %@" = "Tell %@";
 "Tells you how long your household has gone without a germ." = "Tells you how long your household has gone without a germ.";
+"Telltale sign: %@" = "Telltale sign: %@";
 "Ten days or more with one germ. Endurance." = "Ten days or more with one germ. Endurance.";
 "Terms" = "Terms";
 "Terms of Use" = "Terms of Use";
@@ -593,8 +610,13 @@
 "Unlocked" = "Unlocked";
 "Until the germ leaves" = "Until the germ leaves";
 "Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove." = "Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove.";
+"Useless against a virus" = "Useless against a virus";
+"Useless: an antifungal treats it" = "Useless: an antifungal treats it";
+"Useless: it needs its own treatment" = "Useless: it needs its own treatment";
 "Usually lasts %@" = "Usually lasts %@";
 "Valid" = "Valid";
+"Virus" = "Virus";
+"Virus or bacterium?" = "Virus or bacterium?";
 "Waiting for approval" = "Waiting for approval";
 "Watch" = "Watch";
 "Watch my window" = "Watch my window";
@@ -625,6 +647,7 @@
 "Worn on Today and on your season recap." = "Worn on Today and on your season recap.";
 "Wrapped." = "Wrapped.";
 "Yearly" = "Yearly";
+"Yes" = "Yes";
 "Yes, I'm better" = "Yes, I'm better";
 "You" = "You";
 "You caught" = "You caught";

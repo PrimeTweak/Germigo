@@ -24,6 +24,7 @@
 "%@ suffered the most." = "%@ a le plus souffert.";
 "%@ watch" = "Alerte %@";
 "%@: how long does it usually last?" = "%@ : combien de temps ça dure, en général ?";
+"%@: what's behind it?" = "%@ : qu'est-ce qui se cache derrière ?";
 "%@: when do symptoms usually start?" = "%@ : quand les symptômes commencent-ils, en général ?";
 "%lld day" = "%lld jour";
 "%lld day without a germ" = "%lld jour sans microbe";
@@ -77,6 +78,8 @@
 "All germs" = "Tous les microbes";
 "Always yours" = "Toujours à toi";
 "An outbreak radar for your group" = "Un radar des éclosions pour ton groupe";
+"Antibiotics" = "Antibiotiques";
+"Antibiotics?" = "Antibiotiques ?";
 "App icon unlocked: %@" = "Icône débloquée : %@";
 "Appearance" = "Apparence";
 "Apple's standard license agreement (EULA)" = "Contrat de licence standard d'Apple (CLUF)";
@@ -86,10 +89,12 @@
 "Back Up" = "Sauvegarder";
 "Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal dans un fichier, où tu veux. Restaurer une sauvegarde le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
 "Backups" = "Sauvegardes";
+"Bacterium" = "Bactérie";
 "Badge unlocked: %@" = "Badge débloqué : %@";
 "Badges" = "Badges";
 "Bathroom floor" = "Plancher de salle de bain";
 "Be kind. No offensive names, no harassment. Offenders are removed." = "Sois gentil. Aucun nom offensant, aucun harcèlement. Les fautifs sont retirés.";
+"Behind it" = "La cause";
 "Better" = "Guéri";
 "Block" = "Bloquer";
 "Boomerang" = "Boomerang";
@@ -99,6 +104,7 @@
 "Both parents sick at the same time" = "Les deux parents malades en même temps";
 "Bucket Holder" = "Porteur de chaudière";
 "Busiest month so far: %@." = "Mois le plus chargé jusqu'ici : %@.";
+"Can help, when a doctor prescribes them" = "Peuvent aider, quand un médecin les prescrit";
 "Cancel" = "Annuler";
 "Card %1$@ · %2$@ · From %3$@" = "Carte %1$@ · %2$@ · De %3$@";
 "Card %@" = "Carte %@";
@@ -170,6 +176,7 @@
 "Delete this entry?" = "Supprimer cette entrée ?";
 "Delete this log?" = "Supprimer cette entrée du journal ?";
 "Did you dodge it?" = "Tu l'as esquivé ?";
+"Do antibiotics help against %@?" = "Les antibiotiques aident-ils contre %@ ?";
 "Dodge" = "Esquive";
 "Dodged it" = "Esquivé";
 "Dodged it. +%lld Sick Points" = "Esquivé. +%lld points malades";
@@ -217,6 +224,7 @@
 "Fresh Host" = "Hôte tout neuf";
 "From %1$@ · %2$@" = "De %1$@ · %2$@";
 "Full Album" = "Album complet";
+"Fungus" = "Champignon";
 "germ dodged" = "microbe esquivé";
 "Germ Magnet" = "Aimant à microbes";
 "Germ of the day" = "Le microbe du jour";
@@ -262,6 +270,7 @@
 "Incoming" = "En approche";
 "Incubating, no symptoms yet" = "Incubation, pas encore de symptômes";
 "Incubation watch" = "Alerte d'incubation";
+"Instagram Stories" = "Stories Instagram";
 "Invite" = "Inviter";
 "Invite code" = "Code d'invitation";
 "Iron Parent" = "Parent de fer";
@@ -273,6 +282,7 @@
 "Itch Witness" = "Témoin de la gratte";
 "Its countdown and reminders go with it." = "Son décompte et ses rappels partent avec elle.";
 "Its points leave your total and your streak is counted again without it." = "Ses points quittent ton total et ta série est recalculée sans elle.";
+"Its weakness: %@" = "Son point faible : %@";
 "Join a crew" = "Me joindre";
 "Join my Petri crew \"%1$@\" with the code %2$@." = "Joins-toi à mon groupe Petri « %1$@ » avec le code %2$@.";
 "Join the crew" = "Me joindre au groupe";
@@ -354,6 +364,7 @@
 "Night Shift unlocks with its badge. Mint unlocks after 30 days without a germ. Good luck with that." = "Quart de nuit se débloque avec son badge. Menthe se débloque après 30 jours sans microbe. Bonne chance.";
 "night shifts" = "quarts de nuit";
 "Night-shift logs" = "Prises de quart de nuit";
+"No" = "Non";
 "No ads, no trackers, no third-party analytics, no data sold." = "Aucune publicité, aucun traceur, aucun outil d'analyse tiers, aucune donnée vendue.";
 "No countdown for this one. The case file explains what to watch for." = "Pas de compte à rebours pour celui-là. Le dossier explique quoi surveiller.";
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
@@ -391,6 +402,7 @@
 "Outbreak radar" = "Radar des éclosions";
 "Outbreak Survivor" = "Survivant d'éclosion";
 "Owed by" = "Dû par";
+"Parasite" = "Parasite";
 "Partner" = "Partenaire";
 "Pass (test build)" = "Passe (version test)";
 "Patient Infinity" = "Patient infini";
@@ -450,6 +462,7 @@
 "Restore Purchases" = "Restaurer les achats";
 "Right!" = "Bravo !";
 "Rough Month" = "Mois difficile";
+"Rough one. The points are banked, now go lie down." = "Celle-là fait mal. Les points sont en banque, va t'étendre.";
 "Same as %@?" = "Comme %@ ?";
 "Same germ twice within 30 days" = "Le même microbe deux fois en 30 jours";
 "Same germ, again and again. Loyal." = "Le même microbe, encore et encore. Fidèle.";
@@ -480,6 +493,7 @@
 "Show %lld more" = "Afficher %lld de plus";
 "Shows up" = "Apparaît";
 "Sick" = "Malade";
+"Sick leave: your streak waits for you." = "Congé de maladie : ta série t'attend.";
 "Sick Points" = "Points malades";
 "Sick: %@" = "Malade : %@";
 "Sick? Hold this." = "Malade ? Maintiens ça.";
@@ -495,6 +509,7 @@
 "Something else" = "Autre chose";
 "Something went wrong. Try again." = "Quelque chose a cloché. Réessaie.";
 "Sounds and Haptics" = "Sons et vibrations";
+"Sounds stay off from 10 PM to 7 AM, so nobody wakes up." = "Les sons se taisent de 22 h à 7 h, pour ne réveiller personne.";
 "Soup Bowl" = "Bol de soupe";
 "Soup Sommelier" = "Sommelier de soupe";
 "Soup, tissues, tea" = "Soupe, mouchoirs, thé";
@@ -511,6 +526,7 @@
 "Start your countdown" = "Lance ton compte à rebours";
 "Started" = "Début";
 "Still fine" = "Ça va encore";
+"Still sick" = "Encore malade";
 "Still under the weather?" = "Encore mal en point ?";
 "Stomach bugs" = "Gastros";
 "Subscribe" = "M'abonner";
@@ -526,6 +542,7 @@
 "Tap, or swipe the card: left for myth, right for fact." = "Touche, ou glisse la carte : à gauche pour mythe, à droite pour fait.";
 "Tell %@" = "Avertir %@";
 "Tells you how long your household has gone without a germ." = "Te dit depuis combien de temps ta maisonnée tient sans microbe.";
+"Telltale sign: %@" = "Signe qui ne ment pas : %@";
 "Ten days or more with one germ. Endurance." = "Dix jours ou plus avec le même microbe. De l'endurance.";
 "Terms" = "Conditions";
 "Terms of Use" = "Conditions d'utilisation";
@@ -593,8 +610,13 @@
 "Unlocked" = "Débloquée";
 "Until the germ leaves" = "Jusqu'au départ du microbe";
 "Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove." = "Sert au duel de couple, au coupon de sieste et au badge Relais. Laisse vide pour le retirer.";
+"Useless against a virus" = "Inutiles contre un virus";
+"Useless: an antifungal treats it" = "Inutiles : c'est un antifongique qui le traite";
+"Useless: it needs its own treatment" = "Inutiles : il lui faut son propre traitement";
 "Usually lasts %@" = "Dure en général %@";
 "Valid" = "Valide";
+"Virus" = "Virus";
+"Virus or bacterium?" = "Virus ou bactérie ?";
 "Waiting for approval" = "En attente d'approbation";
 "Watch" = "Surveiller";
 "Watch my window" = "Surveiller ma fenêtre";
@@ -625,6 +647,7 @@
 "Worn on Today and on your season recap." = "Affiché dans Aujourd'hui et dans ton bilan de saison.";
 "Wrapped." = "Le bilan.";
 "Yearly" = "Annuel";
+"Yes" = "Oui";
 "Yes, I'm better" = "Oui, ça va mieux";
 "You" = "Toi";
 "You caught" = "Tu as attrapé";

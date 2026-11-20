@@ -74,6 +74,12 @@
 	<string>REPLACE-ME.invalid</string>
 	<key>PetriCrewEnabled</key>
 	<true/>
+	<key>PetriMetaAppID</key>
+	<string>REPLACE-ME.invalid</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Petri saves the share cards you choose to keep to your photo library.</string>
 </dict>

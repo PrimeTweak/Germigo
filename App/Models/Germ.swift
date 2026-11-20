@@ -64,10 +64,40 @@ enum GermFamily: String, Codable, CaseIterable {
     case other
 }
 
+/// The kind of microbe behind an illness, when it is always the same kind.
+enum Microbe: String, Codable, CaseIterable {
+    case virus
+    case bacterium
+    case fungus
+    case parasite
+
+    var label: String {
+        switch self {
+        case .virus: return tr("Virus")
+        case .bacterium: return tr("Bacterium")
+        case .fungus: return tr("Fungus")
+        case .parasite: return tr("Parasite")
+        }
+    }
+
+    var antibioticsHelp: Bool { self == .bacterium }
+
+    var antibioticsNote: String {
+        switch self {
+        case .virus: return tr("Useless against a virus")
+        case .bacterium: return tr("Can help, when a doctor prescribes them")
+        case .fungus: return tr("Useless: an antifungal treats it")
+        case .parasite: return tr("Useless: it needs its own treatment")
+        }
+    }
+}
+
 /// The joke stats of a germ's boss card; the weakness restates its Field Notes.
 struct GermBoss: Codable, Hashable {
     let attack: LocalizedText
     let weakness: LocalizedText
+    /// True when the weakness alone names the germ, so the quiz may ask about it.
+    var weaknessQuiz: Bool?
 }
 
 struct GermMyth: Codable, Hashable {
@@ -79,6 +109,8 @@ struct GermMyth: Codable, Hashable {
 struct GermSymptom: Codable, Hashable {
     let icon: String
     let text: LocalizedText
+    /// True for the one sign that names the germ on its own.
+    var telltale: Bool?
 }
 
 /// One way a germ travels, with an optional precision.
@@ -126,6 +158,7 @@ struct Germ: Codable, Identifiable, Hashable {
     var symptomsNote: LocalizedText?
     var spreads: [GermSpread] = []
     var spreadNote: LocalizedText?
+    var microbe: Microbe?
 
     var assetName: String { "germ-" + id }
 
