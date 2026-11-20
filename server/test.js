@@ -7,13 +7,17 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { createApp, cleanName } = require('./server.js');
+const legal = require('./legal.json');
 
 const DAY = 24 * 3600 * 1000;
 
 async function main() {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-test-'));
   let now = Date.UTC(2026, 10, 17, 15, 0, 0);
-  const options = { dataDir, adminToken: 'admin-secret', supportEmail: 'help@example.org', now: () => now };
+  const options = {
+    dataDir, adminToken: 'admin-secret', supportEmail: 'help@example.org', publisherName: 'Test Publisher',
+    writeDelay: 0, now: () => now,
+  };
   let server = createApp(options);
   await new Promise((resolve) => server.listen(0, resolve));
   let base = `http://127.0.0.1:${server.address().port}`;
@@ -30,7 +34,10 @@ async function main() {
     });
     const text = await response.text();
     const type = response.headers.get('content-type') || '';
-    return { status: response.status, data: type.includes('json') && text ? JSON.parse(text) : text };
+    return {
+      status: response.status, headers: response.headers,
+      data: type.includes('json') && text ? JSON.parse(text) : text,
+    };
   }
 
   // Name filter
@@ -47,11 +54,34 @@ async function main() {
   assert.equal((await call('GET', '/health')).data.ok, true);
   const privacy = await call('GET', '/privacy');
   assert.equal(privacy.status, 200);
-  assert.match(privacy.data, /Privacy Policy/);
-  assert.match((await call('GET', '/privacy?lang=fr')).data, /Politique de confidentialité/);
-  assert.match((await call('GET', '/terms', { headers: { 'Accept-Language': 'fr-CA' } })).data, /Conditions d'utilisation/);
+  assert.ok(privacy.data.includes(legal.web.privacyTitle.en));
+  assert.ok(privacy.data.includes('Test Publisher'));
+  assert.ok((await call('GET', '/privacy?lang=fr')).data.includes(legal.web.privacyTitle.fr));
+  const frenchTerms = (await call('GET', '/terms', { headers: { 'Accept-Language': 'fr-CA' } })).data;
+  assert.ok(frenchTerms.includes(legal.web.eulaLabel.fr));
   assert.match((await call('GET', '/terms')).data, /stdeula/);
-  assert.match((await call('GET', '/support')).data, /help@example\.org/);
+  const support = (await call('GET', '/support?lang=fr')).data;
+  assert.match(support, /help@example\.org/);
+  assert.ok(support.includes(legal.web.supportIntro.fr.split(' ')[0]));
+
+  // The landing page a share card points to
+  const landing = await call('GET', '/get');
+  assert.equal(landing.status, 200);
+  assert.ok(landing.data.includes(legal.web.landingTagline.en));
+  assert.ok(landing.data.includes(legal.web.landingSoon.en));
+  assert.ok((await call('GET', '/?lang=fr')).data.includes(legal.web.landingTagline.fr));
+
+  // Security headers, and a moderation page that carries no data
+  assert.equal(privacy.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(privacy.headers.get('x-frame-options'), 'DENY');
+  assert.match(privacy.headers.get('content-security-policy'), /default-src 'none'/);
+  assert.equal(privacy.headers.get('content-security-policy').includes('script-src'), false);
+  assert.equal((await call('GET', '/health')).headers.get('x-content-type-options'), 'nosniff');
+  const adminPage = await call('GET', '/admin');
+  assert.equal(adminPage.status, 200);
+  const nonce = /script-src 'nonce-([^']+)'/.exec(adminPage.headers.get('content-security-policy'))[1];
+  assert.ok(adminPage.data.includes(`<script nonce="${nonce}">`));
+  assert.equal(adminPage.data.includes('admin-secret'), false);
 
   // Create and join
   assert.equal((await call('POST', '/v1/crews', { body: { name: 'Ladybugs', displayName: 'shit', emblem: 0 } })).data.error, 'name_rejected');
@@ -96,6 +126,18 @@ async function main() {
   assert.deepEqual(state.feed[0].mine, []);
   assert.equal((await call('POST', `/v1/crew/events/${eventID}/reactions`, { token: alex, body: { kind: 'bomb' } })).data.error, 'invalid');
 
+  // A member of another crew cannot touch this one
+  const outsider = (await call('POST', '/v1/crews', { body: { name: 'Wasps', displayName: 'Zed', emblem: 1 } })).data;
+  assert.equal((await call('POST', `/v1/crew/events/${eventID}/reactions`, { token: outsider.token, body: { kind: 'tea' } })).status, 404);
+  const alexID = state.members.find((member) => member.name === 'Alex').id;
+  assert.equal((await call('POST', '/v1/crew/reports', { token: outsider.token, body: { memberID: alexID, reason: 'name' } })).data.error, 'invalid');
+  const outsiderView = (await call('GET', '/v1/crew', { token: outsider.token })).data;
+  assert.equal(outsiderView.crew.name, 'Wasps');
+  assert.equal(outsiderView.members.length, 1);
+  assert.deepEqual(outsiderView.feed, []);
+  assert.equal((await call('GET', '/v1/crew', { token: alex })).data.feed[0].reactions.tea, undefined);
+  assert.equal((await call('DELETE', '/v1/crew/me', { token: outsider.token })).status, 204);
+
   // Rename
   assert.equal((await call('POST', '/v1/crew/me', { token: jon, body: { displayName: 'c0nnard' } })).data.error, 'name_rejected');
   assert.equal((await call('POST', '/v1/crew/me', { token: jon, body: { displayName: 'Jonathan' } })).data.me.name, 'Jonathan');
@@ -110,6 +152,8 @@ async function main() {
   assert.equal(state.members.find((member) => member.id === marieID).name, 'Parent');
   assert.equal(state.feed[0].name, 'Parent');
   assert.equal((await call('GET', '/admin/reports')).status, 401);
+  assert.equal((await call('GET', '/admin/reports', { token: 'admin-secre' })).status, 401);
+  assert.equal((await call('GET', '/admin/reports', { token: 'admin-secret-and-more' })).status, 401);
   const reports = (await call('GET', '/admin/reports', { token: 'admin-secret' })).data.reports;
   assert.equal(reports.length, 2);
   assert.equal(reports[0].memberName, 'Marie');
@@ -143,6 +187,9 @@ async function main() {
   const jonID = state.members.find((member) => member.name === 'Jonathan').id;
   await call('POST', `/admin/members/${jonID}/remove`, { token: 'admin-secret' });
   assert.equal((await call('GET', '/v1/crew', { token: jon })).status, 401);
+  const rotated = (await call('GET', '/v1/crew', { token: alex })).data.crew.code;
+  assert.notEqual(rotated, code);
+  assert.equal((await call('POST', '/v1/crews/join', { body: { code, displayName: 'Jonathan' } })).data.error, 'invalid_code');
   assert.equal((await call('DELETE', '/v1/crew/me', { token: alex })).status, 204);
   assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'petri.json'), 'utf8')).crews.length, 0);
 
@@ -164,14 +211,39 @@ async function main() {
   await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'rhino', named: false } });
   assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'petri.json'), 'utf8')).events.length, 1);
 
-  // Rate limit on sign-ups
+  // A member who has not connected for that long is removed with the old events
+  assert.equal((await call('GET', '/v1/crew', { token: second.token })).status, 401);
+  assert.equal((await call('GET', '/v1/crew', { token: pat })).data.crew.families, 1);
+
+  // A retried share is stored once
   now += 61000;
-  let limited = false;
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const result = await call('POST', '/v1/crews/join', { body: { code: 'AAAAAA', displayName: 'Spam' } });
-    if (result.status === 429) limited = true;
+  const clientID = '0b0e7a52-2f0c-4a43-9a53-3d5a0c1b2e11';
+  await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'strep', named: true, clientID } });
+  state = (await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'strep', named: true, clientID } })).data;
+  assert.equal(state.feed.filter((event) => event.germID === 'strep').length, 1);
+
+  // Daily cap on shares per member
+  let accepted = 0;
+  let capped = false;
+  for (let attempt = 0; attempt < 45; attempt += 1) {
+    now += 7000;
+    const result = await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'rhino', named: false } });
+    if (result.status === 200) accepted += 1;
+    if (result.status === 429) capped = true;
   }
-  assert.equal(limited, true);
+  assert.equal(accepted, 38);
+  assert.equal(capped, true);
+
+  // Rate limit on sign-ups; a forged forwarding header does not reset it
+  now += DAY;
+  let limited = 0;
+  for (let attempt = 0; attempt < 14; attempt += 1) {
+    const result = await call('POST', '/v1/crews/join', {
+      body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': `10.0.0.${attempt}` },
+    });
+    if (result.status === 429) limited += 1;
+  }
+  assert.equal(limited, 4);
 
   // Oversized and malformed bodies
   now += 61000;
@@ -181,7 +253,61 @@ async function main() {
   assert.equal((await call('GET', '/v1/unknown', { token: pat })).status, 404);
 
   await new Promise((resolve) => server.close(resolve));
+
+  // Behind one trusted proxy, the address the proxy appended decides, not the client's own claim
+  const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'petri-proxy-')), trustProxyHops: 1 });
+  const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'petri-store-')),
+    appStoreURL: 'https://apps.apple.com/app/id000000000' });
+  await new Promise((resolve) => listed.listen(0, resolve));
+  const listedPage = await (await fetch(`http://127.0.0.1:${listed.address().port}/get`)).text();
+  assert.ok(listedPage.includes('https://apps.apple.com/app/id000000000'));
+  await new Promise((resolve) => listed.close(resolve));
+  await new Promise((resolve) => proxied.listen(0, resolve));
+  base = `http://127.0.0.1:${proxied.address().port}`;
+  now += DAY;
+  let blocked = 0;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const result = await call('POST', '/v1/crews/join', {
+      body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': `10.9.9.${attempt}, 203.0.113.7` },
+    });
+    if (result.status === 429) blocked += 1;
+  }
+  assert.equal(blocked, 2);
+  const other = await call('POST', '/v1/crews/join', {
+    body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': '203.0.113.8' },
+  });
+  assert.equal(other.status, 404);
+  await new Promise((resolve) => proxied.close(resolve));
+
+  // Small changes are grouped into one write; membership changes are written at once
+  const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-slow-'));
+  const slow = createApp({ ...options, dataDir: slowDir, writeDelay: 60000 });
+  await new Promise((resolve) => slow.listen(0, resolve));
+  base = `http://127.0.0.1:${slow.address().port}`;
+  now += DAY;
+  const solo = (await call('POST', '/v1/crews', { body: { name: 'Fireflies', displayName: 'Lou', emblem: 1 } })).data;
+  const slowFile = path.join(slowDir, 'petri.json');
+  assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).members.length, 1);
+  await call('POST', '/v1/crew/events', { token: solo.token, body: { germID: 'flu', named: true } });
+  assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 0);
+  slow.flush();
+  assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 1);
+  await call('POST', '/v1/crew/events', { token: solo.token, body: { germID: 'noro', named: true } });
+
+  // One address cannot create crews without end
+  let crewsMade = 1;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    now += 7000;
+    const made = await call('POST', '/v1/crews', { body: { name: `Hive ${attempt + 1}`, displayName: 'Lou', emblem: 0 } });
+    if (made.status === 200) crewsMade += 1;
+  }
+  assert.equal(crewsMade, 5);
+
+  await new Promise((resolve) => slow.close(resolve));
+  assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 2);
+
   fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(slowDir, { recursive: true, force: true });
   console.log('crew server: all checks passed');
 }
 

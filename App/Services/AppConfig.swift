@@ -17,8 +17,19 @@ enum AppConfig {
         return URL(string: raw)
     }
 
+    /// Where the QR code of a share card leads; nil until a real https address replaces the placeholder.
+    static var shareURL: URL? {
+        guard let raw = string("PetriShareURL"), raw.hasPrefix("https://") else { return nil }
+        return URL(string: raw)
+    }
+
     static var supportEmail: String? {
         string("PetriSupportEmail")
+    }
+
+    /// The person or company that publishes the app, named in the legal pages.
+    static var publisherName: String? {
+        string("PetriPublisherName")
     }
 
     static var crewEnabled: Bool {

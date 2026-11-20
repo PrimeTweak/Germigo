@@ -14,7 +14,6 @@ struct GermCardView: View {
     var finish = Finish.standard
     var count = 0
     var isNew = false
-    @Environment(\.palette) private var palette
 
     private var height: CGFloat { width * 1.39 }
     private var scale: CGFloat { width / 124 }
@@ -23,10 +22,9 @@ struct GermCardView: View {
     var body: some View {
         ZStack {
             background
-            RingsBackground(color: finish == .locked ? palette.ink.opacity(0.05) : Color.white.opacity(0.3),
-                            spacing: 17 * scale)
+            RingsBackground(color: Color.white.opacity(finish == .locked ? 0.55 : 0.3), spacing: 17 * scale)
             GermImage(germ: germ, size: width * 0.8, silhouette: finish == .locked)
-                .foregroundStyle(palette.ink.opacity(0.14))
+                .foregroundStyle(germ.deepTint)
                 .shadow(color: Color.black.opacity(finish == .locked ? 0 : 0.16), radius: 6 * scale, x: 0, y: 5 * scale)
                 .offset(y: -height * 0.05)
             if finish == .locked {
@@ -59,7 +57,7 @@ struct GermCardView: View {
     private var background: some View {
         Group {
             if finish == .locked {
-                palette.surfaceAlt
+                germ.lightTint
             } else {
                 RadialGradient(colors: [germ.lightTint, germ.deepTint], center: UnitPoint(x: 0.5, y: 0.38),
                                startRadius: 0, endRadius: height * 0.75)
@@ -69,8 +67,8 @@ struct GermCardView: View {
 
     private var borderColor: Color {
         switch finish {
-        case .locked: return palette.ink.opacity(0.06)
-        case .gold, .holo: return Color(hex: 0xFFD978)
+        case .locked: return Color(hex: Swatch.night, opacity: 0.06)
+        case .gold, .holo: return Color(hex: Swatch.goldFoil)
         case .standard: return Color.white.opacity(0.75)
         }
     }
@@ -79,48 +77,52 @@ struct GermCardView: View {
         HStack {
             if finish != .locked {
                 Text(germ.rarity.label.uppercased())
-                    .font(.system(size: 9.5 * scale, weight: .heavy))
-                    .kerning(0.6)
-                    .foregroundStyle(germ.rarity.color)
-                    .padding(.horizontal, 7 * scale)
+                    .font(.system(size: max(11, 9.5 * scale), weight: .heavy))
+                    .kerning(0.2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.9)
+                    .foregroundStyle(germ.rarity.inkColor)
+                    .padding(.horizontal, 4 * scale)
                     .padding(.vertical, 3 * scale)
                     .background(Color.white.opacity(0.85), in: Capsule())
             }
             Spacer(minLength: 0)
-            Text(verbatim: germ.numberLabel)
-                .font(.system(size: 12 * scale, weight: .heavy))
-                .foregroundStyle(Color(hex: 0x1E1A26, opacity: finish == .locked ? 0.3 : 0.45))
         }
     }
+
+    private var lockedInk: Color { Color(hex: Swatch.night, opacity: 0.64) }
 
     private var footer: some View {
         VStack(spacing: 4 * scale) {
             HStack {
+                Text(verbatim: germ.numberLabel)
+                    .font(.system(size: max(11, 12 * scale), weight: .heavy))
+                    .foregroundStyle(Color(hex: Swatch.night, opacity: 0.8))
                 Spacer(minLength: 0)
                 if isNew {
-                    badge(tr("NEW"), background: Color(hex: 0xFF5B4D))
+                    badge(tr("NEW"), foreground: Color(hex: Swatch.night), background: Color(hex: Swatch.coral))
                 } else if count > 0 {
-                    badge("×\(count)", background: Color(hex: 0x1E1A26))
+                    badge("×\(count)", foreground: Color.white, background: Color(hex: Swatch.night))
                 }
             }
             Text(finish == .locked ? "???" : germ.name)
                 .font(.system(size: 17 * scale, weight: .heavy))
-                .foregroundStyle(Color(hex: 0x1E1A26, opacity: finish == .locked ? 0.32 : 1))
+                .foregroundStyle(finish == .locked ? lockedInk : Color(hex: Swatch.night))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(finish == .locked ? tr("Not caught yet") : germ.illness.value)
                 .font(.system(size: 11 * scale, weight: .semibold))
-                .foregroundStyle(Color(hex: 0x1E1A26, opacity: 0.55))
+                .foregroundStyle(finish == .locked ? lockedInk : Color(hex: Swatch.night, opacity: 0.8))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .padding(.bottom, 3 * scale)
     }
 
-    private func badge(_ text: String, background: Color) -> some View {
+    private func badge(_ text: String, foreground: Color, background: Color) -> some View {
         Text(text)
             .font(.system(size: 11 * scale, weight: .heavy))
-            .foregroundStyle(Color.white)
+            .foregroundStyle(foreground)
             .padding(.horizontal, 7 * scale)
             .padding(.vertical, 3 * scale)
             .background(background, in: Capsule())
@@ -140,10 +142,10 @@ private struct HoloSheen: View {
         LinearGradient(
             stops: [
                 .init(color: .clear, location: 0.15),
-                .init(color: Color(hex: 0xFF78C8, opacity: 0.55), location: 0.32),
-                .init(color: Color(hex: 0x78DCFF, opacity: 0.55), location: 0.45),
-                .init(color: Color(hex: 0xC8FF78, opacity: 0.55), location: 0.57),
-                .init(color: Color(hex: 0xFFE678, opacity: 0.5), location: 0.68),
+                .init(color: Color(hex: Swatch.holoPink, opacity: 0.55), location: 0.32),
+                .init(color: Color(hex: Swatch.holoBlue, opacity: 0.55), location: 0.45),
+                .init(color: Color(hex: Swatch.holoGreen, opacity: 0.55), location: 0.57),
+                .init(color: Color(hex: Swatch.holoYellow, opacity: 0.5), location: 0.68),
                 .init(color: .clear, location: 0.84)
             ],
             startPoint: .topLeading, endPoint: .bottomTrailing)

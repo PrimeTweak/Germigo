@@ -25,6 +25,17 @@
 		<string>en</string>
 		<string>fr</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>ca.petri.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>petri</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
@@ -55,8 +66,12 @@
 	</array>
 	<key>PetriServerURL</key>
 	<string>https://REPLACE-ME.invalid</string>
+	<key>PetriShareURL</key>
+	<string>https://REPLACE-ME.invalid/get</string>
 	<key>PetriSupportEmail</key>
 	<string>REPLACE-ME@example.invalid</string>
+	<key>PetriPublisherName</key>
+	<string>REPLACE-ME.invalid</string>
 	<key>PetriCrewEnabled</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>

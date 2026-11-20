@@ -48,6 +48,12 @@ enum StreakMath {
 enum RewardEngine {
     static let nightShiftPoints = 50
 
+    /// Answering "Dodged it" when a kid's germ skipped the parent.
+    static let dodgePoints = 40
+
+    /// A log closed sooner than this is a correction, not a recovery.
+    static let speedrunMinimum: TimeInterval = 3600
+
     static func bonuses(for draft: LogDraft, germ: Germ) -> [LogBonus] {
         var result = [LogBonus(kind: .rarity, points: germ.rarity.basePoints)]
         let hour = Calendar.current.component(.hour, from: draft.startedAt)
@@ -55,6 +61,11 @@ enum RewardEngine {
             result.append(LogBonus(kind: .nightShift, points: nightShiftPoints))
         }
         return result
+    }
+
+    static func totalPoints(data: AppData) -> Int {
+        let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
+        return data.logs.reduce(0) { $0 + $1.points } + dodged * dodgePoints
     }
 
     static func earnedBadges(data: AppData, catalog: GermCatalog, now: Date) -> Set<String> {
@@ -66,11 +77,12 @@ enum RewardEngine {
         if logs.contains(where: { log in log.bonuses.contains { $0.kind == .nightShift } }) {
             earned.insert(BadgeCatalog.nightShift)
         }
-        if logs.contains(where: { $0.partnerSickToo }) { earned.insert("tag_team") }
+        if logs.contains(where: { $0.sufferer == .both }) { earned.insert("tag_team") }
         if logs.contains(where: { $0.dayCount(now: now) >= 10 }) { earned.insert("marathon") }
         if logs.contains(where: { log in
             guard let end = log.endedAt else { return false }
-            return end.timeIntervalSince(log.startedAt) <= 24 * 3600
+            let length = end.timeIntervalSince(log.startedAt)
+            return length >= speedrunMinimum && length <= 24 * 3600
         }) {
             earned.insert("speedrun")
         }

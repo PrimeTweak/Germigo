@@ -23,35 +23,34 @@ struct HoldToLogButton: View {
                     .font(.title3.weight(.bold))
                 Text(tr("Hold to log it"))
                     .font(.footnote.weight(.medium))
-                    .opacity(0.85)
             }
             Spacer(minLength: 8)
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.4), lineWidth: 2.5)
+                    .stroke(palette.night.opacity(0.25), lineWidth: 2.5)
                 Circle()
                     .trim(from: 0, to: progress)
-                    .stroke(Color.white, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .stroke(palette.night, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 Image(systemName: "hand.tap.fill")
                     .font(.system(size: 18, weight: .semibold))
             }
             .frame(width: 44, height: 44)
         }
-        .foregroundStyle(Color.white)
+        .foregroundStyle(palette.night)
         .padding(.horizontal, 10)
         .frame(height: 66)
         .background {
             ZStack(alignment: .leading) {
-                LinearGradient(colors: [Color(hex: 0xFF7A63), Color(hex: 0xFF4F42)], startPoint: .top, endPoint: .bottom)
+                LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)], startPoint: .top, endPoint: .bottom)
                 GeometryReader { proxy in
-                    Color(hex: 0x96140A, opacity: 0.22)
+                    Color(hex: Swatch.ember, opacity: 0.22)
                         .frame(width: proxy.size.width * progress)
                 }
             }
         }
         .clipShape(Capsule())
-        .shadow(color: Color(hex: 0xFF4F42, opacity: 0.32), radius: 13, x: 0, y: 10)
+        .shadow(color: Color(hex: Swatch.coralDeep, opacity: 0.32), radius: 13, x: 0, y: 10)
         .scaleEffect(progress > 0 ? 0.975 : 1)
         .contentShape(Capsule())
         .onLongPressGesture(minimumDuration: holdDuration, maximumDistance: 60) {
@@ -116,7 +115,7 @@ struct IncubationBar: View {
 private struct DangerStripes: View {
     var body: some View {
         Canvas { context, size in
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: 0xFF5B4D, opacity: 0.12)))
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: Swatch.coral, opacity: 0.12)))
             var x = -size.height
             while x < size.width {
                 var path = Path()
@@ -125,7 +124,7 @@ private struct DangerStripes: View {
                 path.addLine(to: CGPoint(x: x + size.height + 5, y: 0))
                 path.addLine(to: CGPoint(x: x + 5, y: size.height))
                 path.closeSubpath()
-                context.fill(path, with: .color(Color(hex: 0xFF5B4D, opacity: 0.3)))
+                context.fill(path, with: .color(Color(hex: Swatch.coral, opacity: 0.3)))
                 x += 10
             }
         }
@@ -138,14 +137,14 @@ struct SeverityFace: View {
     let selected: Bool
 
     private var fillColor: Color {
-        if selected { return Color(hex: 0xFF5B4D) }
-        let tints: [UInt32] = [0xFFE1DC, 0xFFD3CC, 0xFFC1B8, 0xFFB0A5, 0xF3EEE6]
+        if selected { return Color(hex: Swatch.coral) }
+        let tints: [UInt32] = [Swatch.blushFaint, Swatch.blushLight, Swatch.blush, Swatch.blushDeep, Swatch.linen]
         return Color(hex: tints[max(0, min(tints.count - 1, level - 1))])
     }
 
     var body: some View {
         Canvas { context, size in
-            let ink = selected ? Color.white : Color(hex: 0x231E2E)
+            let ink = selected ? Color.white : Color(hex: Swatch.night)
             let w = size.width
             let h = size.height
             context.fill(Path(ellipseIn: CGRect(x: 0, y: 0, width: w, height: h)), with: .color(fillColor))
@@ -227,7 +226,7 @@ struct ConfettiView: View {
 
     private static let pieces: [Piece] = {
         var generator = SeededGenerator(state: 7)
-        let colors = [Color(hex: 0xB6F34A), Color(hex: 0xFF5B4D), Color(hex: 0xB48CFF), Color(hex: 0xFFC93C), Color(hex: 0x7CC4F5)]
+        let colors = [Color(hex: Swatch.lime), Color(hex: Swatch.coral), Color(hex: Swatch.lilac), Color(hex: Swatch.hazard), Color(hex: Swatch.sky)]
         return (0..<56).map { index in
             let angle = Double.random(in: -2.9 ... -0.25, using: &generator)
             let speed = Double.random(in: 320...760, using: &generator)

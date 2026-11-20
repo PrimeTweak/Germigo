@@ -23,7 +23,18 @@ struct StreakWidgetView: View {
         trCount(days, one: "day without a germ", other: "days without a germ")
     }
 
+    /// A tap opens the log sheet, or Today while a germ is active.
+    private var link: URL? {
+        URL(string: isSick ? "petri://today" : "petri://log")
+    }
+
     var body: some View {
+        content
+            .widgetURL(link)
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch family {
         case .accessoryInline:
             Text(trCount(days, one: "%lld day without a germ", other: "%lld days without a germ"))

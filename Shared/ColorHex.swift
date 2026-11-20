@@ -12,6 +12,6 @@ extension Color {
     /// Parses "#RRGGBB" strings from bundled content.
     init(hexString: String) {
         let cleaned = hexString.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        self.init(hex: UInt32(cleaned, radix: 16) ?? 0x8A93A6)
+        self.init(hex: UInt32(cleaned, radix: 16) ?? Swatch.slate)
     }
 }

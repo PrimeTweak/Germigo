@@ -50,6 +50,11 @@ struct LegalScreen: View {
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                 }
+                if let publisher = AppConfig.publisherName {
+                    Text(tr("Petri is published by %@.", publisher))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.ink)
+                }
                 ForEach(Array(sections.enumerated()), id: \.offset) { item in
                     VStack(alignment: .leading, spacing: 6) {
                         Text(item.element.title.value)
@@ -62,19 +67,25 @@ struct LegalScreen: View {
                     }
                 }
                 if kind == .terms, let eula = Self.standardEULA {
-                    Link(tr("Apple's standard license agreement (EULA)"), destination: eula)
-                        .font(.subheadline.weight(.semibold))
+                    Link(destination: eula) {
+                        Text(tr("Apple's standard license agreement (EULA)")).underline()
+                    }
+                    .font(.subheadline.weight(.semibold))
                 }
                 if let webURL {
-                    Link(tr("Open the web version"), destination: webURL)
-                        .font(.subheadline.weight(.semibold))
+                    Link(destination: webURL) {
+                        Text(tr("Open the web version")).underline()
+                    }
+                    .font(.subheadline.weight(.semibold))
                 }
                 if let email = AppConfig.supportEmail, let mail = URL(string: "mailto:" + email) {
-                    Link(tr("Contact: %@", email), destination: mail)
-                        .font(.subheadline.weight(.semibold))
+                    Link(destination: mail) {
+                        Text(tr("Contact: %@", email)).underline()
+                    }
+                    .font(.subheadline.weight(.semibold))
                 }
             }
-            .tint(palette.isDark ? palette.lime : Color(hex: 0x3D7BFA))
+            .tint(palette.isDark ? palette.lime : palette.ink)
             .padding(.horizontal, 22)
             .padding(.vertical, 16)
         }

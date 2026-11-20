@@ -11,6 +11,8 @@ struct AlbumScreen: View {
     @Environment(\.palette) private var palette
     @State private var segment = Segment.germs
     @State private var lockedGerm: Germ?
+    @State private var guideRequested = false
+    @State private var showGuide = false
     @Namespace private var zoom
 
     var body: some View {
@@ -19,8 +21,7 @@ struct AlbumScreen: View {
                 let cardWidth = max(96, (proxy.size.width - 40 - 24) / 3)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text(tr("Season %1$lld · %2$lld of %3$lld germs", model.season.number,
-                                model.caughtGermIDs.count, model.catalog.germs.count))
+                        Text(tr("%1$lld of %2$lld germs caught", model.caughtGermIDs.count, model.catalog.germs.count))
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
                             .padding(.horizontal, 4)
@@ -35,6 +36,15 @@ struct AlbumScreen: View {
                         case .germs:
                             grid(cardWidth: cardWidth)
                         case .badges:
+                            NavigationLink {
+                                SkillTreeScreen()
+                            } label: {
+                                ValueRow(symbol: "point.3.connected.trianglepath.dotted", tint: palette.lilac,
+                                         title: tr("Skill Tree"), value: model.displayTitle)
+                                    .padding(.horizontal, 16)
+                                    .petriCard(padding: 0)
+                            }
+                            .buttonStyle(.plain)
                             BadgesGrid()
                         case .kids:
                             KidsGermsView()
@@ -60,11 +70,23 @@ struct AlbumScreen: View {
                 GermDetailScreen(germ: germ)
                     .navigationTransition(.zoom(sourceID: germ.id, in: zoom))
             }
-            .sheet(item: $lockedGerm) { germ in
-                LockedCardSheet(germ: germ)
-                    .presentationDetents([.medium])
+            .navigationDestination(isPresented: $showGuide) {
+                FieldGuideScreen()
+            }
+            .sheet(item: $lockedGerm, onDismiss: openGuideIfRequested) { germ in
+                LockedCardSheet(germ: germ) {
+                    guideRequested = true
+                }
+                .presentationDetents([.medium])
             }
         }
+    }
+
+    /// Pushes the Field Guide once the locked-card sheet is gone.
+    private func openGuideIfRequested() {
+        guard guideRequested else { return }
+        guideRequested = false
+        showGuide = true
     }
 
     private func grid(cardWidth: CGFloat) -> some View {
@@ -94,6 +116,7 @@ struct AlbumScreen: View {
 /// Explains a locked card without spoiling which germ it is.
 private struct LockedCardSheet: View {
     let germ: Germ
+    let onOpenGuide: () -> Void
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
 
@@ -111,10 +134,17 @@ private struct LockedCardSheet: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
             Spacer(minLength: 0)
-            Button(tr("Got it")) {
-                dismiss()
+            VStack(spacing: 10) {
+                Button(tr("Open the Field Guide")) {
+                    onOpenGuide()
+                    dismiss()
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink))
+                Button(tr("Got it")) {
+                    dismiss()
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost))
             }
-            .buttonStyle(PillButtonStyle(kind: .ink))
             .padding(.horizontal, 24)
             .padding(.bottom, 16)
         }
@@ -161,6 +191,7 @@ private struct KidsGermsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var showSheet = false
+    @State private var pendingDelete: KidIllness?
 
     private var illnesses: [KidIllness] {
         model.data.kidIllnesses.sorted { $0.startedAt > $1.startedAt }
@@ -187,6 +218,23 @@ private struct KidsGermsView: View {
         .sheet(isPresented: $showSheet) {
             KidIllnessSheet()
         }
+        .confirmationDialog(tr("Delete this entry?"), isPresented: deleteBinding, titleVisibility: .visible) {
+            Button(tr("Delete"), role: .destructive) {
+                if let illness = pendingDelete { model.deleteKidIllness(illness.id) }
+                pendingDelete = nil
+            }
+            Button(tr("Cancel"), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: {
+            Text(tr("Its countdown and reminders go with it."))
+        }
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(get: { pendingDelete != nil }, set: { shown in
+            if !shown { pendingDelete = nil }
+        })
     }
 
     @ViewBuilder
@@ -215,7 +263,7 @@ private struct KidsGermsView: View {
                 .buttonStyle(.plain)
                 Menu {
                     Button(role: .destructive) {
-                        model.deleteKidIllness(illness.id)
+                        pendingDelete = illness
                     } label: {
                         Label(tr("Delete"), systemImage: "trash")
                     }
@@ -237,6 +285,7 @@ private struct KidsGermsView: View {
         case .open: return tr("You're still clear")
         case .caught: return tr("You caught it")
         case .dodged: return tr("You dodged it")
+        case .expired: return tr("Window passed")
         }
     }
 }
@@ -251,6 +300,13 @@ struct KidIllnessSheet: View {
     @State private var startedAt = Date()
     @State private var watch = true
     @State private var newKidName = ""
+    @State private var saved = false
+
+    /// False for the germs that have no known incubation window, so nothing to watch.
+    private var hasWindow: Bool {
+        guard let germID, let germ = model.catalog.germ(germID) else { return true }
+        return germ.incubationMinHours != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -293,18 +349,22 @@ struct KidIllnessSheet: View {
                         .padding(.horizontal, 4)
                     GermPicker(selection: $germID)
                     VStack(spacing: 0) {
-                        DatePicker(tr("Since"), selection: $startedAt, in: ...Date(),
+                        DatePicker(tr("Since"), selection: $startedAt, in: AppModel.earliestNewEntry...Date(),
                                    displayedComponents: [.date, .hourAndMinute])
                             .frame(minHeight: 54)
-                        Divider()
-                        Toggle(tr("Watch my window"), isOn: $watch)
-                            .frame(minHeight: 54)
+                        if hasWindow {
+                            Divider()
+                            Toggle(tr("Watch my window"), isOn: $watch)
+                                .frame(minHeight: 54)
+                        }
                     }
-                    .tint(Color(hex: 0x34C759))
+                    .tint(.green)
                     .foregroundStyle(palette.ink)
                     .padding(.horizontal, 16)
                     .petriCard(padding: 0)
-                    Text(tr("Watching sends a check-in when your window opens and closes, and shows the countdown on the Lock Screen."))
+                    Text(hasWindow
+                         ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Petri also puts the countdown on the Lock Screen.")
+                         : tr("No countdown for this one. The Field Notes explain what to watch for."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
@@ -344,17 +404,17 @@ struct KidIllnessSheet: View {
     }
 
     private func save() {
-        guard let germID else { return }
+        guard !saved, let germID else { return }
         var target = kidID
         if model.data.kids.isEmpty {
-            let kid = Kid(name: newKidName.trimmingCharacters(in: .whitespaces), ageYears: 2,
-                          daycareSince: Date(), colorIndex: 0)
+            let kid = Kid(name: newKidName.trimmingCharacters(in: .whitespaces), colorIndex: 0)
             model.saveKid(kid)
             target = kid.id
         }
         guard let target else { return }
+        saved = true
         let illness = model.addKidIllness(kidID: target, germID: germID, startedAt: startedAt)
-        if watch {
+        if watch && hasWindow {
             Task {
                 _ = await NotificationManager.requestAuthorization()
                 model.setWatching(illness.id, watching: true)

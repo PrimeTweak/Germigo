@@ -15,21 +15,69 @@ struct RewardResult: Identifiable {
     let unlockedIcons: [AppIconOption]
 }
 
+/// A streak milestone waiting to be celebrated.
+struct MilestoneEvent: Identifiable {
+    let days: Int
+    var id: Int { days }
+}
+
+/// A journal problem the parent has to be told about.
+enum JournalNotice {
+    case setAside
+    case saveFailed
+}
+
 /// The single source of truth for the journal and everything derived from it.
 @MainActor
 @Observable
 final class AppModel {
     static let shared = AppModel()
 
+    /// Longest first name or nickname the journal keeps.
+    static let nameLimit = 24
+
+    /// An exposure to a germ without a known window closes by itself after this long.
+    static let openExposureLifetime: TimeInterval = 21 * 24 * 3600
+
+    /// How far back a new entry may be dated.
+    static var earliestNewEntry: Date {
+        Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+    }
+
     private(set) var data: AppData
     let catalog: GermCatalog
     var pendingReward: RewardResult?
     var logRequest: LogRequest?
     var selectedTab = AppTab.today
+    var journalNotice: JournalNotice?
+    var askBetter = false
+    var pendingMilestone: MilestoneEvent?
+    /// A short confirmation shown at the top of the screen.
+    var toast: String?
+
+    /// False while the journal file exists but cannot be read; nothing is saved over it then.
+    @ObservationIgnored private var journalAvailable = true
+    @ObservationIgnored private var saveFailureReported = false
 
     init() {
         catalog = GermCatalog.load()
-        data = Persistence.load() ?? AppData()
+        data = AppData()
+        loadJournal()
+    }
+
+    private func loadJournal() {
+        switch Persistence.load() {
+        case .loaded(let stored):
+            data = stored
+            journalAvailable = true
+        case .missing:
+            journalAvailable = true
+        case .setAside:
+            journalAvailable = true
+            journalNotice = .setAside
+        case .unavailable:
+            journalAvailable = false
+        }
     }
 
     // MARK: - Derived state
@@ -54,7 +102,7 @@ final class AppModel {
     }
 
     var totalPoints: Int {
-        data.logs.reduce(0) { $0 + $1.points }
+        RewardEngine.totalPoints(data: data)
     }
 
     var level: LevelInfo {
@@ -67,6 +115,27 @@ final class AppModel {
 
     var displayName: String {
         data.profileName.isEmpty ? tr("You") : data.profileName
+    }
+
+    var partnerDisplayName: String {
+        data.partnerName ?? tr("Partner")
+    }
+
+    /// The skill tree title the parent chose to wear, if still earned.
+    var wornTitle: String? {
+        SkillTree.wornTitle(data: data, catalog: catalog)
+    }
+
+    var displayTitle: String {
+        wornTitle ?? level.title
+    }
+
+    func name(of sufferer: Sufferer) -> String {
+        switch sufferer {
+        case .me: return displayName
+        case .partner: return partnerDisplayName
+        case .both: return tr("%1$@ and %2$@", displayName, partnerDisplayName)
+        }
     }
 
     func streakDays(now: Date = Date()) -> Int {
@@ -102,7 +171,13 @@ final class AppModel {
         }
     }
 
-    func seasonStats(now: Date = Date()) -> SeasonStats {
+    /// The season that many daycare years before the current one.
+    func season(back offset: Int) -> Season {
+        let date = Calendar.current.date(byAdding: .year, value: -offset, to: Date()) ?? Date()
+        return Season.containing(date, firstUse: data.installedAt)
+    }
+
+    func seasonStats(for season: Season, now: Date = Date()) -> SeasonStats {
         StatsEngine.stats(data: data, catalog: catalog, season: season, now: now)
     }
 
@@ -112,9 +187,9 @@ final class AppModel {
 
     func isIconUnlocked(_ icon: AppIconOption) -> Bool {
         switch icon {
-        case .petri: return true
+        case .petri, .classic: return true
         case .nightShift: return hasBadge(BadgeCatalog.nightShift)
-        case .tissueBox: return count(of: "rhino") >= 3
+        case .tissueBox: return count(of: GermCatalog.commonColdID) >= 3
         case .goldenDish: return data.logs.count >= 20
         case .soupBowl: return hasPass
         case .holo: return !catalog.germs.isEmpty && caughtGermIDs.count >= catalog.germs.count
@@ -129,8 +204,9 @@ final class AppModel {
         }
     }
 
+    /// Reads open with the number of germs logged, repeats included.
     func isArticleUnlocked(_ article: Article) -> Bool {
-        hasPass || caughtGermIDs.count >= article.unlockAtGerms
+        hasPass || data.logs.count >= article.unlockAtGerms
     }
 
     func deepDiveUnlocked(for germ: Germ) -> Bool {
@@ -144,24 +220,34 @@ final class AppModel {
 
     // MARK: - Household
 
+    /// Trims a name and keeps it within the limit.
+    private func clean(_ name: String) -> String {
+        String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.nameLimit))
+    }
+
     func completeOnboarding(kid: Kid?) {
-        if let kid, !kid.name.isEmpty { data.kids = [kid] }
+        if var kid {
+            kid.name = clean(kid.name)
+            if !kid.name.isEmpty { data.kids = [kid] }
+        }
         data.onboardingDone = true
         commit()
     }
 
     func setProfileName(_ name: String) {
-        data.profileName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        data.profileName = clean(name)
         commit()
     }
 
     func setPartnerName(_ name: String) {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = clean(name)
         data.partnerName = trimmed.isEmpty ? nil : trimmed
         commit()
     }
 
     func saveKid(_ kid: Kid) {
+        var kid = kid
+        kid.name = clean(kid.name)
         if let index = data.kids.firstIndex(where: { $0.id == kid.id }) {
             data.kids[index] = kid
         } else {
@@ -176,6 +262,7 @@ final class AppModel {
         }
         data.kids.removeAll { $0.id == id }
         data.kidIllnesses.removeAll { $0.kidID == id }
+        reconcileUnlocks()
         commit()
     }
 
@@ -183,6 +270,11 @@ final class AppModel {
         change(&data.settings)
         commit()
         rescheduleNotifications()
+    }
+
+    func wearTitle(_ id: String?) {
+        data.settings.wornTitle = id
+        commit()
     }
 
     func markArticleRead(_ id: String) {
@@ -196,21 +288,22 @@ final class AppModel {
     @discardableResult
     func logGerm(_ draft: LogDraft, now: Date = Date()) -> RewardResult? {
         guard let germ = catalog.germ(draft.germID) else { return nil }
+        if let illnessID = draft.kidIllnessID,
+           data.kidIllnesses.contains(where: { $0.id == illnessID && $0.outcome == .caught }) {
+            return nil
+        }
         let previousStreak = streakDays(now: draft.startedAt)
         let isNewCard = !caughtGermIDs.contains(germ.id)
         let levelBefore = level
         let iconsBefore = AppIconOption.allCases.filter { isIconUnlocked($0) }
 
-        if let active = activeLog, let index = data.logs.firstIndex(where: { $0.id == active.id }) {
-            data.logs[index].endedAt = max(active.startedAt, draft.startedAt)
-        }
-
         let bonuses = RewardEngine.bonuses(for: draft, germ: germ)
-        let log = SickLog(germID: germ.id, source: draft.source, severity: draft.severity,
-                          startedAt: draft.startedAt, endedAt: nil,
-                          points: bonuses.reduce(0) { $0 + $1.points }, bonuses: bonuses,
-                          partnerSickToo: draft.partnerSickToo, kidIllnessID: draft.kidIllnessID)
-        data.logs.append(log)
+        let entry = SickLog(germID: germ.id, source: draft.source, severity: draft.severity,
+                            startedAt: draft.startedAt, endedAt: nil,
+                            points: bonuses.reduce(0) { $0 + $1.points }, bonuses: bonuses,
+                            sufferer: draft.sufferer, kidIllnessID: draft.kidIllnessID)
+        data.logs = JournalRules.normalized(data.logs + [entry])
+        let log = data.logs.first { $0.id == entry.id } ?? entry
 
         if let illnessID = draft.kidIllnessID,
            let index = data.kidIllnesses.firstIndex(where: { $0.id == illnessID }) {
@@ -221,7 +314,7 @@ final class AppModel {
 
         let newBadges = awardBadges(now: now)
         commit()
-        NotificationManager.scheduleSickCheckIn(settings: data.settings)
+        syncSickCheckIn()
 
         let iconsAfter = AppIconOption.allCases.filter { isIconUnlocked($0) }
         return RewardResult(log: log, germ: germ, isNewCard: isNewCard, previousStreak: previousStreak,
@@ -234,20 +327,24 @@ final class AppModel {
         data.logs[index].endedAt = max(active.startedAt, now)
         _ = awardBadges(now: now)
         commit()
-        NotificationManager.cancelSickCheckIn()
+        syncSickCheckIn()
     }
 
-    func updateLog(_ log: SickLog) {
+    func updateLog(_ log: SickLog, now: Date = Date()) {
         guard let index = data.logs.firstIndex(where: { $0.id == log.id }) else { return }
         data.logs[index] = log
+        data.logs = JournalRules.normalized(data.logs)
+        reconcileUnlocks(now: now)
+        _ = awardBadges(now: now)
         commit()
+        syncSickCheckIn()
     }
 
     func deleteLog(_ id: UUID) {
-        let wasActive = activeLog?.id == id
         data.logs.removeAll { $0.id == id }
+        reconcileUnlocks()
         commit()
-        if wasActive { NotificationManager.cancelSickCheckIn() }
+        syncSickCheckIn()
     }
 
     // MARK: - Kid illnesses and exposures
@@ -263,11 +360,12 @@ final class AppModel {
     func setWatching(_ id: UUID, watching: Bool) {
         guard let index = data.kidIllnesses.firstIndex(where: { $0.id == id }) else { return }
         data.kidIllnesses[index].watching = watching
+        data.kidIllnesses[index].liveDismissed = false
         let illness = data.kidIllnesses[index]
         commit()
         if watching, let germ = catalog.germ(illness.germID) {
             let kidName = kid(illness.kidID)?.name ?? tr("Your kid")
-            NotificationManager.scheduleExposure(illness: illness, kidName: kidName, germ: germ, settings: data.settings)
+            NotificationManager.scheduleExposure(illness: illness, germ: germ, settings: data.settings)
             LiveActivityManager.start(illness: illness, kidName: kidName, germ: germ)
         } else {
             stopWatching(illness)
@@ -281,11 +379,15 @@ final class AppModel {
         data.kidIllnesses[index].watching = false
         _ = awardBadges(now: now)
         commit()
+        if outcome == .dodged {
+            toast = tr("Dodged it. +%lld Sick Points", RewardEngine.dodgePoints)
+        }
     }
 
     func deleteKidIllness(_ id: UUID) {
         if let illness = data.kidIllnesses.first(where: { $0.id == id }) { stopWatching(illness) }
         data.kidIllnesses.removeAll { $0.id == id }
+        reconcileUnlocks()
         commit()
     }
 
@@ -298,20 +400,55 @@ final class AppModel {
 
     /// Runs when the app comes to the foreground.
     func refresh(now: Date = Date()) {
+        if !journalAvailable { loadJournal() }
         var changed = false
         for index in data.kidIllnesses.indices where data.kidIllnesses[index].outcome == .open {
             let illness = data.kidIllnesses[index]
-            guard let germ = catalog.germ(illness.germID),
-                  let window = germ.window(from: illness.startedAt) else { continue }
-            if now > window.closes.addingTimeInterval(24 * 3600) {
+            guard let germ = catalog.germ(illness.germID) else { continue }
+            let deadline = germ.window(from: illness.startedAt)?.closes.addingTimeInterval(24 * 3600)
+                ?? illness.startedAt.addingTimeInterval(Self.openExposureLifetime)
+            if now > deadline {
                 stopWatching(illness)
-                data.kidIllnesses[index].outcome = .dodged
+                data.kidIllnesses[index].outcome = .expired
                 data.kidIllnesses[index].watching = false
                 changed = true
+            } else if illness.watching, !illness.liveDismissed {
+                let kidName = kid(illness.kidID)?.name ?? tr("Your kid")
+                LiveActivityManager.start(illness: illness, kidName: kidName, germ: germ)
             }
         }
         if !awardBadges(now: now).isEmpty { changed = true }
+        if data.onboardingDone, pendingMilestone == nil, let days = Milestones.pending(data: data, now: now),
+           let start = StreakMath.currentStart(data: data) {
+            data.celebratedMilestone = MilestoneMark(streakStart: start, days: days)
+            pendingMilestone = MilestoneEvent(days: days)
+            changed = true
+        }
         if changed { commit() } else { publishSnapshot() }
+        syncStreakReminders(now: now)
+    }
+
+    /// Opens what a widget or a link asked for.
+    func open(_ url: URL) {
+        guard url.scheme == "petri", data.onboardingDone else { return }
+        selectedTab = .today
+        if url.host == "log" {
+            pendingMilestone = nil
+            logRequest = LogRequest()
+        }
+    }
+
+    /// Replaces the journal with a backup, keeping the parent past onboarding.
+    func restore(_ backup: AppData, now: Date = Date()) {
+        for illness in data.kidIllnesses { stopWatching(illness) }
+        var restored = backup
+        restored.onboardingDone = true
+        data = restored
+        journalAvailable = true
+        reconcileUnlocks(now: now)
+        _ = awardBadges(now: now)
+        commit()
+        rescheduleNotifications()
     }
 
     /// Handles the Live Activity buttons, which run in the app process.
@@ -319,13 +456,18 @@ final class AppModel {
         switch action {
         case .caught(let exposureID):
             guard let id = UUID(uuidString: exposureID),
-                  let illness = data.kidIllnesses.first(where: { $0.id == id }) else { return }
+                  let illness = data.kidIllnesses.first(where: { $0.id == id }),
+                  illness.outcome == .open else { return }
             let draft = LogDraft(germID: illness.germID, source: .kid(illness.kidID), severity: 3,
-                                 startedAt: Date(), partnerSickToo: false, kidIllnessID: illness.id)
+                                 startedAt: Date(), sufferer: .me, kidIllnessID: illness.id)
             pendingReward = logGerm(draft)
         case .stillFine(let exposureID):
             guard let id = UUID(uuidString: exposureID) else { return }
             LiveActivityManager.end(exposureID: id)
+            if let index = data.kidIllnesses.firstIndex(where: { $0.id == id }) {
+                data.kidIllnesses[index].liveDismissed = true
+                commit()
+            }
         }
     }
 
@@ -336,15 +478,47 @@ final class AppModel {
     func eraseEverything() {
         for illness in data.kidIllnesses { stopWatching(illness) }
         NotificationManager.cancelSickCheckIn()
+        NotificationManager.cancelStreakReminders()
         Persistence.erase()
         data = AppData()
+        journalAvailable = true
+        saveFailureReported = false
+        journalNotice = nil
         pendingReward = nil
         logRequest = nil
+        askBetter = false
+        pendingMilestone = nil
+        toast = nil
         selectedTab = .today
         publishSnapshot()
     }
 
+    /// Asks for notification permission the first time a reminder needs it, then schedules them.
+    func enableReminders() async {
+        guard await NotificationManager.ensureAuthorization() else { return }
+        rescheduleNotifications()
+    }
+
     // MARK: - Internals
+
+    /// After an entry is removed or changed: drops the badges the journal no longer earns,
+    /// and falls back to the default theme and icon when theirs is locked again.
+    private func reconcileUnlocks(now: Date = Date()) {
+        let earned = RewardEngine.earnedBadges(data: data, catalog: catalog, now: now)
+        data.badges = data.badges.filter { earned.contains($0.key) }
+        if !isThemeUnlocked(data.settings.theme) {
+            data.settings.theme = .agar
+        }
+        if data.settings.wornTitle != nil, SkillTree.wornTitle(data: data, catalog: catalog) == nil {
+            data.settings.wornTitle = nil
+        }
+        let icon = AppIconManager.current
+        if icon != .petri, !isIconUnlocked(icon) {
+            Task {
+                _ = await AppIconManager.apply(.petri)
+            }
+        }
+    }
 
     private func awardBadges(now: Date) -> [Badge] {
         let earned = RewardEngine.earnedBadges(data: data, catalog: catalog, now: now)
@@ -359,20 +533,49 @@ final class AppModel {
     private func rescheduleNotifications() {
         for illness in data.kidIllnesses where illness.watching && illness.outcome == .open {
             guard let germ = catalog.germ(illness.germID) else { continue }
-            let kidName = kid(illness.kidID)?.name ?? tr("Your kid")
-            NotificationManager.scheduleExposure(illness: illness, kidName: kidName, germ: germ, settings: data.settings)
+            NotificationManager.scheduleExposure(illness: illness, germ: germ, settings: data.settings)
         }
-        if activeLog != nil {
-            NotificationManager.scheduleSickCheckIn(settings: data.settings)
+        syncSickCheckIn()
+    }
+
+    /// The daily check-in exists only while a germ is active; it carries that germ's advice.
+    private func syncSickCheckIn() {
+        if let log = activeLog {
+            NotificationManager.scheduleSickCheckIn(settings: data.settings, germ: catalog.germ(log.germID),
+                                                    startedAt: log.startedAt)
+        } else {
+            NotificationManager.cancelSickCheckIn()
+        }
+        syncStreakReminders(now: Date())
+    }
+
+    /// Announces the next streak milestone and the season story.
+    private func syncStreakReminders(now: Date) {
+        guard data.onboardingDone else { return }
+        let calendar = Calendar.current
+        if let start = StreakMath.currentStart(data: data),
+           let next = Milestones.next(after: StreakMath.days(from: start, to: now)),
+           let day = calendar.date(byAdding: .day, value: next, to: calendar.startOfDay(for: start)) {
+            NotificationManager.scheduleMilestone(days: next, on: day, settings: data.settings)
+        } else {
+            NotificationManager.cancelMilestone()
+        }
+        let reveal = WrapEngine.revealDate(for: season)
+        if reveal > now, data.logs.contains(where: { season.contains($0.startedAt) }) {
+            NotificationManager.scheduleWrapped(at: reveal, settings: data.settings)
         }
     }
 
     private func commit() {
-        Persistence.save(data)
+        if journalAvailable, !Persistence.save(data), !saveFailureReported {
+            saveFailureReported = true
+            journalNotice = .saveFailed
+        }
         publishSnapshot()
     }
 
     private func publishSnapshot() {
+        guard journalAvailable else { return }
         var snapshot = WidgetSnapshot.empty
         snapshot.streakStart = StreakMath.currentStart(data: data)
         snapshot.recordDays = recordDays()

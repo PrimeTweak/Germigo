@@ -133,10 +133,11 @@ struct LogSheet: View {
     @State private var source = GermSource.unknown
     @State private var severity = 3
     @State private var startedAt = Date()
-    @State private var partnerSickToo = false
+    @State private var sufferer = Sufferer.me
     @State private var tellCrew = true
     @State private var linkedIllnessID: UUID?
     @State private var didPrefill = false
+    @State private var submitted = false
 
     private var severityNames: [String] {
         [tr("Sniffles"), tr("Meh"), tr("Couch day"), tr("Bathroom floor"), tr("Send soup")]
@@ -152,7 +153,7 @@ struct LogSheet: View {
     private var draft: LogDraft? {
         guard let germID else { return nil }
         return LogDraft(germID: germID, source: source, severity: severity, startedAt: startedAt,
-                        partnerSickToo: partnerSickToo, kidIllnessID: linkedIllnessID)
+                        sufferer: sufferer, kidIllnessID: linkedIllnessID)
     }
 
     private var previewPoints: Int {
@@ -223,7 +224,7 @@ struct LogSheet: View {
                 if let trailing {
                     Text(trailing)
                         .font(.subheadline.weight(.bold))
-                        .foregroundStyle(palette.coralDeep)
+                        .foregroundStyle(palette.coralInk)
                 }
             }
             .padding(.horizontal, 4)
@@ -283,7 +284,7 @@ struct LogSheet: View {
                     }
                 }
                 sourceButton(.daycare, name: tr("Daycare")) {
-                    symbolAvatar("building.2.fill", colors: [Color(hex: 0xFFE08A), Color(hex: 0xF7B52B)])
+                    symbolAvatar("building.2.fill", colors: [Color(hex: Swatch.butter), Color(hex: Swatch.amber)])
                 }
                 sourceButton(.unknown, name: tr("Not sure")) {
                     symbolAvatar("questionmark", colors: [palette.surfaceAlt, palette.surfaceAlt])
@@ -302,7 +303,7 @@ struct LogSheet: View {
             .overlay {
                 Image(systemName: symbol)
                     .font(.title3.weight(.bold))
-                    .foregroundStyle(Color(hex: 0x1E1A26))
+                    .foregroundStyle(Color(hex: Swatch.night))
             }
     }
 
@@ -355,7 +356,7 @@ struct LogSheet: View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
                 IconTile(symbol: "moon.fill", background: palette.night, foreground: palette.lime)
-                DatePicker(tr("Started"), selection: $startedAt, in: ...Date(),
+                DatePicker(tr("Started"), selection: $startedAt, in: AppModel.earliestNewEntry...Date(),
                            displayedComponents: [.date, .hourAndMinute])
                     .font(.body)
             }
@@ -364,22 +365,24 @@ struct LogSheet: View {
                 HStack {
                     Spacer()
                     PillLabel(text: tr("Night shift +%lld", RewardEngine.nightShiftPoints),
-                              foreground: Color(hex: 0x7B4FE0), background: Color(hex: 0xEDE4FF))
+                              foreground: Color(hex: Swatch.grape), background: Color(hex: Swatch.lilacMist))
                 }
                 .padding(.bottom, 10)
             }
-            if model.data.partnerName != nil {
+            if let partner = model.data.partnerName {
                 Divider()
-                Toggle(isOn: $partnerSickToo) {
-                    Label {
-                        Text(tr("%@ is sick too", model.data.partnerName ?? ""))
-                    } icon: {
-                        IconTile(symbol: "person.2.fill", background: Color(hex: 0xF26AA8))
+                HStack(spacing: 12) {
+                    IconTile(symbol: "person.2.fill", background: Color(hex: Swatch.pink))
+                    Picker(tr("Who's sick?"), selection: $sufferer) {
+                        Text(tr("Me")).tag(Sufferer.me)
+                        Text(verbatim: partner).tag(Sufferer.partner)
+                        Text(tr("Both")).tag(Sufferer.both)
                     }
+                    .pickerStyle(.segmented)
                 }
                 .frame(minHeight: 54)
             }
-            if crew.isMember, let crewName = crew.state?.crew.name {
+            if model.hasPass, crew.isMember, let crewName = crew.state?.crew.name {
                 Divider()
                 Toggle(isOn: $tellCrew) {
                     Label {
@@ -391,13 +394,13 @@ struct LogSheet: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     } icon: {
-                        IconTile(symbol: "dot.radiowaves.left.and.right", background: Color(hex: 0xFF5B4D))
+                        IconTile(symbol: "dot.radiowaves.left.and.right", background: Color(hex: Swatch.coral))
                     }
                 }
                 .frame(minHeight: 60)
             }
         }
-        .tint(Color(hex: 0x34C759))
+        .tint(.green)
         .foregroundStyle(palette.ink)
         .padding(.horizontal, 16)
         .petriCard(padding: 0)
@@ -439,12 +442,13 @@ struct LogSheet: View {
     }
 
     private func submit() {
-        guard let draft, let result = model.logGerm(draft) else { return }
+        guard !submitted, let draft, let result = model.logGerm(draft) else { return }
+        submitted = true
         Haptics.thud()
-        if tellCrew && crew.isMember {
-            Task {
-                await crew.reportGerm(draft.germID)
-            }
+        let share = tellCrew && crew.isMember && model.hasPass
+        Task {
+            if model.data.settings.checkInsOn { await model.enableReminders() }
+            if share { await crew.reportGerm(draft.germID) }
         }
         onLogged(result)
         dismiss()

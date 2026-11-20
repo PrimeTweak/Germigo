@@ -1,5 +1,7 @@
 import AVFoundation
+import CoreTransferable
 import UIKit
+import UniformTypeIdentifiers
 
 enum SoundEffect: String {
     case flap
@@ -68,27 +70,45 @@ enum AppIconManager {
     }
 }
 
-/// Writes the journal as a CSV file the parent can keep.
-enum CSVExporter {
-    static func export(logs: [SickLog], catalog: GermCatalog, sourceName: (GermSource) -> String) -> URL? {
+/// The whole journal as a JSON backup that Restore can read back.
+struct JournalBackup: Transferable {
+    let data: AppData
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .json) { (backup: JournalBackup) in
+            Persistence.backupData(backup.data) ?? Data()
+        }
+        .suggestedFileName("petri-backup.json")
+    }
+}
+
+/// The journal as a CSV file, produced only when the share sheet asks for it.
+struct JournalExport: Transferable {
+    let logs: [SickLog]
+    let catalog: GermCatalog
+    let sourceNames: [UUID: String]
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .commaSeparatedText) { (export: JournalExport) in
+            Data(export.csv.utf8)
+        }
+        .suggestedFileName("petri-journal.csv")
+    }
+
+    var csv: String {
         let formatter = ISO8601DateFormatter()
-        var rows = ["started,ended,germ,illness,source,severity,points"]
+        var rows = ["started,ended,germ,illness,source,sick,severity,points"]
         for log in logs.sorted(by: { $0.startedAt < $1.startedAt }) {
             let germ = catalog.germ(log.germID)
             let ended = log.endedAt.map { formatter.string(from: $0) } ?? ""
             let fields = [
                 formatter.string(from: log.startedAt), ended, germ?.name ?? log.germID,
-                germ?.illness.value ?? "", sourceName(log.source), String(log.severity), String(log.points)
+                germ?.illness.value ?? "", sourceNames[log.id] ?? "", log.sufferer.rawValue, String(log.severity),
+                String(log.points)
             ]
-            rows.append(fields.map(escape).joined(separator: ","))
+            rows.append(fields.map(Self.escape).joined(separator: ","))
         }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("petri-journal.csv")
-        do {
-            try rows.joined(separator: "\n").write(to: url, atomically: true, encoding: .utf8)
-            return url
-        } catch {
-            return nil
-        }
+        return rows.joined(separator: "\n")
     }
 
     private static func escape(_ field: String) -> String {

@@ -109,11 +109,11 @@ private struct FlapTile: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: width * 0.14, style: .continuous)
-                .fill(LinearGradient(colors: [Color(hex: 0x34303D), Color(hex: 0x1F1C26)],
+                .fill(LinearGradient(colors: [Color(hex: Swatch.tileTop), Color(hex: Swatch.tileBottom)],
                                      startPoint: .top, endPoint: .bottom))
             Text(verbatim: "\(digit)")
                 .font(.system(size: width * 1.02, weight: .heavy))
-                .foregroundStyle(hot ? Color(hex: 0xFF6A5A) : Color(hex: 0xFFF6E2))
+                .foregroundStyle(hot ? Color(hex: Swatch.coralHot) : Color(hex: Swatch.cream))
         }
         .frame(width: width, height: height)
     }
@@ -123,7 +123,7 @@ private struct FlapTile: View {
 struct HazardStripes: View {
     var body: some View {
         Canvas { context, size in
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: 0x1E1A26)))
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: Swatch.night)))
             let band: CGFloat = 11
             var x = -size.height
             while x < size.width + size.height {
@@ -133,7 +133,7 @@ struct HazardStripes: View {
                 path.addLine(to: CGPoint(x: x + size.height + band, y: 0))
                 path.addLine(to: CGPoint(x: x + band, y: size.height))
                 path.closeSubpath()
-                context.fill(path, with: .color(Color(hex: 0xFFC93C)))
+                context.fill(path, with: .color(Color(hex: Swatch.hazard)))
                 x += band * 2
             }
         }

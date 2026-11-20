@@ -117,7 +117,7 @@
   {
     "id": "antibiotics",
     "icon": "pills.fill",
-    "unlockAtGerms": 5,
+    "unlockAtGerms": 4,
     "title": {
       "en": "Antibiotics: when they help",
       "fr": "Les antibiotiques : quand ils aident"
@@ -154,7 +154,7 @@
   {
     "id": "contagious",
     "icon": "clock.fill",
-    "unlockAtGerms": 8,
+    "unlockAtGerms": 6,
     "title": {
       "en": "How long am I contagious?",
       "fr": "Je suis contagieux combien de temps ?"
@@ -195,7 +195,7 @@
   {
     "id": "survival-kit",
     "icon": "cross.case.fill",
-    "unlockAtGerms": 12,
+    "unlockAtGerms": 8,
     "title": {
       "en": "The sick-parent survival kit",
       "fr": "La trousse de survie du parent malade"

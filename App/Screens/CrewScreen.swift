@@ -108,6 +108,7 @@ struct CrewScreen: View {
 /// What the crew offers, shown until the Season Pass is active.
 private struct CrewTeaser: View {
     @Binding var showPaywall: Bool
+    @State private var confirmLeave = false
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
 
@@ -148,9 +149,32 @@ private struct CrewTeaser: View {
                     showPaywall = true
                 }
                 .buttonStyle(PillButtonStyle(kind: .accent))
+                if crew.isMember {
+                    Button(tr("Leave crew and delete my data")) {
+                        confirmLeave = true
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
+                    .disabled(crew.isLoading)
+                    if let message = crew.errorMessage {
+                        Text(message)
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(palette.coralInk)
+                            .multilineTextAlignment(.center)
+                    }
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 28)
+        }
+        .confirmationDialog(tr("Leave this crew?"), isPresented: $confirmLeave, titleVisibility: .visible) {
+            Button(tr("Leave and delete"), role: .destructive) {
+                Task {
+                    _ = await crew.leave()
+                }
+            }
+            Button(tr("Cancel"), role: .cancel) {}
+        } message: {
+            Text(tr("Removes your name, your reactions and the germs you shared from the server. Your journal stays on this phone."))
         }
     }
 
@@ -188,13 +212,14 @@ private struct CrewJoinView: View {
     @State private var emblem = 0
     @State private var accepted = false
     @State private var showRules = false
+    @State private var submitting = false
 
     private var canSubmit: Bool {
         let nameOK = displayName.trimmingCharacters(in: .whitespaces).count >= 2
         let detailOK = mode == .create
             ? crewName.trimmingCharacters(in: .whitespaces).count >= 2
             : code.trimmingCharacters(in: .whitespaces).count >= 6
-        return nameOK && detailOK && accepted && !crew.isLoading
+        return nameOK && detailOK && accepted && !crew.isLoading && !submitting
     }
 
     var body: some View {
@@ -237,7 +262,7 @@ private struct CrewJoinView: View {
                             .foregroundStyle(palette.inkSecondary)
                     }
                 }
-                .tint(Color(hex: 0x34C759))
+                .tint(.green)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .petriCard(padding: 0)
@@ -250,7 +275,7 @@ private struct CrewJoinView: View {
                 if let message = crew.errorMessage {
                     Text(message)
                         .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.coralDeep)
+                        .foregroundStyle(palette.coralInk)
                         .padding(.horizontal, 4)
                 }
                 Button {
@@ -313,12 +338,19 @@ private struct CrewJoinView: View {
     }
 
     private func submit() {
+        guard !submitting else { return }
+        submitting = true
         let name = displayName.trimmingCharacters(in: .whitespaces)
         Task {
+            let joined: Bool
             if mode == .create {
-                _ = await crew.create(name: crewName.trimmingCharacters(in: .whitespaces), displayName: name, emblem: emblem)
+                joined = await crew.create(name: crewName.trimmingCharacters(in: .whitespaces), displayName: name, emblem: emblem)
             } else {
-                _ = await crew.join(code: code.trimmingCharacters(in: .whitespaces), displayName: name)
+                joined = await crew.join(code: code.trimmingCharacters(in: .whitespaces), displayName: name)
+            }
+            submitting = false
+            if joined, model.data.settings.crewAlertsOn {
+                await model.enableReminders()
             }
         }
     }
@@ -406,7 +438,7 @@ private struct CrewHome: View {
                 .font(.title2)
                 .foregroundStyle(Color.white)
                 .frame(width: 58, height: 58)
-                .background(LinearGradient(colors: [Color(hex: 0xFF7A63), Color(hex: 0xFF4F42)],
+                .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
                                            startPoint: .top, endPoint: .bottom),
                             in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .accessibilityHidden(true)
@@ -482,7 +514,7 @@ private struct CrewHome: View {
                     HStack(spacing: 12) {
                         Text(String(item.offset + 1))
                             .font(.headline.monospacedDigit())
-                            .foregroundStyle(item.offset == 0 ? palette.coralDeep : palette.inkTertiary)
+                            .foregroundStyle(item.offset == 0 ? palette.coralInk : palette.inkTertiary)
                             .frame(width: 22)
                         AvatarView(name: item.element.name, gradient: AvatarColors.gradient(item.element.colorIndex), size: 36)
                         Text(item.element.id == state.me.id ? tr("You") : item.element.name)
@@ -634,7 +666,7 @@ private struct FeedRow: View {
             .frame(minWidth: 48)
             .background(mine ? palette.accent.opacity(0.35) : palette.ink.opacity(0.06), in: Capsule())
             .overlay {
-                Capsule().strokeBorder(mine ? palette.limeDeep : Color.clear, lineWidth: 1.5)
+                Capsule().strokeBorder(mine ? palette.ink : Color.clear, lineWidth: 2)
             }
         }
         .buttonStyle(.plain)
@@ -659,6 +691,7 @@ private struct CrewSettingsSheet: View {
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    @State private var renamed = false
     @State private var confirmLeave = false
 
     private var sharesName: Binding<Bool> {
@@ -678,14 +711,19 @@ private struct CrewSettingsSheet: View {
                         .textInputAutocapitalization(.words)
                     Button(tr("Save name")) {
                         Task {
-                            _ = await crew.rename(name.trimmingCharacters(in: .whitespaces))
+                            renamed = await crew.rename(name.trimmingCharacters(in: .whitespaces))
                         }
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).count < 2 || crew.isLoading)
+                    if renamed {
+                        Label(tr("Name saved."), systemImage: "checkmark")
+                            .font(.footnote)
+                            .foregroundStyle(palette.inkSecondary)
+                    }
                     if let message = crew.errorMessage {
                         Text(message)
                             .font(.footnote)
-                            .foregroundStyle(palette.coralDeep)
+                            .foregroundStyle(palette.coralInk)
                     }
                 }
                 if !crew.blockedIDs.isEmpty {
@@ -703,7 +741,7 @@ private struct CrewSettingsSheet: View {
                     Text(tr("Removes your name, your reactions and the germs you shared from the server. Your journal stays on this phone."))
                 }
             }
-            .tint(Color(hex: 0x34C759))
+            .tint(.green)
             .navigationTitle(tr("Crew settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

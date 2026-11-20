@@ -65,7 +65,7 @@ struct RewardView: View {
 
     private var background: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0x2A2140), Color(hex: 0x120F17)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
             RadialGradient(colors: [germ.deepTint.opacity(0.55), Color.clear], center: UnitPoint(x: 0.5, y: 0.4),
                            startRadius: 0, endRadius: 300)
             RingsBackground(color: Color.white.opacity(0.05), spacing: 36)
@@ -76,8 +76,9 @@ struct RewardView: View {
     private var heading: some View {
         VStack(spacing: 8) {
             PillLabel(text: reward.isNewCard ? tr("NEW CARD") : tr("REPEAT CATCH"),
-                      foreground: Color(hex: 0x1E1A26), background: Color(hex: 0xB6F34A))
-            Text(tr("You caught %@!", germ.name))
+                      foreground: Color(hex: Swatch.night), background: Color(hex: Swatch.lime))
+            Text(reward.log.sufferer == .partner ? tr("%1$@ caught %2$@!", model.partnerDisplayName, germ.name)
+                                                 : tr("You caught %@!", germ.name))
                 .font(.largeTitle.weight(.heavy))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.7)
@@ -93,7 +94,7 @@ struct RewardView: View {
         VStack(spacing: 6) {
             Text(verbatim: "+\(shownPoints)")
                 .font(.system(size: 56, weight: .black))
-                .foregroundStyle(Color(hex: 0xB6F34A))
+                .foregroundStyle(Color(hex: Swatch.lime))
                 .contentTransition(.numericText())
                 .monospacedDigit()
             Text(tr("Sick Points"))
@@ -127,7 +128,7 @@ struct RewardView: View {
                           title: tr("Badge unlocked: %@", badge.title), detail: badge.detail)
             }
             ForEach(reward.unlockedIcons) { icon in
-                unlockRow(symbol: "app.badge.fill", tint: Color(hex: 0xB6F34A),
+                unlockRow(symbol: "app.badge.fill", tint: Color(hex: Swatch.lime),
                           title: tr("App icon unlocked: %@", icon.title), detail: tr("Find it in Settings."))
             }
             VStack(spacing: 7) {
@@ -140,7 +141,7 @@ struct RewardView: View {
                         .foregroundStyle(Color.white.opacity(0.6))
                 }
                 ProgressView(value: levelFraction)
-                    .tint(Color(hex: 0xB6F34A))
+                    .tint(Color(hex: Swatch.lime))
             }
             .padding(.horizontal, 4)
             .padding(.top, 4)

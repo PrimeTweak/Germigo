@@ -17,6 +17,9 @@ errors = []
 SPEC = re.compile(r"%(?:\d+\$)?(?:lld|@|d|f)")
 STRING_LINE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')
 
+# Longest "Shows up" or "Lasts" text the two-line stat tile of a germ page is given.
+TILE_TEXT_LIMIT = 30
+
 REQUIRED = [
     "project.yml", ".gitignore", ".github/workflows/build-ipa.yml", ".github/workflows/release.yml",
     "App/Info.plist", "App/Petri.entitlements", "App/PrivacyInfo.xcprivacy", "App/PetriApp.swift",
@@ -27,6 +30,7 @@ REQUIRED = [
     "Widgets/Info.plist", "Widgets/PetriWidgets.entitlements", "Widgets/PrivacyInfo.xcprivacy",
     "server/server.js", "server/test.js", "server/legal.json", "server/package.json",
     "README.md", "docs/APP-STORE.md",
+    "App/Store/JournalRules.swift", "App/Store/ProgressEngine.swift", "Tests/LogicTests/main.swift", "tools/run_logic_tests.sh",
 ]
 
 
@@ -95,6 +99,12 @@ def check_plists():
         email = str(app.get("PetriSupportEmail", ""))
         if ".invalid" in email or "@" not in email:
             fail("release: set PetriSupportEmail in App/Info.plist to a real address")
+        publisher = str(app.get("PetriPublisherName", ""))
+        if ".invalid" in publisher or not publisher.strip():
+            fail("release: set PetriPublisherName in App/Info.plist to the person or company that publishes the app")
+        share = str(app.get("PetriShareURL", ""))
+        if ".invalid" in share or not share.startswith("https://"):
+            fail("release: set PetriShareURL in App/Info.plist to the https page the share cards' QR code opens")
         if app.get("PetriCrewEnabled", True) and (".invalid" in server or not server.startswith("https://")):
             fail("release: set PetriServerURL in App/Info.plist to the deployed https server, or set PetriCrewEnabled to false")
 
@@ -114,6 +124,33 @@ def check_content():
         gid = germ.get("id", "?")
         for key in ("illness", "phrase", "scientific", "showsUp", "lasts", "doctor"):
             localized(germ.get(key), f"germs.json {gid}.{key}")
+        if germ.get("family") not in ("airways", "gut", "skin", "other"):
+            fail(f"germs.json {gid}: family must be airways, gut, skin or other")
+        up_to = germ.get("lastsUpToDays")
+        if up_to is not None and (not isinstance(up_to, int) or up_to < 1):
+            fail(f"germs.json {gid}: lastsUpToDays must be a positive number of days")
+        localized(germ.get("doctorLead"), f"germs.json {gid}.doctorLead")
+        if not germ.get("doctorSigns"):
+            fail(f"germs.json {gid}: needs at least one doctorSigns entry")
+        for index, sign in enumerate(germ.get("doctorSigns", [])):
+            localized(sign, f"germs.json {gid}.doctorSigns[{index}]")
+        if germ.get("doctorNote") is not None:
+            localized(germ.get("doctorNote"), f"germs.json {gid}.doctorNote")
+        boss = germ.get("boss") or {}
+        localized(boss.get("attack"), f"germs.json {gid}.boss.attack")
+        localized(boss.get("weakness"), f"germs.json {gid}.boss.weakness")
+        myth = germ.get("myth") or {}
+        localized(myth.get("claim"), f"germs.json {gid}.myth.claim")
+        localized(myth.get("explanation"), f"germs.json {gid}.myth.explanation")
+        if not isinstance(myth.get("isTrue"), bool):
+            fail(f"germs.json {gid}: myth.isTrue must be true or false")
+        kid = germ.get("kidSource")
+        if kid is not None and kid not in [source.get("url") for source in germ.get("sources", [])]:
+            fail(f"germs.json {gid}: kidSource must be one of the germ's sources")
+        for key in ("showsUp", "lasts"):
+            for language, text in (germ.get(key) or {}).items():
+                if len(str(text)) > TILE_TEXT_LIMIT:
+                    fail(f"germs.json {gid}.{key}.{language}: longer than {TILE_TEXT_LIMIT} characters, the stat tile shows two lines")
         if germ.get("rarity") not in rarities:
             fail(f"germs.json {gid}: unknown rarity")
         for key in ("tintLight", "tintDeep"):
@@ -149,6 +186,15 @@ def check_content():
         for index, section in enumerate(sections):
             localized(section.get("title"), f"legal.json {kind}[{index}].title")
             localized(section.get("body"), f"legal.json {kind}[{index}].body")
+    for key in ("privacyTitle", "termsTitle", "supportTitle", "updatedLabel", "publisherLabel", "contactLabel",
+                "eulaLabel", "supportIntro", "supportDelete", "landingTagline", "landingIntro", "landingStore",
+                "landingSoon"):
+        localized((legal.get("web") or {}).get(key), f"legal.json web.{key}")
+    points = (legal.get("web") or {}).get("landingPoints") or []
+    if not points:
+        fail("legal.json: web.landingPoints is empty")
+    for index, point in enumerate(points):
+        localized(point, f"legal.json web.landingPoints[{index}]")
     if (ROOT / "server/legal.json").is_file() and (ROOT / "App/Content/legal.json").is_file():
         if (ROOT / "server/legal.json").read_bytes() != (ROOT / "App/Content/legal.json").read_bytes():
             fail("server/legal.json must be identical to App/Content/legal.json")

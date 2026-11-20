@@ -13,8 +13,6 @@ struct OnboardingFlow: View {
     @Environment(\.palette) private var palette
     @State private var step = Step.splash
     @State private var kidName = ""
-    @State private var kidAge = 2
-    @State private var daycareSince = Date()
     @State private var practiced = false
     @State private var showPaywall = false
 
@@ -50,7 +48,7 @@ struct OnboardingFlow: View {
 
     private func finish() {
         let name = kidName.trimmingCharacters(in: .whitespaces)
-        let kid = name.isEmpty ? nil : Kid(name: name, ageYears: kidAge, daycareSince: daycareSince, colorIndex: 0)
+        let kid = name.isEmpty ? nil : Kid(name: name, colorIndex: 0)
         model.completeOnboarding(kid: kid)
     }
 
@@ -158,23 +156,13 @@ struct OnboardingFlow: View {
                             .padding(.bottom, 12)
                         PillLabel(text: tr("Patient zero").uppercased(), foreground: palette.background, background: palette.ink)
                     }
-                    VStack(spacing: 0) {
-                        TextField(tr("First name"), text: $kidName)
-                            .textInputAutocapitalization(.words)
-                            .submitLabel(.done)
-                            .frame(minHeight: 54)
-                        Divider()
-                        Stepper(value: $kidAge, in: 0...12) {
-                            Text(trCount(kidAge, one: "%lld year old", other: "%lld years old"))
-                        }
+                    TextField(tr("First name"), text: $kidName)
+                        .textInputAutocapitalization(.words)
+                        .submitLabel(.done)
                         .frame(minHeight: 54)
-                        Divider()
-                        DatePicker(tr("Daycare since"), selection: $daycareSince, in: ...Date(), displayedComponents: .date)
-                            .frame(minHeight: 54)
-                    }
-                    .foregroundStyle(palette.ink)
-                    .padding(.horizontal, 16)
-                    .petriCard(padding: 0)
+                        .foregroundStyle(palette.ink)
+                        .padding(.horizontal, 16)
+                        .petriCard(padding: 0)
                     Text(tr("Only a first name, and it never leaves this phone. More kids? Add them later in Settings."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
@@ -216,7 +204,7 @@ struct OnboardingFlow: View {
                 Label(practiced ? tr("That's it. Nothing was logged.") : tr("Keep holding until the ring closes."),
                       systemImage: practiced ? "checkmark.circle.fill" : "hand.tap")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(practiced ? Color(hex: 0x2CB868) : palette.inkSecondary)
+                    .foregroundStyle(practiced ? palette.successInk : palette.inkSecondary)
             }
             .padding(.horizontal, 24)
             Spacer()
@@ -356,13 +344,13 @@ struct Wordmark: View {
     private var dot: some View {
         let diameter = size * 0.3
         return Circle()
-            .fill(RadialGradient(colors: [Color(hex: 0xE0FF9C), Color(hex: 0x9EDC48), Color(hex: 0x73B52B)],
+            .fill(RadialGradient(colors: [Color(hex: Swatch.limeGlow), Color(hex: Swatch.grass), Color(hex: Swatch.moss)],
                                  center: UnitPoint(x: 0.35, y: 0.3), startRadius: 0, endRadius: diameter * 0.7))
             .frame(width: diameter, height: diameter)
             .overlay {
                 HStack(spacing: diameter * 0.14) {
-                    Capsule().fill(Color(hex: 0x231E2E)).frame(width: diameter * 0.16, height: diameter * 0.22)
-                    Capsule().fill(Color(hex: 0x231E2E)).frame(width: diameter * 0.16, height: diameter * 0.22)
+                    Capsule().fill(Color(hex: Swatch.night)).frame(width: diameter * 0.16, height: diameter * 0.22)
+                    Capsule().fill(Color(hex: Swatch.night)).frame(width: diameter * 0.16, height: diameter * 0.22)
                 }
             }
             .shadow(color: Color.black.opacity(0.18), radius: 2, x: 0, y: 2)

@@ -22,6 +22,13 @@ extension View {
 }
 
 /// Full-width capsule buttons in the four roles the app uses.
+/// The one health disclaimer, shown wherever health notes appear.
+enum HealthNotice {
+    static var text: String {
+        tr("Petri shares general information from public health sources. It is not medical advice and does not replace a health professional.")
+    }
+}
+
 struct PillButtonStyle: ButtonStyle {
     enum Kind {
         case ink
@@ -51,7 +58,7 @@ struct PillButtonStyle: ButtonStyle {
         switch kind {
         case .ink: return palette.background
         case .accent: return palette.night
-        case .coral: return .white
+        case .coral: return palette.night
         case .ghost: return palette.ink
         }
     }
@@ -61,10 +68,10 @@ struct PillButtonStyle: ButtonStyle {
         case .ink:
             return AnyShapeStyle(palette.ink)
         case .accent:
-            return AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xC9FA6E), Color(hex: 0xA6EB3A)],
+            return AnyShapeStyle(LinearGradient(colors: [Color(hex: Swatch.limeLight), Color(hex: Swatch.limeMid)],
                                                 startPoint: .top, endPoint: .bottom))
         case .coral:
-            return AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFF7A63), Color(hex: 0xFF4F42)],
+            return AnyShapeStyle(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
                                                 startPoint: .top, endPoint: .bottom))
         case .ghost:
             return AnyShapeStyle(palette.ink.opacity(0.07))
@@ -133,7 +140,6 @@ struct AvatarView: View {
     let name: String
     let gradient: LinearGradient
     var size: CGFloat = 40
-    var darkText = false
 
     private var initial: String {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -147,7 +153,7 @@ struct AvatarView: View {
             .overlay {
                 Text(initial)
                     .font(.system(size: size * 0.42, weight: .bold))
-                    .foregroundStyle(darkText ? Color(hex: 0x1E1A26) : Color.white)
+                    .foregroundStyle(Color(hex: Swatch.night))
             }
             .accessibilityHidden(true)
     }

@@ -17,10 +17,26 @@ const REPORT_REASONS = new Set(['name', 'abuse', 'other']);
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_MEMBERS = 40;
 const MAX_BODY_BYTES = 4096;
+const MINUTE = 60 * 1000;
 const DAY = 24 * 3600 * 1000;
+const MAX_LIMIT_KEYS = 50000;
+const WRITE_DELAY = 250;
+const LIMITS = {
+  all: [120, MINUTE],
+  join: [10, MINUTE],
+  crewsPerDay: [5, DAY],
+  events: [12, MINUTE],
+  eventsPerDay: [40, DAY],
+  reactions: [60, MINUTE],
+  rename: [10, MINUTE],
+  reports: [10, MINUTE],
+  admin: [20, MINUTE],
+};
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const RADAR_WINDOW = 7 * DAY;
 const FEED_WINDOW = 30 * DAY;
 const EVENT_LIFETIME = 400 * DAY;
+const MEMBER_LIFETIME = 400 * DAY;
 const MASK_AFTER_REPORTERS = 2;
 const MASKED_NAME = 'Parent';
 
@@ -80,11 +96,22 @@ function escapeHtml(text) {
   return text.replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 }
 
+// Compares two secrets without leaking where they differ.
+function sameSecret(given, expected) {
+  const left = crypto.createHash('sha256').update(given).digest();
+  const right = crypto.createHash('sha256').update(expected).digest();
+  return crypto.timingSafeEqual(left, right);
+}
+
 function createApp(options = {}) {
   const dataDir = options.dataDir || process.env.DATA_DIR || path.join(__dirname, 'data');
   const dataFile = path.join(dataDir, 'petri.json');
   const adminToken = options.adminToken || process.env.ADMIN_TOKEN || '';
   const supportEmail = options.supportEmail || process.env.SUPPORT_EMAIL || '';
+  const publisherName = options.publisherName || process.env.PUBLISHER_NAME || '';
+  const appStoreURL = options.appStoreURL || process.env.APP_STORE_URL || '';
+  const trustedHops = Number(options.trustProxyHops ?? process.env.TRUST_PROXY_HOPS ?? 0) || 0;
+  const writeDelay = options.writeDelay ?? WRITE_DELAY;
   const extraBlocked = (options.blockedWords || process.env.BLOCKED_WORDS || '')
     .split(',').map((word) => normalize(word.trim())).filter(Boolean);
   const clock = options.now || (() => Date.now());
@@ -95,29 +122,72 @@ function createApp(options = {}) {
     db = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
   }
 
-  const hits = new Map();
+  const counters = new Map();
+  let lastSweep = 0;
+  let writeTimer = null;
 
-  function save() {
+  function flush() {
+    if (writeTimer) clearTimeout(writeTimer);
+    writeTimer = null;
     fs.mkdirSync(dataDir, { recursive: true });
     const temp = dataFile + '.tmp';
     fs.writeFileSync(temp, JSON.stringify(db));
     fs.renameSync(temp, dataFile);
   }
 
-  function limit(ip, bucket, max) {
-    const now = clock();
-    const key = bucket + ':' + ip;
-    const recent = (hits.get(key) || []).filter((time) => now - time < 60000);
-    if (recent.length >= max) {
-      hits.set(key, recent);
-      throw new ApiError(429, 'rate_limited');
-    }
-    recent.push(now);
-    hits.set(key, recent);
+  // Membership changes are written at once; frequent small changes are grouped.
+  function save(urgent) {
+    if (urgent || writeDelay <= 0) return flush();
+    if (!writeTimer) writeTimer = setTimeout(flush, writeDelay);
+    return undefined;
   }
 
+  // The address the request really came from. A forwarded header is only read
+  // when a known number of proxies stand in front, and then from the trusted end.
+  function clientAddress(req) {
+    const direct = req.socket.remoteAddress || 'unknown';
+    if (trustedHops <= 0) return direct;
+    const chain = String(req.headers['x-forwarded-for'] || '').split(',').map((part) => part.trim()).filter(Boolean);
+    return chain.length >= trustedHops ? chain[chain.length - trustedHops] : direct;
+  }
+
+  // Fixed-window counter per key; expired windows are swept so the map stays bounded.
+  function limit(who, bucket) {
+    const [max, windowLength] = LIMITS[bucket];
+    const now = clock();
+    if (now - lastSweep > MINUTE || now < lastSweep) {
+      lastSweep = now;
+      for (const [key, entry] of counters) {
+        if (now >= entry.resetAt || entry.resetAt - now > DAY) counters.delete(key);
+      }
+    }
+    const key = bucket + ':' + who;
+    let entry = counters.get(key);
+    if (!entry || now >= entry.resetAt) {
+      if (counters.size >= MAX_LIMIT_KEYS) throw new ApiError(429, 'rate_limited');
+      entry = { count: 0, resetAt: now + windowLength };
+      counters.set(key, entry);
+    }
+    if (entry.count >= max) throw new ApiError(429, 'rate_limited');
+    entry.count += 1;
+  }
+
+  function dropMembers(ids) {
+    db.members = db.members.filter((member) => !ids.has(member.id));
+    db.events = db.events.filter((event) => !ids.has(event.memberID));
+    for (const event of db.events) {
+      for (const kind of Object.keys(event.reactions)) {
+        event.reactions[kind] = event.reactions[kind].filter((id) => !ids.has(id));
+      }
+    }
+    db.reports = db.reports.filter((report) => !ids.has(report.memberID) && !ids.has(report.reporterID));
+  }
+
+  // Removes old events, members who have not connected for a long time, and emptied crews.
   function purge() {
     const now = clock();
+    const idle = db.members.filter((member) => now - (member.seenAt || member.joinedAt) > MEMBER_LIFETIME);
+    if (idle.length > 0) dropMembers(new Set(idle.map((member) => member.id)));
     db.events = db.events.filter((event) => now - event.at < EVENT_LIFETIME);
     const populated = new Set(db.members.map((member) => member.crewID));
     db.crews = db.crews.filter((crew) => populated.has(crew.id));
@@ -152,6 +222,11 @@ function createApp(options = {}) {
     const tokenHash = hashToken(token);
     const member = db.members.find((candidate) => candidate.tokenHash === tokenHash);
     if (!member) throw new ApiError(401, 'unauthorized');
+    const now = clock();
+    if (now - (member.seenAt || 0) > DAY) {
+      member.seenAt = now;
+      save();
+    }
     return member;
   }
 
@@ -214,60 +289,130 @@ function createApp(options = {}) {
   }
 
   function removeMember(memberID) {
-    db.members = db.members.filter((member) => member.id !== memberID);
-    db.events = db.events.filter((event) => event.memberID !== memberID);
-    for (const event of db.events) {
-      for (const kind of Object.keys(event.reactions)) {
-        event.reactions[kind] = event.reactions[kind].filter((id) => id !== memberID);
-      }
-    }
-    db.reports = db.reports.filter((report) => report.memberID !== memberID && report.reporterID !== memberID);
+    dropMembers(new Set([memberID]));
     purge();
   }
 
-  function legalPage(kind, lang) {
-    const french = lang === 'fr';
-    const title = kind === 'privacy'
-      ? (french ? 'Politique de confidentialité' : 'Privacy Policy')
-      : (french ? "Conditions d'utilisation" : 'Terms of Use');
-    const sections = legal[kind].map((section) => {
-      const heading = french ? section.title.fr : section.title.en;
-      const body = french ? section.body.fr : section.body.en;
-      return `<h2>${escapeHtml(heading)}</h2><p>${escapeHtml(body)}</p>`;
-    }).join('');
-    const updated = (french ? 'Dernière mise à jour : ' : 'Last updated ') + escapeHtml(legal.updated);
-    const eula = kind === 'terms'
-      ? `<p><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">${french ? "Contrat de licence standard d'Apple (CLUF)" : "Apple's standard license agreement (EULA)"}</a></p>`
-      : '';
-    return page(`Petri · ${title}`, lang, `<h1>${escapeHtml(title)}</h1><p class="meta">${updated}</p>${sections}${eula}${contactBlock(french)}`);
+  // A member removed by the moderator must not walk back in: the crew gets a new invite code.
+  function expelMember(memberID) {
+    const member = db.members.find((candidate) => candidate.id === memberID);
+    removeMember(memberID);
+    const crew = member && db.crews.find((candidate) => candidate.id === member.crewID);
+    if (crew) crew.code = newCode();
   }
 
-  function contactBlock(french) {
+  function legalPage(kind, lang) {
+    const web = legal.web;
+    const title = (kind === 'privacy' ? web.privacyTitle : web.termsTitle)[lang];
+    const sections = legal[kind]
+      .map((section) => `<h2>${escapeHtml(section.title[lang])}</h2><p>${escapeHtml(section.body[lang])}</p>`)
+      .join('');
+    const updated = `${escapeHtml(web.updatedLabel[lang])} ${escapeHtml(legal.updated)}`;
+    const publisher = publisherName
+      ? `<p>${escapeHtml(web.publisherLabel[lang])} ${escapeHtml(publisherName)}.</p>`
+      : '';
+    const eula = kind === 'terms'
+      ? `<p><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">${escapeHtml(web.eulaLabel[lang])}</a></p>`
+      : '';
+    const body = `<h1>${escapeHtml(title)}</h1><p class="meta">${updated}</p>${publisher}${sections}${eula}${contactBlock(lang)}`;
+    return page(`Petri · ${title}`, lang, body);
+  }
+
+  function contactBlock(lang) {
     if (!supportEmail) return '';
-    const separator = french ? ' : ' : ': ';
-    return `<p>Contact${separator}<a href="mailto:${escapeHtml(supportEmail)}">${escapeHtml(supportEmail)}</a></p>`;
+    const address = escapeHtml(supportEmail);
+    return `<p>${escapeHtml(legal.web.contactLabel[lang])} <a href="mailto:${address}">${address}</a></p>`;
   }
 
   function supportPage(lang) {
-    const french = lang === 'fr';
-    const body = french
-      ? '<h1>Soutien</h1><p>Une question, un problème ou un signalement ? Écris-nous, on répond en général en moins de 48 heures.</p>'
-        + '<p>Pour supprimer tes données : dans l\'app, Réglages, puis Tout supprimer. Quitter un groupe supprime tes données du serveur.</p>'
-      : '<h1>Support</h1><p>A question, a problem or something to report? Write to us. We usually answer within 48 hours.</p>'
-        + '<p>To delete your data: in the app, open Settings, then Delete Everything. Leaving a crew deletes your data from the server.</p>';
-    const links = french
-      ? '<p><a href="/privacy?lang=fr">Politique de confidentialité</a> · <a href="/terms?lang=fr">Conditions d\'utilisation</a></p>'
-      : '<p><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Use</a></p>';
-    return page('Petri · Support', lang, body + contactBlock(french) + links);
+    const web = legal.web;
+    const suffix = lang === 'fr' ? '?lang=fr' : '';
+    const body = `<h1>${escapeHtml(web.supportTitle[lang])}</h1><p>${escapeHtml(web.supportIntro[lang])}</p>`
+      + `<p>${escapeHtml(web.supportDelete[lang])}</p>`;
+    const links = `<p><a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a> · `
+      + `<a href="/terms${suffix}">${escapeHtml(web.termsTitle[lang])}</a></p>`;
+    return page(`Petri · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
   }
 
-  function page(title, lang, body) {
+  // The page a share card's QR code opens.
+  function landingPage(lang) {
+    const web = legal.web;
+    const points = web.landingPoints.map((point) => `<li>${escapeHtml(point[lang])}</li>`).join('');
+    const store = /^https:\/\/apps\.apple\.com\//.test(appStoreURL)
+      ? `<a class="store" href="${escapeHtml(appStoreURL)}">${escapeHtml(web.landingStore[lang])}</a>`
+      : `<p class="soon">${escapeHtml(web.landingSoon[lang])}</p>`;
+    const suffix = lang === 'fr' ? '?lang=fr' : '';
+    const body = '<p class="mark">petri</p>'
+      + `<h1>${escapeHtml(web.landingTagline[lang])}</h1><p class="lede">${escapeHtml(web.landingIntro[lang])}</p>`
+      + `<ul>${points}</ul>${store}`
+      + `<p class="links"><a href="/support${suffix}">${escapeHtml(web.supportTitle[lang])}</a> · `
+      + `<a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a></p>`;
+    const style = '.mark{font-size:44px;font-weight:900;letter-spacing:-2px;margin:8px 0 18px}'
+      + '.lede{font-size:19px}ul{padding:0;list-style:none}li{background:#fff;border-radius:16px;padding:14px 16px;margin:8px 0}'
+      + '.store{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:99px;background:#1E1A26;color:#F6F1E7;'
+      + 'text-decoration:none;font-weight:700}.soon{margin:18px 0;font-weight:700}.links{color:#6b6675;font-size:15px}';
+    return page('Petri', lang, body, style);
+  }
+
+  // The moderation page. It holds no data: the reports load after the token is typed.
+  function adminPage(nonce) {
+    const script = `
+const state = { token: '' };
+const list = document.getElementById('list');
+const status = document.getElementById('status');
+function node(tag, text) { const el = document.createElement(tag); if (text) el.textContent = text; return el; }
+async function api(method, path) {
+  const response = await fetch(path, { method, headers: { Authorization: 'Bearer ' + state.token } });
+  if (!response.ok) throw new Error(response.status === 401 ? 'Wrong token.' : 'Request failed (' + response.status + ').');
+  return response.json();
+}
+async function act(memberID, action, label) {
+  if (!confirm(label + '?')) return;
+  try { await api('POST', '/admin/members/' + memberID + '/' + action); await load(); } catch (error) { status.textContent = error.message; }
+}
+async function load() {
+  status.textContent = 'Loading...';
+  list.replaceChildren();
+  try {
+    const data = await api('GET', '/admin/reports');
+    status.textContent = data.reports.length ? data.reports.length + ' open report(s).' : 'No open reports.';
+    for (const report of data.reports) {
+      const card = node('section');
+      card.append(node('h2', (report.memberName || 'Removed member') + ' · ' + (report.crewName || 'Removed crew')));
+      card.append(node('p', 'Reason: ' + report.reason + ' · ' + new Date(report.at).toLocaleString()));
+      const remove = node('button', 'Remove member');
+      remove.addEventListener('click', () => act(report.memberID, 'remove', 'Remove this member and everything they shared'));
+      const clear = node('button', 'Dismiss reports');
+      clear.addEventListener('click', () => act(report.memberID, 'clear', 'Dismiss every report about this member'));
+      card.append(remove, clear);
+      list.append(card);
+    }
+  } catch (error) { status.textContent = error.message; }
+}
+document.getElementById('form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  state.token = document.getElementById('token').value;
+  load();
+});`;
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Petri · Moderation</title>'
+      + '<style>body{font:17px/1.5 -apple-system,system-ui,sans-serif;color:#1E1A26;background:#F6F1E7;margin:0}'
+      + 'main{max-width:680px;margin:0 auto;padding:32px 22px 64px}h1{font-size:30px;margin:0 0 12px}'
+      + 'h2{font-size:18px;margin:0 0 4px}section{background:#fff;border-radius:18px;padding:16px;margin:12px 0}'
+      + 'input,button{font:inherit;padding:10px 14px;border-radius:12px;border:1px solid #c9c2b4;margin:4px 6px 4px 0}'
+      + 'button{background:#1E1A26;color:#F6F1E7;border:0}p{margin:4px 0 10px}</style></head><body><main>'
+      + '<h1>Moderation</h1><form id="form"><input id="token" type="password" placeholder="Admin token" '
+      + 'autocomplete="off" required><button type="submit">Load reports</button></form>'
+      + `<p id="status"></p><div id="list"></div></main><script nonce="${nonce}">${script}</script></body></html>`;
+  }
+
+  function page(title, lang, body, extraStyle = '') {
     return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">`
       + '<meta name="viewport" content="width=device-width, initial-scale=1">'
       + `<title>${escapeHtml(title)}</title>`
       + '<style>body{font:17px/1.55 -apple-system,system-ui,sans-serif;color:#1E1A26;background:#F6F1E7;margin:0}'
       + 'main{max-width:680px;margin:0 auto;padding:32px 22px 64px}h1{font-size:32px;margin:0 0 4px}'
-      + 'h2{font-size:19px;margin:28px 0 6px}.meta{color:#6b6675}a{color:#3D7BFA}</style></head>'
+      + `h2{font-size:19px;margin:28px 0 6px}.meta{color:#6b6675}a{color:#3D7BFA}${extraStyle}</style></head>`
       + `<body><main>${body}</main></body></html>`;
   }
 
@@ -297,18 +442,27 @@ function createApp(options = {}) {
   async function route(req, res) {
     const url = new URL(req.url, 'http://localhost');
     const key = req.method + ' ' + url.pathname;
-    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+    const ip = clientAddress(req);
 
     if (key === 'GET /health') return json(res, 200, { ok: true });
     if (key === 'GET /privacy') return html(res, legalPage('privacy', language(req, url)));
     if (key === 'GET /terms') return html(res, legalPage('terms', language(req, url)));
-    if (key === 'GET /support' || key === 'GET /') return html(res, supportPage(language(req, url)));
+    if (key === 'GET /support') return html(res, supportPage(language(req, url)));
+    if (key === 'GET /' || key === 'GET /get') return html(res, landingPage(language(req, url)));
 
-    limit(ip, 'all', 120);
+    limit(ip, 'all');
+
+    if (key === 'GET /admin') {
+      limit(ip, 'admin');
+      const nonce = crypto.randomBytes(16).toString('base64');
+      return html(res, adminPage(nonce), nonce);
+    }
 
     if (url.pathname.startsWith('/admin/')) {
+      limit(ip, 'admin');
       const header = req.headers.authorization || '';
-      if (!adminToken || header !== 'Bearer ' + adminToken) throw new ApiError(401, 'unauthorized');
+      const given = header.startsWith('Bearer ') ? header.slice(7) : '';
+      if (!adminToken || !sameSecret(given, adminToken)) throw new ApiError(401, 'unauthorized');
       if (key === 'GET /admin/reports') {
         const open = db.reports.filter((report) => !report.resolved).map((report) => {
           const member = db.members.find((candidate) => candidate.id === report.memberID);
@@ -320,20 +474,21 @@ function createApp(options = {}) {
       const match = url.pathname.match(/^\/admin\/members\/([0-9a-f-]{36})\/(remove|clear)$/);
       if (req.method === 'POST' && match) {
         if (match[2] === 'remove') {
-          removeMember(match[1]);
+          expelMember(match[1]);
         } else {
           for (const report of db.reports) {
             if (report.memberID === match[1]) report.resolved = true;
           }
         }
-        save();
+        save(true);
         return json(res, 200, { ok: true });
       }
       throw new ApiError(404, 'not_found');
     }
 
     if (key === 'POST /v1/crews') {
-      limit(ip, 'join', 10);
+      limit(ip, 'join');
+      limit(ip, 'crewsPerDay');
       const body = await readBody(req);
       const name = cleanName(body.name, 24, extraBlocked);
       const displayName = cleanName(body.displayName, 20, extraBlocked);
@@ -342,12 +497,12 @@ function createApp(options = {}) {
       const crew = { id: crypto.randomUUID(), name, emblem, code: newCode(), createdAt: clock() };
       db.crews.push(crew);
       const { member, token } = addMember(crew, displayName);
-      save();
+      save(true);
       return json(res, 200, { token, state: stateFor(member) });
     }
 
     if (key === 'POST /v1/crews/join') {
-      limit(ip, 'join', 10);
+      limit(ip, 'join');
       const body = await readBody(req);
       const code = typeof body.code === 'string' ? body.code.trim().toUpperCase() : '';
       const crew = db.crews.find((candidate) => candidate.code === code);
@@ -358,7 +513,7 @@ function createApp(options = {}) {
         throw new ApiError(409, 'crew_full');
       }
       const { member, token } = addMember(crew, displayName);
-      save();
+      save(true);
       return json(res, 200, { token, state: stateFor(member) });
     }
 
@@ -367,20 +522,28 @@ function createApp(options = {}) {
     if (key === 'GET /v1/crew') return json(res, 200, stateFor(me));
 
     if (key === 'POST /v1/crew/events') {
-      limit(me.id, 'events', 12);
+      limit(me.id, 'events');
       const body = await readBody(req);
       if (!GERM_IDS.has(body.germID)) throw new ApiError(400, 'invalid');
-      db.events.push({
-        id: crypto.randomUUID(), crewID: me.crewID, memberID: me.id, germID: body.germID,
-        at: clock(), named: body.named === true, reactions: {},
-      });
-      purge();
-      save();
+      // A retried share carries the same client ID and is stored once.
+      const clientID = typeof body.clientID === 'string' && UUID_PATTERN.test(body.clientID) ? body.clientID : null;
+      const repeated = clientID
+        && db.events.some((event) => event.memberID === me.id && event.clientID === clientID);
+      if (!repeated) {
+        limit(me.id, 'eventsPerDay');
+        db.events.push({
+          id: crypto.randomUUID(), crewID: me.crewID, memberID: me.id, germID: body.germID,
+          at: clock(), named: body.named === true, reactions: {}, clientID,
+        });
+        purge();
+        save();
+      }
       return json(res, 200, stateFor(me));
     }
 
     const reaction = url.pathname.match(/^\/v1\/crew\/events\/([0-9a-f-]{36})\/reactions$/);
     if (req.method === 'POST' && reaction) {
+      limit(me.id, 'reactions');
       const body = await readBody(req);
       if (!REACTIONS.has(body.kind)) throw new ApiError(400, 'invalid');
       const event = db.events.find((candidate) => candidate.id === reaction[1] && candidate.crewID === me.crewID);
@@ -392,6 +555,7 @@ function createApp(options = {}) {
     }
 
     if (key === 'POST /v1/crew/me') {
+      limit(me.id, 'rename');
       const body = await readBody(req);
       const displayName = cleanName(body.displayName, 20, extraBlocked);
       if (!displayName) throw new ApiError(400, 'name_rejected');
@@ -401,7 +565,7 @@ function createApp(options = {}) {
     }
 
     if (key === 'POST /v1/crew/reports') {
-      limit(me.id, 'reports', 10);
+      limit(me.id, 'reports');
       const body = await readBody(req);
       const target = db.members.find((member) => member.id === body.memberID && member.crewID === me.crewID);
       if (!target || target.id === me.id) throw new ApiError(400, 'invalid');
@@ -420,7 +584,7 @@ function createApp(options = {}) {
 
     if (key === 'DELETE /v1/crew/me') {
       removeMember(me.id);
-      save();
+      save(true);
       res.writeHead(204);
       return res.end();
     }
@@ -428,30 +592,66 @@ function createApp(options = {}) {
     throw new ApiError(404, 'not_found');
   }
 
+  const baseHeaders = {
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'no-referrer',
+    'X-Frame-Options': 'DENY',
+    'Strict-Transport-Security': 'max-age=31536000',
+  };
+
   function json(res, status, body) {
-    res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+    res.writeHead(status, {
+      ...baseHeaders, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store',
+    });
     res.end(JSON.stringify(body));
   }
 
-  function html(res, body) {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  // Pages carry inline styles only; the moderation page also runs one script, allowed by its nonce.
+  function html(res, body, nonce) {
+    const scripts = nonce ? ` script-src 'nonce-${nonce}'; connect-src 'self';` : '';
+    res.writeHead(200, {
+      ...baseHeaders,
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': nonce ? 'no-store' : 'public, max-age=300',
+      'Content-Security-Policy':
+        `default-src 'none'; style-src 'unsafe-inline';${scripts} base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
+    });
     res.end(body);
   }
 
-  return http.createServer((req, res) => {
+  const server = http.createServer((req, res) => {
     route(req, res).catch((error) => {
       if (error instanceof ApiError) return json(res, error.status, { error: error.code });
       console.error(error);
       return json(res, 500, { error: 'server_error' });
     });
   });
+  server.flush = flush;
+  server.on('close', () => {
+    if (writeTimer) flush();
+  });
+  return server;
 }
 
 module.exports = { createApp, cleanName };
 
 if (require.main === module) {
+  if (process.env.NODE_ENV === 'production' && !process.env.DATA_DIR) {
+    console.error('DATA_DIR must point to a persistent disk in production. The server did not start.');
+    process.exit(1);
+  }
+  if (!process.env.ADMIN_TOKEN) {
+    console.warn('ADMIN_TOKEN is not set: the moderation page cannot load reports.');
+  }
   const port = Number(process.env.PORT) || 8080;
-  createApp().listen(port, () => {
+  const server = createApp();
+  server.listen(port, () => {
     console.log(`Petri crew server listening on ${port}`);
   });
+  for (const signal of ['SIGTERM', 'SIGINT']) {
+    process.on(signal, () => {
+      server.flush();
+      process.exit(0);
+    });
+  }
 }

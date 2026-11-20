@@ -26,15 +26,15 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 | Purpose strings | Photo library (add only), in English and French | `App/*/InfoPlist.strings` |
 | 5.1.1(v) Accounts | No account or sign-in. Leaving a crew deletes the server data. Delete Everything erases the device data. | `CrewStore.leave`, `AppModel.eraseEverything` |
 | 5.1.2 Data use | No ads, trackers or third-party SDKs | whole app |
-| 5.1.3(ii) Health data and iCloud | The journal is a local file. iCloud and HealthKit are not used. | `Persistence.swift` |
+| 5.1.3(ii) Health data and iCloud | The journal is a local file. iCloud and HealthKit are not used. A backup is a file the user saves where they choose. | `Persistence.swift`, `SettingsScreen.swift` |
 | Accessibility | Labels on custom controls, system text styles for reading text, Reduce Motion honored | screens |
 
 ## 2. To do before the first upload
 
 1. **Apple Developer Program.** Enrollment is required for TestFlight and the App Store.
 2. **Bundle identifier.** `ca.petri.app` must be available to the account. If it is not, change it in `project.yml` (both targets), both `.entitlements` files, `Shared/AppGroup.swift`, `App/Services/AppConfig.swift` (refresh task and keychain service), `App/Info.plist` (`BGTaskSchedulerPermittedIdentifiers`) and `PassProduct` in `App/Services/PurchaseManager.swift`.
-3. **Crew server.** Deploy `server/` on a host with a persistent disk, set `ADMIN_TOKEN` and `SUPPORT_EMAIL`, then put its https address in `PetriServerURL`. To ship without Crew, set `PetriCrewEnabled` to `false`.
-4. **Support address.** Put a monitored address in `PetriSupportEmail`.
+3. **Crew server.** Deploy `server/` on a host with a persistent disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN`, `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `PetriServerURL`. To ship without Crew, set `PetriCrewEnabled` to `false`.
+4. **Support address, publisher and share page.** Put a monitored address in `PetriSupportEmail`, the publisher's name in `PetriPublisherName`, and `<server>/get` in `PetriShareURL` (the page the share cards' QR code opens). The release check fails while any of them holds its placeholder. Once the app is live, set `APP_STORE_URL` on the server so that page links to it.
 5. **Subscriptions.** In App Store Connect create one subscription group with two products, then attach them to the first version:
    - `ca.petri.app.pass.yearly`: 1 year, with a 7-day free introductory offer
    - `ca.petri.app.pass.monthly`: 1 month
@@ -63,7 +63,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 
 > Petri is a humor app for parents with general health information from public sources. It does not diagnose.
 > No account is needed. To test Crew: subscribe in the sandbox, open the Crew tab, start a crew, then join it from a second device with the invite code.
-> Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours through the server's admin endpoint.
+> Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours on the server's moderation page.
 > Leaving a crew deletes the member's data from the server. Settings > Delete Everything erases all local data.
 
 ## 4. Open risks
@@ -71,10 +71,10 @@ If Crew is disabled, the answer is "Data Not Collected".
 | Risk | Detail |
 | --- | --- |
 | 5.1.1(ix) | Apple expects apps in regulated fields that collect sensitive data, health included, to be submitted by a legal entity. Petri keeps the journal on the device and offers general information only, but a reviewer may still ask. Disabling Crew removes all health data collection. |
-| Field Notes review | The health text was written from the linked public sources and has not been reviewed by a clinician. |
-| Source links | `check_links.py` reports the links that stop answering. Fix or replace them before a release. |
-| Moderation duty | Guideline 1.2 expects timely responses. `GET /admin/reports` must be checked daily once Crew is live. |
+| Field Notes review | Timing, contagion, care and "when to call" statements were re-read against the linked pages on 2026-11-19. The text has not been reviewed by a clinician, and the trivia lines of the deep dives are not covered by the linked pages. |
+| Source links | `check_links.py` fails on a broken link and lists as blocked the sites that refuse scripts. Open the blocked ones in a browser before a release. |
+| Moderation duty | Guideline 1.2 expects timely responses. The moderation page at `<server>/admin` must be checked daily once Crew is live. |
 | Crew alerts | The radar is refreshed by background fetch, which iOS schedules at its own pace. There is no push server. |
-| Live Activity length | iOS ends a Live Activity after about 8 hours. Local notifications cover the rest of the window. |
+| Live Activity length | iOS ends a Live Activity after about 8 hours, so it starts only when the window closes within 8 hours and the app is opened. Local notifications and the widget cover the rest of the window. |
 | Siri phrases | App Shortcuts phrases are English only. |
 | Legal text | The privacy policy and terms were not reviewed by a lawyer. |

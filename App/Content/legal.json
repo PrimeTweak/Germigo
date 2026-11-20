@@ -1,5 +1,73 @@
 {
-  "updated": "2026-11-17",
+  "updated": "2026-11-19",
+  "web": {
+    "privacyTitle": {
+      "en": "Privacy Policy",
+      "fr": "Politique de confidentialité"
+    },
+    "termsTitle": {
+      "en": "Terms of Use",
+      "fr": "Conditions d'utilisation"
+    },
+    "supportTitle": {
+      "en": "Support",
+      "fr": "Soutien"
+    },
+    "updatedLabel": {
+      "en": "Last updated",
+      "fr": "Dernière mise à jour :"
+    },
+    "publisherLabel": {
+      "en": "Petri is published by",
+      "fr": "Petri est publiée par"
+    },
+    "contactLabel": {
+      "en": "Contact:",
+      "fr": "Contact :"
+    },
+    "eulaLabel": {
+      "en": "Apple's standard license agreement (EULA)",
+      "fr": "Contrat de licence standard d'Apple (CLUF)"
+    },
+    "supportIntro": {
+      "en": "A question, a problem or something to report? Write to us. We usually answer within 48 hours.",
+      "fr": "Une question, un problème ou un signalement ? Écris-nous, on répond en général en moins de 48 heures."
+    },
+    "landingTagline": {
+      "en": "Daycare germs, collected.",
+      "fr": "Les microbes de garderie, en collection."
+    },
+    "landingIntro": {
+      "en": "The first year of daycare, logged one germ at a time. Petri turns every cold your kid brings home into a card, a badge and a reason to laugh about it.",
+      "fr": "La première année de garderie, notée un microbe à la fois. Petri transforme chaque rhume rapporté à la maison en carte, en badge et en raison d'en rire."
+    },
+    "landingPoints": [
+      {
+        "en": "Log a germ in seconds, even at 3 AM.",
+        "fr": "Note un microbe en quelques secondes, même à 3 h du matin."
+      },
+      {
+        "en": "Collect 24 cards, with health notes from public sources.",
+        "fr": "Collectionne 24 cartes, avec des notes santé tirées de sources publiques."
+      },
+      {
+        "en": "Settle who suffered most this season.",
+        "fr": "Règle une fois pour toutes qui a le plus souffert cette saison."
+      }
+    ],
+    "landingStore": {
+      "en": "Download on the App Store",
+      "fr": "Télécharger dans l'App Store"
+    },
+    "landingSoon": {
+      "en": "Coming soon to the App Store.",
+      "fr": "Bientôt dans l'App Store."
+    },
+    "supportDelete": {
+      "en": "To delete your data: in the app, open Settings, then Delete Everything. Leaving a crew deletes your data from the server.",
+      "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
+    }
+  },
   "privacy": [
     {
       "title": {
@@ -27,8 +95,8 @@
         "fr": "Ce qui reste sur ton téléphone"
       },
       "body": {
-        "en": "The germs you log, their dates and severity, your kids' first names and ages, your partner's first name, your badges, points and settings. This is stored in a protected file on your device. It is included in your device backup if you use one. The developer cannot see it.",
-        "fr": "Les microbes que tu notes, leurs dates et leur intensité, les prénoms et âges de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans un fichier protégé sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Le développeur ne peut pas le voir."
+        "en": "The germs you log, their dates and severity, your kids' first names, your partner's first name, your badges, points and settings. This is stored in a protected file on your device. It is included in your device backup if you use one. A backup you make from Settings is a file you save where you choose; Petri never uploads it. The developer cannot see it.",
+        "fr": "Les microbes que tu notes, leurs dates et leur intensité, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans un fichier protégé sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages est un fichier que tu enregistres où tu veux; Petri ne la téléverse jamais. Le développeur ne peut pas le voir."
       }
     },
     {
@@ -37,8 +105,8 @@
         "fr": "Ce qu'un groupe partage"
       },
       "body": {
-        "en": "Crews are optional. If you create or join one, the crew server stores: the crew's name and emblem, the name you choose to show, the germs you decide to share with the time you shared them, your reactions, and an anonymous session key. A shared germ is counted on the radar without your name. It appears in the feed and the leaderboard under your crew name only if you turn that on. Your kids' names, your journal and your notes are never sent.",
-        "fr": "Les groupes sont facultatifs. Si tu en crées un ou t'y joins, le serveur des groupes conserve : le nom et l'emblème du groupe, le nom que tu choisis d'afficher, les microbes que tu décides de partager et le moment du partage, tes réactions et une clé de session anonyme. Un microbe partagé compte au radar sans ton nom. Il apparaît dans le fil et au classement sous ton nom de groupe seulement si tu actives cette option. Les prénoms de tes enfants, ton journal et tes notes ne sont jamais envoyés."
+        "en": "Crews are optional. If you create or join one, the crew server stores: the crew's name and emblem, the name you choose to show, the germs you decide to share with the time you shared them, your reactions, and an anonymous session key. A shared germ is counted on the radar without your name. It appears in the feed and the leaderboard under your crew name only if you turn that on. Your kids' names, your journal and your notes are never sent. Your phone keeps a copy of the last crew view it received, and any share still waiting to be sent, so the crew opens without a connection. Both are erased when you leave the crew.",
+        "fr": "Les groupes sont facultatifs. Si tu en crées un ou t'y joins, le serveur des groupes conserve : le nom et l'emblème du groupe, le nom que tu choisis d'afficher, les microbes que tu décides de partager et le moment du partage, tes réactions et une clé de session anonyme. Un microbe partagé compte au radar sans ton nom. Il apparaît dans le fil et au classement sous ton nom de groupe seulement si tu actives cette option. Les prénoms de tes enfants, ton journal et tes notes ne sont jamais envoyés. Ton téléphone garde une copie de la dernière vue du groupe reçue, et tout partage en attente d'envoi, pour que le groupe s'ouvre sans connexion. Les deux sont effacés quand tu quittes le groupe."
       }
     },
     {
@@ -77,8 +145,8 @@
         "fr": "Enfants"
       },
       "body": {
-        "en": "Petri is made for parents and is not directed at children. Kids' first names and ages are entered by a parent and stay on the parent's phone.",
-        "fr": "Petri est conçue pour les parents et ne s'adresse pas aux enfants. Les prénoms et les âges des enfants sont saisis par un parent et restent sur son téléphone."
+        "en": "Petri is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone.",
+        "fr": "Petri est conçue pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone."
       }
     },
     {
@@ -87,8 +155,8 @@
         "fr": "Conservation et suppression"
       },
       "body": {
-        "en": "Your journal stays on your phone until you delete it. Delete Everything, in Settings, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months and empty crews are removed automatically.",
-        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans les réglages, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois et les groupes vides sont retirés automatiquement."
+        "en": "Your journal stays on your phone until you delete it. Delete Everything, in Settings, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
+        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans les réglages, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
       }
     },
     {
@@ -97,8 +165,8 @@
         "fr": "Tes droits"
       },
       "body": {
-        "en": "You can see and export your journal from Settings, correct any entry in the Logbook, and delete everything at any time. For any question or request about your personal information, or to file a complaint, write to the contact address.",
-        "fr": "Tu peux consulter et exporter ton journal depuis les réglages, corriger chaque entrée dans le journal de bord et tout supprimer en tout temps. Pour toute question ou demande sur tes renseignements personnels, ou pour formuler une plainte, écris à l'adresse de contact."
+        "en": "You can see, export and back up your journal from Settings, restore it from a backup, correct any entry in the Logbook, and delete everything at any time. For any question or request about your personal information, or to file a complaint, write to the contact address.",
+        "fr": "Tu peux consulter, exporter et sauvegarder ton journal depuis les réglages, le restaurer à partir d'une copie, corriger chaque entrée dans le journal de bord et tout supprimer en tout temps. Pour toute question ou demande sur tes renseignements personnels, ou pour formuler une plainte, écris à l'adresse de contact."
       }
     },
     {

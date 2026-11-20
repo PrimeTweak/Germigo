@@ -6,27 +6,55 @@ import UserNotifications
 /// Local notifications: incubation check-ins, the daily sick check-in, crew radar alerts.
 enum NotificationManager {
     private static let sickID = "sick-checkin"
+    private static let milestoneID = "streak-milestone"
+    private static let wrappedID = "season-wrapped"
+
+    /// The morning check-in comes this many days in a row, then stops on its own.
+    private static let sickCheckInDays = 7
+    private static let presenter = ForegroundPresenter()
+
+    /// Reminders that would ring at night wait until morning.
+    private static let nightStartMinute = 22 * 60
+    private static let nightEndMinute = 7 * 60
 
     private static var center: UNUserNotificationCenter {
         UNUserNotificationCenter.current()
+    }
+
+    /// Lets reminders show as banners while the app is open.
+    static func install() {
+        center.delegate = presenter
     }
 
     static func requestAuthorization() async -> Bool {
         (try? await center.requestAuthorization(options: [.alert, .sound])) ?? false
     }
 
-    static func scheduleExposure(illness: KidIllness, kidName: String, germ: Germ, settings: AppSettings) {
+    /// Asks once; afterwards reports what the parent decided.
+    static func ensureAuthorization() async -> Bool {
+        switch await center.notificationSettings().authorizationStatus {
+        case .notDetermined: return await requestAuthorization()
+        case .denied: return false
+        default: return true
+        }
+    }
+
+    static func isDenied() async -> Bool {
+        await center.notificationSettings().authorizationStatus == .denied
+    }
+
+    static func scheduleExposure(illness: KidIllness, germ: Germ, settings: AppSettings) {
         cancelExposure(id: illness.id)
         guard settings.checkInsOn, let window = germ.window(from: illness.startedAt) else { return }
         let now = Date()
-        let opens = adjusted(window.opens, settings: settings)
+        let opens = adjusted(window.opens)
         if opens > now {
             add(id: exposureKey(illness.id, "open"),
                 title: tr("%@ watch", germ.name),
-                body: tr("%1$@ has %2$@. Your window opens now. Still fine?", kidName, germ.illness.value),
+                body: tr("Your window for %@ opens now. Still fine?", germ.illness.value),
                 at: opens)
         }
-        let closes = adjusted(window.closes, settings: settings)
+        let closes = adjusted(window.closes)
         if closes > now {
             add(id: exposureKey(illness.id, "close"),
                 title: tr("Window closed"),
@@ -39,22 +67,70 @@ enum NotificationManager {
         center.removePendingNotificationRequests(withIdentifiers: [exposureKey(id, "open"), exposureKey(id, "close")])
     }
 
-    static func scheduleSickCheckIn(settings: AppSettings) {
+    static func scheduleSickCheckIn(settings: AppSettings, germ: Germ?, startedAt: Date) {
         cancelSickCheckIn()
         guard settings.checkInsOn else { return }
-        var minute = 9 * 60
-        if isQuiet(minute, settings: settings) { minute = settings.quietEndMinute }
-        let content = UNMutableNotificationContent()
-        content.title = tr("Still under the weather?")
-        content.body = tr("Tap \"I'm better\" when the germ is gone. The counter is waiting.")
-        content.sound = .default
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: DateComponents(hour: minute / 60, minute: minute % 60), repeats: true)
-        center.add(UNNotificationRequest(identifier: sickID, content: content, trigger: trigger))
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let firstDay = calendar.startOfDay(for: startedAt)
+        for offset in 1...sickCheckInDays {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: today) else { continue }
+            let dayNumber = (calendar.dateComponents([.day], from: firstDay, to: day).day ?? 0) + 1
+            let content = UNMutableNotificationContent()
+            content.title = tr("Still under the weather?")
+            content.body = tr("Tap \"I'm better\" when the germ is gone. The counter is waiting.")
+            if let germ {
+                content.subtitle = tr("Day %1$lld · %2$@", dayNumber, germ.illness.value)
+                content.body = dailyAdvice(germ: germ, day: dayNumber)
+            }
+            content.sound = .default
+            var parts = calendar.dateComponents([.year, .month, .day], from: day)
+            parts.hour = 9
+            parts.minute = 0
+            let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)
+            center.add(UNNotificationRequest(identifier: sickKey(offset), content: content, trigger: trigger))
+        }
+    }
+
+    /// One piece of the germ's Field Notes per day: each tip in turn, then when to call.
+    static func dailyAdvice(germ: Germ, day: Int) -> String {
+        let items = germ.tips.map { tip -> String in
+            let title = tip.title.value
+            let joint = title.hasSuffix("?") || title.hasSuffix("!") || title.hasSuffix(".") ? " " : ". "
+            return title + joint + tip.body.value
+        } + [germ.doctor.value]
+        return items[(max(1, day) - 1) % items.count]
+    }
+
+    static func scheduleMilestone(days: Int, on day: Date, settings: AppSettings) {
+        cancelMilestone()
+        guard settings.checkInsOn else { return }
+        addMorning(id: milestoneID, on: day,
+                   title: trCount(days, one: "%lld day without a germ", other: "%lld days without a germ"),
+                   body: tr("Milestone reached. Open Petri to frame it."))
+    }
+
+    static func cancelMilestone() {
+        center.removePendingNotificationRequests(withIdentifiers: [milestoneID])
+    }
+
+    static func scheduleWrapped(at date: Date, settings: AppSettings) {
+        center.removePendingNotificationRequests(withIdentifiers: [wrappedID])
+        guard settings.checkInsOn else { return }
+        addMorning(id: wrappedID, on: date, title: tr("Your season, wrapped"),
+                   body: tr("The numbers are in. Brace yourself."))
+    }
+
+    static func cancelStreakReminders() {
+        center.removePendingNotificationRequests(withIdentifiers: [milestoneID, wrappedID])
     }
 
     static func cancelSickCheckIn() {
-        center.removePendingNotificationRequests(withIdentifiers: [sickID])
+        center.removePendingNotificationRequests(withIdentifiers: [sickID] + (1...sickCheckInDays).map(sickKey))
+    }
+
+    private static func sickKey(_ offset: Int) -> String {
+        sickID + "-" + String(offset)
     }
 
     static func notifyRadar(illness: String, crewName: String, families: Int) {
@@ -62,6 +138,19 @@ enum NotificationManager {
             title: tr("Going around %@", crewName),
             body: tr("%1$@: %2$lld families this week.", illness, families),
             at: Date().addingTimeInterval(2))
+    }
+
+    /// A reminder at 10 AM on the given day.
+    private static func addMorning(id: String, on day: Date, title: String, body: String) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        var parts = Calendar.current.dateComponents([.year, .month, .day], from: day)
+        parts.hour = 10
+        parts.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)
+        center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
 
     private static func exposureKey(_ id: UUID, _ suffix: String) -> String {
@@ -77,32 +166,39 @@ enum NotificationManager {
         center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
     }
 
-    private static func isQuiet(_ minute: Int, settings: AppSettings) -> Bool {
-        guard settings.quietHoursOn else { return false }
-        let start = settings.quietStartMinute
-        let end = settings.quietEndMinute
-        if start == end { return false }
-        return start < end ? (minute >= start && minute < end) : (minute >= start || minute < end)
-    }
-
-    /// Moves a date that falls inside quiet hours to the end of the quiet period.
-    private static func adjusted(_ date: Date, settings: AppSettings) -> Date {
+    /// Moves a date that falls in the night to the next morning.
+    private static func adjusted(_ date: Date) -> Date {
         let calendar = Calendar.current
         let parts = calendar.dateComponents([.hour, .minute], from: date)
         let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-        guard isQuiet(minute, settings: settings) else { return date }
-        let end = DateComponents(hour: settings.quietEndMinute / 60, minute: settings.quietEndMinute % 60)
-        return calendar.nextDate(after: date, matching: end, matchingPolicy: .nextTime) ?? date
+        guard minute >= nightStartMinute || minute < nightEndMinute else { return date }
+        let morning = DateComponents(hour: nightEndMinute / 60, minute: nightEndMinute % 60)
+        return calendar.nextDate(after: date, matching: morning, matchingPolicy: .nextTime) ?? date
+    }
+}
+
+/// Shows a reminder as a banner when it arrives while the app is on screen.
+final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
     }
 }
 
 /// Starts and stops the incubation Live Activity.
 enum LiveActivityManager {
+    /// iOS ends a Live Activity after eight hours, so it only covers the end of a window.
+    static let maximumLead: TimeInterval = 8 * 3600
+
     static func start(illness: KidIllness, kidName: String, germ: Germ) {
+        let key = illness.id.uuidString
         guard ActivityAuthorizationInfo().areActivitiesEnabled,
-              let window = germ.window(from: illness.startedAt), window.closes > Date() else { return }
+              let window = germ.window(from: illness.startedAt),
+              window.closes > Date(), window.closes.timeIntervalSinceNow <= maximumLead,
+              !Activity<ExposureActivityAttributes>.activities.contains(where: { $0.attributes.exposureID == key })
+        else { return }
         let attributes = ExposureActivityAttributes(
-            exposureID: illness.id.uuidString, kidName: kidName, germID: germ.id, germName: germ.name,
+            exposureID: key, kidName: kidName, germID: germ.id, germName: germ.name,
             illness: germ.illness.value, exposedAt: illness.startedAt,
             windowOpens: window.opens, windowCloses: window.closes)
         let content = ActivityContent(state: ExposureActivityAttributes.ContentState(), staleDate: window.closes)

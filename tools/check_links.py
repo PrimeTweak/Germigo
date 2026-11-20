@@ -3,6 +3,8 @@
 
 Usage: python3 tools/check_links.py
 Needs network access, so it runs as an informational step in CI.
+Some sites answer 401, 403 or 429 to any script while the page opens fine in a browser.
+Those links are listed as blocked, which means not verified here, and do not fail the run.
 """
 import json
 import pathlib
@@ -12,6 +14,7 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 EXTRA = ["https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"]
+BLOCKED = {401, 403, 429}
 AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
 
 
@@ -40,12 +43,20 @@ def status(url):
 def main():
     links = collect()
     broken = []
+    blocked = []
     for url, owner in sorted(links.items()):
         result = status(url)
-        print(f"{result}  {url}  ({owner})")
-        if result != 200:
+        if result == 200:
+            label = "ok      "
+        elif result in BLOCKED:
+            label = "blocked "
+            blocked.append(url)
+        else:
+            label = "BROKEN  "
             broken.append(url)
-    print(f"check_links: {len(links) - len(broken)} of {len(links)} links answered 200")
+        print(f"{label}{result}  {url}  ({owner})")
+    answered = len(links) - len(broken) - len(blocked)
+    print(f"check_links: {answered} answered 200, {len(blocked)} refused this script (not verified), {len(broken)} broken")
     sys.exit(1 if broken else 0)
 
 

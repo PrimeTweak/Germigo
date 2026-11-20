@@ -10,20 +10,36 @@ final class CrewStore {
 
     private(set) var state: CrewState?
     private(set) var isMember: Bool
-    private(set) var isLoading = false
     private(set) var blockedIDs: Set<String>
     var errorMessage: String?
 
     /// When true, logged germs also appear in the feed under the crew name.
     private(set) var sharesName: Bool
 
+    /// Requests in flight; several can overlap.
+    private var operations = 0
+
     @ObservationIgnored private var token: String?
+    @ObservationIgnored private var isFlushing = false
+
+    private static let pendingLimit = 20
+    private static let pendingLifetime: TimeInterval = 7 * 24 * 3600
 
     private enum Keys {
         static let token = "crew.token"
         static let sharesName = "crew.sharesName"
         static let blocked = "crew.blocked"
         static let radarSeen = "crew.radarSeen"
+        static let state = "crew.state"
+        static let pending = "crew.pending"
+    }
+
+    /// A germ share that has not reached the server yet.
+    private struct PendingShare: Codable {
+        let id: String
+        let germID: String
+        let named: Bool
+        let queuedAt: Date
     }
 
     private struct CreateBody: Encodable {
@@ -40,6 +56,7 @@ final class CrewStore {
     private struct EventBody: Encodable {
         let germID: String
         let named: Bool
+        let clientID: String
     }
 
     private struct ReactionBody: Encodable {
@@ -61,9 +78,33 @@ final class CrewStore {
         isMember = stored != nil
         sharesName = UserDefaults.standard.bool(forKey: Keys.sharesName)
         blockedIDs = Set(UserDefaults.standard.stringArray(forKey: Keys.blocked) ?? [])
+        state = stored == nil ? nil : Self.cachedState()
     }
 
     var isConfigured: Bool { AppConfig.serverURL != nil }
+
+    var isLoading: Bool { operations > 0 }
+
+    private static func cachedState() -> CrewState? {
+        guard let raw = UserDefaults.standard.data(forKey: Keys.state) else { return nil }
+        return try? JSONDecoder().decode(CrewState.self, from: raw)
+    }
+
+    /// Keeps the last state on the device so the crew shows without waiting for the network.
+    private func store(_ fresh: CrewState) {
+        state = fresh
+        UserDefaults.standard.set(try? JSONEncoder().encode(fresh), forKey: Keys.state)
+    }
+
+    private var pendingShares: [PendingShare] {
+        get {
+            guard let raw = UserDefaults.standard.data(forKey: Keys.pending) else { return [] }
+            return (try? JSONDecoder().decode([PendingShare].self, from: raw)) ?? []
+        }
+        set {
+            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: Keys.pending)
+        }
+    }
 
     var visibleFeed: [FeedEvent] {
         (state?.feed ?? []).filter { !blockedIDs.contains($0.memberID) }
@@ -83,23 +124,24 @@ final class CrewStore {
         token = session.token
         Keychain.set(session.token, for: Keys.token)
         isMember = true
-        state = session.state
+        store(session.state)
         rememberRadar(session.state.radar)
     }
 
-    private func run(_ work: () async throws -> Void) async -> Bool {
-        isLoading = true
-        defer { isLoading = false }
+    /// Runs one request. A quiet request leaves the message of the visible form alone.
+    private func run(quiet: Bool = false, _ work: () async throws -> Void) async -> Bool {
+        operations += 1
+        defer { operations -= 1 }
         do {
             try await work()
-            errorMessage = nil
+            if !quiet { errorMessage = nil }
             return true
         } catch let error as CrewAPIError {
             if error.code == "unauthorized" { forget() }
-            errorMessage = error.errorDescription
+            if !quiet || error.code == "unauthorized" { errorMessage = error.errorDescription }
             return false
         } catch {
-            errorMessage = tr("Something went wrong. Try again.")
+            if !quiet { errorMessage = tr("Something went wrong. Try again.") }
             return false
         }
     }
@@ -122,28 +164,52 @@ final class CrewStore {
 
     func refresh() async {
         guard isMember, isConfigured else { return }
-        _ = await run {
+        await flushPending()
+        _ = await run(quiet: state != nil) {
             let fresh: CrewState = try await self.client().get("v1/crew")
-            self.state = fresh
+            self.store(fresh)
             self.rememberRadar(fresh.radar)
         }
     }
 
     /// Adds a logged germ to the radar, and to the feed when the name is shared.
+    /// The share is queued first, so it survives a lost connection.
     func reportGerm(_ germID: String) async {
         guard isMember, isConfigured else { return }
-        _ = await run {
-            let fresh: CrewState = try await self.client().send(
-                "POST", "v1/crew/events", EventBody(germID: germID, named: self.sharesName))
-            self.state = fresh
+        let share = PendingShare(id: UUID().uuidString.lowercased(), germID: germID, named: sharesName, queuedAt: Date())
+        pendingShares = Array((pendingShares + [share]).suffix(Self.pendingLimit))
+        await flushPending()
+    }
+
+    /// Sends queued shares, oldest first, and stops at the first one the server cannot take yet.
+    private func flushPending() async {
+        guard !isFlushing else { return }
+        isFlushing = true
+        defer { isFlushing = false }
+        pendingShares = pendingShares.filter { Date().timeIntervalSince($0.queuedAt) < Self.pendingLifetime }
+        while isMember, let next = pendingShares.first {
+            do {
+                let fresh: CrewState = try await client().send(
+                    "POST", "v1/crew/events", EventBody(germID: next.germID, named: next.named, clientID: next.id))
+                store(fresh)
+            } catch let error as CrewAPIError {
+                if error.code == "unauthorized" {
+                    forget()
+                    return
+                }
+                if error.code == "offline" || error.code == "rate_limited" { return }
+            } catch {
+                return
+            }
+            pendingShares = Array(pendingShares.dropFirst())
         }
     }
 
     func react(to eventID: String, kind: String) async {
-        _ = await run {
+        _ = await run(quiet: true) {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/events/" + eventID + "/reactions", ReactionBody(kind: kind))
-            self.state = fresh
+            self.store(fresh)
         }
     }
 
@@ -151,7 +217,7 @@ final class CrewStore {
         await run {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/me", RenameBody(displayName: displayName))
-            self.state = fresh
+            self.store(fresh)
         }
     }
 
@@ -159,7 +225,7 @@ final class CrewStore {
         await run {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/reports", ReportBody(memberID: memberID, reason: reason))
-            self.state = fresh
+            self.store(fresh)
         }
     }
 
@@ -193,7 +259,17 @@ final class CrewStore {
         Keychain.set(nil, for: Keys.token)
         isMember = false
         state = nil
-        UserDefaults.standard.removeObject(forKey: Keys.radarSeen)
+        for key in [Keys.radarSeen, Keys.state, Keys.pending] {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    /// Clears what the crew feature keeps on this device; used by Delete Everything.
+    func resetLocal() {
+        forget()
+        unblockAll()
+        setSharesName(false)
+        errorMessage = nil
     }
 
     private func rememberRadar(_ radar: [RadarEntry]) {
@@ -202,7 +278,8 @@ final class CrewStore {
 
     /// Checks the radar in the background and announces germs that just appeared.
     func backgroundRefresh() async {
-        guard isMember, isConfigured, AppModel.shared.data.settings.crewAlertsOn else { return }
+        guard isMember, isConfigured, AppModel.shared.hasPass,
+              AppModel.shared.data.settings.crewAlertsOn else { return }
         let seen = Set(UserDefaults.standard.stringArray(forKey: Keys.radarSeen) ?? [])
         let fresh: CrewState
         do {
@@ -210,7 +287,7 @@ final class CrewStore {
         } catch {
             return
         }
-        state = fresh
+        store(fresh)
         for entry in fresh.radar where !seen.contains(entry.germID) {
             let illness = AppModel.shared.catalog.germ(entry.germID)?.illness.value ?? entry.germID
             NotificationManager.notifyRadar(illness: illness, crewName: fresh.crew.name, families: entry.families)

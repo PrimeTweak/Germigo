@@ -14,18 +14,18 @@ enum BadgeCatalog {
 
     static var all: [Badge] {
         [
-            Badge(id: "patient_one", title: tr("Patient One"), detail: tr("Logged your first germ"), symbol: "1.circle.fill", tint: 0xFF5B4D),
-            Badge(id: nightShift, title: tr("Night Shift"), detail: tr("Logged a germ between 1 and 5 AM"), symbol: "moon.fill", tint: 0xB48CFF),
-            Badge(id: "tag_team", title: tr("Tag Team"), detail: tr("Both parents sick at the same time"), symbol: "person.2.fill", tint: 0xF26AA8),
-            Badge(id: "boomerang", title: tr("Boomerang"), detail: tr("Same germ twice within 30 days"), symbol: "arrow.uturn.backward.circle.fill", tint: 0x2EC4B6),
-            Badge(id: "rough_month", title: tr("Rough Month"), detail: tr("Three germs in one month"), symbol: "calendar", tint: 0xFFA33A),
-            Badge(id: "speedrun", title: tr("Speedrun"), detail: tr("Back on your feet in a day"), symbol: "hare.fill", tint: 0x7CC4F5),
-            Badge(id: "marathon", title: tr("Marathon"), detail: tr("One germ, ten days or more"), symbol: "tortoise.fill", tint: 0x8A93A6),
-            Badge(id: "dodger", title: tr("Dodger"), detail: tr("Dodged three incoming germs"), symbol: "figure.run", tint: 0x3D7BFA),
-            Badge(id: "collector", title: tr("Collector"), detail: tr("Five different germs caught"), symbol: "square.stack.3d.up.fill", tint: 0x9EDC48),
-            Badge(id: "half_album", title: tr("Half Album"), detail: tr("Twelve different germs caught"), symbol: "circle.lefthalf.filled", tint: 0xF2A21B),
-            Badge(id: "full_album", title: tr("Full Album"), detail: tr("Every germ of the season caught"), symbol: "checkmark.seal.fill", tint: 0x9B5CFF),
-            Badge(id: ironParent, title: tr("Iron Parent"), detail: tr("Thirty days without a germ"), symbol: "shield.fill", tint: 0x2CB868)
+            Badge(id: "patient_one", title: tr("Patient One"), detail: tr("Logged your first germ"), symbol: "1.circle.fill", tint: Swatch.coral),
+            Badge(id: nightShift, title: tr("Night Shift"), detail: tr("Logged a germ between 1 and 5 AM"), symbol: "moon.fill", tint: Swatch.lilac),
+            Badge(id: "tag_team", title: tr("Tag Team"), detail: tr("Both parents sick at the same time"), symbol: "person.2.fill", tint: Swatch.pink),
+            Badge(id: "boomerang", title: tr("Boomerang"), detail: tr("Same germ twice within 30 days"), symbol: "arrow.uturn.backward.circle.fill", tint: Swatch.mint),
+            Badge(id: "rough_month", title: tr("Rough Month"), detail: tr("Three germs in one month"), symbol: "calendar", tint: Swatch.tangerine),
+            Badge(id: "speedrun", title: tr("Speedrun"), detail: tr("Back on your feet in a day"), symbol: "hare.fill", tint: Swatch.sky),
+            Badge(id: "marathon", title: tr("Marathon"), detail: tr("One germ, ten days or more"), symbol: "tortoise.fill", tint: Swatch.slate),
+            Badge(id: "dodger", title: tr("Dodger"), detail: tr("Dodged three incoming germs"), symbol: "figure.run", tint: Swatch.azure),
+            Badge(id: "collector", title: tr("Collector"), detail: tr("Five different germs caught"), symbol: "square.stack.3d.up.fill", tint: Swatch.grass),
+            Badge(id: "half_album", title: tr("Half Album"), detail: tr("Twelve different germs caught"), symbol: "circle.lefthalf.filled", tint: Swatch.gold),
+            Badge(id: "full_album", title: tr("Full Album"), detail: tr("Every germ caught"), symbol: "checkmark.seal.fill", tint: Swatch.violet),
+            Badge(id: ironParent, title: tr("Iron Parent"), detail: tr("Thirty days without a germ"), symbol: "shield.fill", tint: Swatch.green)
         ]
     }
 
@@ -44,7 +44,8 @@ struct LevelInfo: Hashable {
 }
 
 enum Levels {
-    static let pointsPerLevel = 400
+    /// Points needed for each level: the first ones come within weeks, the last takes a hard season.
+    static let thresholds = [0, 150, 350, 600, 900, 1300, 1800, 2400, 3100, 4000]
 
     static func info(for points: Int) -> LevelInfo {
         let titles = [
@@ -52,10 +53,15 @@ enum Levels {
             tr("Soup Sommelier"), tr("Fever Veteran"), tr("Germ Magnet"), tr("Outbreak Survivor"),
             tr("Immune Legend"), tr("Patient Infinity")
         ]
-        let number = min(titles.count, points / pointsPerLevel + 1)
-        let isMax = number == titles.count
-        let progress = isMax ? pointsPerLevel : points % pointsPerLevel
-        return LevelInfo(number: number, title: titles[number - 1], progress: progress, span: pointsPerLevel)
+        let reached = thresholds.lastIndex { points >= $0 } ?? 0
+        let number = min(titles.count, reached + 1)
+        if number >= thresholds.count {
+            let span = thresholds[thresholds.count - 1] - thresholds[thresholds.count - 2]
+            return LevelInfo(number: number, title: titles[number - 1], progress: span, span: span)
+        }
+        let floor = thresholds[number - 1]
+        return LevelInfo(number: number, title: titles[number - 1], progress: points - floor,
+                         span: thresholds[number] - floor)
     }
 }
 
@@ -93,6 +99,7 @@ struct Season: Hashable {
 /// A home screen icon the parent can unlock.
 enum AppIconOption: String, CaseIterable, Identifiable {
     case petri
+    case classic
     case nightShift
     case tissueBox
     case goldenDish
@@ -104,6 +111,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
     var alternateName: String? {
         switch self {
         case .petri: return nil
+        case .classic: return "AppIconClassic"
         case .nightShift: return "AppIconNightShift"
         case .tissueBox: return "AppIconTissueBox"
         case .goldenDish: return "AppIconGoldenDish"
@@ -117,6 +125,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .petri: return tr("Petri")
+        case .classic: return tr("Classic")
         case .nightShift: return tr("Night Shift")
         case .tissueBox: return tr("Tissue Box")
         case .goldenDish: return tr("Golden Dish")
@@ -127,7 +136,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
 
     var requirement: String {
         switch self {
-        case .petri: return tr("Always yours")
+        case .petri, .classic: return tr("Always yours")
         case .nightShift: return tr("Earn the Night Shift badge")
         case .tissueBox: return tr("Catch 3 colds")
         case .goldenDish: return tr("Catch 20 germs")

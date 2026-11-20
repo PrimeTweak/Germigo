@@ -1,3 +1,4 @@
+import CoreImage.CIFilterBuiltins
 import SwiftUI
 
 /// Previews a 360 by 640 card, renders it once, and offers the share sheet.
@@ -55,19 +56,49 @@ struct SharePreviewSheet<Card: View>: View {
     }
 }
 
-private struct ShareWordmark: View {
+/// The signature at the bottom of every card, with a QR code once a share address is set.
+struct ShareWordmark: View {
     var color = Color.white
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text(verbatim: "petri")
-                .font(.system(size: 30, weight: .black))
-                .kerning(-1.2)
-            Text(tr("Daycare germs, collected."))
-                .font(.system(size: 12, weight: .semibold))
-                .opacity(0.7)
+        let link = AppConfig.shareURL
+        HStack(spacing: 14) {
+            VStack(alignment: link == nil ? .center : .leading, spacing: 2) {
+                Text(verbatim: "petri")
+                    .font(.system(size: 30, weight: .black))
+                    .kerning(-1.2)
+                Text(tr("Daycare germs, collected."))
+                    .font(.system(size: 12, weight: .semibold))
+                    .opacity(0.7)
+                if let host = link?.host {
+                    Text(verbatim: host)
+                        .font(.system(size: 11, weight: .bold))
+                        .opacity(0.7)
+                }
+            }
+            if let link, let code = QRCode.image(for: link.absoluteString) {
+                Image(uiImage: code)
+                    .interpolation(.none)
+                    .resizable()
+                    .frame(width: 56, height: 56)
+                    .padding(5)
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            }
         }
         .foregroundStyle(color)
+    }
+}
+
+/// Black-on-white QR codes for the share cards.
+enum QRCode {
+    static func image(for text: String) -> UIImage? {
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(text.utf8)
+        filter.correctionLevel = "M"
+        guard let output = filter.outputImage else { return nil }
+        let scaled = output.transformed(by: CGAffineTransform(scaleX: 8, y: 8))
+        guard let image = CIContext().createCGImage(scaled, from: scaled.extent) else { return nil }
+        return UIImage(cgImage: image)
     }
 }
 
@@ -79,7 +110,7 @@ struct GermShareCard: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0x2A2140), Color(hex: 0x120F17)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
             RadialGradient(colors: [germ.deepTint.opacity(0.6), Color.clear], center: UnitPoint(x: 0.5, y: 0.42),
                            startRadius: 0, endRadius: 260)
             VStack(spacing: 0) {
@@ -117,7 +148,7 @@ struct NapCouponCard: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0xF6F1E7)
+            Color(hex: Swatch.chalk)
             VStack(spacing: 0) {
                 HazardStripes()
                     .frame(height: 22)
@@ -145,12 +176,12 @@ struct NapCouponCard: View {
                 .padding(.horizontal, 26)
                 .padding(.top, 24)
                 Spacer(minLength: 0)
-                ShareWordmark(color: Color(hex: 0x1E1A26))
+                ShareWordmark(color: Color(hex: Swatch.night))
                     .padding(.bottom, 26)
                 HazardStripes()
                     .frame(height: 22)
             }
-            .foregroundStyle(Color(hex: 0x1E1A26))
+            .foregroundStyle(Color(hex: Swatch.night))
         }
         .frame(width: 360, height: 640)
     }
@@ -173,11 +204,12 @@ struct SeasonRecapCard: View {
     let seasonNumber: Int
     let stats: SeasonStats
     let level: LevelInfo
+    let title: String
     let germs: [Germ]
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0xC9FA6E), Color(hex: 0x9EDC48)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.limeLight), Color(hex: Swatch.grass)], startPoint: .top, endPoint: .bottom)
             RingsBackground(color: Color.white.opacity(0.35), spacing: 34)
             VStack(spacing: 0) {
                 Text(tr("Season %lld", seasonNumber).uppercased())
@@ -198,15 +230,15 @@ struct SeasonRecapCard: View {
                     tile(String(stats.germsCaught), tr("germs caught"))
                     tile(String(stats.daysSick), tr("days sick"))
                     tile(String(stats.dodged), tr("germs dodged"))
-                    tile(tr("Lv %lld", level.number), level.title)
+                    tile(tr("Lv %lld", level.number), title)
                 }
                 .padding(.horizontal, 30)
                 .padding(.top, 22)
                 Spacer(minLength: 0)
-                ShareWordmark(color: Color(hex: 0x1E1A26))
+                ShareWordmark(color: Color(hex: Swatch.night))
                     .padding(.bottom, 36)
             }
-            .foregroundStyle(Color(hex: 0x1E1A26))
+            .foregroundStyle(Color(hex: Swatch.night))
         }
         .frame(width: 360, height: 640)
     }

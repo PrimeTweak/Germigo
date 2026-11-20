@@ -21,6 +21,7 @@
     "quickPick": true,
     "incubationMinHours": 24,
     "incubationMaxHours": 72,
+    "family": "airways",
     "showsUp": {
       "en": "1 to 3 days after",
       "fr": "1 à 3 jours après"
@@ -42,14 +43,14 @@
         }
       },
       {
-        "icon": "clock.fill",
+        "icon": "calendar",
         "label": {
-          "en": "Most contagious",
-          "fr": "Plus contagieux"
+          "en": "How often",
+          "fr": "Fréquence"
         },
         "value": {
-          "en": "The first 2 to 3 days",
-          "fr": "Les 2 ou 3 premiers jours"
+          "en": "Adults: 2 to 3 colds a year",
+          "fr": "Adultes : 2 ou 3 rhumes par année"
         }
       },
       {
@@ -68,12 +69,12 @@
       {
         "icon": "cup.and.saucer.fill",
         "title": {
-          "en": "Fluids and rest",
-          "fr": "Liquides et repos"
+          "en": "Wait it out",
+          "fr": "Laisse passer"
         },
         "body": {
-          "en": "Water, broth, tea. Your body does the rest.",
-          "fr": "Eau, bouillon, tisane. Ton corps fait le reste."
+          "en": "There is no cure. A cold clears on its own, usually within 7 to 10 days.",
+          "fr": "Il n'y a pas de remède. Un rhume passe tout seul, en général en 7 à 10 jours."
         }
       },
       {
@@ -92,6 +93,49 @@
       "en": "Call if it lasts more than 10 days without improving, if a fever lasts more than 4 days, if you have trouble breathing, or if you get better and then worse again.",
       "fr": "Appelle si ça dure plus de 10 jours sans amélioration, si la fièvre dure plus de 4 jours, si tu as du mal à respirer, ou si ça s'améliore puis ça empire."
     },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "It lasts more than 10 days without improving",
+        "fr": "Ça dure plus de 10 jours sans amélioration"
+      },
+      {
+        "en": "A fever lasts more than 4 days",
+        "fr": "La fièvre dure plus de 4 jours"
+      },
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "You get better, then worse again",
+        "fr": "Ça s'améliore, puis ça empire"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Endless Drip: a runny nose for 7 to 10 days.",
+        "fr": "Écoulement sans fin : le nez coule de 7 à 10 jours."
+      },
+      "weakness": {
+        "en": "Time. And 20 seconds of soap to spare everyone else.",
+        "fr": "Le temps. Et 20 secondes de savon pour épargner les autres."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Antibiotics knock out a cold.",
+        "fr": "Les antibiotiques viennent à bout d'un rhume."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "A cold is a virus, so antibiotics do nothing. It clears on its own, usually within 7 to 10 days.",
+        "fr": "Le rhume est un virus : les antibiotiques n'y font rien. Il passe tout seul, en général en 7 à 10 jours."
+      }
+    },
     "deepDive": [
       {
         "en": "More than 200 viruses cause colds, and rhinoviruses lead the pack. That is why you can catch one after another all winter: each one is a new opponent.",
@@ -106,8 +150,18 @@
       {
         "name": "CDC: About Common Cold",
         "url": "https://www.cdc.gov/common-cold/about/index.html"
+      },
+      {
+        "name": "CDC: Common Cold, treatment and when to seek care",
+        "url": "https://www.cdc.gov/common-cold/treatment/index.html"
+      },
+      {
+        "name": "Mayo Clinic: Common cold",
+        "url": "https://www.mayoclinic.org/diseases-conditions/common-cold/symptoms-causes/syc-20351605"
       }
-    ]
+    ],
+    "lastsUpToDays": 10,
+    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html"
   },
   {
     "id": "mystery",
@@ -129,6 +183,7 @@
     "tintLight": "#F2F4F9",
     "tintDeep": "#CBD3E2",
     "quickPick": true,
+    "family": "other",
     "showsUp": {
       "en": "When it wants",
       "fr": "Quand ça lui chante"
@@ -197,13 +252,60 @@
       }
     ],
     "doctor": {
-      "en": "Call if you have trouble breathing, chest pain, confusion, signs of dehydration, or a fever that lasts more than 3 days or comes back.",
-      "fr": "Appelle si tu as du mal à respirer, une douleur à la poitrine, de la confusion, des signes de déshydratation, ou une fièvre qui dure plus de 3 jours ou qui revient."
+      "en": "Call if you have trouble breathing, signs of dehydration, a fever that lasts more than 4 days, symptoms that last more than 10 days without improving, or if you get better and then worse.",
+      "fr": "Appelle si tu as du mal à respirer, des signes de déshydratation, une fièvre qui dure plus de 4 jours, des symptômes qui durent plus de 10 jours sans amélioration, ou si ça s'améliore puis ça empire."
+    },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "You show signs of dehydration",
+        "fr": "Tu as des signes de déshydratation"
+      },
+      {
+        "en": "A fever lasts more than 4 days",
+        "fr": "La fièvre dure plus de 4 jours"
+      },
+      {
+        "en": "Symptoms last more than 10 days without improving",
+        "fr": "Les symptômes durent plus de 10 jours sans amélioration"
+      },
+      {
+        "en": "You get better, then worse",
+        "fr": "Ça s'améliore, puis ça empire"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Plot Twist: shows up whenever it wants.",
+        "fr": "Coup de théâtre : arrive quand ça lui chante."
+      },
+      "weakness": {
+        "en": "Sleep, fluids and soap.",
+        "fr": "Sommeil, liquides et savon."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Resting while sick is just being lazy.",
+        "fr": "Se reposer quand on est malade, c'est de la paresse."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Sleep is the treatment. Stay home until you have been fever-free for 24 hours and are improving.",
+        "fr": "Le sommeil, c'est le traitement. Reste à la maison jusqu'à 24 h sans fièvre et en amélioration."
+      }
     },
     "deepDive": [
       {
-        "en": "Most everyday infections never get a name. Clinics rarely test for the exact virus because the care is the same: rest, fluids and time.",
-        "fr": "La plupart des infections du quotidien ne reçoivent jamais de nom. On teste rarement pour trouver le virus exact, parce que les soins sont les mêmes : repos, liquides et patience."
+        "en": "More than 200 viruses can cause a cold, so most everyday infections never get a name.",
+        "fr": "Plus de 200 virus peuvent causer un rhume, alors la plupart des infections du quotidien ne reçoivent jamais de nom."
       },
       {
         "en": "Logging a mystery still counts. Patterns show up over a season, even when the culprit stays anonymous.",
@@ -214,8 +316,17 @@
       {
         "name": "CDC: Preventing spread when you're sick",
         "url": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
+      },
+      {
+        "name": "CDC: About Common Cold",
+        "url": "https://www.cdc.gov/common-cold/about/index.html"
+      },
+      {
+        "name": "CDC: Common Cold, treatment and when to seek care",
+        "url": "https://www.cdc.gov/common-cold/treatment/index.html"
       }
-    ]
+    ],
+    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html"
   },
   {
     "id": "lingerer",
@@ -230,42 +341,43 @@
       "fr": "une toux qui ne part pas"
     },
     "scientific": {
-      "en": "Post-viral cough",
-      "fr": "Toux post-virale"
+      "en": "Persistent cough",
+      "fr": "Toux persistante"
     },
     "rarity": "common",
     "tintLight": "#EEF4F9",
     "tintDeep": "#BCD3E8",
     "quickPick": false,
+    "family": "airways",
     "showsUp": {
-      "en": "After a cold",
-      "fr": "Après un rhume"
+      "en": "After a cold or the flu",
+      "fr": "Après un rhume ou une grippe"
     },
     "lasts": {
-      "en": "3 to 8 weeks",
-      "fr": "3 à 8 semaines"
+      "en": "3 to 4 weeks",
+      "fr": "3 à 4 semaines"
     },
     "facts": [
       {
         "icon": "lungs.fill",
         "label": {
-          "en": "What it is",
-          "fr": "C'est quoi"
+          "en": "Usual cause",
+          "fr": "Cause habituelle"
         },
         "value": {
-          "en": "Irritated airways after the virus is gone",
-          "fr": "Des voies respiratoires irritées, une fois le virus parti"
+          "en": "A cold or the flu",
+          "fr": "Un rhume ou une grippe"
         }
       },
       {
-        "icon": "person.2.fill",
+        "icon": "cross.case.fill",
         "label": {
-          "en": "Contagious",
-          "fr": "Contagieux"
+          "en": "Who can help",
+          "fr": "Qui peut aider"
         },
         "value": {
-          "en": "Usually not anymore",
-          "fr": "En général, plus maintenant"
+          "en": "A pharmacist, for syrups and lozenges",
+          "fr": "Un pharmacien, pour les sirops et les pastilles"
         }
       },
       {
@@ -275,8 +387,8 @@
           "fr": "Antibiotiques"
         },
         "value": {
-          "en": "No help for a post-viral cough",
-          "fr": "N'aident pas une toux post-virale"
+          "en": "Not normally prescribed for a cough",
+          "fr": "Pas prescrits d'habitude pour une toux"
         }
       }
     ],
@@ -288,34 +400,77 @@
           "fr": "Miel et boissons chaudes"
         },
         "body": {
-          "en": "A spoonful of honey soothes a cough. Never for babies under 1.",
-          "fr": "Une cuillerée de miel calme la toux. Jamais pour un bébé de moins de 1 an."
+          "en": "Hot lemon and honey can soothe a cough. Never for babies under 1.",
+          "fr": "Citron chaud et miel peuvent calmer la toux. Jamais pour un bébé de moins de 1 an."
         }
       },
       {
-        "icon": "humidifier.fill",
+        "icon": "bed.double.fill",
         "title": {
-          "en": "Humid air helps",
-          "fr": "L'air humide aide"
+          "en": "Rest and fluids",
+          "fr": "Repos et liquides"
         },
         "body": {
-          "en": "A cool-mist humidifier or a steamy shower calms the tickle.",
-          "fr": "Un humidificateur à vapeur froide ou une douche chaude calme le chatouillement."
+          "en": "Rest and drink plenty. Most coughs clear up on their own.",
+          "fr": "Repose-toi et bois beaucoup. La plupart des toux passent toutes seules."
         }
       }
     ],
     "doctor": {
-      "en": "Call if the cough lasts more than 3 weeks, if you cough up blood, lose weight without trying, have a fever, or feel short of breath.",
-      "fr": "Appelle si la toux dure plus de 3 semaines, si tu craches du sang, si tu perds du poids sans raison, si tu fais de la fièvre ou si tu es essoufflé."
+      "en": "See a doctor if the cough lasts more than 3 weeks or if you are losing weight for no reason. Get help quickly if you cough up blood, have chest pain or find it hard to breathe.",
+      "fr": "Consulte si la toux dure plus de 3 semaines ou si tu perds du poids sans raison. Demande de l'aide rapidement si tu craches du sang, si tu as mal à la poitrine ou si tu as du mal à respirer."
+    },
+    "doctorLead": {
+      "en": "See a doctor if:",
+      "fr": "Consulte si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "The cough lasts more than 3 weeks",
+        "fr": "La toux dure plus de 3 semaines"
+      },
+      {
+        "en": "You are losing weight for no reason",
+        "fr": "Tu perds du poids sans raison"
+      },
+      {
+        "en": "Get help quickly if you cough up blood",
+        "fr": "Aide rapide si tu craches du sang"
+      },
+      {
+        "en": "Get help quickly for chest pain or trouble breathing",
+        "fr": "Aide rapide en cas de douleur à la poitrine ou de mal à respirer"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "The Encore: a cough that stays for 3 to 4 weeks.",
+        "fr": "Le rappel : une toux qui reste de 3 à 4 semaines."
+      },
+      "weakness": {
+        "en": "Hot lemon and honey. Never honey for a baby under 1.",
+        "fr": "Citron chaud et miel. Jamais de miel pour un bébé de moins de 1 an."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Honey is a fine cough soother for a baby.",
+        "fr": "Le miel est un bon remède contre la toux pour un bébé."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Never give honey to a baby under 1. For older kids and adults, hot lemon and honey can soothe a cough.",
+        "fr": "Jamais de miel avant 1 an. Pour les plus vieux et les adultes, citron chaud et miel peuvent calmer la toux."
+      }
     },
     "deepDive": [
       {
-        "en": "After a cold, the lining of your airways stays sensitive for weeks. Cold air, talking or laughing can set off a coughing fit even though the infection is over.",
-        "fr": "Après un rhume, la paroi des voies respiratoires reste sensible pendant des semaines. L'air froid, parler ou rire peut déclencher une quinte, même si l'infection est finie."
+        "en": "Most coughs clear up on their own within 3 to 4 weeks. One that lasts longer is called persistent and deserves a check-up.",
+        "fr": "La plupart des toux passent toutes seules en 3 à 4 semaines. Celle qui dure plus longtemps est dite persistante et mérite un examen."
       },
       {
-        "en": "A cough that lasts 3 to 8 weeks is called subacute. Past 8 weeks it is chronic and deserves a proper check-up.",
-        "fr": "Une toux qui dure de 3 à 8 semaines est dite subaiguë. Après 8 semaines, elle est chronique et mérite un vrai examen."
+        "en": "Cough syrup has competition: hot lemon and honey can have a similar effect, even if the evidence is limited.",
+        "fr": "Le sirop a de la concurrence : le citron chaud et le miel peuvent avoir un effet semblable, même si les preuves sont limitées."
       }
     ],
     "sources": [
@@ -323,7 +478,8 @@
         "name": "NHS: Cough",
         "url": "https://www.nhs.uk/conditions/cough/"
       }
-    ]
+    ],
+    "lastsUpToDays": 28
   },
   {
     "id": "chesty",
@@ -345,9 +501,10 @@
     "tintLight": "#F4F6E6",
     "tintDeep": "#D3DC9C",
     "quickPick": false,
+    "family": "airways",
     "showsUp": {
-      "en": "After a cold",
-      "fr": "Après un rhume"
+      "en": "With a virus, usually",
+      "fr": "Avec un virus, en général"
     },
     "lasts": {
       "en": "Up to 3 weeks",
@@ -383,8 +540,8 @@
           "fr": "Antibiotiques"
         },
         "value": {
-          "en": "Rarely needed",
-          "fr": "Rarement nécessaires"
+          "en": "Won't help a chest cold",
+          "fr": "N'aident pas une bronchite"
         }
       }
     ],
@@ -396,34 +553,77 @@
           "fr": "Repos et liquides"
         },
         "body": {
-          "en": "Fluids thin the mucus. Rest lets your airways heal.",
-          "fr": "Les liquides éclaircissent le mucus. Le repos laisse les bronches guérir."
+          "en": "Get plenty of rest and drink plenty of fluids.",
+          "fr": "Repose-toi beaucoup et bois beaucoup de liquides."
         }
       },
       {
-        "icon": "wind",
+        "icon": "humidifier.fill",
         "title": {
-          "en": "Skip the smoke",
-          "fr": "Évite la fumée"
+          "en": "Humid air and honey",
+          "fr": "Air humide et miel"
         },
         "body": {
-          "en": "Smoke and vaping irritate the airways and drag it out.",
-          "fr": "La fumée et le vapotage irritent les bronches et prolongent le tout."
+          "en": "A clean humidifier helps. Pasteurized honey calms a cough, but never for a baby under 1.",
+          "fr": "Un humidificateur propre aide. Le miel pasteurisé calme la toux, mais jamais pour un bébé de moins de 1 an."
         }
       }
     ],
     "doctor": {
-      "en": "Call if you have a fever of 38 °C (100.4 °F) or higher, cough up bloody mucus, feel short of breath, or if it lasts more than 3 weeks.",
-      "fr": "Appelle si tu fais 38 °C de fièvre ou plus, si ton mucus contient du sang, si tu es essoufflé ou si ça dure plus de 3 semaines."
+      "en": "Call if a fever lasts more than 5 days or reaches 40 °C (104 °F), if you cough up bloody mucus, feel short of breath, or if it lasts more than 3 weeks or keeps coming back.",
+      "fr": "Appelle si la fièvre dure plus de 5 jours ou atteint 40 °C, si ton mucus contient du sang, si tu es essoufflé, ou si ça dure plus de 3 semaines ou que ça revient sans cesse."
+    },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "A fever lasts more than 5 days or reaches 40 °C (104 °F)",
+        "fr": "La fièvre dure plus de 5 jours ou atteint 40 °C"
+      },
+      {
+        "en": "You cough up bloody mucus",
+        "fr": "Ton mucus contient du sang"
+      },
+      {
+        "en": "You feel short of breath",
+        "fr": "Tu es essoufflé"
+      },
+      {
+        "en": "It lasts more than 3 weeks or keeps coming back",
+        "fr": "Ça dure plus de 3 semaines ou ça revient sans cesse"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Mucus Factory: swollen airways and a cough for up to 3 weeks.",
+        "fr": "Usine à mucus : bronches enflées et toux jusqu'à 3 semaines."
+      },
+      "weakness": {
+        "en": "Rest, fluids and a clean humidifier.",
+        "fr": "Repos, liquides et humidificateur propre."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "A chest cold needs antibiotics.",
+        "fr": "Une bronchite a besoin d'antibiotiques."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Antibiotics won't help a chest cold. It almost always gets better on its own, in less than 3 weeks.",
+        "fr": "Les antibiotiques n'aident pas une bronchite. Elle guérit presque toujours toute seule, en moins de 3 semaines."
+      }
     },
     "deepDive": [
       {
-        "en": "A chest cold is what happens when a cold moves down into the bronchial tubes. The cough is your body clearing the mucus out.",
-        "fr": "Une bronchite, c'est un rhume qui descend dans les bronches. La toux, c'est ton corps qui évacue le mucus."
+        "en": "A chest cold happens when the airways of the lungs swell and make mucus. That is what makes you cough.",
+        "fr": "Une bronchite, c'est quand les bronches enflent et produisent du mucus. C'est ce qui te fait tousser."
       },
       {
-        "en": "Green or yellow mucus does not mean you need antibiotics. The color changes as your immune system does its work.",
-        "fr": "Un mucus vert ou jaune ne veut pas dire qu'il te faut des antibiotiques. La couleur change pendant que ton système immunitaire travaille."
+        "en": "Antibiotics won't help a chest cold. It almost always gets better on its own, in less than 3 weeks.",
+        "fr": "Les antibiotiques n'aident pas une bronchite. Elle guérit presque toujours toute seule, en moins de 3 semaines."
       }
     ],
     "sources": [
@@ -431,7 +631,9 @@
         "name": "CDC: Chest Cold (Acute Bronchitis)",
         "url": "https://www.cdc.gov/acute-bronchitis/about/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 21,
+    "kidSource": "https://www.cdc.gov/acute-bronchitis/about/index.html"
   },
   {
     "id": "whisper",
@@ -453,6 +655,7 @@
     "tintLight": "#F6F4FC",
     "tintDeep": "#DCD4F1",
     "quickPick": false,
+    "family": "airways",
     "showsUp": {
       "en": "With or after a cold",
       "fr": "Avec ou après un rhume"
@@ -491,8 +694,8 @@
           "fr": "Antibiotiques"
         },
         "value": {
-          "en": "Rarely needed",
-          "fr": "Rarement nécessaires"
+          "en": "Usually not: the cause is mostly a virus",
+          "fr": "En général non : la cause est surtout virale"
         }
       }
     ],
@@ -521,17 +724,56 @@
       }
     ],
     "doctor": {
-      "en": "Call if your voice has not come back after 2 weeks. Get help right away if you have trouble breathing or swallowing.",
-      "fr": "Appelle si ta voix n'est pas revenue après 2 semaines. Consulte sans attendre si tu as du mal à respirer ou à avaler."
+      "en": "See a doctor if your voice has not improved after 2 weeks. Get help quickly for severe pain or trouble swallowing, and call emergency services for trouble breathing.",
+      "fr": "Consulte si ta voix ne s'améliore pas après 2 semaines. Demande de l'aide rapidement si la douleur est forte ou si tu as du mal à avaler, et appelle les urgences si tu as du mal à respirer."
+    },
+    "doctorLead": {
+      "en": "See a doctor if:",
+      "fr": "Consulte si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Your voice hasn't improved after 2 weeks",
+        "fr": "Ta voix ne s'améliore pas après 2 semaines"
+      },
+      {
+        "en": "Get help quickly for severe pain or trouble swallowing",
+        "fr": "Aide rapide si la douleur est forte ou si tu as du mal à avaler"
+      },
+      {
+        "en": "Call emergency services for trouble breathing",
+        "fr": "Urgences si tu as du mal à respirer"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Mute Button: swollen vocal cords.",
+        "fr": "Bouton sourdine : cordes vocales enflées."
+      },
+      "weakness": {
+        "en": "Silence. Not whispering: actual silence.",
+        "fr": "Le silence. Pas chuchoter : se taire."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Whispering rests a lost voice.",
+        "fr": "Chuchoter repose une voix éteinte."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Whispering strains the voice too. Talk as little as you can and drink plenty.",
+        "fr": "Chuchoter fatigue aussi la voix. Parle le moins possible et bois beaucoup."
+      }
     },
     "deepDive": [
       {
-        "en": "Your vocal cords vibrate hundreds of times a second when you speak. Swollen cords vibrate badly, so your voice turns hoarse or disappears.",
-        "fr": "Tes cordes vocales vibrent des centaines de fois par seconde quand tu parles. Enflées, elles vibrent mal : la voix devient rauque ou disparaît."
+        "en": "It usually comes with a cold or the flu, and clears up on its own within 1 to 2 weeks.",
+        "fr": "Elle vient en général avec un rhume ou une grippe, et passe toute seule en 1 à 2 semaines."
       },
       {
-        "en": "Whispering sounds gentle, but it makes the cords work harder than quiet normal speech.",
-        "fr": "Chuchoter a l'air doux, mais ça fait travailler les cordes plus fort que de parler tout bas normalement."
+        "en": "Whispering sounds gentle, but the advice is clear: don't talk loudly and don't whisper. Both strain the voice.",
+        "fr": "Chuchoter semble doux, mais la consigne est claire : ne parle pas fort et ne chuchote pas. Les deux fatiguent la voix."
       }
     ],
     "sources": [
@@ -539,7 +781,9 @@
         "name": "NHS: Laryngitis",
         "url": "https://www.nhs.uk/conditions/laryngitis/"
       }
-    ]
+    ],
+    "lastsUpToDays": 14,
+    "kidSource": "https://www.nhs.uk/conditions/laryngitis/"
   },
   {
     "id": "pressure",
@@ -561,6 +805,7 @@
     "tintLight": "#F9ECF6",
     "tintDeep": "#E7B2DB",
     "quickPick": false,
+    "family": "airways",
     "showsUp": {
       "en": "After a cold",
       "fr": "Après un rhume"
@@ -619,12 +864,12 @@
       {
         "icon": "drop.fill",
         "title": {
-          "en": "Rinse with saline",
-          "fr": "Rince à l'eau saline"
+          "en": "Saline spray",
+          "fr": "Vaporisateur salin"
         },
         "body": {
-          "en": "A saline spray helps drain. For rinses, use sterile or boiled water only.",
-          "fr": "Un vaporisateur salin aide à drainer. Pour un rinçage, seulement de l'eau stérile ou bouillie."
+          "en": "A decongestant or saline nasal spray helps you breathe.",
+          "fr": "Un décongestionnant ou un vaporisateur nasal salin t'aide à respirer."
         }
       }
     ],
@@ -632,10 +877,53 @@
       "en": "Call if you have a severe headache or facial pain, symptoms that last more than 10 days, symptoms that improve and then get worse, or a fever for more than 3 to 4 days.",
       "fr": "Appelle en cas de mal de tête ou de douleur au visage intense, de symptômes qui durent plus de 10 jours, qui s'améliorent puis empirent, ou d'une fièvre de plus de 3 ou 4 jours."
     },
+    "doctorLead": {
+      "en": "Call if you have:",
+      "fr": "Appelle en cas de :"
+    },
+    "doctorSigns": [
+      {
+        "en": "A severe headache or facial pain",
+        "fr": "Mal de tête ou douleur au visage intense"
+      },
+      {
+        "en": "Symptoms that last more than 10 days",
+        "fr": "Symptômes qui durent plus de 10 jours"
+      },
+      {
+        "en": "Symptoms that improve, then get worse",
+        "fr": "Symptômes qui s'améliorent puis empirent"
+      },
+      {
+        "en": "A fever for more than 3 to 4 days",
+        "fr": "Fièvre de plus de 3 ou 4 jours"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Face Squeeze: fluid trapped in the sinuses.",
+        "fr": "Étau facial : du liquide coincé dans les sinus."
+      },
+      "weakness": {
+        "en": "A warm compress and a saline spray.",
+        "fr": "Une compresse chaude et un vaporisateur salin."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Most sinus infections clear up without antibiotics.",
+        "fr": "La plupart des sinusites guérissent sans antibiotiques."
+      },
+      "isTrue": true,
+      "explanation": {
+        "en": "Most are caused by viruses, which antibiotics don't touch. A warm compress and saline spray help meanwhile.",
+        "fr": "La plupart viennent de virus, que les antibiotiques ne touchent pas. Compresse chaude et vaporisateur salin aident en attendant."
+      }
+    },
     "deepDive": [
       {
-        "en": "Your sinuses are air pockets behind the forehead, nose and cheeks. A cold swells the lining, the drains block, and pressure builds.",
-        "fr": "Tes sinus sont des cavités d'air derrière le front, le nez et les joues. Un rhume fait enfler la paroi, les conduits se bouchent et la pression monte."
+        "en": "Your sinuses are air-filled pockets in the face. A sinus infection starts when fluid builds up in them.",
+        "fr": "Tes sinus sont des cavités remplies d'air dans le visage. Une sinusite commence quand du liquide s'y accumule."
       },
       {
         "en": "Most sinus infections clear up on their own. Antibiotics do nothing against the viruses behind most of them.",
@@ -647,7 +935,9 @@
         "name": "CDC: Sinus Infection",
         "url": "https://www.cdc.gov/sinus-infection/about/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 10,
+    "kidSource": "https://www.cdc.gov/sinus-infection/about/index.html"
   },
   {
     "id": "noro",
@@ -671,6 +961,7 @@
     "quickPick": true,
     "incubationMinHours": 12,
     "incubationMaxHours": 48,
+    "family": "gut",
     "showsUp": {
       "en": "12 to 48 h after",
       "fr": "12 à 48 h après"
@@ -742,14 +1033,57 @@
       "en": "Call if you pee much less than usual, have a dry mouth and throat, feel dizzy when you stand up, or can't keep fluids down.",
       "fr": "Appelle si tu urines beaucoup moins que d'habitude, si tu as la bouche et la gorge sèches, si tu es étourdi en te levant ou si tu ne gardes aucun liquide."
     },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You pee much less than usual",
+        "fr": "Tu urines beaucoup moins que d'habitude"
+      },
+      {
+        "en": "Your mouth and throat are dry",
+        "fr": "Tu as la bouche et la gorge sèches"
+      },
+      {
+        "en": "You feel dizzy when you stand up",
+        "fr": "Tu es étourdi en te levant"
+      },
+      {
+        "en": "You can't keep fluids down",
+        "fr": "Tu ne gardes aucun liquide"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Express Exit: 1 to 3 days of stomach chaos.",
+        "fr": "Sortie express : de 1 à 3 jours de chaos gastrique."
+      },
+      "weakness": {
+        "en": "Soap and water. Sanitizer barely tickles it.",
+        "fr": "L'eau et le savon. Le gel le chatouille à peine."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Hand sanitizer is enough against the stomach bug.",
+        "fr": "Le gel désinfectant suffit contre la gastro."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Sanitizer barely works on norovirus. Wash with soap and water for 20 seconds.",
+        "fr": "Le gel fonctionne à peine contre le norovirus. Lave-toi les mains à l'eau et au savon pendant 20 secondes."
+      }
+    },
     "deepDive": [
       {
         "en": "Norovirus is absurdly contagious: a few viral particles are enough to make you sick, and a sick person sheds billions.",
         "fr": "Le norovirus est ridiculement contagieux : quelques particules suffisent à te rendre malade, et une personne malade en libère des milliards."
       },
       {
-        "en": "It survives on surfaces for days and shrugs off many disinfectants. Bleach-based cleaners are the ones that work.",
-        "fr": "Il survit des jours sur les surfaces et résiste à bien des désinfectants. Les nettoyants à base d'eau de Javel sont ceux qui fonctionnent."
+        "en": "Hand sanitizer alone doesn't work well against it. On surfaces, use a chlorine bleach solution.",
+        "fr": "Le désinfectant pour les mains seul fonctionne mal contre lui. Sur les surfaces, utilise une solution d'eau de Javel."
       }
     ],
     "sources": [
@@ -760,8 +1094,14 @@
       {
         "name": "CDC: How to Prevent Norovirus",
         "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+      },
+      {
+        "name": "CDC: How Norovirus Spreads",
+        "url": "https://www.cdc.gov/norovirus/causes/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 3,
+    "kidSource": "https://www.cdc.gov/norovirus/about/index.html"
   },
   {
     "id": "pinky",
@@ -783,26 +1123,25 @@
     "tintLight": "#FFF0F8",
     "tintDeep": "#FFC4E1",
     "quickPick": true,
-    "incubationMinHours": 24,
-    "incubationMaxHours": 288,
+    "family": "skin",
     "showsUp": {
-      "en": "1 to 12 days after",
-      "fr": "1 à 12 jours après"
+      "en": "Depends on the cause",
+      "fr": "Ça dépend de la cause"
     },
     "lasts": {
-      "en": "1 to 2 weeks",
-      "fr": "1 à 2 semaines"
+      "en": "A few days to 2 weeks",
+      "fr": "De quelques jours à 2 semaines"
     },
     "facts": [
       {
         "icon": "eye.fill",
         "label": {
-          "en": "Spreads by",
-          "fr": "Se transmet par"
+          "en": "Contagious",
+          "fr": "Contagieux"
         },
         "value": {
-          "en": "Hands, towels and pillowcases",
-          "fr": "Mains, serviettes et taies d'oreiller"
+          "en": "Very, when a virus or bacteria is behind it",
+          "fr": "Très, si c'est un virus ou une bactérie"
         }
       },
       {
@@ -823,8 +1162,8 @@
           "fr": "Verres de contact"
         },
         "value": {
-          "en": "Stop until it clears",
-          "fr": "Arrête jusqu'à la guérison"
+          "en": "Stop until the symptoms are gone",
+          "fr": "Arrête jusqu'à la fin des symptômes"
         }
       }
     ],
@@ -836,19 +1175,19 @@
           "fr": "Ta serviette, ton oreiller"
         },
         "body": {
-          "en": "Change them every day and wash them in hot water.",
-          "fr": "Change-les chaque jour et lave-les à l'eau chaude."
+          "en": "Don't share them, and wash them often in hot water.",
+          "fr": "Ne les partage pas, et lave-les souvent à l'eau chaude."
         }
       },
       {
         "icon": "drop.fill",
         "title": {
-          "en": "Cool compress",
-          "fr": "Compresse fraîche"
+          "en": "Cold compress",
+          "fr": "Compresse froide"
         },
         "body": {
-          "en": "A clean, cool, damp cloth soothes. A new one for each eye.",
-          "fr": "Un linge propre, frais et humide soulage. Un nouveau pour chaque œil."
+          "en": "Cold compresses and artificial tears ease the irritation.",
+          "fr": "Les compresses froides et les larmes artificielles calment l'irritation."
         }
       }
     ],
@@ -856,22 +1195,75 @@
       "en": "Call if you have eye pain, blurred vision or light sensitivity that doesn't clear when you wipe the eye, intense redness, or symptoms that get worse.",
       "fr": "Appelle en cas de douleur à l'œil, de vision floue ou de sensibilité à la lumière qui persiste après avoir essuyé l'œil, de rougeur intense ou de symptômes qui empirent."
     },
+    "doctorLead": {
+      "en": "Call if you have:",
+      "fr": "Appelle en cas de :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Eye pain",
+        "fr": "Douleur à l'œil"
+      },
+      {
+        "en": "Blurred vision or light sensitivity that doesn't clear when you wipe the eye",
+        "fr": "Vision floue ou sensibilité à la lumière qui persiste après avoir essuyé l'œil"
+      },
+      {
+        "en": "Intense redness",
+        "fr": "Rougeur intense"
+      },
+      {
+        "en": "Symptoms that get worse",
+        "fr": "Symptômes qui empirent"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Red Alert: one pink, irritated eye.",
+        "fr": "Alerte rouge : un œil rose et irrité."
+      },
+      "weakness": {
+        "en": "Hands off your eyes, and your own towel.",
+        "fr": "Pas touche aux yeux, et ta propre serviette."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "All pink eye needs antibiotic drops.",
+        "fr": "Toutes les conjonctivites demandent des gouttes antibiotiques."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Antibiotics don't work on the viral kind, which usually clears in 7 to 14 days. Only some bacterial cases need drops or ointment.",
+        "fr": "Les antibiotiques n'agissent pas sur la forme virale, qui passe en général en 7 à 14 jours. Seuls certains cas bactériens demandent des gouttes ou un onguent."
+      }
+    },
     "deepDive": [
       {
         "en": "Pink eye is an inflamed conjunctiva, the thin clear layer over the white of the eye. Viruses, bacteria and allergies can all cause it.",
         "fr": "La conjonctivite, c'est l'inflammation de la conjonctive, la fine couche transparente sur le blanc de l'œil. Virus, bactéries et allergies peuvent la causer."
       },
       {
-        "en": "The viral kind often arrives with a cold, and antibiotics do nothing for it. Only some bacterial cases need drops.",
-        "fr": "La forme virale arrive souvent avec un rhume, et les antibiotiques n'y changent rien. Seuls certains cas bactériens demandent des gouttes."
+        "en": "Antibiotics don't work on the viral kind, which usually clears in 7 to 14 days. Only some bacterial cases need drops or ointment.",
+        "fr": "Les antibiotiques n'agissent pas sur la forme virale, qui passe en général en 7 à 14 jours. Seuls certains cas bactériens demandent des gouttes ou un onguent."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Pink Eye",
         "url": "https://www.cdc.gov/conjunctivitis/about/index.html"
+      },
+      {
+        "name": "CDC: How to Treat Pink Eye",
+        "url": "https://www.cdc.gov/conjunctivitis/treatment/index.html"
+      },
+      {
+        "name": "CDC: How to Prevent Pink Eye",
+        "url": "https://www.cdc.gov/conjunctivitis/prevention/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 14,
+    "kidSource": "https://www.cdc.gov/conjunctivitis/about/index.html"
   },
   {
     "id": "rona",
@@ -895,13 +1287,14 @@
     "quickPick": false,
     "incubationMinHours": 48,
     "incubationMaxHours": 336,
+    "family": "airways",
     "showsUp": {
       "en": "2 to 14 days after",
       "fr": "2 à 14 jours après"
     },
     "lasts": {
-      "en": "A few days to 2 weeks",
-      "fr": "Quelques jours à 2 semaines"
+      "en": "It varies a lot",
+      "fr": "Ça varie beaucoup"
     },
     "facts": [
       {
@@ -942,12 +1335,12 @@
       {
         "icon": "testtube.2",
         "title": {
-          "en": "Test early, test again",
-          "fr": "Teste tôt, reteste"
+          "en": "Negative? Test again",
+          "fr": "Négatif ? Reteste"
         },
         "body": {
-          "en": "A negative rapid test can turn positive a day or two later.",
-          "fr": "Un test rapide négatif peut devenir positif un ou deux jours plus tard."
+          "en": "A negative home test doesn't rule it out. Test again 48 hours later.",
+          "fr": "Un test maison négatif n'écarte rien. Refais un test 48 heures plus tard."
         }
       },
       {
@@ -957,8 +1350,8 @@
           "fr": "Informe-toi sur le traitement"
         },
         "body": {
-          "en": "At higher risk? Antivirals work best in the first days.",
-          "fr": "Plus à risque ? Les antiviraux sont plus efficaces dans les premiers jours."
+          "en": "At higher risk? Treatment has to start within 5 to 7 days of your first symptoms.",
+          "fr": "Plus à risque ? Le traitement doit commencer dans les 5 à 7 jours après les premiers symptômes."
         }
       }
     ],
@@ -966,14 +1359,61 @@
       "en": "Get emergency care for trouble breathing, chest pain or pressure that won't go away, new confusion, trouble staying awake, or pale, gray or blue lips.",
       "fr": "Va à l'urgence en cas de difficulté à respirer, de douleur ou de pression persistante à la poitrine, de confusion nouvelle, de difficulté à rester éveillé, ou de lèvres pâles, grises ou bleues."
     },
-    "deepDive": [
+    "doctorLead": {
+      "en": "Get emergency care for:",
+      "fr": "Va à l'urgence en cas de :"
+    },
+    "doctorSigns": [
       {
-        "en": "SARS-CoV-2 keeps changing, which is why you can catch it more than once. Each new variant dodges part of the immunity built before.",
-        "fr": "Le SARS-CoV-2 change sans arrêt, et c'est pourquoi on peut l'attraper plus d'une fois. Chaque variant contourne une partie de l'immunité déjà acquise."
+        "en": "Trouble breathing",
+        "fr": "Difficulté à respirer"
       },
       {
-        "en": "Vaccination and past infections do not always stop you from catching it, but they lower the odds of getting seriously ill.",
-        "fr": "La vaccination et les infections passées n'empêchent pas toujours de l'attraper, mais elles réduisent le risque d'être gravement malade."
+        "en": "Chest pain or pressure that won't go away",
+        "fr": "Douleur ou pression persistante à la poitrine"
+      },
+      {
+        "en": "New confusion",
+        "fr": "Confusion nouvelle"
+      },
+      {
+        "en": "Trouble staying awake",
+        "fr": "Difficulté à rester éveillé"
+      },
+      {
+        "en": "Pale, gray or blue lips",
+        "fr": "Lèvres pâles, grises ou bleues"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Wildcard: shows up 2 to 14 days after.",
+        "fr": "Joker : apparaît de 2 à 14 jours après."
+      },
+      "weakness": {
+        "en": "A home test, then another 48 hours later.",
+        "fr": "Un test maison, puis un autre 48 heures plus tard."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "One negative home test means it's not COVID.",
+        "fr": "Un test maison négatif veut dire que ce n'est pas la COVID."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "A negative home test doesn't rule it out. Test again 48 hours later.",
+        "fr": "Un test maison négatif n'écarte rien. Refais un test 48 heures plus tard."
+      }
+    },
+    "deepDive": [
+      {
+        "en": "Symptoms can show up anywhere from 2 to 14 days after exposure, which makes it hard to know who gave it to you.",
+        "fr": "Les symptômes peuvent apparaître de 2 à 14 jours après l'exposition. Difficile de savoir qui te l'a donnée."
+      },
+      {
+        "en": "A single negative home test is not a clean bill of health. That is why the second test, 48 hours later, matters.",
+        "fr": "Un seul test maison négatif n'est pas un certificat de santé. C'est pour ça que le deuxième test, 48 heures plus tard, compte."
       }
     ],
     "sources": [
@@ -984,6 +1424,14 @@
       {
         "name": "CDC: Preventing spread when you're sick",
         "url": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
+      },
+      {
+        "name": "CDC: Self-Testing At Home or Anywhere",
+        "url": "https://www.cdc.gov/covid/testing/self-testing.html"
+      },
+      {
+        "name": "CDC: Types of COVID-19 Treatment",
+        "url": "https://www.cdc.gov/covid/treatment/index.html"
       }
     ]
   },
@@ -1007,11 +1455,12 @@
     "tintLight": "#E9F4FE",
     "tintDeep": "#A7D5FA",
     "quickPick": false,
-    "incubationMinHours": 48,
-    "incubationMaxHours": 192,
+    "incubationMinHours": 96,
+    "incubationMaxHours": 144,
+    "family": "airways",
     "showsUp": {
-      "en": "2 to 8 days after",
-      "fr": "2 à 8 jours après"
+      "en": "4 to 6 days after",
+      "fr": "4 à 6 jours après"
     },
     "lasts": {
       "en": "1 to 2 weeks",
@@ -1071,31 +1520,88 @@
           "fr": "Nettoie ce qu'on touche"
         },
         "body": {
-          "en": "RSV survives for hours on hard surfaces like tables and crib rails.",
-          "fr": "Le VRS survit des heures sur les surfaces dures comme les tables et les barreaux de lit."
+          "en": "RSV survives for many hours on hard surfaces like tables and crib rails.",
+          "fr": "Le VRS survit de nombreuses heures sur les surfaces dures, comme les tables et les barreaux de lit."
         }
       }
     ],
     "doctor": {
-      "en": "Call if you have trouble breathing, can't drink enough, or your symptoms get worse. For a baby, fast or labored breathing means go now.",
-      "fr": "Appelle si tu as du mal à respirer, si tu n'arrives pas à boire assez ou si tes symptômes empirent. Pour un bébé, une respiration rapide ou difficile veut dire : vas-y tout de suite."
+      "en": "Call if you have trouble breathing, can't drink enough, or your symptoms get worse. For a baby, trouble breathing means get medical care now.",
+      "fr": "Appelle si tu as du mal à respirer, si tu n'arrives pas à boire assez ou si tes symptômes empirent. Pour un bébé, du mal à respirer veut dire consulter tout de suite."
+    },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "You can't drink enough",
+        "fr": "Tu n'arrives pas à boire assez"
+      },
+      {
+        "en": "Your symptoms get worse",
+        "fr": "Tes symptômes empirent"
+      },
+      {
+        "en": "For a baby, trouble breathing means get medical care now",
+        "fr": "Pour un bébé, du mal à respirer veut dire consulter tout de suite"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Cold Disguise: in adults, it passes for a cold.",
+        "fr": "Déguisement : chez l'adulte, il se fait passer pour un rhume."
+      },
+      "weakness": {
+        "en": "Clean hands and wiped surfaces. It lasts hours on tables.",
+        "fr": "Mains propres et surfaces nettoyées. Il tient des heures sur les tables."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Once you've had RSV, you're immune for life.",
+        "fr": "Une fois qu'on a eu le VRS, on est immunisé à vie."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Repeat infections happen throughout life. In adults it usually feels like a cold.",
+        "fr": "Les réinfections arrivent tout au long de la vie. Chez l'adulte, il ressemble souvent à un rhume."
+      }
     },
     "deepDive": [
       {
-        "en": "Almost every child has had RSV by age 2. In babies it can cause bronchiolitis, a swelling of the smallest airways.",
-        "fr": "Presque tous les enfants ont eu le VRS avant 2 ans. Chez les bébés, il peut causer une bronchiolite, une enflure des plus petites voies respiratoires."
+        "en": "Most children have had RSV by the time they turn 2. In babies it can cause bronchiolitis, an inflammation of the small airways in the lungs.",
+        "fr": "La plupart des enfants ont eu le VRS avant l'âge de 2 ans. Chez le bébé, il peut causer une bronchiolite, une inflammation des petites voies respiratoires des poumons."
       },
       {
-        "en": "Immunity fades quickly, so adults catch it again and again, usually as a plain cold.",
-        "fr": "L'immunité s'estompe vite : les adultes le rattrapent encore et encore, le plus souvent sous forme de simple rhume."
+        "en": "One round does not protect you: repeat infections happen throughout life.",
+        "fr": "Une fois ne te protège pas : les réinfections arrivent tout au long de la vie."
       }
     ],
     "sources": [
       {
         "name": "CDC: About RSV",
         "url": "https://www.cdc.gov/rsv/about/index.html"
+      },
+      {
+        "name": "CDC: RSV symptoms and care",
+        "url": "https://www.cdc.gov/rsv/symptoms/index.html"
+      },
+      {
+        "name": "CDC: How RSV spreads",
+        "url": "https://www.cdc.gov/rsv/causes/index.html"
+      },
+      {
+        "name": "CDC: RSV in infants and young children",
+        "url": "https://www.cdc.gov/rsv/infants-young-children/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 14,
+    "kidSource": "https://www.cdc.gov/rsv/infants-young-children/index.html"
   },
   {
     "id": "strep",
@@ -1119,13 +1625,14 @@
     "quickPick": true,
     "incubationMinHours": 48,
     "incubationMaxHours": 120,
+    "family": "airways",
     "showsUp": {
       "en": "2 to 5 days after",
       "fr": "2 à 5 jours après"
     },
     "lasts": {
-      "en": "3 to 7 days",
-      "fr": "3 à 7 jours"
+      "en": "Better in 48 h if treated",
+      "fr": "Mieux en 48 h si traitée"
     },
     "facts": [
       {
@@ -1177,18 +1684,49 @@
       {
         "icon": "pills.fill",
         "title": {
-          "en": "Finish the antibiotics",
-          "fr": "Finis les antibiotiques"
+          "en": "Not better in 48 hours?",
+          "fr": "Pas mieux après 48 heures ?"
         },
         "body": {
-          "en": "Take every dose, even once you feel fine.",
-          "fr": "Prends toutes les doses, même quand tu te sens mieux."
+          "en": "Call back if you don't feel better after 48 hours of antibiotics.",
+          "fr": "Rappelle si tu ne te sens pas mieux après 48 heures d'antibiotiques."
         }
       }
     ],
     "doctor": {
       "en": "See a health professional for a sore throat that starts fast with a fever and pain when you swallow, especially with no cough. Strep needs a test and antibiotics.",
       "fr": "Consulte pour un mal de gorge qui commence vite, avec de la fièvre et de la douleur en avalant, surtout sans toux. Le strepto demande un test et des antibiotiques."
+    },
+    "doctorLead": {
+      "en": "See a health professional for:",
+      "fr": "Consulte pour :"
+    },
+    "doctorSigns": [
+      {
+        "en": "A sore throat that starts fast, with a fever and pain when you swallow, especially with no cough",
+        "fr": "Un mal de gorge qui commence vite, avec de la fièvre et de la douleur en avalant, surtout sans toux"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Razor Throat: a sore throat that starts fast, with fever.",
+        "fr": "Gorge de rasoir : un mal de gorge soudain, avec de la fièvre."
+      },
+      "weakness": {
+        "en": "A throat swab, then antibiotics. A real fix, for once.",
+        "fr": "Un prélèvement de gorge, puis des antibiotiques. Un vrai remède, pour une fois."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Strep is one of the few daycare germs antibiotics can treat.",
+        "fr": "Le strepto est un des rares microbes de garderie que les antibiotiques soignent."
+      },
+      "isTrue": true,
+      "explanation": {
+        "en": "Strep is caused by a bacterium. A swab confirms it, and antibiotics shorten the illness and stop the spread.",
+        "fr": "Le strepto est une bactérie. Un prélèvement le confirme, et les antibiotiques raccourcissent la maladie et freinent la contagion."
+      }
     },
     "deepDive": [
       {
@@ -1204,8 +1742,21 @@
       {
         "name": "CDC: About Strep Throat",
         "url": "https://www.cdc.gov/group-a-strep/about/strep-throat.html"
+      },
+      {
+        "name": "CDC: Testing for Strep Throat or Scarlet Fever",
+        "url": "https://www.cdc.gov/group-a-strep/testing/index.html"
+      },
+      {
+        "name": "CDC: Clinical Guidance for Group A Streptococcal Pharyngitis",
+        "url": "https://www.cdc.gov/group-a-strep/hcp/clinical-guidance/strep-throat.html"
       }
-    ]
+    ],
+    "doctorNote": {
+      "en": "Strep needs a test and antibiotics.",
+      "fr": "Le strepto demande un test et des antibiotiques."
+    },
+    "kidSource": "https://www.cdc.gov/group-a-strep/about/strep-throat.html"
   },
   {
     "id": "flu",
@@ -1229,13 +1780,14 @@
     "quickPick": true,
     "incubationMinHours": 24,
     "incubationMaxHours": 96,
+    "family": "airways",
     "showsUp": {
       "en": "1 to 4 days after",
       "fr": "1 à 4 jours après"
     },
     "lasts": {
-      "en": "3 to 7 days",
-      "fr": "3 à 7 jours"
+      "en": "A few days to 2 weeks",
+      "fr": "De quelques jours à 2 semaines"
     },
     "facts": [
       {
@@ -1256,8 +1808,8 @@
           "fr": "Meilleure défense"
         },
         "value": {
-          "en": "A flu shot every fall",
-          "fr": "Un vaccin chaque automne"
+          "en": "A flu vaccine every year",
+          "fr": "Un vaccin contre la grippe chaque année"
         }
       },
       {
@@ -1291,8 +1843,8 @@
           "fr": "Plus à risque ? Appelle tôt"
         },
         "body": {
-          "en": "Pregnant, asthma, diabetes or 65 and over: ask about antivirals right away.",
-          "fr": "Enceinte, asthme, diabète ou 65 ans et plus : informe-toi tout de suite sur les antiviraux."
+          "en": "Asthma, diabetes or heart disease: ask about antivirals right away.",
+          "fr": "Asthme, diabète ou maladie du cœur : demande vite si un antiviral est indiqué."
         }
       }
     ],
@@ -1300,10 +1852,61 @@
       "en": "Get emergency care for trouble breathing, chest pain or pressure, confusion, not peeing, severe weakness, or a fever or cough that improves and then comes back worse.",
       "fr": "Va à l'urgence en cas de difficulté à respirer, de douleur ou de pression à la poitrine, de confusion, d'absence d'urine, de grande faiblesse, ou d'une fièvre ou d'une toux qui s'améliore puis revient en pire."
     },
+    "doctorLead": {
+      "en": "Get emergency care for:",
+      "fr": "Va à l'urgence en cas de :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Trouble breathing",
+        "fr": "Difficulté à respirer"
+      },
+      {
+        "en": "Chest pain or pressure",
+        "fr": "Douleur ou pression à la poitrine"
+      },
+      {
+        "en": "Confusion",
+        "fr": "Confusion"
+      },
+      {
+        "en": "Not peeing",
+        "fr": "Absence d'urine"
+      },
+      {
+        "en": "Severe weakness",
+        "fr": "Grande faiblesse"
+      },
+      {
+        "en": "A fever or cough that improves, then comes back worse",
+        "fr": "Une fièvre ou une toux qui s'améliore puis revient en pire"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Body Slam: hits fast and hard.",
+        "fr": "Plaquage : frappe vite et fort."
+      },
+      "weakness": {
+        "en": "A vaccine every year. Antivirals work best within 2 days.",
+        "fr": "Un vaccin chaque année. Les antiviraux agissent mieux dans les 2 premiers jours."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "You can spread the flu before you feel sick.",
+        "fr": "On peut transmettre la grippe avant de se sentir malade."
+      },
+      "isTrue": true,
+      "explanation": {
+        "en": "Starting one day before you feel anything. By the time you know, the household already has it.",
+        "fr": "Dès la veille des premiers symptômes. Quand tu le sais, la maisonnée l'a déjà."
+      }
+    },
     "deepDive": [
       {
-        "en": "Flu viruses mutate constantly, so last year's immunity is a poor match for this year's strains. That is why the vaccine is updated every season.",
-        "fr": "Les virus de la grippe mutent sans arrêt : l'immunité de l'an dernier colle mal aux souches de cette année. C'est pourquoi le vaccin est mis à jour chaque saison."
+        "en": "Flu viruses keep changing, which is why the vaccine is updated every year.",
+        "fr": "Les virus de la grippe changent sans arrêt. C'est pour ça que le vaccin est mis à jour chaque année."
       },
       {
         "en": "You can spread the flu starting one day before you feel anything. By the time you know, the household already has it.",
@@ -1318,8 +1921,14 @@
       {
         "name": "CDC: About Influenza",
         "url": "https://www.cdc.gov/flu/about/index.html"
+      },
+      {
+        "name": "CDC: Treatment of Flu",
+        "url": "https://www.cdc.gov/flu/treatment/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 14,
+    "kidSource": "https://www.cdc.gov/flu/signs-symptoms/index.html"
   },
   {
     "id": "addy",
@@ -1341,15 +1950,14 @@
     "tintLight": "#EBEDFE",
     "tintDeep": "#B0B8F9",
     "quickPick": false,
-    "incubationMinHours": 48,
-    "incubationMaxHours": 336,
+    "family": "airways",
     "showsUp": {
-      "en": "2 to 14 days after",
-      "fr": "2 à 14 jours après"
+      "en": "Depends on the type",
+      "fr": "Ça dépend du type"
     },
     "lasts": {
-      "en": "A few days to 2 weeks",
-      "fr": "Quelques jours à 2 semaines"
+      "en": "Most cases are mild",
+      "fr": "La plupart des cas sont légers"
     },
     "facts": [
       {
@@ -1364,14 +1972,14 @@
         }
       },
       {
-        "icon": "hands.sparkles.fill",
+        "icon": "sparkles",
         "label": {
-          "en": "Hand sanitizer",
-          "fr": "Gel désinfectant"
+          "en": "Cleaning",
+          "fr": "Nettoyage"
         },
         "value": {
-          "en": "Tough virus. Soap is better.",
-          "fr": "Virus coriace. Le savon est mieux."
+          "en": "Resists many common disinfectants",
+          "fr": "Résiste à bien des désinfectants courants"
         }
       },
       {
@@ -1381,8 +1989,8 @@
           "fr": "S'attarde"
         },
         "value": {
-          "en": "Can be shed for weeks",
-          "fr": "Peut être excrété pendant des semaines"
+          "en": "Can be shed for weeks or longer",
+          "fr": "Peut être excrété des semaines ou plus"
         }
       }
     ],
@@ -1394,8 +2002,8 @@
           "fr": "Soigne ce que tu ressens"
         },
         "body": {
-          "en": "There is no specific treatment. Rest, fluids and fever relief.",
-          "fr": "Il n'y a pas de traitement précis. Repos, liquides et soulagement de la fièvre."
+          "en": "There is no specific treatment. Most infections are mild: rest and over-the-counter relief.",
+          "fr": "Il n'y a pas de traitement spécifique. La plupart des infections sont légères : repos et médicaments en vente libre."
         }
       },
       {
@@ -1405,29 +2013,84 @@
           "fr": "Désinfecte les surfaces"
         },
         "body": {
-          "en": "Adenoviruses resist many common cleaners and last a long time on surfaces.",
-          "fr": "Les adénovirus résistent à bien des nettoyants courants et durent longtemps sur les surfaces."
+          "en": "Adenoviruses resist many common disinfectants and stay infectious for hours on surfaces.",
+          "fr": "Les adénovirus résistent à bien des désinfectants courants et restent infectieux des heures sur les surfaces."
         }
       }
     ],
     "doctor": {
-      "en": "Call if you have trouble breathing, a fever that lasts more than a few days, eye pain or changes in vision, or signs of dehydration.",
-      "fr": "Appelle si tu as du mal à respirer, une fièvre qui dure plus de quelques jours, une douleur à l'œil ou un changement de vision, ou des signes de déshydratation."
+      "en": "Call if you have trouble breathing, signs of dehydration, a fever that lasts more than 4 days, symptoms that last more than 10 days without improving, or if you get better and then worse.",
+      "fr": "Appelle si tu as du mal à respirer, des signes de déshydratation, une fièvre qui dure plus de 4 jours, des symptômes qui durent plus de 10 jours sans amélioration, ou si ça s'améliore puis ça empire."
+    },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "You show signs of dehydration",
+        "fr": "Tu as des signes de déshydratation"
+      },
+      {
+        "en": "A fever lasts more than 4 days",
+        "fr": "La fièvre dure plus de 4 jours"
+      },
+      {
+        "en": "Symptoms last more than 10 days without improving",
+        "fr": "Les symptômes durent plus de 10 jours sans amélioration"
+      },
+      {
+        "en": "You get better, then worse",
+        "fr": "Ça s'améliore, puis ça empire"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Shapeshifter: a cold, sore throat, pink eye or tummy bug.",
+        "fr": "Métamorphe : rhume, mal de gorge, conjonctivite ou gastro."
+      },
+      "weakness": {
+        "en": "Soap, and surfaces cleaned well. It shrugs off many disinfectants.",
+        "fr": "Le savon et un bon ménage. Il résiste à bien des désinfectants."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Any household disinfectant wipes out adenovirus.",
+        "fr": "N'importe quel désinfectant ménager élimine l'adénovirus."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Adenoviruses resist many common disinfectants and stay infectious for hours on surfaces.",
+        "fr": "Les adénovirus résistent à bien des désinfectants courants et restent infectieux des heures sur les surfaces."
+      }
     },
     "deepDive": [
       {
-        "en": "More than 50 types of adenovirus can infect people. Different types prefer different targets: the throat, the eyes, the lungs or the gut.",
-        "fr": "Plus de 50 types d'adénovirus peuvent infecter l'humain. Chacun a sa cible préférée : la gorge, les yeux, les poumons ou l'intestin."
+        "en": "Adenoviruses come in many types. Depending on the type, they go for the nose and throat, the eyes or the gut.",
+        "fr": "Les adénovirus existent en plusieurs types. Selon le type, ils s'en prennent au nez et à la gorge, aux yeux ou à l'intestin."
       },
       {
-        "en": "Its shell is a perfect 20-sided die with a fiber at each corner. Virologists love it. Parents do not.",
-        "fr": "Sa coque est un dé à 20 faces parfait, avec une fibre à chaque coin. Les virologues l'adorent. Les parents, moins."
+        "en": "A vaccine exists against two types, but it is only approved for the military. The rest of us get soap.",
+        "fr": "Un vaccin existe contre deux types, mais il n'est approuvé que pour les militaires. Nous autres, on a le savon."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Adenovirus",
         "url": "https://www.cdc.gov/adenovirus/about/index.html"
+      },
+      {
+        "name": "CDC: Clinical Overview of Adenovirus",
+        "url": "https://www.cdc.gov/adenovirus/hcp/clinical-overview/index.html"
+      },
+      {
+        "name": "CDC: Common Cold, treatment and when to seek care",
+        "url": "https://www.cdc.gov/common-cold/treatment/index.html"
       }
     ]
   },
@@ -1453,13 +2116,14 @@
     "quickPick": false,
     "incubationMinHours": 72,
     "incubationMaxHours": 144,
+    "family": "airways",
     "showsUp": {
       "en": "3 to 6 days after",
       "fr": "3 à 6 jours après"
     },
     "lasts": {
-      "en": "About a week",
-      "fr": "Environ une semaine"
+      "en": "It varies",
+      "fr": "Ça dépend"
     },
     "facts": [
       {
@@ -1469,8 +2133,8 @@
           "fr": "Chez l'adulte"
         },
         "value": {
-          "en": "Usually a cold with a cough",
-          "fr": "Souvent un rhume avec de la toux"
+          "en": "Cough, fever and a stuffy nose",
+          "fr": "Toux, fièvre et nez bouché"
         }
       },
       {
@@ -1480,8 +2144,8 @@
           "fr": "Saison"
         },
         "value": {
-          "en": "Late winter and spring",
-          "fr": "Fin de l'hiver et printemps"
+          "en": "Winter through spring",
+          "fr": "De l'hiver au printemps"
         }
       },
       {
@@ -1521,25 +2185,85 @@
       }
     ],
     "doctor": {
-      "en": "Call if you have trouble breathing, wheezing, a fever that lasts more than a few days, or if you get better and then worse.",
-      "fr": "Appelle si tu as du mal à respirer, une respiration sifflante, une fièvre qui dure plus de quelques jours, ou si ça s'améliore puis ça empire."
+      "en": "Call if you have trouble breathing, signs of dehydration, a fever that lasts more than 4 days, symptoms that last more than 10 days without improving, or if you get better and then worse.",
+      "fr": "Appelle si tu as du mal à respirer, des signes de déshydratation, une fièvre qui dure plus de 4 jours, des symptômes qui durent plus de 10 jours sans amélioration, ou si ça s'améliore puis ça empire."
+    },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "You show signs of dehydration",
+        "fr": "Tu as des signes de déshydratation"
+      },
+      {
+        "en": "A fever lasts more than 4 days",
+        "fr": "La fièvre dure plus de 4 jours"
+      },
+      {
+        "en": "Symptoms last more than 10 days without improving",
+        "fr": "Les symptômes durent plus de 10 jours sans amélioration"
+      },
+      {
+        "en": "You get better, then worse",
+        "fr": "Ça s'améliore, puis ça empire"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Copycat: a cough, a fever and a stuffy nose.",
+        "fr": "Imitateur : toux, fièvre et nez bouché."
+      },
+      "weakness": {
+        "en": "Rest, fluids, patience. Cough into your elbow.",
+        "fr": "Repos, liquides, patience. Tousse dans ton coude."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "hMPV is a brand-new virus.",
+        "fr": "Le métapneumovirus est un tout nouveau virus."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It was identified in 2001, but stored blood samples show it was already circulating in 1958.",
+        "fr": "Il a été identifié en 2001, mais des échantillons de sang conservés montrent qu'il circulait déjà en 1958."
+      }
     },
     "deepDive": [
       {
-        "en": "hMPV was only identified in 2001, but stored blood samples show it had already been circulating in people for decades.",
-        "fr": "Le hMPV n'a été identifié qu'en 2001, mais des échantillons de sang conservés montrent qu'il circulait déjà chez l'humain depuis des décennies."
+        "en": "hMPV was first identified in 2001 in the Netherlands, but stored blood samples show it was already circulating there in 1958.",
+        "fr": "Le hMPV a été identifié pour la première fois en 2001 aux Pays-Bas, mais des échantillons de sang conservés montrent qu'il y circulait déjà en 1958."
       },
       {
-        "en": "It is a cousin of RSV and behaves like it: mild in most adults, harder on babies and older people.",
-        "fr": "C'est un cousin du VRS et il se comporte pareil : léger chez la plupart des adultes, plus dur pour les bébés et les aînés."
+        "en": "It belongs to the same virus family as RSV and hits the same people hardest: young children, older adults and anyone with a weakened immune system.",
+        "fr": "Il appartient à la même famille de virus que le VRS et frappe plus fort les mêmes personnes : les jeunes enfants, les aînés et les gens dont le système immunitaire est affaibli."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Human Metapneumovirus",
         "url": "https://www.cdc.gov/human-metapneumovirus/about/index.html"
+      },
+      {
+        "name": "MedlinePlus: Human metapneumovirus (hMPV)",
+        "url": "https://medlineplus.gov/ency/article/007857.htm"
+      },
+      {
+        "name": "StatPearls: Human Metapneumovirus",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK560910/"
+      },
+      {
+        "name": "CDC: Common Cold, treatment and when to seek care",
+        "url": "https://www.cdc.gov/common-cold/treatment/index.html"
       }
-    ]
+    ],
+    "kidSource": "https://medlineplus.gov/ency/article/007857.htm"
   },
   {
     "id": "para",
@@ -1563,6 +2287,7 @@
     "quickPick": false,
     "incubationMinHours": 48,
     "incubationMaxHours": 144,
+    "family": "airways",
     "showsUp": {
       "en": "2 to 6 days after",
       "fr": "2 à 6 jours après"
@@ -1590,8 +2315,8 @@
           "fr": "Chez l'adulte"
         },
         "value": {
-          "en": "A cold, often with a hoarse voice",
-          "fr": "Un rhume, souvent avec la voix rauque"
+          "en": "Usually a mild cold",
+          "fr": "En général un rhume léger"
         }
       },
       {
@@ -1601,38 +2326,77 @@
           "fr": "Saison"
         },
         "value": {
-          "en": "Mostly fall and spring",
-          "fr": "Surtout l'automne et le printemps"
+          "en": "Croup types peak in the fall",
+          "fr": "Les types du croup culminent à l'automne"
         }
       }
     ],
     "tips": [
       {
-        "icon": "speaker.slash.fill",
+        "icon": "pills.fill",
         "title": {
-          "en": "Rest your voice",
-          "fr": "Repose ta voix"
+          "en": "No magic pill",
+          "fr": "Pas de pilule magique"
         },
         "body": {
-          "en": "Hoarse? Talk less, drink more.",
-          "fr": "Enroué ? Parle moins, bois plus."
+          "en": "There is no specific treatment and antibiotics don't help. Most people recover on their own.",
+          "fr": "Il n'y a pas de traitement spécifique et les antibiotiques n'aident pas. La plupart des gens guérissent tout seuls."
         }
       },
       {
-        "icon": "wind",
+        "icon": "exclamationmark.triangle.fill",
         "title": {
-          "en": "Cool air for croup",
-          "fr": "De l'air frais pour le faux croup"
+          "en": "Watch the little ones",
+          "fr": "Surveille les petits"
         },
         "body": {
-          "en": "Cool night air can ease a child's barky cough.",
-          "fr": "L'air frais de la nuit peut calmer la toux aboyante d'un enfant."
+          "en": "Croup and its barking cough are the serious form in children.",
+          "fr": "Le croup et sa toux aboyante sont la forme sérieuse chez l'enfant."
         }
       }
     ],
     "doctor": {
-      "en": "Call if you have trouble breathing or a fever that lasts more than a few days. For a child with croup, noisy breathing at rest or a struggle to breathe means go now.",
-      "fr": "Appelle si tu as du mal à respirer ou une fièvre qui dure plus de quelques jours. Pour un enfant avec un faux croup, une respiration bruyante au repos ou difficile veut dire : vas-y tout de suite."
+      "en": "Get medical attention if your symptoms are severe or don't improve. For a child with croup, trouble breathing means go now.",
+      "fr": "Consulte si tes symptômes sont forts ou ne s'améliorent pas. Pour un enfant qui a le croup, du mal à respirer veut dire y aller tout de suite."
+    },
+    "doctorLead": {
+      "en": "Get medical attention if:",
+      "fr": "Consulte si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Your symptoms are severe",
+        "fr": "Tes symptômes sont forts"
+      },
+      {
+        "en": "Your symptoms don't improve",
+        "fr": "Tes symptômes ne s'améliorent pas"
+      },
+      {
+        "en": "For a child with croup, trouble breathing means go now",
+        "fr": "Pour un enfant qui a le croup, du mal à respirer veut dire y aller tout de suite"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Bark: in kids, the barking cough of croup.",
+        "fr": "Aboiement : chez l'enfant, la toux aboyante du croup."
+      },
+      "weakness": {
+        "en": "Time. Antibiotics don't touch it.",
+        "fr": "Le temps. Les antibiotiques n'y font rien."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Parainfluenza is a kind of flu.",
+        "fr": "Le parainfluenza est une sorte de grippe."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Despite the name, it is a separate virus family. In adults it is usually a mild cold.",
+        "fr": "Malgré son nom, c'est une famille de virus à part. Chez l'adulte, c'est en général un rhume léger."
+      }
     },
     "deepDive": [
       {
@@ -1640,16 +2404,22 @@
         "fr": "Malgré son nom, le parainfluenza n'est pas la grippe. C'est une famille à part de quatre types, et les types 1 et 2 sont la cause classique du faux croup."
       },
       {
-        "en": "The seal-like bark comes from swelling just below the vocal cords. Adult airways are wider, so adults mostly get a sore throat and a raspy voice.",
-        "fr": "La toux d'otarie vient d'une enflure juste sous les cordes vocales. Les voies respiratoires d'un adulte sont plus larges : il s'en tire avec un mal de gorge et une voix rauque."
+        "en": "Croup is an infection of the voice box and windpipe, which is what gives the cough its bark. Adults who catch the same virus usually get a mild cold.",
+        "fr": "Le croup est une infection du larynx et de la trachée, d'où la toux qui aboie. Les adultes qui attrapent le même virus font en général un rhume léger."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Human Parainfluenza Viruses",
         "url": "https://www.cdc.gov/parainfluenza/about/index.html"
+      },
+      {
+        "name": "CDC: Clinical Overview of Human Parainfluenza Viruses",
+        "url": "https://www.cdc.gov/parainfluenza/hcp/clinical-overview/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 7,
+    "kidSource": "https://www.cdc.gov/parainfluenza/about/index.html"
   },
   {
     "id": "rota",
@@ -1673,6 +2443,7 @@
     "quickPick": false,
     "incubationMinHours": 24,
     "incubationMaxHours": 72,
+    "family": "gut",
     "showsUp": {
       "en": "About 2 days after",
       "fr": "Environ 2 jours après"
@@ -1689,8 +2460,8 @@
           "fr": "Vaccin"
         },
         "value": {
-          "en": "Given to babies by mouth",
-          "fr": "Donné aux bébés par la bouche"
+          "en": "Makes babies less likely to get sick",
+          "fr": "Rend les bébés moins susceptibles de tomber malades"
         }
       },
       {
@@ -1711,8 +2482,8 @@
           "fr": "Se transmet par"
         },
         "value": {
-          "en": "Hands after diaper changes",
-          "fr": "Les mains après les changements de couche"
+          "en": "Hands that carry the virus to a mouth",
+          "fr": "Des mains qui portent le virus à la bouche"
         }
       }
     ],
@@ -1724,8 +2495,8 @@
           "fr": "Discipline de couche"
         },
         "body": {
-          "en": "Wash with soap after every diaper and disinfect the changing table.",
-          "fr": "Lave-toi les mains au savon après chaque couche et désinfecte la table à langer."
+          "en": "Wash your hands with soap after every diaper change.",
+          "fr": "Lave-toi les mains au savon après chaque changement de couche."
         }
       },
       {
@@ -1744,14 +2515,57 @@
       "en": "Call if you pee much less than usual, have a dry mouth and throat, feel dizzy when you stand up, or can't keep fluids down.",
       "fr": "Appelle si tu urines beaucoup moins que d'habitude, si tu as la bouche et la gorge sèches, si tu es étourdi en te levant ou si tu ne gardes aucun liquide."
     },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You pee much less than usual",
+        "fr": "Tu urines beaucoup moins que d'habitude"
+      },
+      {
+        "en": "Your mouth and throat are dry",
+        "fr": "Tu as la bouche et la gorge sèches"
+      },
+      {
+        "en": "You feel dizzy when you stand up",
+        "fr": "Tu es étourdi en te levant"
+      },
+      {
+        "en": "You can't keep fluids down",
+        "fr": "Tu ne gardes aucun liquide"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Spin Cycle: 3 to 8 days of tummy trouble.",
+        "fr": "Cycle essorage : de 3 à 8 jours de dégâts au ventre."
+      },
+      "weakness": {
+        "en": "Soap after every diaper. The vaccine, for babies.",
+        "fr": "Le savon après chaque couche. Le vaccin, pour les bébés."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Rotavirus is usually milder in adults than in kids.",
+        "fr": "Le rotavirus est souvent plus léger chez l'adulte que chez l'enfant."
+      },
+      "isTrue": true,
+      "explanation": {
+        "en": "Adults tend to have milder symptoms. Dehydration is still the thing to watch for.",
+        "fr": "Les adultes ont en général des symptômes plus légers. La déshydratation reste à surveiller."
+      }
+    },
     "deepDive": [
       {
         "en": "Rota means wheel in Latin: under an electron microscope the virus looks like a tiny wheel with spokes.",
         "fr": "Rota veut dire roue en latin : au microscope électronique, le virus ressemble à une minuscule roue à rayons."
       },
       {
-        "en": "Before the vaccine, almost every child caught it by age 5. Since vaccination began, hospital stays for rotavirus have dropped sharply.",
-        "fr": "Avant le vaccin, presque tous les enfants l'attrapaient avant 5 ans. Depuis la vaccination, les hospitalisations pour rotavirus ont chuté."
+        "en": "Adults who catch it tend to have milder symptoms than children. Dehydration is the thing to watch for.",
+        "fr": "Les adultes qui l'attrapent ont en général des symptômes plus légers que les enfants. C'est la déshydratation qu'il faut surveiller."
       }
     ],
     "sources": [
@@ -1759,7 +2573,9 @@
         "name": "CDC: About Rotavirus",
         "url": "https://www.cdc.gov/rotavirus/about/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 8,
+    "kidSource": "https://www.cdc.gov/rotavirus/about/index.html"
   },
   {
     "id": "coxy",
@@ -1782,10 +2598,11 @@
     "tintDeep": "#A6EADF",
     "quickPick": true,
     "incubationMinHours": 72,
-    "incubationMaxHours": 144,
+    "incubationMaxHours": 120,
+    "family": "skin",
     "showsUp": {
-      "en": "3 to 6 days after",
-      "fr": "3 à 6 jours après"
+      "en": "3 to 5 days after",
+      "fr": "3 à 5 jours après"
     },
     "lasts": {
       "en": "7 to 10 days",
@@ -1799,8 +2616,8 @@
           "fr": "Chez l'adulte"
         },
         "value": {
-          "en": "Often mild, sometimes no symptoms",
-          "fr": "Souvent léger, parfois sans symptômes"
+          "en": "Usually not serious, sometimes no symptoms at all",
+          "fr": "En général sans gravité, parfois sans aucun symptôme"
         }
       },
       {
@@ -1821,21 +2638,21 @@
           "fr": "Couches"
         },
         "value": {
-          "en": "The virus stays in stool for weeks",
-          "fr": "Le virus reste dans les selles pendant des semaines"
+          "en": "The virus is in poop and spreads for days or weeks after",
+          "fr": "Le virus est dans les selles et se transmet des jours ou des semaines après"
         }
       }
     ],
     "tips": [
       {
-        "icon": "snowflake",
+        "icon": "drop.fill",
         "title": {
-          "en": "Cold and soft",
-          "fr": "Froid et mou"
+          "en": "Keep drinking",
+          "fr": "Continue de boire"
         },
         "body": {
-          "en": "Mouth sores hurt. Cold drinks, yogurt and popsicles go down easier.",
-          "fr": "Les ulcères dans la bouche font mal. Boissons froides, yogourt et sucettes glacées passent mieux."
+          "en": "Mouth sores make swallowing hurt. Drink enough to stay hydrated.",
+          "fr": "Les plaies dans la bouche font mal quand on avale. Bois assez pour rester hydraté."
         }
       },
       {
@@ -1845,8 +2662,8 @@
           "fr": "Laisse les cloques tranquilles"
         },
         "body": {
-          "en": "Don't pop them. They dry up on their own.",
-          "fr": "Ne les perce pas. Elles sèchent toutes seules."
+          "en": "Keep them clean and avoid touching them.",
+          "fr": "Garde-les propres et évite d'y toucher."
         }
       }
     ],
@@ -1854,22 +2671,71 @@
       "en": "Call if you can't drink enough, if a fever lasts more than 3 days, or if symptoms are not better after 10 days.",
       "fr": "Appelle si tu n'arrives pas à boire assez, si la fièvre dure plus de 3 jours ou si ça ne va pas mieux après 10 jours."
     },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You can't drink enough",
+        "fr": "Tu n'arrives pas à boire assez"
+      },
+      {
+        "en": "A fever lasts more than 3 days",
+        "fr": "La fièvre dure plus de 3 jours"
+      },
+      {
+        "en": "Symptoms aren't better after 10 days",
+        "fr": "Ça ne va pas mieux après 10 jours"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Ouch Mouth: sores that make swallowing hurt.",
+        "fr": "Bouche qui pique : des plaies qui font mal en avalant."
+      },
+      "weakness": {
+        "en": "Keep drinking, and leave the blisters alone.",
+        "fr": "Continue de boire, et laisse les cloques tranquilles."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Hand, foot and mouth comes from farm animals.",
+        "fr": "La maladie pieds-mains-bouche vient des animaux de ferme."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It has nothing to do with foot-and-mouth disease in livestock. Different virus, different species.",
+        "fr": "Aucun rapport avec la fièvre aphteuse des animaux de ferme. Autre virus, autres espèces."
+      }
+    },
     "deepDive": [
       {
         "en": "It has nothing to do with foot-and-mouth disease in farm animals. Different virus, different species.",
         "fr": "Aucun rapport avec la fièvre aphteuse des animaux de ferme. Autre virus, autres espèces."
       },
       {
-        "en": "A few weeks after the illness, a fingernail or toenail sometimes peels or falls off. It looks alarming and grows back on its own.",
-        "fr": "Quelques semaines après la maladie, un ongle peut peler ou tomber. C'est impressionnant, et ça repousse tout seul."
+        "en": "Very rarely, a fingernail or toenail falls off a few weeks later. In the reported cases it grew back on its own.",
+        "fr": "Très rarement, un ongle tombe quelques semaines plus tard. Dans les cas rapportés, il a repoussé tout seul."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Hand, Foot, and Mouth Disease",
         "url": "https://www.cdc.gov/hand-foot-mouth/about/index.html"
+      },
+      {
+        "name": "CDC: Symptoms of Hand, Foot, and Mouth Disease",
+        "url": "https://www.cdc.gov/hand-foot-mouth/signs-symptoms/index.html"
+      },
+      {
+        "name": "CDC: How Hand, Foot, and Mouth Disease Spreads",
+        "url": "https://www.cdc.gov/hand-foot-mouth/causes/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 10,
+    "kidSource": "https://www.cdc.gov/hand-foot-mouth/about/index.html"
   },
   {
     "id": "slappy",
@@ -1893,6 +2759,7 @@
     "quickPick": false,
     "incubationMinHours": 96,
     "incubationMaxHours": 336,
+    "family": "skin",
     "showsUp": {
       "en": "4 to 14 days after",
       "fr": "4 à 14 jours après"
@@ -1909,8 +2776,8 @@
           "fr": "Chez l'adulte"
         },
         "value": {
-          "en": "Achy joints more than a rash",
-          "fr": "Des articulations douloureuses plus qu'une éruption"
+          "en": "Joint pain is more common than in kids",
+          "fr": "Les douleurs aux articulations sont plus fréquentes que chez l'enfant"
         }
       },
       {
@@ -1944,8 +2811,8 @@
           "fr": "Ménage tes articulations"
         },
         "body": {
-          "en": "Hands, wrists and knees can ache for 1 to 3 weeks. Rest helps.",
-          "fr": "Mains, poignets et genoux peuvent faire mal de 1 à 3 semaines. Le repos aide."
+          "en": "Joint pain usually lasts 1 to 3 weeks.",
+          "fr": "Les douleurs aux articulations durent en général de 1 à 3 semaines."
         }
       },
       {
@@ -1964,10 +2831,49 @@
       "en": "Call if you are pregnant, have a weakened immune system or a blood disorder such as sickle cell disease, and you were exposed or feel sick.",
       "fr": "Appelle si tu es enceinte, si ton système immunitaire est affaibli ou si tu as une maladie du sang comme l'anémie falciforme, et que tu as été exposé ou que tu te sens malade."
     },
+    "doctorLead": {
+      "en": "Call if you were exposed or feel sick, and:",
+      "fr": "Appelle si tu as été exposé ou te sens malade, et que :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You are pregnant",
+        "fr": "Tu es enceinte"
+      },
+      {
+        "en": "Your immune system is weakened",
+        "fr": "Ton système immunitaire est affaibli"
+      },
+      {
+        "en": "You have a blood disorder such as sickle cell disease",
+        "fr": "Tu as une maladie du sang comme l'anémie falciforme"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Joint Lock: in adults, aching joints for 1 to 3 weeks.",
+        "fr": "Clé articulaire : chez l'adulte, des articulations douloureuses de 1 à 3 semaines."
+      },
+      "weakness": {
+        "en": "Its contagious phase ends when the rash shows up.",
+        "fr": "Sa phase contagieuse finit quand l'éruption apparaît."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "With fifth disease, you're most contagious once the rash shows.",
+        "fr": "Avec la cinquième maladie, on est le plus contagieux une fois l'éruption sortie."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "By the time the slapped-cheek rash appears, the contagious phase is already over.",
+        "fr": "Quand les joues rouges apparaissent, la phase contagieuse est déjà finie."
+      }
+    },
     "deepDive": [
       {
-        "en": "It is called fifth disease because it was fifth on an old list of common childhood rash illnesses, after measles, scarlet fever, rubella and Dukes' disease.",
-        "fr": "On l'appelle cinquième maladie parce qu'elle était cinquième sur une vieille liste des éruptions de l'enfance, après la rougeole, la scarlatine, la rubéole et la maladie de Dukes."
+        "en": "It is called fifth disease because it was fifth on a historical list of common childhood rash illnesses.",
+        "fr": "On l'appelle la cinquième maladie parce qu'elle était cinquième sur une liste historique des maladies infantiles à éruption."
       },
       {
         "en": "By the time the slapped-cheek rash shows up, the contagious phase is already over. The germ did its traveling while everyone felt fine.",
@@ -1978,8 +2884,18 @@
       {
         "name": "CDC: About Parvovirus B19",
         "url": "https://www.cdc.gov/parvovirus-b19/about/index.html"
+      },
+      {
+        "name": "CDC: Preventing Parvovirus B19",
+        "url": "https://www.cdc.gov/parvovirus-b19/prevention-treatment/index.html"
+      },
+      {
+        "name": "CDC: Parvovirus B19, infection control guidance",
+        "url": "https://www.cdc.gov/infection-control/hcp/healthcare-personnel-epidemiology-control/parvovirus.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 21,
+    "kidSource": "https://www.cdc.gov/parvovirus-b19/about/index.html"
   },
   {
     "id": "lousy",
@@ -2001,6 +2917,7 @@
     "tintLight": "#F7F0E9",
     "tintDeep": "#DFC2A6",
     "quickPick": false,
+    "family": "skin",
     "showsUp": {
       "en": "Itching takes 4 to 6 weeks",
       "fr": "Ça pique après 4 à 6 semaines"
@@ -2052,19 +2969,19 @@
           "fr": "Vérifie tout le monde"
         },
         "body": {
-          "en": "Go through the whole household with a fine-toothed comb under good light.",
-          "fr": "Passe toute la maisonnée au peigne fin, sous un bon éclairage."
+          "en": "Check all household members and close contacts, with a fine-toothed comb under good light.",
+          "fr": "Vérifie tous les membres de la maisonnée et les contacts proches, au peigne fin et sous un bon éclairage."
         }
       },
       {
         "icon": "calendar",
         "title": {
-          "en": "Treat, then repeat",
-          "fr": "Traite, puis répète"
+          "en": "Follow the instructions",
+          "fr": "Suis le mode d'emploi"
         },
         "body": {
-          "en": "Follow the product directions. Many treatments need a second round 7 to 9 days later.",
-          "fr": "Suis le mode d'emploi. Bien des traitements demandent une deuxième application 7 à 9 jours plus tard."
+          "en": "Follow the product directions exactly. Ask a health professional before you treat a second time.",
+          "fr": "Suis le mode d'emploi du produit à la lettre. Informe-toi auprès d'un professionnel de la santé avant de traiter une deuxième fois."
         }
       }
     ],
@@ -2072,10 +2989,45 @@
       "en": "Ask a pharmacist or a health professional which treatment to use, and go back if live lice are still there after two full treatments.",
       "fr": "Demande à un pharmacien ou à un professionnel de la santé quel traitement utiliser, et retournes-y si des poux vivants sont encore là après deux traitements complets."
     },
+    "doctorLead": {
+      "en": "Ask a pharmacist or a health professional:",
+      "fr": "Demande à un pharmacien ou à un professionnel de la santé :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Which treatment to use",
+        "fr": "Quel traitement utiliser"
+      },
+      {
+        "en": "Again, if live lice are still there after two full treatments",
+        "fr": "De nouveau, si des poux vivants sont encore là après deux traitements complets"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Itch Ambush: the itching can take 4 to 6 weeks to start.",
+        "fr": "Embuscade : ça peut prendre 4 à 6 semaines avant que ça pique."
+      },
+      "weakness": {
+        "en": "A fine-toothed comb, good light, and the instructions to the letter.",
+        "fr": "Un peigne fin, un bon éclairage et le mode d'emploi à la lettre."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Lice prefer dirty hair.",
+        "fr": "Les poux préfèrent les cheveux sales."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Clean or not, lice don't care. They crawl from head to head; they can't jump or fly.",
+        "fr": "Propres ou pas, les poux s'en fichent. Ils rampent d'une tête à l'autre; ils ne sautent pas et ne volent pas."
+      }
+    },
     "deepDive": [
       {
-        "en": "A louse lives about 30 days on a head and dies within a day or two off it. Furniture and stuffed animals are not the main route.",
-        "fr": "Un pou vit environ 30 jours sur une tête et meurt en un jour ou deux loin d'elle. Les meubles et les toutous ne sont pas la voie principale."
+        "en": "A louse lives about 30 days on a head and dies within two days off it.",
+        "fr": "Un pou vit environ 30 jours sur une tête et meurt en moins de deux jours une fois tombé."
       },
       {
         "en": "Head lice do not spread disease. They are a nuisance, not a health hazard.",
@@ -2086,8 +3038,13 @@
       {
         "name": "CDC: About Head Lice",
         "url": "https://www.cdc.gov/lice/about/head-lice.html"
+      },
+      {
+        "name": "CDC: Treatment of Head Lice",
+        "url": "https://www.cdc.gov/lice/treatment/index.html"
       }
-    ]
+    ],
+    "kidSource": "https://www.cdc.gov/lice/about/head-lice.html"
   },
   {
     "id": "wiggles",
@@ -2109,9 +3066,10 @@
     "tintLight": "#FEF5F8",
     "tintDeep": "#FAD9E3",
     "quickPick": false,
+    "family": "skin",
     "showsUp": {
-      "en": "1 to 2 months after",
-      "fr": "1 à 2 mois après"
+      "en": "Sometimes with no symptoms",
+      "fr": "Parfois sans symptômes"
     },
     "lasts": {
       "en": "Until treated",
@@ -2180,10 +3138,41 @@
       "en": "See a health professional or a pharmacist for treatment. It is usually two doses of medicine, two weeks apart.",
       "fr": "Consulte un professionnel de la santé ou un pharmacien pour le traitement. C'est en général deux doses de médicament, à deux semaines d'intervalle."
     },
+    "doctorLead": {
+      "en": "See a health professional or a pharmacist:",
+      "fr": "Consulte un professionnel de la santé ou un pharmacien :"
+    },
+    "doctorSigns": [
+      {
+        "en": "For treatment, usually two doses of medicine, two weeks apart",
+        "fr": "Pour le traitement, en général deux doses de médicament à deux semaines d'intervalle"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Night Itch: itching at night.",
+        "fr": "Gratte nocturne : des démangeaisons la nuit."
+      },
+      "weakness": {
+        "en": "Morning showers, hot washes, short nails.",
+        "fr": "Douche le matin, lavage à l'eau chaude, ongles courts."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Shaking out the sheets gets rid of pinworm eggs.",
+        "fr": "Secouer les draps élimine les œufs d'oxyures."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "Don't shake them: wash bedding and pajamas in hot water instead. The eggs are too small to see.",
+        "fr": "Ne les secoue pas : lave plutôt la literie et les pyjamas à l'eau chaude. Les œufs sont trop petits pour être vus."
+      }
+    },
     "deepDive": [
       {
-        "en": "Pinworm is one of the most common worm infections in North America, and school-age kids are its favorite hosts.",
-        "fr": "L'oxyurose est une des infections à vers les plus courantes en Amérique du Nord, et les enfants d'âge scolaire sont ses hôtes préférés."
+        "en": "Pinworm is the most common worm infection in the United States, and school-age and preschool kids are its favorite hosts.",
+        "fr": "L'oxyure est l'infection à vers la plus courante aux États-Unis, et les enfants d'âge scolaire et préscolaire sont ses hôtes préférés."
       },
       {
         "en": "The eggs are too small to see and survive 2 to 3 weeks on surfaces. That is why reinfection is so easy, and why short nails and clean hands matter.",
@@ -2194,8 +3183,13 @@
       {
         "name": "CDC: About Pinworm Infection",
         "url": "https://www.cdc.gov/pinworm/about/index.html"
+      },
+      {
+        "name": "CDC: Preventing Pinworm Infection",
+        "url": "https://www.cdc.gov/pinworm/prevention/index.html"
       }
-    ]
+    ],
+    "kidSource": "https://www.cdc.gov/pinworm/about/index.html"
   },
   {
     "id": "crusty",
@@ -2217,11 +3211,10 @@
     "tintLight": "#FDF4E3",
     "tintDeep": "#F7D38F",
     "quickPick": false,
-    "incubationMinHours": 96,
-    "incubationMaxHours": 240,
+    "family": "skin",
     "showsUp": {
-      "en": "4 to 10 days after",
-      "fr": "4 à 10 jours après"
+      "en": "About 10 days after",
+      "fr": "Environ 10 jours après"
     },
     "lasts": {
       "en": "7 to 10 days once treated",
@@ -2281,8 +3274,8 @@
           "fr": "On ne partage pas"
         },
         "body": {
-          "en": "Your own towel and washcloth, washed hot every day.",
-          "fr": "Ta serviette et ta débarbouillette à toi, lavées à l'eau chaude chaque jour."
+          "en": "Don't share towels, washcloths or sheets, and wash them hot.",
+          "fr": "Ne partage pas les serviettes, les débarbouillettes ni les draps, et lave-les à l'eau chaude."
         }
       }
     ],
@@ -2290,22 +3283,71 @@
       "en": "See a health professional: impetigo usually needs antibiotics. Call again if the sores spread or if you get a fever.",
       "fr": "Consulte un professionnel de la santé : l'impétigo demande en général des antibiotiques. Rappelle si les plaies s'étendent ou si tu fais de la fièvre."
     },
-    "deepDive": [
+    "doctorLead": {
+      "en": "See a health professional:",
+      "fr": "Consulte un professionnel de la santé :"
+    },
+    "doctorSigns": [
       {
-        "en": "The bacteria behind impetigo often live on healthy skin. They only cause trouble when they get into a scratch, a bug bite or skin rubbed raw by a runny nose.",
-        "fr": "Les bactéries de l'impétigo vivent souvent sur une peau saine. Elles causent des ennuis seulement quand elles entrent par une égratignure, une piqûre ou une peau irritée par un nez qui coule."
+        "en": "Impetigo usually needs antibiotics",
+        "fr": "L'impétigo demande en général des antibiotiques"
       },
       {
-        "en": "It spreads by touch, which is why it loves daycare groups, sports teams and siblings.",
-        "fr": "Il se transmet par le toucher : voilà pourquoi il adore les groupes de garderie, les équipes sportives et les fratries."
+        "en": "Call again if the sores spread",
+        "fr": "Rappelle si les plaies s'étendent"
+      },
+      {
+        "en": "Call again if you get a fever",
+        "fr": "Rappelle si tu fais de la fièvre"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Honey Crust: sores with honey-colored crusts.",
+        "fr": "Croûte de miel : des plaies aux croûtes couleur miel."
+      },
+      "weakness": {
+        "en": "Antibiotics, and sores kept covered.",
+        "fr": "Des antibiotiques, et des plaies bien couvertes."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Impetigo clears up by itself, no treatment needed.",
+        "fr": "L'impétigo guérit tout seul, sans traitement."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It usually needs antibiotics, as a cream or pills. Keep the sores covered meanwhile.",
+        "fr": "Il demande en général des antibiotiques, en crème ou en comprimés. Garde les plaies couvertes en attendant."
+      }
+    },
+    "deepDive": [
+      {
+        "en": "Broken skin is the way in: an infection or an injury that breaks the skin raises the risk.",
+        "fr": "La peau abîmée est la porte d'entrée : une infection ou une blessure qui brise la peau augmente le risque."
+      },
+      {
+        "en": "Close contact is the main risk, which is why it loves daycare groups. It is most common in children aged 2 to 5.",
+        "fr": "Le contact rapproché est le principal risque. Voilà pourquoi il adore les groupes de garderie. Il est le plus fréquent chez les enfants de 2 à 5 ans."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Impetigo",
         "url": "https://www.cdc.gov/group-a-strep/about/impetigo.html"
+      },
+      {
+        "name": "NHS: Impetigo",
+        "url": "https://www.nhs.uk/conditions/impetigo/"
+      },
+      {
+        "name": "HSE: Impetigo",
+        "url": "https://www.hse.ie/conditions/impetigo/"
       }
-    ]
+    ],
+    "lastsUpToDays": 10,
+    "kidSource": "https://www.nhs.uk/conditions/impetigo/"
   },
   {
     "id": "ringo",
@@ -2329,6 +3371,7 @@
     "quickPick": false,
     "incubationMinHours": 96,
     "incubationMaxHours": 336,
+    "family": "skin",
     "showsUp": {
       "en": "4 to 14 days after",
       "fr": "4 à 14 jours après"
@@ -2356,8 +3399,8 @@
           "fr": "Vient aussi de"
         },
         "value": {
-          "en": "Cats and dogs",
-          "fr": "Chats et chiens"
+          "en": "Pets and other animals",
+          "fr": "Les animaux de compagnie et autres"
         }
       },
       {
@@ -2391,19 +3434,58 @@
           "fr": "N'arrête pas trop tôt"
         },
         "body": {
-          "en": "Use the cream as long as directed, even after the ring fades.",
-          "fr": "Applique la crème aussi longtemps qu'indiqué, même quand l'anneau pâlit."
+          "en": "Creams are usually applied for 2 to 4 weeks. Keep going as directed, even after the ring fades.",
+          "fr": "Les crèmes s'appliquent en général pendant 2 à 4 semaines. Continue comme indiqué, même quand l'anneau pâlit."
         }
       }
     ],
     "doctor": {
-      "en": "Call if it is on the scalp, if it has not improved after 2 weeks of cream, or if it keeps spreading. Scalp ringworm needs prescription pills.",
-      "fr": "Appelle si c'est sur le cuir chevelu, si ça ne s'améliore pas après 2 semaines de crème ou si ça continue de s'étendre. Sur le cuir chevelu, il faut des comprimés sur ordonnance."
+      "en": "See a health professional for any suspected ringworm, and always if it is on the scalp or doesn't improve with treatment. Scalp ringworm needs prescription medicine by mouth for 1 to 3 months.",
+      "fr": "Consulte un professionnel de la santé si tu soupçonnes une teigne, et toujours si elle est sur le cuir chevelu ou ne s'améliore pas avec le traitement. La teigne du cuir chevelu demande un médicament sur ordonnance, par la bouche, pendant 1 à 3 mois."
+    },
+    "doctorLead": {
+      "en": "See a health professional:",
+      "fr": "Consulte un professionnel de la santé :"
+    },
+    "doctorSigns": [
+      {
+        "en": "For any suspected ringworm",
+        "fr": "Si tu soupçonnes une teigne"
+      },
+      {
+        "en": "Always if it is on the scalp",
+        "fr": "Toujours si elle est sur le cuir chevelu"
+      },
+      {
+        "en": "If it doesn't improve with treatment",
+        "fr": "Si elle ne s'améliore pas avec le traitement"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Fairy Ring: a ring that grows outward.",
+        "fr": "Rond de sorcière : un anneau qui s'agrandit."
+      },
+      "weakness": {
+        "en": "Antifungal cream for the full 2 to 4 weeks, and dry skin.",
+        "fr": "Crème antifongique pendant 2 à 4 semaines complètes, et la peau au sec."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Ringworm is caused by a worm.",
+        "fr": "La teigne est causée par un ver."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It's a fungus. The ring forms because it grows outward while the middle heals.",
+        "fr": "C'est un champignon. L'anneau se forme parce qu'il pousse vers l'extérieur pendant que le centre guérit."
+      }
     },
     "deepDive": [
       {
-        "en": "Ringworm belongs to the same family of fungi as athlete's foot and jock itch. The name only describes where it lands.",
-        "fr": "La teigne fait partie de la même famille de champignons que le pied d'athlète. Le nom décrit seulement l'endroit où elle s'installe."
+        "en": "The same fungi that cause ringworm also cause athlete's foot and jock itch. The name only describes where it lands.",
+        "fr": "Les mêmes champignons causent la teigne et le pied d'athlète. Le nom dit seulement où ça se pose."
       },
       {
         "en": "The ring forms because the fungus grows outward while the middle heals, like a tiny fairy ring on a lawn.",
@@ -2414,8 +3496,21 @@
       {
         "name": "CDC: About Ringworm",
         "url": "https://www.cdc.gov/ringworm/about/index.html"
+      },
+      {
+        "name": "CDC: Symptoms of Ringworm",
+        "url": "https://www.cdc.gov/ringworm/signs-symptoms/index.html"
+      },
+      {
+        "name": "CDC: Treatment of Ringworm",
+        "url": "https://www.cdc.gov/ringworm/treatment/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 28,
+    "doctorNote": {
+      "en": "Scalp ringworm needs prescription medicine by mouth for 1 to 3 months.",
+      "fr": "La teigne du cuir chevelu demande un médicament sur ordonnance, par la bouche, pendant 1 à 3 mois."
+    }
   },
   {
     "id": "whoopy",
@@ -2439,13 +3534,14 @@
     "quickPick": false,
     "incubationMinHours": 120,
     "incubationMaxHours": 504,
+    "family": "airways",
     "showsUp": {
       "en": "5 to 21 days after",
       "fr": "5 à 21 jours après"
     },
     "lasts": {
-      "en": "Weeks to months",
-      "fr": "Des semaines, voire des mois"
+      "en": "Coughing: 1 to 10 weeks",
+      "fr": "Toux : 1 à 10 semaines"
     },
     "facts": [
       {
@@ -2455,8 +3551,8 @@
           "fr": "Protection"
         },
         "value": {
-          "en": "A booster shot. Check if yours is due.",
-          "fr": "Un rappel de vaccin. Vérifie si le tien est dû."
+          "en": "Vaccination, recommended for everyone",
+          "fr": "La vaccination, recommandée pour tous"
         }
       },
       {
@@ -2484,14 +3580,14 @@
     ],
     "tips": [
       {
-        "icon": "phone.fill",
+        "icon": "fork.knife",
         "title": {
-          "en": "Call before you go",
-          "fr": "Appelle avant d'y aller"
+          "en": "Small meals",
+          "fr": "Petits repas"
         },
         "body": {
-          "en": "Phone the clinic first so they can keep you away from babies in the waiting room.",
-          "fr": "Téléphone d'abord à la clinique pour qu'on te tienne loin des bébés dans la salle d'attente."
+          "en": "Eat a little every few hours. It helps prevent vomiting after a coughing fit.",
+          "fr": "Mange un peu toutes les quelques heures. Ça aide à éviter de vomir après une quinte."
         }
       },
       {
@@ -2510,22 +3606,83 @@
       "en": "See a health professional if you have coughing fits, vomit after coughing, or were exposed to whooping cough. Get emergency care for trouble breathing.",
       "fr": "Consulte si tu as des quintes de toux, si tu vomis après avoir toussé ou si tu as été exposé à la coqueluche. Va à l'urgence en cas de difficulté à respirer."
     },
+    "doctorLead": {
+      "en": "See a health professional if:",
+      "fr": "Consulte si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "You have coughing fits",
+        "fr": "Tu as des quintes de toux"
+      },
+      {
+        "en": "You vomit after coughing",
+        "fr": "Tu vomis après avoir toussé"
+      },
+      {
+        "en": "You were exposed to whooping cough",
+        "fr": "Tu as été exposé à la coqueluche"
+      },
+      {
+        "en": "Get emergency care for trouble breathing",
+        "fr": "Urgences si tu as du mal à respirer"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "The Whoop: coughing fits for 1 to 10 weeks.",
+        "fr": "Le chant du coq : des quintes de toux pendant 1 à 10 semaines."
+      },
+      "weakness": {
+        "en": "Vaccination at every age, and antibiotics early.",
+        "fr": "La vaccination à tout âge, et des antibiotiques tôt."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "Having had whooping cough protects you for life.",
+        "fr": "Avoir eu la coqueluche protège pour la vie."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It doesn't, which is why vaccination is recommended at every age.",
+        "fr": "Non. Voilà pourquoi la vaccination est recommandée à tout âge."
+      }
+    },
     "deepDive": [
       {
         "en": "It starts like an ordinary cold. One to two weeks later the coughing fits begin, sometimes ending with the high-pitched whoop that gave it its name.",
         "fr": "Ça commence comme un rhume ordinaire. Une ou deux semaines plus tard, les quintes arrivent, parfois suivies du « chant du coq » qui a donné son nom à la maladie."
       },
       {
-        "en": "It is nicknamed the 100-day cough. Vaccine protection fades over the years, which is why adults need boosters.",
-        "fr": "On la surnomme la toux des 100 jours. La protection du vaccin diminue avec les années : voilà pourquoi les adultes ont besoin de rappels."
+        "en": "Having had it does not protect you for life, which is why vaccination is recommended at every age.",
+        "fr": "L'avoir eue ne protège pas pour la vie. Voilà pourquoi la vaccination est recommandée à tout âge."
       }
     ],
     "sources": [
       {
         "name": "CDC: About Whooping Cough",
         "url": "https://www.cdc.gov/pertussis/about/index.html"
+      },
+      {
+        "name": "CDC: Symptoms of Whooping Cough",
+        "url": "https://www.cdc.gov/pertussis/signs-symptoms/index.html"
+      },
+      {
+        "name": "CDC: Treatment of Whooping Cough",
+        "url": "https://www.cdc.gov/pertussis/treatment/index.html"
+      },
+      {
+        "name": "CDC: Clinical Overview of Pertussis",
+        "url": "https://www.cdc.gov/pertussis/hcp/clinical-overview/index.html"
+      },
+      {
+        "name": "CDC: Pertussis, infection control guidance",
+        "url": "https://www.cdc.gov/infection-control/hcp/healthcare-personnel-epidemiology-control/pertussis.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 70,
+    "kidSource": "https://www.cdc.gov/pertussis/signs-symptoms/index.html"
   },
   {
     "id": "poxy",
@@ -2549,6 +3706,7 @@
     "quickPick": false,
     "incubationMinHours": 240,
     "incubationMaxHours": 504,
+    "family": "skin",
     "showsUp": {
       "en": "10 to 21 days after",
       "fr": "10 à 21 jours après"
@@ -2620,6 +3778,53 @@
       "en": "Call right away if you are an adult who never had chickenpox or the vaccine, if you are pregnant, or if your immune system is weakened. Also call for a fever that lasts more than 4 days, trouble breathing, or blisters that look infected.",
       "fr": "Appelle sans attendre si tu es un adulte qui n'a jamais eu la varicelle ni le vaccin, si tu es enceinte ou si ton système immunitaire est affaibli. Appelle aussi pour une fièvre de plus de 4 jours, une difficulté à respirer ou des cloques qui semblent infectées."
     },
+    "doctorLead": {
+      "en": "Call if:",
+      "fr": "Appelle si :"
+    },
+    "doctorSigns": [
+      {
+        "en": "Right away: you're an adult who never had chickenpox or the vaccine",
+        "fr": "Sans attendre : tu es un adulte qui n'a jamais eu la varicelle ni le vaccin"
+      },
+      {
+        "en": "Right away: you're pregnant or your immune system is weakened",
+        "fr": "Sans attendre : tu es enceinte ou ton système immunitaire est affaibli"
+      },
+      {
+        "en": "A fever lasts more than 4 days",
+        "fr": "La fièvre dure plus de 4 jours"
+      },
+      {
+        "en": "You have trouble breathing",
+        "fr": "Tu as du mal à respirer"
+      },
+      {
+        "en": "Blisters look infected",
+        "fr": "Des cloques semblent infectées"
+      }
+    ],
+    "boss": {
+      "attack": {
+        "en": "Dot Storm: itchy blisters everywhere.",
+        "fr": "Tempête de boutons : des cloques qui piquent partout."
+      },
+      "weakness": {
+        "en": "Two vaccine doses. Short nails, no aspirin.",
+        "fr": "Deux doses de vaccin. Ongles courts, pas d'aspirine."
+      }
+    },
+    "myth": {
+      "claim": {
+        "en": "After chickenpox, the virus leaves for good.",
+        "fr": "Après la varicelle, le virus part pour de bon."
+      },
+      "isTrue": false,
+      "explanation": {
+        "en": "It sleeps in nerve cells and can wake up decades later as shingles.",
+        "fr": "Il dort dans les cellules nerveuses et peut se réveiller des décennies plus tard sous forme de zona."
+      }
+    },
     "deepDive": [
       {
         "en": "After chickenpox, the virus never leaves. It sleeps in nerve cells and can wake up decades later as shingles.",
@@ -2634,7 +3839,13 @@
       {
         "name": "CDC: About Chickenpox",
         "url": "https://www.cdc.gov/chickenpox/about/index.html"
+      },
+      {
+        "name": "CDC: How to Treat Chickenpox",
+        "url": "https://www.cdc.gov/chickenpox/treatment/index.html"
       }
-    ]
+    ],
+    "lastsUpToDays": 7,
+    "kidSource": "https://www.cdc.gov/chickenpox/about/index.html"
   }
 ]

@@ -3,7 +3,7 @@
 
 Catches the mistakes that are cheap to find early: unbalanced delimiters, missing translations,
 format strings whose arguments do not match, shared code that depends on app-only types,
-and image names that are not in the asset catalog.
+image names that are not in the asset catalog, and color values kept outside Shared/Swatch.swift.
 """
 import json
 import pathlib
@@ -13,6 +13,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TARGETS = {"Petri": ["App", "Shared"], "PetriWidgets": ["Widgets", "Shared"]}
 CATALOG = {"App": "App/Assets.xcassets", "Widgets": "Widgets/Assets.xcassets"}
+SWATCH = "Shared/Swatch.swift"
 STRING = r'"((?:[^"\\]|\\.)*)"'
 SPEC = re.compile(r"%(?:(\d+)\$)?(?:lld|@|d|f)")
 STRING_LINE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')
@@ -208,6 +209,8 @@ def main():
             fail(f"{relative}: leftover TODO or FIXME")
         if re.search(r"^\s*(debugPrint|print)\(", code, re.M):
             fail(f"{relative}: leftover print statement")
+        if relative != SWATCH and re.search(r"\b0x[0-9A-Fa-f]{6}\b", code):
+            fail(f"{relative}: color value written outside {SWATCH}")
         top_level = [m.group(1) for m in TYPE_DECL.finditer(code)]
         for name in top_level:
             declared[folder].setdefault(name, relative)
@@ -238,6 +241,12 @@ def main():
         for name in app_only:
             if re.search(r"\b" + re.escape(name) + r"\b", code):
                 fail(f"{relative}: uses {name}, which only exists in the app target ({declared['App'][name]})")
+
+    swatch = (ROOT / SWATCH).read_text(encoding="utf-8")
+    elsewhere = "\n".join(code for path, (_f, code, _k, _r) in sources.items() if path.relative_to(ROOT).as_posix() != SWATCH)
+    for name in re.findall(r"static let (\w+): UInt32", swatch):
+        if not re.search(r"\bSwatch\." + name + r"\b", elsewhere):
+            fail(f"{SWATCH}: color {name} is not used anywhere")
 
     unused = sorted(set(english) - used_keys)
     for key in unused:

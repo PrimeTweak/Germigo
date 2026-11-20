@@ -5,6 +5,7 @@ struct KidsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var editing: Kid?
+    @State private var pendingDelete: Kid?
     @State private var showPaywall = false
 
     var body: some View {
@@ -16,27 +17,23 @@ struct KidsScreen: View {
                     } label: {
                         HStack(spacing: 12) {
                             AvatarView(name: kid.name, gradient: AvatarColors.gradient(kid.colorIndex), size: 40)
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(kid.name)
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(palette.ink)
-                                Text(trCount(kid.ageYears, one: "%lld year old", other: "%lld years old"))
-                                    .font(.footnote)
-                                    .foregroundStyle(palette.inkSecondary)
-                            }
+                            Text(kid.name)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(palette.ink)
                         }
                     }
                     .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            model.removeKid(kid.id)
+                        Button {
+                            pendingDelete = kid
                         } label: {
                             Label(tr("Delete"), systemImage: "trash")
                         }
+                        .tint(Color.red)
                     }
                 }
                 Button {
                     if model.canAddKid {
-                        editing = Kid(name: "", ageYears: 2, daycareSince: Date(), colorIndex: model.data.kids.count)
+                        editing = Kid(name: "", colorIndex: model.data.kids.count)
                     } else {
                         showPaywall = true
                     }
@@ -58,6 +55,24 @@ struct KidsScreen: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView()
         }
+        .confirmationDialog(tr("Remove %@?", pendingDelete?.name ?? ""), isPresented: deleteBinding,
+                            titleVisibility: .visible) {
+            Button(tr("Remove"), role: .destructive) {
+                if let kid = pendingDelete { model.removeKid(kid.id) }
+                pendingDelete = nil
+            }
+            Button(tr("Cancel"), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: {
+            Text(tr("Their germs and countdowns are removed too. Your own journal stays."))
+        }
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(get: { pendingDelete != nil }, set: { shown in
+            if !shown { pendingDelete = nil }
+        })
     }
 }
 
@@ -77,10 +92,6 @@ private struct KidEditSheet: View {
                 Section {
                     TextField(tr("Name"), text: $draft.name)
                         .textInputAutocapitalization(.words)
-                    Stepper(value: $draft.ageYears, in: 0...12) {
-                        Text(trCount(draft.ageYears, one: "%lld year old", other: "%lld years old"))
-                    }
-                    DatePicker(tr("Daycare since"), selection: $draft.daycareSince, in: ...Date(), displayedComponents: .date)
                 }
                 Section(tr("Color")) {
                     HStack(spacing: 12) {
@@ -332,7 +343,7 @@ struct HelpLinesScreen: View {
                     }
                 }
             } footer: {
-                Text(tr("Petri is for fun and general information. It doesn't diagnose. When in doubt, call a health professional."))
+                Text(HealthNotice.text)
             }
         }
         .scrollContentBackground(.hidden)
@@ -352,13 +363,22 @@ struct DataScreen: View {
                 item("iphone", tr("On this phone"),
                      tr("Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one."))
                 item("dot.radiowaves.left.and.right", tr("In a crew"),
-                     tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Dates of birth, notes and your journal are never sent."))
+                     tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent."))
                 item("creditcard", tr("Purchases"),
                      tr("The Season Pass is handled by Apple. Petri never sees your payment details."))
                 item("eye.slash", tr("No tracking"),
                      tr("No ads, no trackers, no third-party analytics, no data sold."))
+                item("externaldrive", tr("Backups"),
+                     tr("Back Up saves your whole journal as a file, where you choose. Restore reads it back on this phone or a new one. Petri never uploads it."))
                 item("trash", tr("Your call"),
                      tr("Export your journal or delete everything from Settings at any time. Leaving a crew deletes your data from the server."))
+                if let kept = Persistence.setAsideFiles.first {
+                    ShareLink(item: kept) {
+                        Text(tr("Export the journal that couldn't be read"))
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
+                    .padding(.top, 6)
+                }
                 NavigationLink {
                     LegalScreen(kind: .privacy)
                 } label: {

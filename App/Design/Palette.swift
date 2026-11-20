@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Resolved colors for the active theme and color scheme.
+/// Resolved colors for the active theme, color scheme and contrast setting.
 struct Palette {
     let background: Color
     let surface: Color
@@ -11,38 +11,54 @@ struct Palette {
     let inkTertiary: Color
     let hairline: Color
     let accent: Color
+    /// Coral for text; the bright corals are for fills and icons.
+    let coralInk: Color
+    /// Text and icons that confirm something went right.
+    let successInk: Color
+    /// Fill of progress gauges.
+    let progress: Color
+    /// The leader's crown.
+    let crown: Color
     let isDark: Bool
 
-    let lime = Color(hex: 0xB6F34A)
-    let limeDeep = Color(hex: 0x8FD929)
-    let coral = Color(hex: 0xFF5B4D)
-    let coralDeep = Color(hex: 0xFF4F42)
-    let lilac = Color(hex: 0xB48CFF)
-    let sky = Color(hex: 0x7CC4F5)
-    let hazard = Color(hex: 0xFFC93C)
-    let night = Color(hex: 0x1E1A26)
+    let lime = Color(hex: Swatch.lime)
+    let limeDeep = Color(hex: Swatch.limeDeep)
+    let coral = Color(hex: Swatch.coral)
+    let coralDeep = Color(hex: Swatch.coralDeep)
+    let lilac = Color(hex: Swatch.lilac)
+    let sky = Color(hex: Swatch.sky)
+    let hazard = Color(hex: Swatch.hazard)
+    let night = Color(hex: Swatch.night)
 
-    static func make(theme: Theme, scheme: ColorScheme) -> Palette {
+    static func make(theme: Theme, scheme: ColorScheme, contrast: ColorSchemeContrast = .standard) -> Palette {
         let dark = theme == .nightShift || scheme == .dark
+        let strong = contrast == .increased
         if dark {
-            let ink = Color(hex: 0xF6F1E7)
-            return Palette(background: Color(hex: 0x16131C), surface: Color(hex: 0x231F2C),
-                           surfaceAlt: Color(hex: 0x2E2939), sign: Color(hex: 0x231F2C),
-                           ink: ink, inkSecondary: ink.opacity(0.66), inkTertiary: ink.opacity(0.42),
-                           hairline: ink.opacity(0.12),
-                           accent: theme == .mint ? Color(hex: 0x2EC4B6) : Color(hex: 0xB6F34A), isDark: true)
+            let ink = Color(hex: Swatch.chalk)
+            return Palette(background: Color(hex: Swatch.nightBase), surface: Color(hex: Swatch.nightSurface),
+                           surfaceAlt: Color(hex: Swatch.nightRaised), sign: Color(hex: Swatch.nightSurface),
+                           ink: ink, inkSecondary: ink.opacity(strong ? 0.88 : 0.78), inkTertiary: ink.opacity(strong ? 0.78 : 0.62),
+                           hairline: ink.opacity(strong ? 0.24 : 0.12),
+                           accent: theme == .mint ? Color(hex: Swatch.mint) : Color(hex: Swatch.lime),
+                           coralInk: Color(hex: Swatch.coralSoft), successInk: Color(hex: Swatch.green),
+                           progress: Color(hex: Swatch.limeDeep), crown: Color(hex: Swatch.gold), isDark: true)
         }
-        let ink = Color(hex: 0x1E1A26)
+        let ink = Color(hex: Swatch.night)
+        let secondary = ink.opacity(strong ? 0.84 : 0.72)
+        let tertiary = ink.opacity(strong ? 0.78 : 0.64)
+        let hairline = ink.opacity(strong ? 0.22 : 0.1)
         if theme == .mint {
-            return Palette(background: Color(hex: 0xE8F6F1), surface: .white, surfaceAlt: Color(hex: 0xD5ECE3),
-                           sign: Color(hex: 0xF7FFFC), ink: ink, inkSecondary: ink.opacity(0.62),
-                           inkTertiary: ink.opacity(0.4), hairline: ink.opacity(0.1),
-                           accent: Color(hex: 0x2EC4B6), isDark: false)
+            return Palette(background: Color(hex: Swatch.mintBase), surface: .white, surfaceAlt: Color(hex: Swatch.mintAlt),
+                           sign: Color(hex: Swatch.mintSign), ink: ink, inkSecondary: secondary, inkTertiary: tertiary,
+                           hairline: hairline, accent: Color(hex: Swatch.mint), coralInk: Color(hex: Swatch.coralInk),
+                           successInk: Color(hex: Swatch.forest), progress: Color(hex: Swatch.limeInk),
+                           crown: Color(hex: Swatch.crown), isDark: false)
         }
-        return Palette(background: Color(hex: 0xF6F1E7), surface: .white, surfaceAlt: Color(hex: 0xEFE8DA),
-                       sign: Color(hex: 0xFFFBF2), ink: ink, inkSecondary: ink.opacity(0.62),
-                       inkTertiary: ink.opacity(0.4), hairline: ink.opacity(0.1),
-                       accent: Color(hex: 0xB6F34A), isDark: false)
+        return Palette(background: Color(hex: Swatch.chalk), surface: .white, surfaceAlt: Color(hex: Swatch.agarAlt),
+                       sign: Color(hex: Swatch.agarSign), ink: ink, inkSecondary: secondary, inkTertiary: tertiary,
+                       hairline: hairline, accent: Color(hex: Swatch.lime), coralInk: Color(hex: Swatch.coralInk),
+                       successInk: Color(hex: Swatch.forest), progress: Color(hex: Swatch.limeInk),
+                       crown: Color(hex: Swatch.crown), isDark: false)
     }
 }
 
@@ -58,13 +74,39 @@ extension EnvironmentValues {
 }
 
 extension Rarity {
+    /// Bright fill for gauges on dark surfaces and decorative marks.
     var color: Color {
         switch self {
-        case .common: return Color(hex: 0x8A93A6)
-        case .uncommon: return Color(hex: 0x2CB868)
-        case .rare: return Color(hex: 0x3D7BFA)
-        case .epic: return Color(hex: 0x9B5CFF)
-        case .legendary: return Color(hex: 0xF2A21B)
+        case .common: return Color(hex: Swatch.slate)
+        case .uncommon: return Color(hex: Swatch.green)
+        case .rare: return Color(hex: Swatch.azure)
+        case .epic: return Color(hex: Swatch.violet)
+        case .legendary: return Color(hex: Swatch.gold)
+        }
+    }
+
+    /// Readable shade for text and gauges on light backgrounds.
+    var inkColor: Color {
+        switch self {
+        case .common: return Color(hex: Swatch.slateInk)
+        case .uncommon: return Color(hex: Swatch.greenInk)
+        case .rare: return Color(hex: Swatch.azureInk)
+        case .epic: return Color(hex: Swatch.violetInk)
+        case .legendary: return Color(hex: Swatch.goldInk)
+        }
+    }
+
+    var pillBackground: Color {
+        switch self {
+        case .rare, .epic: return inkColor
+        case .common, .uncommon, .legendary: return color
+        }
+    }
+
+    var pillForeground: Color {
+        switch self {
+        case .rare, .epic: return .white
+        case .common, .uncommon, .legendary: return Color(hex: Swatch.night)
         }
     }
 }
@@ -77,8 +119,8 @@ extension Germ {
 /// Avatar gradients, assigned in the order people are added.
 enum AvatarColors {
     private static let pairs: [(UInt32, UInt32)] = [
-        (0x9FD6FF, 0x4C9FF0), (0xFFB3D2, 0xF26AA8), (0xFFE08A, 0xF7B52B),
-        (0x8FE8DC, 0x21B3A4), (0xD9C4FF, 0x9B6CF2), (0xFFC2A8, 0xFF7A5C)
+        (Swatch.skyLight, Swatch.blue), (Swatch.pinkLight, Swatch.pink), (Swatch.butter, Swatch.amber),
+        (Swatch.aqua, Swatch.teal), (Swatch.lavender, Swatch.violetSoft), (Swatch.peach, Swatch.peachDeep)
     ]
 
     static func gradient(_ index: Int) -> LinearGradient {
@@ -87,6 +129,6 @@ enum AvatarColors {
                               startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
-    static let you = LinearGradient(colors: [Color(hex: 0xD5FA86), Color(hex: 0x93D92F)],
+    static let you = LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeLeaf)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing)
 }

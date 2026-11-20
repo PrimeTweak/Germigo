@@ -37,7 +37,7 @@ struct TodayScreen: View {
                     Button {
                         showSettings = true
                     } label: {
-                        AvatarView(name: model.displayName, gradient: AvatarColors.you, size: 32, darkText: true)
+                        Image(systemName: "gearshape")
                     }
                     .accessibilityLabel(tr("Settings"))
                 }
@@ -78,6 +78,11 @@ private struct SickNowCard: View {
         return tr("Since %@", log.startedAt.formatted(style))
     }
 
+    /// The usual length when the Field Notes give one; otherwise their own wording.
+    private var lengthText: String {
+        germ.lastsUpToDays == nil ? germ.lasts.value : tr("Usually lasts %@", germ.lasts.value)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
@@ -86,15 +91,22 @@ private struct SickNowCard: View {
                     Text(tr("%1$@ · Day %2$lld", germ.illness.value, log.dayCount()))
                         .font(.headline)
                         .foregroundStyle(palette.ink)
-                    Text(sinceText + " · " + tr("Usually lasts %@", germ.lasts.value))
+                    Text(sinceText + " · " + lengthText)
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
+                    if log.sufferer != .me {
+                        Text(tr("Sick: %@", model.name(of: log.sufferer)))
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(palette.inkSecondary)
+                    }
                 }
+            }
+            if let upTo = germ.lastsUpToDays {
+                SickDayBar(day: log.dayCount(), upTo: upTo, tint: germ.deepTint)
             }
             HStack(spacing: 10) {
                 Button {
-                    Haptics.success()
-                    model.markBetter()
+                    model.askBetter = true
                 } label: {
                     Label(tr("I'm better"), systemImage: "checkmark")
                 }
@@ -115,8 +127,42 @@ private struct SickNowCard: View {
         }
         .sheet(isPresented: $showCoupon) {
             SharePreviewSheet(title: tr("Nap coupon")) {
-                NapCouponCard(from: model.displayName, to: model.data.partnerName, germ: germ)
+                if log.sufferer == .partner {
+                    NapCouponCard(from: model.partnerDisplayName, to: model.displayName, germ: germ)
+                } else {
+                    NapCouponCard(from: model.displayName, to: model.data.partnerName, germ: germ)
+                }
             }
+        }
+    }
+}
+
+/// Where today sits against the usual length of the germ, from its Field Notes.
+private struct SickDayBar: View {
+    let day: Int
+    let upTo: Int
+    let tint: Color
+    @Environment(\.palette) private var palette
+
+    private var overdue: Bool { day > upTo }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            GeometryReader { proxy in
+                let fraction = min(1, CGFloat(day) / CGFloat(max(1, upTo)))
+                ZStack(alignment: .leading) {
+                    Capsule().fill(palette.ink.opacity(0.07))
+                    Capsule()
+                        .fill(overdue ? palette.coralDeep : tint)
+                        .frame(width: max(10, proxy.size.width * fraction))
+                }
+            }
+            .frame(height: 10)
+            .accessibilityHidden(true)
+            Text(overdue ? tr("Longer than usual. Check when to call in the Field Notes.")
+                         : tr("Day %1$lld of up to %2$lld", day, upTo))
+                .font(.footnote.weight(overdue ? .semibold : .regular))
+                .foregroundStyle(overdue ? palette.coralInk : palette.inkSecondary)
         }
     }
 }
@@ -135,7 +181,7 @@ private struct TipsCard: View {
                         Divider()
                     }
                     HStack(alignment: .top, spacing: 13) {
-                        IconTile(symbol: item.element.icon, background: germ.lightTint, foreground: Color(hex: 0x1E1A26))
+                        IconTile(symbol: item.element.icon, background: germ.lightTint, foreground: Color(hex: Swatch.night))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.element.title.value)
                                 .font(.callout.weight(.semibold))
@@ -263,18 +309,20 @@ private struct IncomingCard: View {
                     .foregroundStyle(palette.inkSecondary)
             }
             Spacer(minLength: 4)
-            Button {
-                toggleWatch()
-            } label: {
-                Label(illness.watching ? tr("Watching") : tr("Watch"),
-                      systemImage: illness.watching ? "bell.fill" : "bell")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(illness.watching ? palette.ink : palette.background)
-                    .padding(.horizontal, 12)
-                    .frame(height: 34)
-                    .background(illness.watching ? palette.ink.opacity(0.08) : palette.ink, in: Capsule())
+            if germ.window(from: illness.startedAt) != nil {
+                Button {
+                    toggleWatch()
+                } label: {
+                    Label(illness.watching ? tr("Watching") : tr("Watch"),
+                          systemImage: illness.watching ? "bell.fill" : "bell")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(illness.watching ? palette.ink : palette.background)
+                        .padding(.horizontal, 12)
+                        .frame(height: 34)
+                        .background(illness.watching ? palette.ink.opacity(0.08) : palette.ink, in: Capsule())
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
     }
 
@@ -291,7 +339,7 @@ private struct IncomingCard: View {
             .foregroundStyle(palette.inkSecondary)
             Text(status(opens: opens, closes: closes))
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(now >= opens && now <= closes ? palette.coralDeep : palette.ink)
+                .foregroundStyle(now >= opens && now <= closes ? palette.coralInk : palette.ink)
         }
     }
 
@@ -343,7 +391,7 @@ private struct RadarTeaser: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        if let state = crew.state, !state.radar.isEmpty {
+        if model.hasPass, let state = crew.state, !state.radar.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(title: tr("Going around %@", state.crew.name), trailing: tr("This week"))
                 VStack(spacing: 0) {
@@ -383,7 +431,7 @@ struct RadarRow: View {
                             .foregroundStyle(palette.inkSecondary)
                     }
                     ProgressView(value: Double(entry.families), total: Double(max(families, entry.families, 1)))
-                        .tint(germ.deepTint)
+                        .tint(palette.coralDeep)
                 }
             }
             .padding(.horizontal, 16)
@@ -391,27 +439,59 @@ struct RadarRow: View {
     }
 }
 
-/// Level, title and progress to the next level.
+/// Level, worn title, progress to the next level, and the closest thing to unlock.
 private struct LevelCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
 
     var body: some View {
         let level = model.level
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(tr("Level %1$lld · %2$@", level.number, level.title))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                Spacer()
-                Text(tr("%1$lld / %2$lld pts", level.progress, level.span))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(palette.inkSecondary)
+        let goal = GoalEngine.next(data: model.data, catalog: model.catalog, now: Date())
+        NavigationLink {
+            SkillTreeScreen()
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Text(tr("Level %1$lld · %2$@", level.number, model.displayTitle))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .multilineTextAlignment(.leading)
+                    Spacer()
+                    Text(tr("%1$lld / %2$lld pts", level.progress, level.span))
+                        .font(.footnote.monospacedDigit())
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                ProgressView(value: level.fraction)
+                    .tint(palette.progress)
+                if let goal {
+                    Divider()
+                    HStack(spacing: 12) {
+                        IconTile(symbol: goal.symbol, background: palette.surfaceAlt, foreground: palette.ink, size: 32)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(tr("Next up: %@", goal.title))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(palette.ink)
+                                .multilineTextAlignment(.leading)
+                            Text(goal.detail)
+                                .font(.caption)
+                                .foregroundStyle(palette.inkSecondary)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 4)
+                        Text(tr("%1$lld of %2$lld", goal.progress, goal.target))
+                            .font(.footnote.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(palette.inkSecondary)
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.bold))
+                            .foregroundStyle(palette.inkTertiary)
+                            .accessibilityHidden(true)
+                    }
+                }
             }
-            ProgressView(value: level.fraction)
-                .tint(palette.limeDeep)
+            .petriCard()
         }
-        .petriCard()
+        .buttonStyle(.plain)
+        .accessibilityHint(tr("Opens the skill tree"))
         .padding(.top, 8)
     }
 }

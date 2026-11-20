@@ -1,5 +1,6 @@
 import StoreKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// A settings row label with the app's rounded icon tile.
 struct SettingsLabel: View {
@@ -24,6 +25,7 @@ struct SettingsScreen: View {
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showPaywall = false
     @State private var showManage = false
     @State private var editingName = false
@@ -31,7 +33,12 @@ struct SettingsScreen: View {
     @State private var nameDraft = ""
     @State private var confirmErase = false
     @State private var eraseFailed = false
-    @State private var exportURL: URL?
+    @State private var notificationsDenied = false
+    @State private var restoreMessage: String?
+    @State private var isRestoring = false
+    @State private var importingBackup = false
+    @State private var pendingBackup: AppData?
+    @State private var backupUnreadable = false
 
     var body: some View {
         NavigationStack {
@@ -47,7 +54,7 @@ struct SettingsScreen: View {
             }
             .scrollContentBackground(.hidden)
             .background(palette.background.ignoresSafeArea())
-            .tint(Color(hex: 0x34C759))
+            .tint(.green)
             .navigationTitle(tr("Settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -79,7 +86,7 @@ struct SettingsScreen: View {
                 }
                 Button(tr("Cancel"), role: .cancel) {}
             } message: {
-                Text(tr("Used for the nap coupon and for Tag Team. Leave it empty to remove."))
+                Text(tr("Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove."))
             }
             .confirmationDialog(tr("Delete everything?"), isPresented: $confirmErase, titleVisibility: .visible) {
                 Button(tr("Delete everything"), role: .destructive) {
@@ -90,20 +97,114 @@ struct SettingsScreen: View {
                 Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone."))
             }
             .alert(tr("Nothing was deleted"), isPresented: $eraseFailed) {
+                Button(tr("Erase this phone only"), role: .destructive) {
+                    eraseEverything(skippingServer: true)
+                }
+                Button(tr("Try later"), role: .cancel) {}
+            } message: {
+                Text(tr("The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed."))
+            }
+            .fileImporter(isPresented: $importingBackup, allowedContentTypes: [.json]) { result in
+                if case .success(let url) = result {
+                    readBackup(url)
+                }
+            }
+            .confirmationDialog(tr("Replace your journal?"), isPresented: backupBinding, titleVisibility: .visible) {
+                Button(tr("Replace with the backup"), role: .destructive) {
+                    if let backup = pendingBackup {
+                        model.restore(backup)
+                        Haptics.success()
+                    }
+                    pendingBackup = nil
+                }
+                Button(tr("Cancel"), role: .cancel) {
+                    pendingBackup = nil
+                }
+            } message: {
+                Text(backupSummary)
+            }
+            .alert(tr("This file isn't a Petri backup"), isPresented: $backupUnreadable) {
                 Button(tr("OK"), role: .cancel) {}
             } message: {
-                Text(tr("The crew server can't be reached, so your crew data can't be removed yet. Try again when you're online."))
+                Text(tr("Pick a file made with Back Up, in Settings."))
+            }
+            .alert(tr("Restore Purchases"), isPresented: restoreBinding) {
+                Button(tr("OK"), role: .cancel) {}
+            } message: {
+                Text(restoreMessage ?? "")
             }
             .onChange(of: model.data.settings.checkInsOn) { _, isOn in
-                guard isOn else { return }
-                Task {
-                    _ = await NotificationManager.requestAuthorization()
-                }
+                if isOn { askForReminders() }
+            }
+            .onChange(of: model.data.settings.crewAlertsOn) { _, isOn in
+                if isOn { askForReminders() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { refreshNotificationStatus() }
             }
             .task {
-                exportURL = CSVExporter.export(logs: model.data.logs, catalog: model.catalog) { source in
-                    model.sourceName(source)
-                }
+                notificationsDenied = await NotificationManager.isDenied()
+            }
+        }
+    }
+
+    private var backupBinding: Binding<Bool> {
+        Binding(get: { pendingBackup != nil }, set: { shown in
+            if !shown { pendingBackup = nil }
+        })
+    }
+
+    private var backupSummary: String {
+        guard let backup = pendingBackup else { return "" }
+        let started = backup.installedAt.formatted(date: .abbreviated, time: .omitted)
+        return tr("The journal on this phone is replaced by the backup: %1$lld germs logged since %2$@.",
+                  backup.logs.count, started)
+    }
+
+    /// Opens a file picked in Files and keeps it only if it is a Petri journal.
+    private func readBackup(_ url: URL) {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer {
+            if scoped { url.stopAccessingSecurityScopedResource() }
+        }
+        if let raw = try? Data(contentsOf: url), let backup = Persistence.readBackup(raw) {
+            pendingBackup = backup
+        } else {
+            backupUnreadable = true
+        }
+    }
+
+    private var restoreBinding: Binding<Bool> {
+        Binding(get: { restoreMessage != nil }, set: { shown in
+            if !shown { restoreMessage = nil }
+        })
+    }
+
+    private func refreshNotificationStatus() {
+        Task {
+            notificationsDenied = await NotificationManager.isDenied()
+        }
+    }
+
+    private func askForReminders() {
+        Task {
+            await model.enableReminders()
+            notificationsDenied = await NotificationManager.isDenied()
+        }
+    }
+
+    private func restore() {
+        guard !isRestoring else { return }
+        isRestoring = true
+        Task {
+            let failure = await purchases.restore()
+            isRestoring = false
+            if let failure {
+                restoreMessage = failure
+            } else if model.hasPass {
+                restoreMessage = tr("Your Season Pass is active on this phone.")
+            } else {
+                restoreMessage = tr("No Season Pass was found for this Apple Account.")
             }
         }
     }
@@ -115,27 +216,20 @@ struct SettingsScreen: View {
                 set: { value in model.updateSettings { $0[keyPath: keyPath] = value } })
     }
 
-    private func clock(_ keyPath: WritableKeyPath<AppSettings, Int>) -> Binding<Date> {
-        Binding(get: {
-            let minute = model.data.settings[keyPath: keyPath]
-            return Calendar.current.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: Date()) ?? Date()
-        }, set: { date in
-            let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
-            let minute = (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
-            model.updateSettings { $0[keyPath: keyPath] = minute }
-        })
-    }
-
-    private func eraseEverything() {
+    private func eraseEverything(skippingServer: Bool = false) {
         Task {
-            if crew.isMember {
+            if crew.isMember, !skippingServer {
                 let left = await crew.leave()
                 if !left {
                     eraseFailed = true
                     return
                 }
             }
+            crew.resetLocal()
             model.eraseEverything()
+            if AppIconManager.current != .petri {
+                _ = await AppIconManager.apply(.petri)
+            }
             dismiss()
         }
     }
@@ -149,12 +243,12 @@ struct SettingsScreen: View {
                 editingName = true
             } label: {
                 HStack(spacing: 14) {
-                    AvatarView(name: model.displayName, gradient: AvatarColors.you, size: 56, darkText: true)
+                    AvatarView(name: model.displayName, gradient: AvatarColors.you, size: 56)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(model.displayName)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(palette.ink)
-                        Text(tr("Level %1$lld · %2$@", model.level.number, model.level.title))
+                        Text(tr("Level %1$lld · %2$@", model.level.number, model.displayTitle))
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
                     }
@@ -187,7 +281,7 @@ struct SettingsScreen: View {
                 LabeledContent {
                     Text(model.data.partnerName ?? tr("Add"))
                 } label: {
-                    SettingsLabel(symbol: "person.2.fill", tint: Color(hex: 0xF26AA8), title: tr("Partner"))
+                    SettingsLabel(symbol: "person.2.fill", tint: Color(hex: Swatch.pink), title: tr("Partner"))
                 }
             }
             if AppConfig.crewEnabled {
@@ -227,15 +321,14 @@ struct SettingsScreen: View {
                 }
             }
             Button {
-                Task {
-                    await purchases.restore()
-                }
+                restore()
             } label: {
-                SettingsLabel(symbol: "arrow.clockwise", tint: Color(hex: 0x8A93A6), title: tr("Restore Purchases"))
+                SettingsLabel(symbol: "arrow.clockwise", tint: Color(hex: Swatch.slate), title: tr("Restore Purchases"))
             }
+            .disabled(isRestoring)
             #if PETRI_SIDELOAD
             Toggle(isOn: setting(\.sideloadPass)) {
-                SettingsLabel(symbol: "hammer.fill", tint: Color(hex: 0x8A93A6), title: tr("Pass (test build)"))
+                SettingsLabel(symbol: "hammer.fill", tint: Color(hex: Swatch.slate), title: tr("Pass (test build)"))
             }
             #endif
         }
@@ -257,13 +350,13 @@ struct SettingsScreen: View {
             }
             .tint(palette.inkSecondary)
             Toggle(isOn: setting(\.soundsOn)) {
-                SettingsLabel(symbol: "speaker.wave.2.fill", tint: Color(hex: 0xFF8A3D), title: tr("Sounds and Haptics"))
+                SettingsLabel(symbol: "speaker.wave.2.fill", tint: Color(hex: Swatch.orange), title: tr("Sounds and Haptics"))
             }
         }
     }
 
     private var notificationSection: some View {
-        Section(tr("Notifications")) {
+        Section {
             Toggle(isOn: setting(\.checkInsOn)) {
                 SettingsLabel(symbol: "bell.fill", tint: palette.coral, title: tr("Check-ins"))
             }
@@ -272,15 +365,17 @@ struct SettingsScreen: View {
                     SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: palette.coral, title: tr("Crew Alerts"))
                 }
             }
-            Toggle(isOn: setting(\.quietHoursOn)) {
-                SettingsLabel(symbol: "moon.fill", tint: Color(hex: 0x5B4FE0), title: tr("Quiet Hours"))
+            if notificationsDenied, let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                Link(destination: url) {
+                    SettingsLabel(symbol: "bell.slash.fill", tint: Color(hex: Swatch.slate), title: tr("Turn On in iOS Settings"))
+                }
             }
-            if model.data.settings.quietHoursOn {
-                DatePicker(tr("From"), selection: clock(\.quietStartMinute), displayedComponents: .hourAndMinute)
-                    .foregroundStyle(palette.ink)
-                DatePicker(tr("To"), selection: clock(\.quietEndMinute), displayedComponents: .hourAndMinute)
-                    .foregroundStyle(palette.ink)
-            }
+        } header: {
+            Text(tr("Notifications"))
+        } footer: {
+            Text(notificationsDenied
+                 ? tr("Notifications are off for Petri, so no reminder can reach you.")
+                 : tr("A reminder due between 10 PM and 7 AM waits until morning."))
         }
     }
 
@@ -289,12 +384,12 @@ struct SettingsScreen: View {
             NavigationLink {
                 HelpLinesScreen()
             } label: {
-                SettingsLabel(symbol: "phone.fill", tint: Color(hex: 0x34C759), title: tr("Help Lines"))
+                SettingsLabel(symbol: "phone.fill", tint: .green, title: tr("Help Lines"))
             }
         } header: {
             Text(tr("Health"))
         } footer: {
-            Text(tr("Petri is for fun and general information. It doesn't diagnose. When in doubt, call a health professional."))
+            Text(HealthNotice.text)
         }
     }
 
@@ -303,16 +398,28 @@ struct SettingsScreen: View {
             NavigationLink {
                 DataScreen()
             } label: {
-                SettingsLabel(symbol: "hand.raised.fill", tint: Color(hex: 0x3D7BFA), title: tr("Your Data"))
+                SettingsLabel(symbol: "hand.raised.fill", tint: Color(hex: Swatch.azure), title: tr("Your Data"))
             }
-            if let exportURL, !model.data.logs.isEmpty {
-                ShareLink(item: exportURL) {
+            if !model.data.logs.isEmpty {
+                ShareLink(item: journalExport, preview: SharePreview(tr("Petri journal"))) {
                     LabeledContent {
                         Text(verbatim: "CSV")
                     } label: {
-                        SettingsLabel(symbol: "square.and.arrow.up", tint: Color(hex: 0x8A93A6), title: tr("Export"))
+                        SettingsLabel(symbol: "square.and.arrow.up", tint: Color(hex: Swatch.slate), title: tr("Export"))
                     }
                 }
+            }
+            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Petri backup"))) {
+                LabeledContent {
+                    Text(verbatim: "JSON")
+                } label: {
+                    SettingsLabel(symbol: "externaldrive.fill", tint: Color(hex: Swatch.azure), title: tr("Back Up"))
+                }
+            }
+            Button {
+                importingBackup = true
+            } label: {
+                SettingsLabel(symbol: "arrow.down.doc.fill", tint: Color(hex: Swatch.azure), title: tr("Restore"))
             }
             Button {
                 confirmErase = true
@@ -322,8 +429,16 @@ struct SettingsScreen: View {
         } header: {
             Text(tr("Privacy"))
         } footer: {
-            Text(tr("No ads, no trackers, no third-party analytics. Your journal stays on this phone. Crew sharing is your choice."))
+            Text(tr("No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice."))
         }
+    }
+
+    /// Built from the journal only when the share sheet asks for it.
+    private var journalExport: JournalExport {
+        let logs = model.data.logs
+        let catalog = model.catalog
+        let names = Dictionary(uniqueKeysWithValues: logs.map { ($0.id, model.sourceName($0.source)) })
+        return JournalExport(logs: logs, catalog: catalog, sourceNames: names)
     }
 
     private var aboutSection: some View {
@@ -336,16 +451,16 @@ struct SettingsScreen: View {
             NavigationLink {
                 LegalScreen(kind: .terms)
             } label: {
-                SettingsLabel(symbol: "doc.text.fill", tint: Color(hex: 0x8A93A6), title: tr("Terms of Use"))
+                SettingsLabel(symbol: "doc.text.fill", tint: Color(hex: Swatch.slate), title: tr("Terms of Use"))
             }
             NavigationLink {
                 LegalScreen(kind: .privacy)
             } label: {
-                SettingsLabel(symbol: "lock.fill", tint: Color(hex: 0x8A93A6), title: tr("Privacy Policy"))
+                SettingsLabel(symbol: "lock.fill", tint: Color(hex: Swatch.slate), title: tr("Privacy Policy"))
             }
             if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
                 Link(destination: url) {
-                    SettingsLabel(symbol: "envelope.fill", tint: Color(hex: 0x3D7BFA), title: tr("Contact Support"))
+                    SettingsLabel(symbol: "envelope.fill", tint: Color(hex: Swatch.azure), title: tr("Contact Support"))
                 }
             }
         } header: {

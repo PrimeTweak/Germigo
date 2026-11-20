@@ -11,11 +11,11 @@ struct PaywallView: View {
     @State private var selectedID = PassProduct.yearlyID
     @State private var legal: LegalKind?
 
-    private let backdrop = Color(hex: 0x16131C)
-    private let panel = Color(hex: 0x231F2C)
-    private let chalk = Color(hex: 0xF6F1E7)
-    private let lime = Color(hex: 0xB6F34A)
-    private let night = Color(hex: 0x1E1A26)
+    private let backdrop = Color(hex: Swatch.nightBase)
+    private let panel = Color(hex: Swatch.nightSurface)
+    private let chalk = Color(hex: Swatch.chalk)
+    private let lime = Color(hex: Swatch.lime)
+    private let night = Color(hex: Swatch.night)
 
     private var selected: Product? {
         purchases.products.first { $0.id == selectedID }
@@ -80,10 +80,19 @@ struct PaywallView: View {
         } message: {
             Text(purchases.lastError ?? "")
         }
+        .alert(tr("Waiting for approval"), isPresented: pendingBinding) {
+            Button(tr("OK"), role: .cancel) {}
+        } message: {
+            Text(tr("Your purchase needs an approval. The Season Pass turns on by itself once it's approved."))
+        }
     }
 
     private var errorBinding: Binding<Bool> {
         Binding(get: { purchases.lastError != nil }, set: { if !$0 { purchases.lastError = nil } })
+    }
+
+    private var pendingBinding: Binding<Bool> {
+        Binding(get: { purchases.pendingNotice }, set: { purchases.pendingNotice = $0 })
     }
 
     private func close() {
@@ -138,7 +147,7 @@ struct PaywallView: View {
         }
         .foregroundStyle(night)
         .frame(maxWidth: .infinity)
-        .background(LinearGradient(colors: [Color(hex: 0xD5FA86), Color(hex: 0xA6EB3A)],
+        .background(LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeMid)],
                                    startPoint: .topLeading, endPoint: .bottomTrailing))
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .rotationEffect(.degrees(-2))
@@ -150,7 +159,9 @@ struct PaywallView: View {
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 14) {
             benefit("person.2.fill", tr("Your whole household"), tr("Every kid in one journal"))
-            benefit("dot.radiowaves.left.and.right", tr("Daycare Crew"), tr("An outbreak radar for your group"))
+            if AppConfig.crewEnabled {
+                benefit("dot.radiowaves.left.and.right", tr("Daycare Crew"), tr("An outbreak radar for your group"))
+            }
             benefit("book.fill", tr("Every deep dive"), tr("The fun science on every germ, and every read"))
             benefit("sparkles", tr("Holo cards and extras"), tr("The Soup Bowl icon and the incubation widget"))
         }
@@ -318,7 +329,9 @@ struct PaywallView: View {
                 ProgressView()
                     .tint(chalk)
             } else {
-                Text(tr("The App Store can't be reached right now. Check your connection and try again."))
+                Text(purchases.loadFailed
+                     ? tr("The App Store can't be reached right now. Check your connection and try again.")
+                     : tr("The Season Pass isn't available right now. Try again later."))
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .opacity(0.8)
@@ -339,8 +352,12 @@ struct PaywallView: View {
         HStack(spacing: 18) {
             Button(tr("Restore Purchases")) {
                 Task {
-                    await purchases.restore()
-                    if model.hasPass { close() }
+                    let failure = await purchases.restore()
+                    if model.hasPass {
+                        close()
+                    } else {
+                        purchases.lastError = failure ?? tr("No Season Pass was found for this Apple Account.")
+                    }
                 }
             }
             Button(tr("Terms")) {

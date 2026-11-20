@@ -23,6 +23,12 @@ final class PurchaseManager {
     private(set) var isPurchasing = false
     var lastError: String?
 
+    /// True when the App Store could not be asked for the products at all.
+    private(set) var loadFailed = false
+
+    /// Set when a purchase waits for an approval, such as Ask to Buy.
+    var pendingNotice = false
+
     @ObservationIgnored private var updatesTask: Task<Void, Never>?
 
     init() {
@@ -60,11 +66,13 @@ final class PurchaseManager {
         defer { isLoading = false }
         do {
             products = try await Product.products(for: PassProduct.all)
+            loadFailed = false
             if let subscription = yearly?.subscription {
                 introEligible = await subscription.isEligibleForIntroOffer
             }
         } catch {
             products = []
+            loadFailed = true
         }
     }
 
@@ -93,7 +101,10 @@ final class PurchaseManager {
                 await transaction.finish()
                 await refreshEntitlements()
                 return hasPass
-            case .userCancelled, .pending:
+            case .pending:
+                pendingNotice = true
+                return false
+            case .userCancelled:
                 return false
             @unknown default:
                 return false
@@ -104,13 +115,16 @@ final class PurchaseManager {
         }
     }
 
-    func restore() async {
+    /// Syncs with the App Store; returns the error text when the sync fails.
+    func restore() async -> String? {
+        var failure: String?
         do {
             try await AppStore.sync()
         } catch {
-            lastError = error.localizedDescription
+            failure = error.localizedDescription
         }
         await refreshEntitlements()
+        return failure
     }
 
     /// The free trial length in days, when the yearly plan offers one.

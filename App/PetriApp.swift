@@ -8,6 +8,7 @@ struct PetriApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        NotificationManager.install()
         IntentRelay.handler = { action in
             await AppModel.shared.handle(action)
         }
@@ -19,6 +20,9 @@ struct PetriApp: App {
                 .environment(model)
                 .environment(purchases)
                 .environment(crew)
+                .onOpenURL { url in
+                    model.open(url)
+                }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
@@ -59,9 +63,10 @@ struct RootView: View {
 private struct ThemedRoot: View {
     @Environment(AppModel.self) private var model
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        let palette = Palette.make(theme: model.data.settings.theme, scheme: colorScheme)
+        let palette = Palette.make(theme: model.data.settings.theme, scheme: colorScheme, contrast: contrast)
         Group {
             if model.data.onboardingDone {
                 MainTabs()
@@ -72,6 +77,27 @@ private struct ThemedRoot: View {
         .environment(\.palette, palette)
         .tint(palette.ink)
         .animation(.easeInOut(duration: 0.35), value: model.data.onboardingDone)
+        .alert(noticeTitle, isPresented: noticeBinding) {
+            Button(tr("OK"), role: .cancel) {}
+        } message: {
+            Text(noticeMessage)
+        }
+    }
+
+    private var noticeBinding: Binding<Bool> {
+        Binding(get: { model.journalNotice != nil }, set: { shown in
+            if !shown { model.journalNotice = nil }
+        })
+    }
+
+    private var noticeTitle: String {
+        model.journalNotice == .saveFailed ? tr("Your journal wasn't saved") : tr("Your journal couldn't be read")
+    }
+
+    private var noticeMessage: String {
+        model.journalNotice == .saveFailed
+            ? tr("Petri couldn't write to this phone. Free up some storage, then make your change again.")
+            : tr("Petri kept the file and started a new journal. You can export the kept file from Settings, under Your Data.")
     }
 }
 
@@ -117,6 +143,36 @@ struct MainTabs: View {
         .fullScreenCover(item: $model.pendingReward) { reward in
             RewardView(reward: reward)
         }
+        .sheet(item: $model.pendingMilestone) { event in
+            SharePreviewSheet(title: tr("Milestone unlocked")) {
+                MilestoneShareCard(days: event.days)
+            }
+            .onAppear {
+                Haptics.success()
+            }
+        }
+        .overlay(alignment: .top) {
+            ZStack {
+                if let toast = model.toast {
+                    ToastView(text: toast)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .task(id: toast) {
+                            try? await Task.sleep(nanoseconds: 2_200_000_000)
+                            model.toast = nil
+                        }
+                }
+            }
+            .animation(.snappy, value: model.toast)
+        }
+        .confirmationDialog(tr("Feeling better?"), isPresented: $model.askBetter, titleVisibility: .visible) {
+            Button(tr("Yes, I'm better")) {
+                Haptics.success()
+                model.markBetter()
+            }
+            Button(tr("Not yet"), role: .cancel) {}
+        } message: {
+            Text(tr("This ends the current germ and restarts your streak."))
+        }
     }
 
     /// Lets the counter flip on Today before the reward covers the screen.
@@ -128,6 +184,23 @@ struct MainTabs: View {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
             model.pendingReward = reward
         }
+    }
+}
+
+/// A short confirmation that slides in at the top of the screen.
+private struct ToastView: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color(hex: Swatch.night))
+            .padding(.horizontal, 18)
+            .frame(minHeight: 42)
+            .background(Color(hex: Swatch.lime), in: Capsule())
+            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 6)
+            .padding(.top, 6)
+            .accessibilityAddTraits(.isStaticText)
     }
 }
 
@@ -148,14 +221,16 @@ private struct SickAccessory: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 8)
-                Button(tr("Better")) {
-                    Haptics.success()
-                    model.markBetter()
+                Button {
+                    model.askBetter = true
+                } label: {
+                    Text(tr("Better"))
+                        .foregroundStyle(Color(hex: Swatch.night))
                 }
                 .font(.subheadline.weight(.semibold))
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
-                .tint(Color(hex: 0xFF4F42))
+                .tint(Color(hex: Swatch.coralDeep))
             }
             .padding(.horizontal, 12)
         }

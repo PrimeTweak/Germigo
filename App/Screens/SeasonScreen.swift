@@ -5,11 +5,16 @@ import SwiftUI
 struct SeasonScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var showRecap = false
+    @State private var showWrapped = false
+    @State private var showDuel = false
+
+    /// Zero is the current season; each step goes one daycare year back.
+    @State private var seasonsBack = 0
 
     var body: some View {
-        let season = model.season
-        let stats = model.seasonStats()
+        let seasonCount = model.season.number
+        let season = model.season(back: min(seasonsBack, seasonCount - 1))
+        let stats = model.seasonStats(for: season)
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
@@ -17,7 +22,9 @@ struct SeasonScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
+                    wrappedBanner(season)
                     tiles(stats)
+                    duelCard(season)
                     if let supplier = stats.topSupplier {
                         supplierCard(supplier)
                     }
@@ -41,40 +48,143 @@ struct SeasonScreen: View {
             .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("Season %lld", season.number))
             .toolbar {
+                if seasonCount > 1 {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Menu {
+                            ForEach(0..<seasonCount, id: \.self) { back in
+                                Button(tr("Season %lld", seasonCount - back)) {
+                                    seasonsBack = back
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "calendar")
+                        }
+                        .accessibilityLabel(tr("Seasons"))
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        showRecap = true
+                        showWrapped = true
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                     }
-                    .accessibilityLabel(tr("Share recap"))
+                    .accessibilityLabel(tr("Season wrapped"))
                 }
             }
-            .sheet(isPresented: $showRecap) {
-                SharePreviewSheet(title: tr("Season recap")) {
-                    SeasonRecapCard(seasonNumber: season.number, stats: stats, level: model.level,
-                                    germs: seasonGerms(stats))
+            .fullScreenCover(isPresented: $showWrapped) {
+                WrappedScreen(season: season)
+            }
+            .sheet(isPresented: $showDuel) {
+                SharePreviewSheet(title: tr("Couple duel")) {
+                    DuelShareCard(seasonNumber: season.number, me: model.displayName, partner: model.partnerDisplayName,
+                                  stats: DuelEngine.stats(data: model.data, season: season, now: Date()))
                 }
             }
         }
+    }
+
+    private func wrappedBanner(_ season: Season) -> some View {
+        Button {
+            showWrapped = true
+        } label: {
+            HStack(spacing: 13) {
+                IconTile(symbol: "sparkles", background: palette.night, foreground: palette.lime, size: 44)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("Season %lld, wrapped", season.number))
+                        .font(.headline)
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Your season in story cards, ready to share."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .petriCard()
+        }
+        .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func duelCard(_ season: Season) -> some View {
+        if model.data.partnerName != nil {
+            let duel = DuelEngine.stats(data: model.data, season: season, now: Date())
+            VStack(alignment: .leading, spacing: 10) {
+                SectionHeader(title: tr("Couple duel"), trailing: duelVerdict(duel))
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        duelSide(name: model.displayName, side: duel.me, leads: duel.leader == .me,
+                                 gradient: AvatarColors.you)
+                        duelSide(name: model.partnerDisplayName, side: duel.partner, leads: duel.leader == .partner,
+                                 gradient: AvatarColors.gradient(1))
+                    }
+                    Button {
+                        showDuel = true
+                    } label: {
+                        Label(tr("Share the scoreboard"), systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
+                }
+                .petriCard()
+            }
+        } else {
+            HStack(spacing: 12) {
+                IconTile(symbol: "person.2.fill", background: Color(hex: Swatch.pink), size: 36)
+                Text(tr("Add your partner in Settings, under Family, to start the couple duel."))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .petriCard()
+        }
+    }
+
+    private func duelVerdict(_ duel: DuelStats) -> String {
+        if duel.leader == .me { return tr("%@ leads", model.displayName) }
+        if duel.leader == .partner { return tr("%@ leads", model.partnerDisplayName) }
+        return tr("Tied")
+    }
+
+    private func duelSide(name: String, side: DuelSide, leads: Bool, gradient: LinearGradient) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                AvatarView(name: name, gradient: gradient, size: 32)
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                    .lineLimit(1)
+                if leads {
+                    Image(systemName: "crown.fill")
+                        .font(.caption)
+                        .foregroundStyle(palette.crown)
+                        .accessibilityLabel(tr("Leads"))
+                }
+            }
+            Text(tr("%lld pts", side.points))
+                .font(.title3.weight(.heavy).monospacedDigit())
+                .foregroundStyle(palette.ink)
+            Text(tr("%1$lld germs · %2$lld days", side.germs, side.daysSick))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(leads ? palette.lime.opacity(0.22) : palette.surfaceAlt.opacity(0.6),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 
     private func rangeLabel(_ season: Season) -> String {
         let lastDay = season.end.addingTimeInterval(-86_400)
         let style = Date.FormatStyle().month(.abbreviated).year()
+        guard season.contains(Date()) else {
+            return tr("%1$@ to %2$@", season.start.formatted(style), lastDay.formatted(style))
+        }
         return tr("%1$@ to %2$@ · Week %3$lld", season.start.formatted(style), lastDay.formatted(style),
                   season.week(for: Date()))
-    }
-
-    private func seasonGerms(_ stats: SeasonStats) -> [Germ] {
-        var seen = Set<String>()
-        var germs: [Germ] = []
-        for bucket in stats.months {
-            for entry in bucket.entries where seen.insert(entry.germ.id).inserted {
-                germs.append(entry.germ)
-            }
-        }
-        return germs
     }
 
     private func monthName(_ offset: Int, season: Season) -> String {
@@ -89,7 +199,7 @@ struct SeasonScreen: View {
             tile(String(stats.germsCaught), tr("germs caught"), tint: palette.coral)
             tile(String(stats.daysSick), tr("days sick"), tint: palette.lilac)
             tile(String(stats.dodged), tr("germs dodged"), tint: palette.sky)
-            tile(tr("Lv %lld", level.number), level.title, tint: palette.limeDeep)
+            tile(tr("Lv %lld", level.number), model.displayTitle, tint: palette.limeDeep)
         }
     }
 
@@ -124,7 +234,7 @@ struct SeasonScreen: View {
                 AvatarView(name: supplier.kid.name, gradient: AvatarColors.gradient(supplier.kid.colorIndex), size: 52)
                 Image(systemName: "trophy.fill")
                     .font(.caption.weight(.bold))
-                    .foregroundStyle(Color(hex: 0x1E1A26))
+                    .foregroundStyle(Color(hex: Swatch.night))
                     .frame(width: 24, height: 24)
                     .background(palette.hazard, in: Circle())
                     .offset(x: 6, y: 4)
@@ -205,8 +315,10 @@ struct SeasonScreen: View {
                           trailing: trCount(chain.days, one: "%lld day", other: "%lld days"))
             HStack(spacing: 10) {
                 chainLink(name: chain.kid.name, gradient: AvatarColors.gradient(chain.kid.colorIndex), germ: chain.germ)
-                arrow
-                chainLink(name: model.displayName, gradient: AvatarColors.you, germ: chain.germ, darkText: true)
+                if chain.sufferer.includesMe {
+                    arrow
+                    chainLink(name: model.displayName, gradient: AvatarColors.you, germ: chain.germ)
+                }
                 if chain.includesPartner {
                     arrow
                     chainLink(name: model.data.partnerName ?? tr("Partner"), gradient: AvatarColors.gradient(4),
@@ -225,10 +337,10 @@ struct SeasonScreen: View {
             .accessibilityHidden(true)
     }
 
-    private func chainLink(name: String, gradient: LinearGradient, germ: Germ, darkText: Bool = false) -> some View {
+    private func chainLink(name: String, gradient: LinearGradient, germ: Germ) -> some View {
         VStack(spacing: 5) {
             ZStack(alignment: .bottomTrailing) {
-                AvatarView(name: name, gradient: gradient, size: 46, darkText: darkText)
+                AvatarView(name: name, gradient: gradient, size: 46)
                 GermImage(germ: germ, size: 24)
                     .offset(x: 8, y: 6)
             }
@@ -247,6 +359,7 @@ struct LogbookScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var editing: SickLog?
+    @State private var pendingDelete: SickLog?
 
     private var logs: [SickLog] {
         model.data.logs.sorted { $0.startedAt > $1.startedAt }
@@ -265,11 +378,12 @@ struct LogbookScreen: View {
                     row(log)
                 }
                 .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        model.deleteLog(log.id)
+                    Button {
+                        pendingDelete = log
                     } label: {
                         Label(tr("Delete"), systemImage: "trash")
                     }
+                    .tint(Color.red)
                 }
             }
         }
@@ -280,6 +394,23 @@ struct LogbookScreen: View {
         .sheet(item: $editing) { log in
             LogEditSheet(log: log)
         }
+        .confirmationDialog(tr("Delete this log?"), isPresented: deleteBinding, titleVisibility: .visible) {
+            Button(tr("Delete"), role: .destructive) {
+                if let log = pendingDelete { model.deleteLog(log.id) }
+                pendingDelete = nil
+            }
+            Button(tr("Cancel"), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: {
+            Text(tr("Its points leave your total and your streak is counted again without it."))
+        }
+    }
+
+    private var deleteBinding: Binding<Bool> {
+        Binding(get: { pendingDelete != nil }, set: { shown in
+            if !shown { pendingDelete = nil }
+        })
     }
 
     private func row(_ log: SickLog) -> some View {
@@ -300,7 +431,7 @@ struct LogbookScreen: View {
             }
             Spacer(minLength: 4)
             if log.isActive {
-                PillLabel(text: tr("Now"), foreground: .white, background: palette.coralDeep)
+                PillLabel(text: tr("Now"), foreground: palette.night, background: palette.coralDeep)
             } else {
                 Text(tr("+%lld pts", log.points))
                     .font(.footnote.monospacedDigit())
@@ -325,14 +456,25 @@ private struct LogEditSheet: View {
         _endDate = State(initialValue: log.endedAt ?? Date())
     }
 
+    /// Only the germ that started last can still be going on.
+    private var canStayOpen: Bool {
+        JournalRules.latestID(in: model.data.logs) == draft.id
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     DatePicker(tr("Started"), selection: $draft.startedAt, in: ...Date())
-                    Toggle(tr("Recovered"), isOn: $recovered)
-                    if recovered {
+                    if canStayOpen {
+                        Toggle(tr("Recovered"), isOn: $recovered)
+                    }
+                    if recovered || !canStayOpen {
                         DatePicker(tr("Ended"), selection: $endDate, in: draft.startedAt...Date())
+                    }
+                } footer: {
+                    if !canStayOpen {
+                        Text(tr("A newer germ is in your journal, so this one has an end date."))
                     }
                 }
                 Section {
@@ -344,12 +486,18 @@ private struct LogEditSheet: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    Toggle(tr("Partner sick too"), isOn: $draft.partnerSickToo)
+                    if let partner = model.data.partnerName {
+                        Picker(tr("Who was sick?"), selection: $draft.sufferer) {
+                            Text(tr("Me")).tag(Sufferer.me)
+                            Text(verbatim: partner).tag(Sufferer.partner)
+                            Text(tr("Both")).tag(Sufferer.both)
+                        }
+                    }
                 } footer: {
                     Text(tr("Points stay as they were when the germ was logged."))
                 }
             }
-            .tint(Color(hex: 0x34C759))
+            .tint(.green)
             .navigationTitle(tr("Edit log"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -362,7 +510,7 @@ private struct LogEditSheet: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(tr("Save")) {
                         var updated = draft
-                        updated.endedAt = recovered ? max(endDate, draft.startedAt) : nil
+                        updated.endedAt = recovered || !canStayOpen ? max(endDate, draft.startedAt) : nil
                         model.updateLog(updated)
                         dismiss()
                     }

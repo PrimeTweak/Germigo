@@ -25,9 +25,11 @@ struct SupplierStat {
 struct ChainStat {
     let kid: Kid
     let germ: Germ
-    let includesPartner: Bool
+    let sufferer: Sufferer
     let days: Int
     let startedAt: Date
+
+    var includesPartner: Bool { sufferer.includesPartner }
 }
 
 struct SeasonStats {
@@ -92,8 +94,7 @@ enum StatsEngine {
             let illness = data.kidIllnesses.first { $0.id == log.kidIllnessID }
             let start = illness?.startedAt ?? log.startedAt
             let days = StreakMath.days(from: start, to: log.endedAt ?? now) + 1
-            let candidate = ChainStat(kid: kid, germ: germ, includesPartner: log.partnerSickToo,
-                                      days: days, startedAt: start)
+            let candidate = ChainStat(kid: kid, germ: germ, sufferer: log.sufferer, days: days, startedAt: start)
             if let current = longestChain {
                 let better = (candidate.includesPartner && !current.includesPartner)
                     || (candidate.includesPartner == current.includesPartner && candidate.days > current.days)

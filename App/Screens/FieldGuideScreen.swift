@@ -26,10 +26,14 @@ struct FieldGuideScreen: View {
                 } header: {
                     Text(tr("Reads"))
                 } footer: {
-                    Text(tr("Reads unlock as your album grows. The Season Pass opens them all."))
+                    Text(tr("Reads unlock as you log germs. The Season Pass opens them all."))
                 }
             }
             Section {
+                if germs.isEmpty {
+                    Text(tr("No illness matches your search."))
+                        .foregroundStyle(palette.inkSecondary)
+                }
                 ForEach(germs) { germ in
                     NavigationLink {
                         GermDetailScreen(germ: germ)
@@ -52,7 +56,7 @@ struct FieldGuideScreen: View {
             } header: {
                 Text(tr("Germs"))
             } footer: {
-                Text(tr("General information from public health sources. Not medical advice."))
+                Text(HealthNotice.text)
             }
         }
         .scrollContentBackground(.hidden)
@@ -136,7 +140,7 @@ struct ArticleScreen: View {
                     SectionHeader(title: tr("Sources"))
                     SourceList(references: article.sources)
                 }
-                Text(tr("General information from public health sources. Not medical advice."))
+                Text(HealthNotice.text)
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
             }
