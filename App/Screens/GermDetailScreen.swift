@@ -408,7 +408,7 @@ struct GermDetailScreen: View {
                     in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
-    /// The germ as a boss: a joke health bar, its signature move, and the weakness from its notes.
+    /// The germ as a boss: a joke health bar, the fight in phases, and the weakness from its notes.
     private var bossSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: tr("Boss card"), trailing: germ.rarity.label)
@@ -424,7 +424,9 @@ struct GermDetailScreen: View {
                         .foregroundStyle(palette.ink)
                 }
                 .accessibilityElement(children: .combine)
-                bossRow(symbol: "bolt.fill", tint: palette.coralDeep, label: tr("Special attack"), text: germ.boss.attack.value)
+                ForEach(Array(germ.bossPhases.enumerated()), id: \.offset) { item in
+                    phaseRow(number: item.offset + 1, phase: item.element)
+                }
                 bossRow(symbol: "shield.lefthalf.filled", tint: palette.sky, label: tr("Weakness"), text: germ.boss.weakness.value)
                 bossRow(symbol: "gift.fill", tint: palette.limeDeep, label: tr("Loot"),
                         text: tr("+%lld Sick Points", germ.rarity.basePoints))
@@ -439,6 +441,27 @@ struct GermDetailScreen: View {
             }
             .petriCard()
         }
+    }
+
+    private func phaseRow(number: Int, phase: BossPhase) -> some View {
+        HStack(alignment: .top, spacing: 13) {
+            Text(verbatim: String(number))
+                .font(.subheadline.weight(.heavy))
+                .foregroundStyle(Color(hex: Swatch.night))
+                .frame(width: 32, height: 32)
+                .background(palette.coral, in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(phase.name)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Text(phase.detail)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(tr("Phase %1$lld: %2$@. %3$@", number, phase.name, phase.detail))
     }
 
     private func bossRow(symbol: String, tint: Color, label: String, text: String) -> some View {

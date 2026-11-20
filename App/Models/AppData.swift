@@ -21,6 +21,7 @@ enum GermSource: Codable, Hashable {
 enum BonusKind: String, Codable {
     case rarity
     case nightShift
+    case recovery
 }
 
 struct LogBonus: Codable, Hashable {
@@ -139,9 +140,11 @@ struct QuizProgress: Codable, Hashable {
     var missed: [String] = []
     var rightTotal = 0
     var mythsRight: [String] = []
+    /// Every question answered right at least once.
+    var rightIDs: [String] = []
 
     enum CodingKeys: String, CodingKey {
-        case round, doneDays, asked, missed, rightTotal, mythsRight
+        case round, doneDays, asked, missed, rightTotal, mythsRight, rightIDs
     }
 }
 
@@ -159,10 +162,12 @@ struct AppData: Codable {
     var readArticles: [String] = []
     var celebratedMilestone: MilestoneMark?
     var quiz = QuizProgress()
+    /// The Wrapped nemesis guess, by season number: true when it was right.
+    var wrapGuesses: [String: Bool] = [:]
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
-        case celebratedMilestone, quiz
+        case celebratedMilestone, quiz, wrapGuesses
     }
 }
 
@@ -246,6 +251,7 @@ extension QuizProgress {
         missed = container.value(.missed, default: [String]())
         rightTotal = container.value(.rightTotal, default: 0)
         mythsRight = container.value(.mythsRight, default: [String]())
+        rightIDs = container.value(.rightIDs, default: [String]())
     }
 }
 
@@ -264,6 +270,7 @@ extension AppData {
         readArticles = container.value(.readArticles, default: [String]())
         celebratedMilestone = try? container.decodeIfPresent(MilestoneMark.self, forKey: .celebratedMilestone)
         quiz = container.value(.quiz, default: QuizProgress())
+        wrapGuesses = container.value(.wrapGuesses, default: [String: Bool]())
     }
 }
 

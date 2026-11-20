@@ -7,6 +7,7 @@ struct SeasonScreen: View {
     @Environment(\.palette) private var palette
     @State private var showWrapped = false
     @State private var showDuel = false
+    @State private var showMonth = false
 
     /// Zero is the current season; each step goes one daycare year back.
     @State private var seasonsBack = 0
@@ -23,6 +24,9 @@ struct SeasonScreen: View {
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
                     wrappedBanner(season)
+                    if seasonsBack == 0 {
+                        monthRecapRow
+                    }
                     tiles(stats)
                     duelCard(season)
                     if let supplier = stats.topSupplier {
@@ -74,12 +78,33 @@ struct SeasonScreen: View {
             .fullScreenCover(isPresented: $showWrapped) {
                 WrappedScreen(season: season)
             }
+            .sheet(isPresented: $showMonth) {
+                SharePreviewSheet(title: tr("Month recap")) {
+                    MonthRecapCard(recap: model.lastMonthRecap())
+                }
+            }
             .sheet(isPresented: $showDuel) {
                 SharePreviewSheet(title: tr("Couple duel")) {
                     DuelShareCard(seasonNumber: season.number, me: model.displayName, partner: model.partnerDisplayName,
                                   stats: DuelEngine.stats(data: model.data, season: season, now: Date()))
                 }
             }
+        }
+    }
+
+    /// Last month's card, once there is something to tell.
+    @ViewBuilder
+    private var monthRecapRow: some View {
+        let recap = model.lastMonthRecap()
+        if !recap.isEmpty {
+            Button {
+                showMonth = true
+            } label: {
+                ValueRow(symbol: "calendar", tint: palette.lime, title: tr("Your %@ recap", recap.monthName))
+                    .padding(.horizontal, 16)
+                    .petriCard(padding: 0)
+            }
+            .buttonStyle(.plain)
         }
     }
 

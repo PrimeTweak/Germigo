@@ -147,6 +147,9 @@ struct MainTabs: View {
         .fullScreenCover(item: $model.pendingReward) { reward in
             RewardView(reward: reward)
         }
+        .fullScreenCover(item: $model.pendingVictory) { victory in
+            VictoryView(victory: victory)
+        }
         .sheet(item: $model.pendingMilestone) { event in
             SharePreviewSheet(title: tr("Milestone unlocked")) {
                 MilestoneShareCard(days: event.days)

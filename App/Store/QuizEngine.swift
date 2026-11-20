@@ -178,6 +178,9 @@ enum QuizEngine {
         progress.missed.removeAll { $0 == question.id }
         if right {
             progress.rightTotal += 1
+            if !progress.rightIDs.contains(question.id) {
+                progress.rightIDs.append(question.id)
+            }
             if question.kind == .myth && !progress.mythsRight.contains(question.germ.id) {
                 progress.mythsRight.append(question.germ.id)
             }
@@ -209,6 +212,16 @@ enum QuizEngine {
             cursor = previous
         }
         return count
+    }
+
+    /// Germs whose every question was answered right at least once.
+    static func studied(bank: [QuizQuestion], rightIDs: [String]) -> Set<String> {
+        let right = Set(rightIDs)
+        var questions: [String: [String]] = [:]
+        for question in bank {
+            questions[question.germ.id, default: []].append(question.id)
+        }
+        return Set(questions.filter { $0.value.allSatisfy(right.contains) }.keys)
     }
 
     /// Every day the parent spent sick, as day keys.

@@ -98,6 +98,20 @@ struct GermBoss: Codable, Hashable {
     let weakness: LocalizedText
     /// True when the weakness alone names the germ, so the quiz may ask about it.
     var weaknessQuiz: Bool?
+
+    /// The attack's name, before the colon of its line.
+    var attackName: String {
+        let text = attack.value
+        return text.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) ?? text
+    }
+
+    /// What the attack does, after the colon.
+    var attackDetail: String {
+        let text = attack.value
+        guard let colon = text.firstIndex(of: ":") else { return text }
+        let detail = text[text.index(after: colon)...].trimmingCharacters(in: .whitespaces)
+        return detail.prefix(1).uppercased() + detail.dropFirst()
+    }
 }
 
 struct GermMyth: Codable, Hashable {
@@ -193,4 +207,23 @@ struct Article: Codable, Identifiable, Hashable {
     let summary: LocalizedText
     let paragraphs: [LocalizedText]
     let sources: [GermReference]
+}
+
+/// One step of the boss fight, told with the case file's own timings.
+struct BossPhase: Hashable {
+    let name: String
+    let detail: String
+}
+
+extension Germ {
+    /// Incubation when the case file gives a window, then the attack, then the retreat.
+    var bossPhases: [BossPhase] {
+        var phases: [BossPhase] = []
+        if incubationMinHours != nil {
+            phases.append(BossPhase(name: tr("Sneak attack"), detail: tr("Incubation: %@", showsUp.value)))
+        }
+        phases.append(BossPhase(name: boss.attackName, detail: boss.attackDetail))
+        phases.append(BossPhase(name: tr("Retreat"), detail: tr("Lasts: %@", lasts.value)))
+        return phases
+    }
 }

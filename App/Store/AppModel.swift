@@ -15,6 +15,14 @@ struct RewardResult: Identifiable {
     let unlockedIcons: [AppIconOption]
 }
 
+/// What the boss-defeated screen shows after "I'm better".
+struct Victory: Identifiable {
+    let id = UUID()
+    let log: SickLog
+    let germ: Germ
+    let points: Int
+}
+
 /// What answering a quiz question earned.
 struct QuizOutcome {
     let right: Bool
@@ -52,7 +60,9 @@ final class AppModel {
 
     private(set) var data: AppData
     let catalog: GermCatalog
+    let household = HouseholdGuide.load()
     var pendingReward: RewardResult?
+    var pendingVictory: Victory?
     var logRequest: LogRequest?
     var selectedTab = AppTab.today
     var journalNotice: JournalNotice?
@@ -384,12 +394,40 @@ final class AppModel {
                             unlockedIcons: iconsAfter.filter { !iconsBefore.contains($0) })
     }
 
+    /// Ends the active germ; a real recovery, not a quick correction, earns points and the boss-defeated screen.
     func markBetter(now: Date = Date()) {
         guard let active = activeLog, let index = data.logs.firstIndex(where: { $0.id == active.id }) else { return }
         data.logs[index].endedAt = max(active.startedAt, now)
+        let recovered = now.timeIntervalSince(active.startedAt) >= RewardEngine.speedrunMinimum
+        if recovered && !data.logs[index].bonuses.contains(where: { $0.kind == .recovery }) {
+            data.logs[index].bonuses.append(LogBonus(kind: .recovery, points: RewardEngine.recoveryPoints))
+            data.logs[index].points += RewardEngine.recoveryPoints
+        }
         _ = awardBadges(now: now)
         commit()
         syncSickCheckIn()
+        if recovered, let germ = catalog.germ(active.germID) {
+            pendingVictory = Victory(log: data.logs[index], germ: germ, points: RewardEngine.recoveryPoints)
+        }
+    }
+
+    /// Germs whose Lab questions were all answered right at least once.
+    var studiedGermIDs: Set<String> {
+        QuizEngine.studied(bank: quizBank, rightIDs: data.quiz.rightIDs)
+    }
+
+    /// Last month in numbers, for the recap card in Season.
+    func lastMonthRecap(now: Date = Date()) -> MonthRecap {
+        MonthRecapEngine.recap(data: data, catalog: catalog, month: MonthRecapEngine.previousMonth(now), now: now)
+    }
+
+    /// Records the season's nemesis guess once; a right guess adds points.
+    func guessNemesis(_ germID: String, season: Season, now: Date = Date()) {
+        let key = String(season.number)
+        guard data.wrapGuesses[key] == nil else { return }
+        let wrap = WrapEngine.wrap(data: data, catalog: catalog, season: season, now: now)
+        data.wrapGuesses[key] = wrap.topGerm?.germ.id == germID
+        commit()
     }
 
     func updateLog(_ log: SickLog, now: Date = Date()) {
@@ -631,6 +669,12 @@ final class AppModel {
         let reveal = WrapEngine.revealDate(for: season)
         if reveal > now, data.logs.contains(where: { season.contains($0.startedAt) }) {
             NotificationManager.scheduleWrapped(at: reveal, settings: data.settings)
+        }
+        let month = MonthRecapEngine.recap(data: data, catalog: catalog, month: now, now: now)
+        if !month.isEmpty, let next = calendar.dateInterval(of: .month, for: now)?.end {
+            NotificationManager.scheduleMonthRecap(month: month.monthName, on: next, settings: data.settings)
+        } else {
+            NotificationManager.cancelMonthRecap()
         }
     }
 

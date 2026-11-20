@@ -126,6 +126,7 @@ struct RewardView: View {
         switch bonus.kind {
         case .rarity: return tr("%1$@ catch +%2$lld", germ.rarity.label, bonus.points)
         case .nightShift: return tr("Night shift +%lld", bonus.points)
+        case .recovery: return tr("Recovery +%lld", bonus.points)
         }
     }
 

@@ -277,6 +277,20 @@ do {
     check(reveal.year == 2027 && reveal.month == 6 && reveal.day == 20, "the story is announced on June 20")
 }
 
+// MARK: - Month recap
+
+do {
+    var month = makeData(logs: [makeLog("rhino", from: day(3), to: day(5)), makeLog("rhino", from: day(10), to: day(11)),
+                                makeLog("noro", from: day(40), to: day(41))])
+    month.quiz.doneDays = [QuizEngine.dayKey(day(4)), QuizEngine.dayKey(day(40))]
+    let recap = MonthRecapEngine.recap(data: month, catalog: catalog, month: day(1), now: day(60))
+    check(recap.caught == 2 && recap.daysSick == 5 && recap.labDays == 1,
+          "the month recap counts its own germs, sick days and Lab days")
+    check(recap.nemesis?.id == "rhino", "the month's nemesis is its most frequent germ")
+    check(MonthRecapEngine.recap(data: makeData(), catalog: catalog, month: day(1), now: day(60)).isEmpty,
+          "a quiet month has no recap")
+}
+
 // MARK: - Daily quiz
 
 do {
@@ -306,6 +320,9 @@ do {
           "a right answer is recorded")
     _ = QuizEngine.answer(plan[2].answer, to: plan[2], progress: &progress, day: today, bankSize: bank.count)
     check(progress.rightTotal == 2 && progress.doneDays == [today], "the day is done after three answers")
+    check(progress.rightIDs == [plan[1].id, plan[2].id], "right answers are remembered by question")
+    let alphaIDs = bank.filter { $0.germ.id == "alpha" }.map { $0.id }
+    check(QuizEngine.studied(bank: bank, rightIDs: alphaIDs) == ["alpha"], "a germ with every question right is studied")
     check(QuizEngine.plan(progress: progress, bank: bank, day: today).map { $0.id } == plan.map { $0.id },
           "a finished day keeps its questions")
 
@@ -334,6 +351,9 @@ do {
     var learner = makeData()
     learner.quiz = progress
     check(RewardEngine.totalPoints(data: learner) == 2 * RewardEngine.quizAnswerPoints, "right answers add points")
+    learner.wrapGuesses = ["1": true, "2": false]
+    check(RewardEngine.totalPoints(data: learner) == 2 * RewardEngine.quizAnswerPoints + RewardEngine.wrapGuessPoints,
+          "only a right nemesis guess adds points")
     let quizCatalog = GermCatalog(germs: quizGerms, articles: [])
     check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.labRat),
           "a finished quiz earns the Lab Rat badge")

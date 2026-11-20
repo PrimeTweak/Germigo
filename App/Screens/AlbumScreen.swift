@@ -21,7 +21,7 @@ struct AlbumScreen: View {
                 let cardWidth = max(96, (proxy.size.width - 40 - 24) / 3)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text(tr("%1$lld of %2$lld germs caught", model.caughtGermIDs.count, model.catalog.germs.count))
+                        Text(caughtLine)
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
                             .padding(.horizontal, 4)
@@ -79,8 +79,16 @@ struct AlbumScreen: View {
         caseFile = germ
     }
 
+    /// Cards caught, and those studied in the Lab while still locked.
+    private var caughtLine: String {
+        let caught = tr("%1$lld of %2$lld germs caught", model.caughtGermIDs.count, model.catalog.germs.count)
+        let studied = model.studiedGermIDs.subtracting(model.caughtGermIDs).count
+        return studied == 0 ? caught : caught + " · " + trCount(studied, one: "%lld studied", other: "%lld studied")
+    }
+
     private func grid(cardWidth: CGFloat) -> some View {
         let columns = Array(repeating: GridItem(.fixed(cardWidth), spacing: 12), count: 3)
+        let studied = model.studiedGermIDs
         return LazyVGrid(columns: columns, spacing: 14) {
             ForEach(model.catalog.germs) { germ in
                 let finish = model.cardFinish(for: germ)
@@ -88,7 +96,7 @@ struct AlbumScreen: View {
                     Button {
                         lockedGerm = germ
                     } label: {
-                        GermCardView(germ: germ, width: cardWidth, finish: .locked)
+                        GermCardView(germ: germ, width: cardWidth, finish: .locked, studied: studied.contains(germ.id))
                     }
                     .buttonStyle(.plain)
                 } else {
@@ -215,6 +223,14 @@ private struct KidsGermsView: View {
                 Label(tr("Add a kid's germ"), systemImage: "plus")
             }
             .buttonStyle(PillButtonStyle(kind: .ink, height: 50))
+            if !model.data.kidIllnesses.isEmpty || !model.data.logs.isEmpty {
+                NavigationLink {
+                    DoctorSummaryScreen()
+                } label: {
+                    Label(tr("For the doctor"), systemImage: "stethoscope")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
+            }
             if illnesses.isEmpty {
                 Text(tr("When a kid gets sick, add it here. Petri starts your incubation countdown and remembers who brought what home."))
                     .font(.subheadline)
@@ -311,6 +327,7 @@ struct KidIllnessSheet: View {
     @State private var watch = true
     @State private var newKidName = ""
     @State private var saved = false
+    @State private var added: KidIllness?
 
     /// False for the germs that have no known incubation window, so nothing to watch.
     private var hasWindow: Bool {
@@ -385,6 +402,11 @@ struct KidIllnessSheet: View {
             .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("A kid is sick"))
             .navigationBarTitleDisplayMode(.inline)
+            .navigationDestination(item: $added) { illness in
+                ProtectHomeView(illness: illness) {
+                    dismiss()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(tr("Cancel")) {
@@ -430,6 +452,10 @@ struct KidIllnessSheet: View {
                 model.setWatching(illness.id, watching: true)
             }
         }
-        dismiss()
+        if model.household != nil {
+            added = illness
+        } else {
+            dismiss()
+        }
     }
 }

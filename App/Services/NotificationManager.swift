@@ -8,6 +8,7 @@ enum NotificationManager {
     private static let sickID = "sick-checkin"
     private static let milestoneID = "streak-milestone"
     private static let wrappedID = "season-wrapped"
+    private static let monthID = "month-recap"
 
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
@@ -135,8 +136,19 @@ enum NotificationManager {
                    body: tr("The numbers are in. Brace yourself."))
     }
 
+    /// On the first morning of the next month, when the month had something to tell.
+    static func scheduleMonthRecap(month: String, on day: Date, settings: AppSettings) {
+        cancelMonthRecap()
+        guard settings.checkInsOn else { return }
+        addMorning(id: monthID, on: day, title: tr("Your %@, wrapped", month), body: tr("Your month recap is ready in Season."))
+    }
+
+    static func cancelMonthRecap() {
+        center.removePendingNotificationRequests(withIdentifiers: [monthID])
+    }
+
     static func cancelStreakReminders() {
-        center.removePendingNotificationRequests(withIdentifiers: [milestoneID, wrappedID])
+        center.removePendingNotificationRequests(withIdentifiers: [milestoneID, wrappedID, monthID])
     }
 
     static func cancelSickCheckIn() {

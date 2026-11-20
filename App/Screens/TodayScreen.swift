@@ -250,7 +250,7 @@ private struct SickNowCard: View {
                 }
             }
             if let upTo = germ.lastsUpToDays {
-                SickDayBar(day: log.dayCount(), upTo: upTo, tint: germ.deepTint)
+                SickDayBar(day: log.dayCount(), upTo: upTo, attack: germ.boss.attackName, tint: germ.deepTint)
             }
             HStack(spacing: 10) {
                 Button {
@@ -280,6 +280,8 @@ private struct SickNowCard: View {
 private struct SickDayBar: View {
     let day: Int
     let upTo: Int
+    /// The boss attack the parent is living through.
+    let attack: String
     let tint: Color
     @Environment(\.palette) private var palette
 
@@ -299,7 +301,7 @@ private struct SickDayBar: View {
             .frame(height: 10)
             .accessibilityHidden(true)
             Text(overdue ? tr("Longer than usual. Check when to call in the case file.")
-                         : tr("Day %1$lld of up to %2$lld", day, upTo))
+                         : tr("Day %1$lld of up to %2$lld · %3$@", day, upTo, attack))
                 .font(.footnote.weight(overdue ? .semibold : .regular))
                 .foregroundStyle(overdue ? palette.coralInk : palette.inkSecondary)
         }

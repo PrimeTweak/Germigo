@@ -14,6 +14,8 @@ struct GermCardView: View {
     var finish = Finish.standard
     var count = 0
     var isNew = false
+    /// A locked card whose Lab questions were all answered right: it shows its name, not its art.
+    var studied = false
 
     private var height: CGFloat { width * 1.39 }
     private var scale: CGFloat { width / 124 }
@@ -27,7 +29,10 @@ struct GermCardView: View {
                 .foregroundStyle(germ.deepTint)
                 .shadow(color: Color.black.opacity(finish == .locked ? 0 : 0.16), radius: 6 * scale, x: 0, y: 5 * scale)
                 .offset(y: -height * 0.05)
-            if finish == .locked {
+            if finish == .locked && studied {
+                badge(tr("STUDIED"), foreground: Color.white, background: Color(hex: Swatch.grape))
+                    .offset(y: -height * 0.05)
+            } else if finish == .locked {
                 Text(verbatim: "?")
                     .font(.system(size: 30 * scale, weight: .black))
                     .foregroundStyle(Color(hex: Swatch.night, opacity: 0.6))
@@ -67,7 +72,7 @@ struct GermCardView: View {
 
     private var borderColor: Color {
         switch finish {
-        case .locked: return Color(hex: Swatch.night, opacity: 0.06)
+        case .locked: return studied ? Color(hex: Swatch.violet) : Color(hex: Swatch.night, opacity: 0.06)
         case .gold, .holo: return Color(hex: Swatch.goldFoil)
         case .standard: return Color.white.opacity(0.75)
         }
@@ -105,12 +110,12 @@ struct GermCardView: View {
                     badge("×\(count)", foreground: Color.white, background: Color(hex: Swatch.night))
                 }
             }
-            Text(finish == .locked ? "???" : germ.name)
+            Text(finish == .locked && !studied ? "???" : germ.name)
                 .font(.system(size: 17 * scale, weight: .heavy))
                 .foregroundStyle(finish == .locked ? lockedInk : Color(hex: Swatch.night))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            Text(finish == .locked ? tr("Not caught yet") : germ.illness.value)
+            Text(finish == .locked ? (studied ? tr("Studied") : tr("Not caught yet")) : germ.illness.value)
                 .font(.system(size: 11 * scale, weight: .semibold))
                 .foregroundStyle(finish == .locked ? lockedInk : Color(hex: Swatch.night, opacity: 0.8))
                 .lineLimit(1)
@@ -130,7 +135,8 @@ struct GermCardView: View {
 
     private var accessibilityText: String {
         if finish == .locked {
-            return tr("Card %@, not caught yet", germ.numberLabel)
+            return studied ? tr("Card %1$@, %2$@, studied, not caught yet", germ.numberLabel, germ.name)
+                           : tr("Card %@, not caught yet", germ.numberLabel)
         }
         return tr("%1$@, %2$@, %3$@, caught %4$lld times", germ.name, germ.illness.value, germ.rarity.label, count)
     }

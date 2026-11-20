@@ -57,6 +57,12 @@ enum RewardEngine {
     /// Each right answer in the daily quiz.
     static let quizAnswerPoints = 5
 
+    /// Saying "I'm better", once per germ.
+    static let recoveryPoints = 30
+
+    /// Guessing the season's nemesis before the Wrapped reveal.
+    static let wrapGuessPoints = 10
+
     static func bonuses(for draft: LogDraft, germ: Germ) -> [LogBonus] {
         var result = [LogBonus(kind: .rarity, points: germ.rarity.basePoints)]
         let hour = Calendar.current.component(.hour, from: draft.startedAt)
@@ -68,7 +74,9 @@ enum RewardEngine {
 
     static func totalPoints(data: AppData) -> Int {
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
+        let guesses = data.wrapGuesses.values.filter { $0 }.count
         return data.logs.reduce(0) { $0 + $1.points } + dodged * dodgePoints + data.quiz.rightTotal * quizAnswerPoints
+            + guesses * wrapGuessPoints
     }
 
     static func earnedBadges(data: AppData, catalog: GermCatalog, now: Date) -> Set<String> {

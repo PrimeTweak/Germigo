@@ -1,0 +1,208 @@
+{
+  "steps": [
+    {
+      "id": "hands-gel",
+      "icon": "hands.sparkles.fill",
+      "families": [
+        "airways"
+      ],
+      "title": {
+        "en": "Soap, 20 seconds",
+        "fr": "Savon, 20 secondes"
+      },
+      "detail": {
+        "en": "After every nose wipe and diaper. Hand gel helps between washes.",
+        "fr": "Après chaque mouchage et chaque couche. Le gel aide entre deux lavages."
+      },
+      "sources": [
+        {
+          "name": "CDC: Hygiene and Respiratory Viruses Prevention",
+          "url": "https://www.cdc.gov/respiratory-viruses/prevention/hygiene.html"
+        },
+        {
+          "name": "Harvard Gazette: Simple tools can reduce transmission",
+          "url": "https://news.harvard.edu/gazette/story/2005/04/simple-tools-can-reduce-transmission"
+        }
+      ]
+    },
+    {
+      "id": "hands-soap",
+      "icon": "hands.sparkles.fill",
+      "families": [
+        "skin",
+        "other"
+      ],
+      "title": {
+        "en": "Soap, 20 seconds",
+        "fr": "Savon, 20 secondes"
+      },
+      "detail": {
+        "en": "After every diaper and before meals.",
+        "fr": "Après chaque couche et avant les repas."
+      },
+      "sources": [
+        {
+          "name": "CDC: About Handwashing",
+          "url": "https://www.cdc.gov/clean-hands/about/index.html"
+        }
+      ]
+    },
+    {
+      "id": "soap-not-gel",
+      "icon": "drop.fill",
+      "families": [
+        "gut"
+      ],
+      "title": {
+        "en": "Soap, not gel",
+        "fr": "Du savon, pas du gel"
+      },
+      "detail": {
+        "en": "Hand gel barely works on stomach bugs. Soap and water, 20 seconds, after every diaper.",
+        "fr": "Le gel ne fait presque rien contre la gastro. Eau et savon, 20 secondes, après chaque couche."
+      },
+      "sources": [
+        {
+          "name": "CDC: How to Prevent Norovirus",
+          "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+        }
+      ]
+    },
+    {
+      "id": "surfaces",
+      "icon": "sparkles",
+      "families": [
+        "airways",
+        "skin",
+        "other"
+      ],
+      "title": {
+        "en": "Wipe what everyone touches",
+        "fr": "Essuie ce que tout le monde touche"
+      },
+      "detail": {
+        "en": "Doorknobs, taps, counters, the remote: clean them often.",
+        "fr": "Poignées, robinets, comptoirs, télécommande : nettoie-les souvent."
+      },
+      "sources": [
+        {
+          "name": "CDC: Hygiene and Respiratory Viruses Prevention",
+          "url": "https://www.cdc.gov/respiratory-viruses/prevention/hygiene.html"
+        }
+      ]
+    },
+    {
+      "id": "bleach",
+      "icon": "bubbles.and.sparkles.fill",
+      "families": [
+        "gut"
+      ],
+      "title": {
+        "en": "Bleach after an accident",
+        "fr": "De l'eau de Javel après un dégât"
+      },
+      "detail": {
+        "en": "After vomit or diarrhea, clean up right away, then disinfect with a bleach-based cleaner.",
+        "fr": "Après un vomissement ou une diarrhée, nettoie tout de suite, puis désinfecte avec un produit à base d'eau de Javel."
+      },
+      "sources": [
+        {
+          "name": "CDC: How to Prevent Norovirus",
+          "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+        }
+      ]
+    },
+    {
+      "id": "laundry",
+      "icon": "washer.fill",
+      "families": [
+        "gut"
+      ],
+      "title": {
+        "en": "Hot wash for soiled laundry",
+        "fr": "Lavage chaud pour le linge souillé"
+      },
+      "detail": {
+        "en": "Wash it right away with hot water and the longest cycle, then dry on high heat.",
+        "fr": "Lave-le tout de suite à l'eau chaude, cycle le plus long, puis sèche à haute température."
+      },
+      "sources": [
+        {
+          "name": "CDC: How to Prevent Norovirus",
+          "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+        }
+      ]
+    },
+    {
+      "id": "towels",
+      "icon": "bed.double.fill",
+      "families": [
+        "skin"
+      ],
+      "title": {
+        "en": "Own towel, own pillowcase",
+        "fr": "Sa serviette, sa taie d'oreiller"
+      },
+      "detail": {
+        "en": "Nothing shared at the sink or in bed until it's over.",
+        "fr": "Rien de partagé au lavabo ni au lit jusqu'à la fin."
+      },
+      "sources": [
+        {
+          "name": "CDC: How to Prevent Pink Eye",
+          "url": "https://www.cdc.gov/conjunctivitis/prevention/index.html"
+        },
+        {
+          "name": "CDC: About Head Lice",
+          "url": "https://www.cdc.gov/lice/about/head-lice.html"
+        }
+      ]
+    },
+    {
+      "id": "air",
+      "icon": "wind",
+      "families": [
+        "airways"
+      ],
+      "title": {
+        "en": "Let air in",
+        "fr": "Fais entrer de l'air"
+      },
+      "detail": {
+        "en": "Open a window for a few minutes, or run a HEPA air cleaner.",
+        "fr": "Ouvre une fenêtre quelques minutes, ou fais rouler un purificateur HEPA."
+      },
+      "sources": [
+        {
+          "name": "CDC: Taking Steps for Cleaner Air",
+          "url": "https://www.cdc.gov/respiratory-viruses/prevention/air-quality.html"
+        }
+      ]
+    },
+    {
+      "id": "cough",
+      "icon": "hand.raised.fill",
+      "families": [
+        "airways"
+      ],
+      "title": {
+        "en": "Coughs go in the elbow",
+        "fr": "On tousse dans son coude"
+      },
+      "detail": {
+        "en": "Show the kids too. Used tissues go straight in the trash.",
+        "fr": "Montre-le aux enfants aussi. Les mouchoirs utilisés vont direct à la poubelle."
+      },
+      "sources": [
+        {
+          "name": "CDC: Hygiene and Respiratory Viruses Prevention",
+          "url": "https://www.cdc.gov/respiratory-viruses/prevention/hygiene.html"
+        }
+      ]
+    }
+  ],
+  "daycare": {
+    "name": "MSSS: Prévention et contrôle des infections dans les services de garde et écoles du Québec",
+    "url": "https://publications.msss.gouv.qc.ca/msss/document-000374/"
+  }
+}

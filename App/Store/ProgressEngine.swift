@@ -326,6 +326,8 @@ struct SeasonWrap {
     let germsCaught: Int
     let families: [GermFamily: Int]
     let daysSick: Int
+    /// Weekdays with someone sick: the work the season cost.
+    let workdays: Int
     let longest: WrapEntry?
     let nightLogs: Int
     let topGerm: WrapEntry?
@@ -357,10 +359,22 @@ enum WrapEngine {
         }
         let nights = logs.filter { log in log.bonuses.contains { $0.kind == .nightShift } }.count
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged && season.contains($0.startedAt) }.count
+        let calendar = Calendar.current
+        var sickDates = Set<Date>()
+        for log in logs {
+            var cursor = calendar.startOfDay(for: log.startedAt)
+            let last = calendar.startOfDay(for: log.endedAt ?? now)
+            while cursor <= last {
+                sickDates.insert(cursor)
+                guard let next = calendar.date(byAdding: .day, value: 1, to: cursor) else { break }
+                cursor = next
+            }
+        }
         let type = persona(caught: logs.count, nights: nights, dodged: dodged, longest: longest?.value ?? 0,
                            repeats: topGerm?.value ?? 0, distinct: order.count)
         return SeasonWrap(season: season, germsCaught: logs.count, families: families,
-                          daysSick: logs.reduce(0) { $0 + $1.dayCount(now: now) }, longest: longest,
+                          daysSick: logs.reduce(0) { $0 + $1.dayCount(now: now) },
+                          workdays: sickDates.filter { !calendar.isDateInWeekend($0) }.count, longest: longest,
                           nightLogs: nights, topGerm: topGerm, dodged: dodged, distinct: order.count,
                           persona: type, germs: order.compactMap { catalog.germ($0) })
     }
@@ -380,5 +394,45 @@ enum WrapEngine {
         let calendar = Calendar.current
         let year = calendar.component(.year, from: season.end)
         return calendar.date(from: DateComponents(year: year, month: 6, day: 20, hour: 10)) ?? season.end
+    }
+}
+
+// MARK: - Month recap
+
+/// One month in numbers, for the recap card.
+struct MonthRecap: Hashable {
+    let month: Date
+    let caught: Int
+    let daysSick: Int
+    let labDays: Int
+    let dodged: Int
+    let nemesis: Germ?
+
+    var isEmpty: Bool { caught == 0 && labDays == 0 && dodged == 0 }
+    var monthName: String { month.formatted(.dateTime.month(.wide)) }
+}
+
+enum MonthRecapEngine {
+    static func recap(data: AppData, catalog: GermCatalog, month: Date, now: Date) -> MonthRecap {
+        let calendar = Calendar.current
+        let start = calendar.dateInterval(of: .month, for: month)?.start ?? month
+        let prefix = String(QuizEngine.dayKey(start).prefix(7))
+        let inMonth: (Date) -> Bool = { calendar.isDate($0, equalTo: start, toGranularity: .month) }
+        let logs = data.logs.filter { inMonth($0.startedAt) }
+        var perGerm: [String: Int] = [:]
+        for log in logs {
+            perGerm[log.germID, default: 0] += 1
+        }
+        let top = perGerm.max { $0.value < $1.value || ($0.value == $1.value && $0.key > $1.key) }
+        return MonthRecap(month: start, caught: logs.count,
+                          daysSick: QuizEngine.sickDays(logs: data.logs, now: now).filter { $0.hasPrefix(prefix) }.count,
+                          labDays: data.quiz.doneDays.filter { $0.hasPrefix(prefix) }.count,
+                          dodged: data.kidIllnesses.filter { $0.outcome == .dodged && inMonth($0.startedAt) }.count,
+                          nemesis: top.flatMap { catalog.germ($0.key) })
+    }
+
+    /// The month before the one the date falls in.
+    static func previousMonth(_ date: Date) -> Date {
+        Calendar.current.date(byAdding: .month, value: -1, to: date) ?? date
     }
 }

@@ -209,18 +209,21 @@ enum WrapPage: Hashable, Identifiable {
     case intro
     case count
     case days
+    case guess
     case nemesis
     case dodges
+    case duel
     case persona
     case summary
 
     var id: Self { self }
 
-    static func pages(for wrap: SeasonWrap, supplier: SupplierStat?) -> [WrapPage] {
+    static func pages(for wrap: SeasonWrap, supplier: SupplierStat?, hasPartner: Bool) -> [WrapPage] {
         var pages: [WrapPage] = [.intro]
         if wrap.germsCaught > 0 { pages += [.count, .days] }
-        if (wrap.topGerm?.value ?? 0) >= 2 { pages.append(.nemesis) }
+        if (wrap.topGerm?.value ?? 0) >= 2 { pages += [.guess, .nemesis] }
         if wrap.dodged > 0 || supplier != nil { pages.append(.dodges) }
+        if hasPartner && wrap.germsCaught > 0 { pages.append(.duel) }
         pages += [.persona, .summary]
         return pages
     }
@@ -253,7 +256,7 @@ struct WrapCard: View {
     private var background: LinearGradient {
         let pair: (UInt32, UInt32)
         switch page {
-        case .intro, .summary: pair = (Swatch.limeLight, Swatch.grass)
+        case .intro, .summary, .guess, .duel: pair = (Swatch.limeLight, Swatch.grass)
         case .count: pair = (Swatch.lilacPale, Swatch.lilac)
         case .days: pair = (Swatch.coralPale, Swatch.coral)
         case .nemesis: pair = (Swatch.plum, Swatch.plumDeep)
@@ -336,6 +339,7 @@ struct WrapCard: View {
                     factRow(tr("Longest"), longest.germ.name + " · " + trCount(longest.value, one: "%lld day", other: "%lld days"))
                 }
                 factRow(tr("Night-shift logs"), String(wrap.nightLogs))
+                factRow(tr("Workdays lost"), String(wrap.workdays))
             }
             .padding(.top, 28)
         case .nemesis:
@@ -392,7 +396,7 @@ struct WrapCard: View {
                 .multilineTextAlignment(.center)
                 .opacity(0.75)
                 .padding(.top, 10)
-        case .summary:
+        case .guess, .duel, .summary:
             EmptyView()
         }
     }
