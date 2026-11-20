@@ -1,9 +1,13 @@
 name: Build IPA
 
+# Manual only: Actions > Build IPA > Run workflow.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      typecheck:
+        description: "List every Swift error at once before building (adds a few minutes)"
+        type: boolean
+        default: true
 
 concurrency:
   group: build-ipa-${{ github.ref }}
@@ -32,7 +36,12 @@ jobs:
           xcodebuild -version
           xcrun swiftc --version
 
+      - name: Logic tests (journal rules, streaks, badges, decoding)
+        continue-on-error: true
+        run: sh tools/run_logic_tests.sh
+
       - name: Typecheck every Swift file (diagnostic, lists all errors at once)
+        if: ${{ inputs.typecheck }}
         continue-on-error: true
         run: |
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
@@ -51,7 +60,7 @@ jobs:
           grep ' error: ' typecheck-widgets.log | sort -u || true
           exit $STATUS
 
-      - name: Source links (informational, lists every link that does not answer)
+      - name: Source links (informational, fails only on a link that is really broken)
         continue-on-error: true
         run: python3 tools/check_links.py
 
