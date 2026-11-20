@@ -48,6 +48,7 @@
 "+%lld pts" = "+%lld pts";
 "+%lld Sick Points" = "+%lld Sick Points";
 "3 AM Philosopher" = "3 AM Philosopher";
+"A backup goes where you save it. Petri never uploads it." = "A backup goes where you save it. Petri never uploads it.";
 "A germ shows up once 2 families report it. No names." = "A germ shows up once 2 families report it. No names.";
 "A kid" = "A kid";
 "A kid is sick" = "A kid is sick";
@@ -58,8 +59,8 @@
 "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses." = "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses.";
 "A reminder due between 10 PM and 7 AM waits until morning." = "A reminder due between 10 PM and 7 AM waits until morning.";
 "A wide and unwanted collection." = "A wide and unwanted collection.";
-"About" = "About";
 "About a minute · +%lld pts" = "About a minute · +%lld pts";
+"About Petri" = "About Petri";
 "Active" = "Active";
 "Add" = "Add";
 "Add a kid" = "Add a kid";
@@ -76,7 +77,6 @@
 "All germs" = "All germs";
 "Always yours" = "Always yours";
 "An outbreak radar for your group" = "An outbreak radar for your group";
-"App Icon" = "App Icon";
 "App icon unlocked: %@" = "App icon unlocked: %@";
 "Appearance" = "Appearance";
 "Apple's standard license agreement (EULA)" = "Apple's standard license agreement (EULA)";
@@ -84,7 +84,7 @@
 "Back" = "Back";
 "Back on your feet in a day" = "Back on your feet in a day";
 "Back Up" = "Back Up";
-"Back Up saves your whole journal as a file, where you choose. Restore reads it back on this phone or a new one. Petri never uploads it." = "Back Up saves your whole journal as a file, where you choose. Restore reads it back on this phone or a new one. Petri never uploads it.";
+"Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.";
 "Backups" = "Backups";
 "Badge unlocked: %@" = "Badge unlocked: %@";
 "Badges" = "Badges";
@@ -141,6 +141,7 @@
 "Daily quiz · %lld question" = "Daily quiz · %lld question";
 "Daily quiz · %lld questions" = "Daily quiz · %lld questions";
 "Dark" = "Dark";
+"Data and Privacy" = "Data and Privacy";
 "day" = "day";
 "Day %1$lld of up to %2$lld" = "Day %1$lld of up to %2$lld";
 "Day %1$lld · %2$@" = "Day %1$lld · %2$@";
@@ -163,8 +164,8 @@
 "Dead heat. Nobody wins." = "Dead heat. Nobody wins.";
 "Deep dive" = "Deep dive";
 "Delete" = "Delete";
-"Delete everything" = "Delete everything";
 "Delete Everything" = "Delete Everything";
+"Delete everything" = "Delete everything";
 "Delete everything?" = "Delete everything?";
 "Delete this entry?" = "Delete this entry?";
 "Delete this log?" = "Delete this log?";
@@ -178,6 +179,7 @@
 "Done for today" = "Done for today";
 "Earn the Night Shift badge" = "Earn the Night Shift badge";
 "Earned" = "Earned";
+"Edit" = "Edit";
 "Edit log" = "Edit log";
 "Edit your name" = "Edit your name";
 "Electrolyte Sommelier" = "Electrolyte Sommelier";
@@ -186,6 +188,7 @@
 "Ended" = "Ended";
 "Epic" = "Epic";
 "Erase this phone only" = "Erase this phone only";
+"Erases your journal, kids, badges and settings from this phone, and your crew data from the server." = "Erases your journal, kids, badges and settings from this phone, and your crew data from the server.";
 "Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone." = "Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone.";
 "Every deep dive" = "Every deep dive";
 "Every germ caught" = "Every germ caught";
@@ -193,7 +196,7 @@
 "Everywhere in Canada except Québec and Nunavut." = "Everywhere in Canada except Québec and Nunavut.";
 "Export" = "Export";
 "Export the journal that couldn't be read" = "Export the journal that couldn't be read";
-"Export your journal or delete everything from Settings at any time. Leaving a crew deletes your data from the server." = "Export your journal or delete everything from Settings at any time. Leaving a crew deletes your data from the server.";
+"Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server." = "Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server.";
 "Exposed" = "Exposed";
 "Exposure" = "Exposure";
 "Fact" = "Fact";
@@ -233,7 +236,6 @@
 "Half Album" = "Half Album";
 "Hand-Washing Zealot" = "Hand-Washing Zealot";
 "Harassment or spam" = "Harassment or spam";
-"Health" = "Health";
 "Health line" = "Health line";
 "Help Lines" = "Help Lines";
 "History" = "History";
@@ -249,6 +251,7 @@
 "I survived." = "I survived.";
 "I'm better" = "I'm better";
 "I'm sick" = "I'm sick";
+"Icon and Theme" = "Icon and Theme";
 "Immune Legend" = "Immune Legend";
 "In a crew" = "In a crew";
 "In an emergency, call your local emergency number." = "In an emergency, call your local emergency number.";
@@ -352,7 +355,6 @@
 "night shifts" = "night shifts";
 "Night-shift logs" = "Night-shift logs";
 "No ads, no trackers, no third-party analytics, no data sold." = "No ads, no trackers, no third-party analytics, no data sold.";
-"No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice." = "No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice.";
 "No countdown for this one. The case file explains what to watch for." = "No countdown for this one. The case file explains what to watch for.";
 "No crew matches that code." = "No crew matches that code.";
 "No germs logged yet. It won't last." = "No germs logged yet. It won't last.";
@@ -405,7 +407,7 @@
 "Petri couldn't write to this phone. Free up some storage, then make your change again." = "Petri couldn't write to this phone. Free up some storage, then make your change again.";
 "Petri is published by %@." = "Petri is published by %@.";
 "Petri journal" = "Petri journal";
-"Petri kept the file and started a new journal. You can export the kept file from Settings, under Your Data." = "Petri kept the file and started a new journal. You can export the kept file from Settings, under Your Data.";
+"Petri kept the file and started a new journal. You can export the kept file from Settings, under Data and Privacy." = "Petri kept the file and started a new journal. You can export the kept file from Settings, under Data and Privacy.";
 "Petri shares general information from public health sources. It is not medical advice and does not replace a health professional." = "Petri shares general information from public health sources. It is not medical advice and does not replace a health professional.";
 "Petri · Admit one household" = "Petri · Admit one household";
 "Petri. Daycare germs, collected." = "Petri. Daycare germs, collected.";
@@ -430,7 +432,6 @@
 "Rash Cartographer" = "Rash Cartographer";
 "Reach rank 2 in three branches. %1$lld of %2$lld so far." = "Reach rank 2 in three branches. %1$lld of %2$lld so far.";
 "Read every lesson" = "Read every lesson";
-"Read the Privacy Policy" = "Read the Privacy Policy";
 "Read the Terms of Use" = "Read the Terms of Use";
 "Reason" = "Reason";
 "Record: %lld" = "Record: %lld";
@@ -445,7 +446,7 @@
 "Report" = "Report";
 "Report or block anyone from the menu next to their name. Reports are reviewed within 24 hours." = "Report or block anyone from the menu next to their name. Reports are reviewed within 24 hours.";
 "Report sent" = "Report sent";
-"Restore" = "Restore";
+"Restore a Backup" = "Restore a Backup";
 "Restore Purchases" = "Restore Purchases";
 "Right!" = "Right!";
 "Rough Month" = "Rough Month";
@@ -476,6 +477,7 @@
 "Share the boss card" = "Share the boss card";
 "Share the scoreboard" = "Share the scoreboard";
 "Share this card" = "Share this card";
+"Show %lld more" = "Show %lld more";
 "Shows up" = "Shows up";
 "Sick" = "Sick";
 "Sick Points" = "Sick Points";
@@ -533,13 +535,13 @@
 "That's it. Nothing was logged." = "That's it. Nothing was logged.";
 "The App Store can't be reached right now. Check your connection and try again." = "The App Store can't be reached right now. Check your connection and try again.";
 "The Boomerang" = "The Boomerang";
+"The case files summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you." = "The case files summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you.";
 "The Collector" = "The Collector";
 "The crew server can't be reached right now." = "The crew server can't be reached right now.";
 "The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed." = "The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed.";
 "The crew server isn't set up for this build yet." = "The crew server isn't set up for this build yet.";
 "The damage" = "The damage";
 "The Dodger" = "The Dodger";
-"The Field Notes summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you." = "The Field Notes summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you.";
 "The fun science on every germ, and every read" = "The fun science on every germ, and every read";
 "The fun science unlocks when you catch this germ, or right away with the Season Pass." = "The fun science unlocks when you catch this germ, or right away with the Season Pass.";
 "The germs win this round." = "The germs win this round.";
@@ -637,10 +639,10 @@
 "You're still clear" = "You're still clear";
 "Your call" = "Your call";
 "Your crew is waiting" = "Your crew is waiting";
-"Your Data" = "Your Data";
 "Your daycare year, in germs." = "Your daycare year, in germs.";
 "Your germs prefer to arrive between 1 and 5 AM." = "Your germs prefer to arrive between 1 and 5 AM.";
 "Your household's current run." = "Your household's current run.";
+"Your journal" = "Your journal";
 "Your journal couldn't be read" = "Your journal couldn't be read";
 "Your journal wasn't saved" = "Your journal wasn't saved";
 "Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one." = "Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one.";

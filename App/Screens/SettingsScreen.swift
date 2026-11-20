@@ -1,8 +1,7 @@
 import StoreKit
 import SwiftUI
-import UniformTypeIdentifiers
 
-/// A settings row label with the app's rounded icon tile.
+/// A settings row label: a pale tile with a night glyph, one tile color per section.
 struct SettingsLabel: View {
     let symbol: String
     let tint: Color
@@ -14,9 +13,32 @@ struct SettingsLabel: View {
             Text(title)
                 .foregroundStyle(palette.ink)
         } icon: {
-            IconTile(symbol: symbol, background: tint, size: 30)
+            IconTile(symbol: symbol, background: tint, foreground: Color(hex: Swatch.night), size: 30)
         }
     }
+}
+
+/// The trailing arrow of a row that opens something but is not a navigation link.
+struct RowChevron: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Image(systemName: "chevron.right")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.inkTertiary)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Tile colors of the settings sections.
+enum SettingsTint {
+    static let family = Color(hex: Swatch.skyPale)
+    static let pass = Color(hex: Swatch.limeLight)
+    static let look = Color(hex: Swatch.lilacPale)
+    static let notifications = Color(hex: Swatch.butter)
+    static let help = Color(hex: Swatch.lime)
+    static let data = Color(hex: Swatch.skyPale)
+    static let about = Color(hex: Swatch.agarAlt)
 }
 
 struct SettingsScreen: View {
@@ -31,14 +53,9 @@ struct SettingsScreen: View {
     @State private var editingName = false
     @State private var editingPartner = false
     @State private var nameDraft = ""
-    @State private var confirmErase = false
-    @State private var eraseFailed = false
     @State private var notificationsDenied = false
     @State private var restoreMessage: String?
     @State private var isRestoring = false
-    @State private var importingBackup = false
-    @State private var pendingBackup: AppData?
-    @State private var backupUnreadable = false
 
     var body: some View {
         NavigationStack {
@@ -48,9 +65,7 @@ struct SettingsScreen: View {
                 passSection
                 lookSection
                 notificationSection
-                healthSection
-                privacySection
-                aboutSection
+                moreSection
             }
             .scrollContentBackground(.hidden)
             .background(palette.background.ignoresSafeArea())
@@ -88,46 +103,6 @@ struct SettingsScreen: View {
             } message: {
                 Text(tr("Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove."))
             }
-            .confirmationDialog(tr("Delete everything?"), isPresented: $confirmErase, titleVisibility: .visible) {
-                Button(tr("Delete everything"), role: .destructive) {
-                    eraseEverything()
-                }
-                Button(tr("Cancel"), role: .cancel) {}
-            } message: {
-                Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone."))
-            }
-            .alert(tr("Nothing was deleted"), isPresented: $eraseFailed) {
-                Button(tr("Erase this phone only"), role: .destructive) {
-                    eraseEverything(skippingServer: true)
-                }
-                Button(tr("Try later"), role: .cancel) {}
-            } message: {
-                Text(tr("The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed."))
-            }
-            .fileImporter(isPresented: $importingBackup, allowedContentTypes: [.json]) { result in
-                if case .success(let url) = result {
-                    readBackup(url)
-                }
-            }
-            .confirmationDialog(tr("Replace your journal?"), isPresented: backupBinding, titleVisibility: .visible) {
-                Button(tr("Replace with the backup"), role: .destructive) {
-                    if let backup = pendingBackup {
-                        model.restore(backup)
-                        Haptics.success()
-                    }
-                    pendingBackup = nil
-                }
-                Button(tr("Cancel"), role: .cancel) {
-                    pendingBackup = nil
-                }
-            } message: {
-                Text(backupSummary)
-            }
-            .alert(tr("This file isn't a Petri backup"), isPresented: $backupUnreadable) {
-                Button(tr("OK"), role: .cancel) {}
-            } message: {
-                Text(tr("Pick a file made with Back Up, in Settings."))
-            }
             .alert(tr("Restore Purchases"), isPresented: restoreBinding) {
                 Button(tr("OK"), role: .cancel) {}
             } message: {
@@ -145,32 +120,6 @@ struct SettingsScreen: View {
             .task {
                 notificationsDenied = await NotificationManager.isDenied()
             }
-        }
-    }
-
-    private var backupBinding: Binding<Bool> {
-        Binding(get: { pendingBackup != nil }, set: { shown in
-            if !shown { pendingBackup = nil }
-        })
-    }
-
-    private var backupSummary: String {
-        guard let backup = pendingBackup else { return "" }
-        let started = backup.installedAt.formatted(date: .abbreviated, time: .omitted)
-        return tr("The journal on this phone is replaced by the backup: %1$lld germs logged since %2$@.",
-                  backup.logs.count, started)
-    }
-
-    /// Opens a file picked in Files and keeps it only if it is a Petri journal.
-    private func readBackup(_ url: URL) {
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer {
-            if scoped { url.stopAccessingSecurityScopedResource() }
-        }
-        if let raw = try? Data(contentsOf: url), let backup = Persistence.readBackup(raw) {
-            pendingBackup = backup
-        } else {
-            backupUnreadable = true
         }
     }
 
@@ -216,24 +165,6 @@ struct SettingsScreen: View {
                 set: { value in model.updateSettings { $0[keyPath: keyPath] = value } })
     }
 
-    private func eraseEverything(skippingServer: Bool = false) {
-        Task {
-            if crew.isMember, !skippingServer {
-                let left = await crew.leave()
-                if !left {
-                    eraseFailed = true
-                    return
-                }
-            }
-            crew.resetLocal()
-            model.eraseEverything()
-            if AppIconManager.current != .petri {
-                _ = await AppIconManager.apply(.petri)
-            }
-            dismiss()
-        }
-    }
-
     // MARK: - Sections
 
     private var profileSection: some View {
@@ -251,15 +182,29 @@ struct SettingsScreen: View {
                         Text(tr("Level %1$lld · %2$@", model.level.number, model.displayTitle))
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
+                        if model.hasPass {
+                            PillLabel(text: tr("Season Pass").uppercased(), foreground: palette.night, background: palette.lime)
+                                .padding(.top, 2)
+                        }
                     }
                     Spacer(minLength: 4)
-                    if model.hasPass {
-                        PillLabel(text: tr("Season Pass").uppercased(), foreground: palette.night, background: palette.lime)
-                    }
+                    Text(tr("Edit"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .padding(.horizontal, 14)
+                        .frame(height: 32)
+                        .background(palette.ink.opacity(0.07), in: Capsule())
                 }
                 .padding(.vertical, 4)
             }
             .accessibilityHint(tr("Edit your name"))
+        }
+    }
+
+    private func valueWithChevron(_ value: String) -> some View {
+        HStack(spacing: 8) {
+            Text(value)
+            RowChevron()
         }
     }
 
@@ -271,7 +216,7 @@ struct SettingsScreen: View {
                 LabeledContent {
                     Text(model.data.kids.map { $0.name }.joined(separator: ", "))
                 } label: {
-                    SettingsLabel(symbol: "face.smiling.inverse", tint: palette.sky, title: tr("Kids"))
+                    SettingsLabel(symbol: "face.smiling.inverse", tint: SettingsTint.family, title: tr("Kids"))
                 }
             }
             Button {
@@ -279,9 +224,9 @@ struct SettingsScreen: View {
                 editingPartner = true
             } label: {
                 LabeledContent {
-                    Text(model.data.partnerName ?? tr("Add"))
+                    valueWithChevron(model.data.partnerName ?? tr("Add"))
                 } label: {
-                    SettingsLabel(symbol: "person.2.fill", tint: Color(hex: Swatch.pink), title: tr("Partner"))
+                    SettingsLabel(symbol: "person.2.fill", tint: SettingsTint.family, title: tr("Partner"))
                 }
             }
             if AppConfig.crewEnabled {
@@ -290,9 +235,9 @@ struct SettingsScreen: View {
                     model.selectedTab = .crew
                 } label: {
                     LabeledContent {
-                        Text(crew.state?.crew.name ?? tr("None"))
+                        valueWithChevron(crew.state?.crew.name ?? tr("None"))
                     } label: {
-                        SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: palette.coral, title: tr("Crew"))
+                        SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: SettingsTint.family, title: tr("Crew"))
                     }
                 }
             }
@@ -315,20 +260,20 @@ struct SettingsScreen: View {
                 }
             } label: {
                 LabeledContent {
-                    Text(planLabel)
+                    valueWithChevron(planLabel)
                 } label: {
-                    SettingsLabel(symbol: "ticket.fill", tint: palette.limeDeep, title: tr("Plan"))
+                    SettingsLabel(symbol: "ticket.fill", tint: SettingsTint.pass, title: tr("Plan"))
                 }
             }
             Button {
                 restore()
             } label: {
-                SettingsLabel(symbol: "arrow.clockwise", tint: Color(hex: Swatch.slate), title: tr("Restore Purchases"))
+                SettingsLabel(symbol: "arrow.clockwise", tint: SettingsTint.pass, title: tr("Restore Purchases"))
             }
             .disabled(isRestoring)
             #if PETRI_SIDELOAD
             Toggle(isOn: setting(\.sideloadPass)) {
-                SettingsLabel(symbol: "hammer.fill", tint: Color(hex: Swatch.slate), title: tr("Pass (test build)"))
+                SettingsLabel(symbol: "hammer.fill", tint: SettingsTint.pass, title: tr("Pass (test build)"))
             }
             #endif
         }
@@ -339,18 +284,18 @@ struct SettingsScreen: View {
             NavigationLink {
                 AppIconScreen()
             } label: {
-                SettingsLabel(symbol: "app.badge.fill", tint: palette.lilac, title: tr("App Icon"))
+                SettingsLabel(symbol: "app.badge.fill", tint: SettingsTint.look, title: tr("Icon and Theme"))
             }
             Picker(selection: setting(\.appearance)) {
                 Text(tr("Automatic")).tag(AppearanceMode.system)
                 Text(tr("Light")).tag(AppearanceMode.light)
                 Text(tr("Dark")).tag(AppearanceMode.dark)
             } label: {
-                SettingsLabel(symbol: "circle.lefthalf.filled", tint: palette.night, title: tr("Appearance"))
+                SettingsLabel(symbol: "circle.lefthalf.filled", tint: SettingsTint.look, title: tr("Appearance"))
             }
             .tint(palette.inkSecondary)
             Toggle(isOn: setting(\.soundsOn)) {
-                SettingsLabel(symbol: "speaker.wave.2.fill", tint: Color(hex: Swatch.orange), title: tr("Sounds and Haptics"))
+                SettingsLabel(symbol: "speaker.wave.2.fill", tint: SettingsTint.look, title: tr("Sounds and Haptics"))
             }
         }
     }
@@ -358,16 +303,20 @@ struct SettingsScreen: View {
     private var notificationSection: some View {
         Section {
             Toggle(isOn: setting(\.checkInsOn)) {
-                SettingsLabel(symbol: "bell.fill", tint: palette.coral, title: tr("Check-ins"))
+                SettingsLabel(symbol: "bell.fill", tint: SettingsTint.notifications, title: tr("Check-ins"))
             }
             if AppConfig.crewEnabled {
                 Toggle(isOn: setting(\.crewAlertsOn)) {
-                    SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: palette.coral, title: tr("Crew Alerts"))
+                    SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: SettingsTint.notifications, title: tr("Crew Alerts"))
                 }
             }
             if notificationsDenied, let url = URL(string: UIApplication.openNotificationSettingsURLString) {
                 Link(destination: url) {
-                    SettingsLabel(symbol: "bell.slash.fill", tint: Color(hex: Swatch.slate), title: tr("Turn On in iOS Settings"))
+                    LabeledContent {
+                        RowChevron()
+                    } label: {
+                        SettingsLabel(symbol: "bell.slash.fill", tint: SettingsTint.notifications, title: tr("Turn On in iOS Settings"))
+                    }
                 }
             }
         } header: {
@@ -379,92 +328,25 @@ struct SettingsScreen: View {
         }
     }
 
-    private var healthSection: some View {
+    private var moreSection: some View {
         Section {
             NavigationLink {
                 HelpLinesScreen()
             } label: {
-                SettingsLabel(symbol: "phone.fill", tint: .green, title: tr("Help Lines"))
+                SettingsLabel(symbol: "phone.fill", tint: SettingsTint.help, title: tr("Help Lines"))
             }
-        } header: {
-            Text(tr("Health"))
-        } footer: {
-            Text(HealthNotice.text)
-        }
-    }
-
-    private var privacySection: some View {
-        Section {
             NavigationLink {
-                DataScreen()
-            } label: {
-                SettingsLabel(symbol: "hand.raised.fill", tint: Color(hex: Swatch.azure), title: tr("Your Data"))
-            }
-            if !model.data.logs.isEmpty {
-                ShareLink(item: journalExport, preview: SharePreview(tr("Petri journal"))) {
-                    LabeledContent {
-                        Text(verbatim: "CSV")
-                    } label: {
-                        SettingsLabel(symbol: "square.and.arrow.up", tint: Color(hex: Swatch.slate), title: tr("Export"))
-                    }
+                DataScreen {
+                    dismiss()
                 }
-            }
-            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Petri backup"))) {
-                LabeledContent {
-                    Text(verbatim: "JSON")
-                } label: {
-                    SettingsLabel(symbol: "externaldrive.fill", tint: Color(hex: Swatch.azure), title: tr("Back Up"))
-                }
-            }
-            Button {
-                importingBackup = true
             } label: {
-                SettingsLabel(symbol: "arrow.down.doc.fill", tint: Color(hex: Swatch.azure), title: tr("Restore"))
-            }
-            Button {
-                confirmErase = true
-            } label: {
-                SettingsLabel(symbol: "trash.fill", tint: palette.coralDeep, title: tr("Delete Everything"))
-            }
-        } header: {
-            Text(tr("Privacy"))
-        } footer: {
-            Text(tr("No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice."))
-        }
-    }
-
-    /// Built from the journal only when the share sheet asks for it.
-    private var journalExport: JournalExport {
-        let logs = model.data.logs
-        let catalog = model.catalog
-        let names = Dictionary(uniqueKeysWithValues: logs.map { ($0.id, model.sourceName($0.source)) })
-        return JournalExport(logs: logs, catalog: catalog, sourceNames: names)
-    }
-
-    private var aboutSection: some View {
-        Section {
-            NavigationLink {
-                SourcesScreen()
-            } label: {
-                SettingsLabel(symbol: "book.closed.fill", tint: palette.lilac, title: tr("Sources"))
+                SettingsLabel(symbol: "hand.raised.fill", tint: SettingsTint.data, title: tr("Data and Privacy"))
             }
             NavigationLink {
-                LegalScreen(kind: .terms)
+                AboutScreen()
             } label: {
-                SettingsLabel(symbol: "doc.text.fill", tint: Color(hex: Swatch.slate), title: tr("Terms of Use"))
+                SettingsLabel(symbol: "info.circle.fill", tint: SettingsTint.about, title: tr("About Petri"))
             }
-            NavigationLink {
-                LegalScreen(kind: .privacy)
-            } label: {
-                SettingsLabel(symbol: "lock.fill", tint: Color(hex: Swatch.slate), title: tr("Privacy Policy"))
-            }
-            if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
-                Link(destination: url) {
-                    SettingsLabel(symbol: "envelope.fill", tint: Color(hex: Swatch.azure), title: tr("Contact Support"))
-                }
-            }
-        } header: {
-            Text(tr("About"))
         } footer: {
             Text(tr("Petri %@ · Made in Montréal", AppConfig.versionLabel))
                 .frame(maxWidth: .infinity)

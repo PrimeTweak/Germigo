@@ -55,7 +55,7 @@ The journal is one JSON file in Application Support. Decoding is tolerant: a key
 
 When a stored type changes, add the new field with a default in its `init(from:)` in `App/Models/AppData.swift` and extend `Tests/LogicTests/main.swift`.
 
-Settings > Your Data > Back Up shares the journal as `petri-backup.json`, in the same format as the file on disk. Restore reads such a file back and replaces the journal after a confirmation.
+Settings > Data and Privacy > Back Up shares the journal as `petri-backup.json`, in the same format as the file on disk. Restore a Backup reads such a file back and replaces the journal after a confirmation.
 
 Skill tree titles, streak milestones, the couple duel and the season story are computed from the journal in `App/Store/ProgressEngine.swift`; only the worn title and the last celebrated milestone are stored.
 

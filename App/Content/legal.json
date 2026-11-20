@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-19",
+  "updated": "2026-11-20",
   "web": {
     "privacyTitle": {
       "en": "Privacy Policy",
@@ -64,8 +64,8 @@
       "fr": "Bientôt dans l'App Store."
     },
     "supportDelete": {
-      "en": "To delete your data: in the app, open Settings, then Delete Everything. Leaving a crew deletes your data from the server.",
-      "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
+      "en": "To delete your data: in the app, open Settings, then Data and Privacy, then Delete Everything. Leaving a crew deletes your data from the server.",
+      "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Données et confidentialité, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
     }
   },
   "privacy": [
@@ -155,8 +155,8 @@
         "fr": "Conservation et suppression"
       },
       "body": {
-        "en": "Your journal stays on your phone until you delete it. Delete Everything, in Settings, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
-        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans les réglages, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
+        "en": "Your journal stays on your phone until you delete it. Delete Everything, in Settings under Data and Privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
+        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
       }
     },
     {

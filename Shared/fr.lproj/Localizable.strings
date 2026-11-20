@@ -48,6 +48,7 @@
 "+%lld pts" = "+%lld pts";
 "+%lld Sick Points" = "+%lld points malades";
 "3 AM Philosopher" = "Philosophe de 3 h du matin";
+"A backup goes where you save it. Petri never uploads it." = "Une sauvegarde va où tu la mets. Petri ne la téléverse jamais.";
 "A germ shows up once 2 families report it. No names." = "Un microbe apparaît quand 2 familles le signalent. Sans nom.";
 "A kid" = "Un enfant";
 "A kid is sick" = "Un enfant est malade";
@@ -58,8 +59,8 @@
 "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses." = "Pour un enfant d'un an, la première année de garderie, c'est environ 12 à 15 infections respiratoires, 2 gastros et 1 ou 2 maladies avec éruption.";
 "A reminder due between 10 PM and 7 AM waits until morning." = "Un rappel prévu entre 22 h et 7 h attend le matin.";
 "A wide and unwanted collection." = "Une collection vaste et non désirée.";
-"About" = "À propos";
 "About a minute · +%lld pts" = "Environ une minute · +%lld pts";
+"About Petri" = "À propos de Petri";
 "Active" = "Active";
 "Add" = "Ajouter";
 "Add a kid" = "Ajouter un enfant";
@@ -76,7 +77,6 @@
 "All germs" = "Tous les microbes";
 "Always yours" = "Toujours à toi";
 "An outbreak radar for your group" = "Un radar des éclosions pour ton groupe";
-"App Icon" = "Icône de l'app";
 "App icon unlocked: %@" = "Icône débloquée : %@";
 "Appearance" = "Apparence";
 "Apple's standard license agreement (EULA)" = "Contrat de licence standard d'Apple (CLUF)";
@@ -84,7 +84,7 @@
 "Back" = "Retour";
 "Back on your feet in a day" = "Sur pied en une journée";
 "Back Up" = "Sauvegarder";
-"Back Up saves your whole journal as a file, where you choose. Restore reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal dans un fichier, où tu veux. Restaurer le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
+"Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal dans un fichier, où tu veux. Restaurer une sauvegarde le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
 "Backups" = "Sauvegardes";
 "Badge unlocked: %@" = "Badge débloqué : %@";
 "Badges" = "Badges";
@@ -141,6 +141,7 @@
 "Daily quiz · %lld question" = "Quiz du jour · %lld question";
 "Daily quiz · %lld questions" = "Quiz du jour · %lld questions";
 "Dark" = "Sombre";
+"Data and Privacy" = "Données et confidentialité";
 "day" = "jour";
 "Day %1$lld of up to %2$lld" = "Jour %1$lld sur un maximum de %2$lld";
 "Day %1$lld · %2$@" = "Jour %1$lld · %2$@";
@@ -163,8 +164,8 @@
 "Dead heat. Nobody wins." = "Égalité parfaite. Personne ne gagne.";
 "Deep dive" = "Pour aller plus loin";
 "Delete" = "Supprimer";
-"Delete everything" = "Tout supprimer";
 "Delete Everything" = "Tout supprimer";
+"Delete everything" = "Tout supprimer";
 "Delete everything?" = "Tout supprimer ?";
 "Delete this entry?" = "Supprimer cette entrée ?";
 "Delete this log?" = "Supprimer cette entrée du journal ?";
@@ -178,6 +179,7 @@
 "Done for today" = "C'est fait pour aujourd'hui";
 "Earn the Night Shift badge" = "Gagne le badge Quart de nuit";
 "Earned" = "Obtenu";
+"Edit" = "Modifier";
 "Edit log" = "Modifier l'entrée";
 "Edit your name" = "Modifier ton nom";
 "Electrolyte Sommelier" = "Sommelier d'électrolytes";
@@ -186,6 +188,7 @@
 "Ended" = "Fin";
 "Epic" = "Épique";
 "Erase this phone only" = "Effacer ce téléphone seulement";
+"Erases your journal, kids, badges and settings from this phone, and your crew data from the server." = "Efface ton journal, tes enfants, tes badges et tes réglages de ce téléphone, et tes données de groupe du serveur.";
 "Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes badges et tes réglages de ce téléphone, ainsi que tes données de groupe sur le serveur. C'est irréversible.";
 "Every deep dive" = "Tous les « Pour aller plus loin »";
 "Every germ caught" = "Tous les microbes attrapés";
@@ -193,7 +196,7 @@
 "Everywhere in Canada except Québec and Nunavut." = "Partout au Canada, sauf au Québec et au Nunavut.";
 "Export" = "Exporter";
 "Export the journal that couldn't be read" = "Exporter le journal illisible";
-"Export your journal or delete everything from Settings at any time. Leaving a crew deletes your data from the server." = "Exporte ton journal ou supprime tout depuis les réglages, quand tu veux. Quitter un groupe supprime tes données du serveur.";
+"Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server." = "Exporte ton journal ou supprime tout d'ici, quand tu veux. Quitter un groupe supprime tes données du serveur.";
 "Exposed" = "Exposé";
 "Exposure" = "Exposition";
 "Fact" = "Fait";
@@ -233,7 +236,6 @@
 "Half Album" = "Demi-album";
 "Hand-Washing Zealot" = "Fanatique du lavage de mains";
 "Harassment or spam" = "Harcèlement ou pourriel";
-"Health" = "Santé";
 "Health line" = "Ligne santé";
 "Help Lines" = "Lignes d'aide";
 "History" = "Historique";
@@ -249,6 +251,7 @@
 "I survived." = "J'ai survécu.";
 "I'm better" = "Je vais mieux";
 "I'm sick" = "Je suis malade";
+"Icon and Theme" = "Icône et thème";
 "Immune Legend" = "Légende immunitaire";
 "In a crew" = "Dans un groupe";
 "In an emergency, call your local emergency number." = "En cas d'urgence, appelle ton numéro d'urgence local.";
@@ -352,7 +355,6 @@
 "night shifts" = "quarts de nuit";
 "Night-shift logs" = "Prises de quart de nuit";
 "No ads, no trackers, no third-party analytics, no data sold." = "Aucune publicité, aucun traceur, aucun outil d'analyse tiers, aucune donnée vendue.";
-"No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice." = "Aucune publicité, aucun traceur, aucun outil d'analyse tiers. Ton journal reste sur ce téléphone, et une sauvegarde va où tu l'enregistres. Partager avec un groupe, c'est ton choix.";
 "No countdown for this one. The case file explains what to watch for." = "Pas de compte à rebours pour celui-là. Le dossier explique quoi surveiller.";
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
 "No germs logged yet. It won't last." = "Aucun microbe noté pour l'instant. Ça ne durera pas.";
@@ -405,7 +407,7 @@
 "Petri couldn't write to this phone. Free up some storage, then make your change again." = "Petri n'a pas pu écrire sur ce téléphone. Libère de l'espace, puis refais ta modification.";
 "Petri is published by %@." = "Petri est publiée par %@.";
 "Petri journal" = "Journal Petri";
-"Petri kept the file and started a new journal. You can export the kept file from Settings, under Your Data." = "Petri a conservé le fichier et commencé un nouveau journal. Tu peux exporter le fichier conservé depuis Réglages, sous Tes données.";
+"Petri kept the file and started a new journal. You can export the kept file from Settings, under Data and Privacy." = "Petri a conservé le fichier et commencé un nouveau journal. Tu peux exporter le fichier conservé depuis Réglages, sous Données et confidentialité.";
 "Petri shares general information from public health sources. It is not medical advice and does not replace a health professional." = "Petri partage de l'information générale tirée de sources de santé publique. Ce n'est pas un avis médical, et ça ne remplace pas un professionnel de la santé.";
 "Petri · Admit one household" = "Petri · Valide pour une maisonnée";
 "Petri. Daycare germs, collected." = "Petri. Les microbes de garderie, en collection.";
@@ -430,7 +432,6 @@
 "Rash Cartographer" = "Cartographe des rougeurs";
 "Reach rank 2 in three branches. %1$lld of %2$lld so far." = "Atteins le rang 2 dans trois branches. %1$lld sur %2$lld pour l'instant.";
 "Read every lesson" = "Toutes les leçons lues";
-"Read the Privacy Policy" = "Lire la politique de confidentialité";
 "Read the Terms of Use" = "Lire les conditions d'utilisation";
 "Reason" = "Motif";
 "Record: %lld" = "Record : %lld";
@@ -445,7 +446,7 @@
 "Report" = "Signaler";
 "Report or block anyone from the menu next to their name. Reports are reviewed within 24 hours." = "Signale ou bloque n'importe qui depuis le menu à côté de son nom. Les signalements sont examinés dans les 24 heures.";
 "Report sent" = "Signalement envoyé";
-"Restore" = "Restaurer";
+"Restore a Backup" = "Restaurer une sauvegarde";
 "Restore Purchases" = "Restaurer les achats";
 "Right!" = "Bravo !";
 "Rough Month" = "Mois difficile";
@@ -476,6 +477,7 @@
 "Share the boss card" = "Partager la carte de boss";
 "Share the scoreboard" = "Partager le tableau";
 "Share this card" = "Partager cette carte";
+"Show %lld more" = "Afficher %lld de plus";
 "Shows up" = "Apparaît";
 "Sick" = "Malade";
 "Sick Points" = "Points malades";
@@ -533,13 +535,13 @@
 "That's it. Nothing was logged." = "C'est ça. Rien n'a été noté.";
 "The App Store can't be reached right now. Check your connection and try again." = "L'App Store est inaccessible pour l'instant. Vérifie ta connexion et réessaie.";
 "The Boomerang" = "Le boomerang";
+"The case files summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you." = "Les dossiers résument les conseils publiés par des agences de santé publique et des sociétés de pédiatrie. C'est de l'information générale, pas un avis médical, et ça ne remplace pas un professionnel de la santé qui te connaît.";
 "The Collector" = "Le collectionneur";
 "The crew server can't be reached right now." = "Le serveur des groupes est inaccessible pour l'instant.";
 "The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed." = "Le serveur des groupes est inaccessible : tes données de groupe ne peuvent pas en être retirées pour l'instant. Tu peux réessayer plus tard, ou effacer ce téléphone maintenant et écrire au soutien pour faire retirer tes données de groupe.";
 "The crew server isn't set up for this build yet." = "Le serveur des groupes n'est pas encore configuré pour cette version.";
 "The damage" = "Les dégâts";
 "The Dodger" = "L'esquiveur";
-"The Field Notes summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you." = "Les notes de terrain résument les conseils publiés par des agences de santé publique et des sociétés de pédiatrie. C'est de l'information générale, pas un avis médical, et ça ne remplace pas un professionnel de la santé qui te connaît.";
 "The fun science on every germ, and every read" = "La science amusante de chaque microbe, et toutes les lectures";
 "The fun science unlocks when you catch this germ, or right away with the Season Pass." = "La science amusante se débloque quand tu attrapes ce microbe, ou tout de suite avec la Passe de saison.";
 "The germs win this round." = "Les microbes gagnent cette manche.";
@@ -637,10 +639,10 @@
 "You're still clear" = "Rien pour l'instant";
 "Your call" = "C'est toi qui décides";
 "Your crew is waiting" = "Ton groupe t'attend";
-"Your Data" = "Tes données";
 "Your daycare year, in germs." = "Ton année de garderie, en microbes.";
 "Your germs prefer to arrive between 1 and 5 AM." = "Tes microbes préfèrent arriver entre 1 h et 5 h du matin.";
 "Your household's current run." = "La série en cours de ta maisonnée.";
+"Your journal" = "Ton journal";
 "Your journal couldn't be read" = "Ton journal est illisible";
 "Your journal wasn't saved" = "Ton journal n'a pas été enregistré";
 "Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one." = "Ton journal, les prénoms de tes enfants, tes badges et tes réglages sont dans un fichier protégé sur ce téléphone. Il fait partie de la sauvegarde de ton appareil si tu en utilises une.";

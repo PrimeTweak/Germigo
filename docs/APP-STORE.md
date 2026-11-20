@@ -64,7 +64,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 > Petri is a humor app for parents with general health information from public sources. It does not diagnose.
 > No account is needed. To test Crew: subscribe in the sandbox, open the Crew tab, start a crew, then join it from a second device with the invite code.
 > Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours on the server's moderation page.
-> Leaving a crew deletes the member's data from the server. Settings > Delete Everything erases all local data.
+> Leaving a crew deletes the member's data from the server. Settings > Data and Privacy > Delete Everything erases all local data.
 
 ## 4. Open risks
 

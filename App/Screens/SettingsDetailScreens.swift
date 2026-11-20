@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The kids in the household. The first one is free; more need the Season Pass.
 struct KidsScreen: View {
@@ -171,7 +172,7 @@ struct AppIconScreen: View {
             .padding(.vertical, 12)
         }
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("App Icon"))
+        .navigationTitle(tr("Icon and Theme"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             current = AppIconManager.current
@@ -353,66 +354,281 @@ struct HelpLinesScreen: View {
     }
 }
 
-/// Plain-language summary of what is stored and where.
+/// What is stored and where, and what can be done with the journal: export, back up, restore, delete.
 struct DataScreen: View {
+    private struct Item {
+        let symbol: String
+        let title: String
+        let detail: String
+    }
+
+    /// Closes Settings once everything is erased.
+    let onErased: () -> Void
+    @Environment(AppModel.self) private var model
+    @Environment(CrewStore.self) private var crew
+    @Environment(\.palette) private var palette
+    @State private var showAll = false
+    @State private var confirmErase = false
+    @State private var eraseFailed = false
+    @State private var importingBackup = false
+    @State private var pendingBackup: AppData?
+    @State private var backupUnreadable = false
+
+    private let shortList = 3
+
+    private var items: [Item] {
+        [
+            Item(symbol: "iphone", title: tr("On this phone"),
+                 detail: tr("Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one.")),
+            Item(symbol: "dot.radiowaves.left.and.right", title: tr("In a crew"),
+                 detail: tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent.")),
+            Item(symbol: "eye.slash", title: tr("No tracking"),
+                 detail: tr("No ads, no trackers, no third-party analytics, no data sold.")),
+            Item(symbol: "creditcard", title: tr("Purchases"),
+                 detail: tr("The Season Pass is handled by Apple. Petri never sees your payment details.")),
+            Item(symbol: "externaldrive", title: tr("Backups"),
+                 detail: tr("Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.")),
+            Item(symbol: "trash", title: tr("Your call"),
+                 detail: tr("Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server."))
+        ]
+    }
+
+    var body: some View {
+        List {
+            infoSection
+            journalSection
+            Section {
+                Button(role: .destructive) {
+                    confirmErase = true
+                } label: {
+                    Label {
+                        Text(tr("Delete Everything"))
+                            .fontWeight(.semibold)
+                            .foregroundStyle(palette.coralInk)
+                    } icon: {
+                        IconTile(symbol: "trash.fill", background: Color(hex: Swatch.blushLight),
+                                 foreground: Color(hex: Swatch.ember), size: 30)
+                    }
+                }
+            } footer: {
+                Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server."))
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(palette.background.ignoresSafeArea())
+        .tint(palette.ink)
+        .navigationTitle(tr("Data and Privacy"))
+        .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog(tr("Delete everything?"), isPresented: $confirmErase, titleVisibility: .visible) {
+            Button(tr("Delete everything"), role: .destructive) {
+                eraseEverything()
+            }
+            Button(tr("Cancel"), role: .cancel) {}
+        } message: {
+            Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone."))
+        }
+        .alert(tr("Nothing was deleted"), isPresented: $eraseFailed) {
+            Button(tr("Erase this phone only"), role: .destructive) {
+                eraseEverything(skippingServer: true)
+            }
+            Button(tr("Try later"), role: .cancel) {}
+        } message: {
+            Text(tr("The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed."))
+        }
+        .fileImporter(isPresented: $importingBackup, allowedContentTypes: [.json]) { result in
+            if case .success(let url) = result {
+                readBackup(url)
+            }
+        }
+        .confirmationDialog(tr("Replace your journal?"), isPresented: backupBinding, titleVisibility: .visible) {
+            Button(tr("Replace with the backup"), role: .destructive) {
+                if let backup = pendingBackup {
+                    model.restore(backup)
+                    Haptics.success()
+                }
+                pendingBackup = nil
+            }
+            Button(tr("Cancel"), role: .cancel) {
+                pendingBackup = nil
+            }
+        } message: {
+            Text(backupSummary)
+        }
+        .alert(tr("This file isn't a Petri backup"), isPresented: $backupUnreadable) {
+            Button(tr("OK"), role: .cancel) {}
+        } message: {
+            Text(tr("Pick a file made with Back Up, in Settings."))
+        }
+    }
+
+    private var infoSection: some View {
+        Section {
+            ForEach(Array(items.prefix(showAll ? items.count : shortList).enumerated()), id: \.offset) { item in
+                HStack(alignment: .top, spacing: 13) {
+                    IconTile(symbol: item.element.symbol, background: SettingsTint.about,
+                             foreground: Color(hex: Swatch.night), size: 30)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.element.title)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                        Text(item.element.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            if !showAll {
+                Button {
+                    withAnimation(.snappy) {
+                        showAll = true
+                    }
+                } label: {
+                    Text(tr("Show %lld more", items.count - shortList))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                }
+            }
+            if let kept = Persistence.setAsideFiles.first {
+                ShareLink(item: kept) {
+                    SettingsLabel(symbol: "exclamationmark.triangle.fill", tint: SettingsTint.notifications,
+                                  title: tr("Export the journal that couldn't be read"))
+                }
+            }
+            NavigationLink {
+                LegalScreen(kind: .privacy)
+            } label: {
+                SettingsLabel(symbol: "lock.fill", tint: SettingsTint.data, title: tr("Privacy Policy"))
+            }
+        }
+    }
+
+    private var journalSection: some View {
+        Section {
+            if !model.data.logs.isEmpty {
+                ShareLink(item: journalExport, preview: SharePreview(tr("Petri journal"))) {
+                    LabeledContent {
+                        Text(verbatim: "CSV")
+                    } label: {
+                        SettingsLabel(symbol: "square.and.arrow.up", tint: SettingsTint.data, title: tr("Export"))
+                    }
+                }
+            }
+            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Petri backup"))) {
+                LabeledContent {
+                    Text(verbatim: "JSON")
+                } label: {
+                    SettingsLabel(symbol: "externaldrive.fill", tint: SettingsTint.data, title: tr("Back Up"))
+                }
+            }
+            Button {
+                importingBackup = true
+            } label: {
+                SettingsLabel(symbol: "arrow.down.doc.fill", tint: SettingsTint.data, title: tr("Restore a Backup"))
+            }
+        } header: {
+            Text(tr("Your journal"))
+        } footer: {
+            Text(tr("A backup goes where you save it. Petri never uploads it."))
+        }
+    }
+
+    /// Built from the journal only when the share sheet asks for it.
+    private var journalExport: JournalExport {
+        let logs = model.data.logs
+        let names = Dictionary(uniqueKeysWithValues: logs.map { ($0.id, model.sourceName($0.source)) })
+        return JournalExport(logs: logs, catalog: model.catalog, sourceNames: names)
+    }
+
+    private var backupBinding: Binding<Bool> {
+        Binding(get: { pendingBackup != nil }, set: { shown in
+            if !shown { pendingBackup = nil }
+        })
+    }
+
+    private var backupSummary: String {
+        guard let backup = pendingBackup else { return "" }
+        let started = backup.installedAt.formatted(date: .abbreviated, time: .omitted)
+        return tr("The journal on this phone is replaced by the backup: %1$lld germs logged since %2$@.",
+                  backup.logs.count, started)
+    }
+
+    /// Opens a file picked in Files and keeps it only if it is a Petri journal.
+    private func readBackup(_ url: URL) {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer {
+            if scoped { url.stopAccessingSecurityScopedResource() }
+        }
+        if let raw = try? Data(contentsOf: url), let backup = Persistence.readBackup(raw) {
+            pendingBackup = backup
+        } else {
+            backupUnreadable = true
+        }
+    }
+
+    private func eraseEverything(skippingServer: Bool = false) {
+        Task {
+            if crew.isMember, !skippingServer {
+                let left = await crew.leave()
+                if !left {
+                    eraseFailed = true
+                    return
+                }
+            }
+            crew.resetLocal()
+            model.eraseEverything()
+            if AppIconManager.current != .petri {
+                _ = await AppIconManager.apply(.petri)
+            }
+            onErased()
+        }
+    }
+}
+
+/// Sources, legal pages and support, with the health notice.
+struct AboutScreen: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                item("iphone", tr("On this phone"),
-                     tr("Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one."))
-                item("dot.radiowaves.left.and.right", tr("In a crew"),
-                     tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent."))
-                item("creditcard", tr("Purchases"),
-                     tr("The Season Pass is handled by Apple. Petri never sees your payment details."))
-                item("eye.slash", tr("No tracking"),
-                     tr("No ads, no trackers, no third-party analytics, no data sold."))
-                item("externaldrive", tr("Backups"),
-                     tr("Back Up saves your whole journal as a file, where you choose. Restore reads it back on this phone or a new one. Petri never uploads it."))
-                item("trash", tr("Your call"),
-                     tr("Export your journal or delete everything from Settings at any time. Leaving a crew deletes your data from the server."))
-                if let kept = Persistence.setAsideFiles.first {
-                    ShareLink(item: kept) {
-                        Text(tr("Export the journal that couldn't be read"))
-                    }
-                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
-                    .padding(.top, 6)
+        List {
+            Section {
+                NavigationLink {
+                    SourcesScreen()
+                } label: {
+                    SettingsLabel(symbol: "book.closed.fill", tint: SettingsTint.about, title: tr("Sources"))
+                }
+                NavigationLink {
+                    LegalScreen(kind: .terms)
+                } label: {
+                    SettingsLabel(symbol: "doc.text.fill", tint: SettingsTint.about, title: tr("Terms of Use"))
                 }
                 NavigationLink {
                     LegalScreen(kind: .privacy)
                 } label: {
-                    Text(tr("Read the Privacy Policy"))
+                    SettingsLabel(symbol: "lock.fill", tint: SettingsTint.about, title: tr("Privacy Policy"))
                 }
-                .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
-                .padding(.top, 6)
+                if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
+                    Link(destination: url) {
+                        LabeledContent {
+                            RowChevron()
+                        } label: {
+                            SettingsLabel(symbol: "envelope.fill", tint: SettingsTint.about, title: tr("Contact Support"))
+                        }
+                    }
+                }
+            } footer: {
+                Text(HealthNotice.text)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
         }
+        .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Your Data"))
+        .navigationTitle(tr("About Petri"))
         .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func item(_ symbol: String, _ title: String, _ detail: String) -> some View {
-        HStack(alignment: .top, spacing: 13) {
-            IconTile(symbol: symbol, background: palette.surfaceAlt, foreground: palette.ink, size: 36)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(palette.ink)
-                Text(detail)
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .petriCard(radius: 22, padding: 14)
     }
 }
 
-/// Every reference used by the Field Notes and the reads.
+/// Every reference used by the case files and the lessons.
 struct SourcesScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -430,7 +646,7 @@ struct SourcesScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text(tr("The Field Notes summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you."))
+                Text(tr("The case files summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you."))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)

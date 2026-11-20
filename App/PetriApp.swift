@@ -97,7 +97,7 @@ private struct ThemedRoot: View {
     private var noticeMessage: String {
         model.journalNotice == .saveFailed
             ? tr("Petri couldn't write to this phone. Free up some storage, then make your change again.")
-            : tr("Petri kept the file and started a new journal. You can export the kept file from Settings, under Your Data.")
+            : tr("Petri kept the file and started a new journal. You can export the kept file from Settings, under Data and Privacy.")
     }
 }
 

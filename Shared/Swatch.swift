@@ -91,7 +91,6 @@ enum Swatch {
     static let amber: UInt32 = 0xF7B52B
     static let butter: UInt32 = 0xFFE08A
     static let tangerine: UInt32 = 0xFFA33A
-    static let orange: UInt32 = 0xFF8A3D
     static let holoYellow: UInt32 = 0xFFE678
     static let holoGreen: UInt32 = 0xC8FF78
 }
