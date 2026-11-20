@@ -353,7 +353,7 @@ struct KidIllnessSheet: View {
                     .petriCard(padding: 0)
                     Text(hasWindow
                          ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Petri also puts the countdown on the Lock Screen.")
-                         : tr("No countdown for this one. The Field Notes explain what to watch for."))
+                         : tr("No countdown for this one. The case file explains what to watch for."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)

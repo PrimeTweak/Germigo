@@ -135,10 +135,10 @@ struct MainTabs: View {
                 .tabItem { Label(tr("Season"), systemImage: "chart.bar.fill") }
                 .tag(AppTab.season)
         }
-        .tabViewBottomAccessory(isEnabled: model.activeLog != nil) {
+        .tabViewBottomAccessory(isEnabled: model.activeLog != nil && model.selectedTab != .today) {
             SickAccessory()
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabBarMinimizeBehavior(.never)
         .sheet(item: $model.logRequest, onDismiss: presentStagedReward) { request in
             LogSheet(request: request) { result in
                 stagedReward = result
@@ -208,7 +208,7 @@ private struct ToastView: View {
     }
 }
 
-/// The bar above the tab bar while a germ is active.
+/// The bar above the tab bar while a germ is active; Today shows the same in its own card.
 private struct SickAccessory: View {
     @Environment(AppModel.self) private var model
 

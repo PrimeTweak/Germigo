@@ -59,6 +59,7 @@
 "A reminder due between 10 PM and 7 AM waits until morning." = "A reminder due between 10 PM and 7 AM waits until morning.";
 "A wide and unwanted collection." = "A wide and unwanted collection.";
 "About" = "About";
+"About a minute · +%lld pts" = "About a minute · +%lld pts";
 "Active" = "Active";
 "Add" = "Add";
 "Add a kid" = "Add a kid";
@@ -72,7 +73,6 @@
 "Album" = "Album";
 "All clear" = "All clear";
 "All clear. For now." = "All clear. For now.";
-"All Field Notes" = "All Field Notes";
 "All germs" = "All germs";
 "Always yours" = "Always yours";
 "An outbreak radar for your group" = "An outbreak radar for your group";
@@ -104,6 +104,7 @@
 "Card %@" = "Card %@";
 "Card %@ is still out there" = "Card %@ is still out there";
 "Card %@, not caught yet" = "Card %@, not caught yet";
+"Case file and when to call" = "Case file and when to call";
 "Case file sources: %@" = "Case file sources: %@";
 "Case files" = "Case files";
 "Catch 20 germs" = "Catch 20 germs";
@@ -203,7 +204,6 @@
 "Feed" = "Feed";
 "Feeling better?" = "Feeling better?";
 "Fever Veteran" = "Fever Veteran";
-"Field Notes" = "Field Notes";
 "Find it in Settings." = "Find it in Settings.";
 "Finish the album" = "Finish the album";
 "Finished your first daily quiz" = "Finished your first daily quiz";
@@ -304,11 +304,10 @@
 "Locked" = "Locked";
 "Log a germ" = "Log a germ";
 "Log it" = "Log it";
-"Log it to start your incubation countdown." = "Log it to start your incubation countdown.";
 "Logbook" = "Logbook";
 "Logged a germ between 1 and 5 AM" = "Logged a germ between 1 and 5 AM";
 "Logged your first germ" = "Logged your first germ";
-"Longer than usual. Check when to call in the Field Notes." = "Longer than usual. Check when to call in the Field Notes.";
+"Longer than usual. Check when to call in the case file." = "Longer than usual. Check when to call in the case file.";
 "Longest" = "Longest";
 "Longest chain" = "Longest chain";
 "Look" = "Look";
@@ -331,7 +330,6 @@
 "Myth" = "Myth";
 "Myth Buster" = "Myth Buster";
 "Myth or fact?" = "Myth or fact?";
-"Myth or fact? %@" = "Myth or fact? %@";
 "Myth!" = "Myth!";
 "Myth." = "Myth.";
 "Name" = "Name";
@@ -355,7 +353,7 @@
 "Night-shift logs" = "Night-shift logs";
 "No ads, no trackers, no third-party analytics, no data sold." = "No ads, no trackers, no third-party analytics, no data sold.";
 "No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice." = "No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice.";
-"No countdown for this one. The Field Notes explain what to watch for." = "No countdown for this one. The Field Notes explain what to watch for.";
+"No countdown for this one. The case file explains what to watch for." = "No countdown for this one. The case file explains what to watch for.";
 "No crew matches that code." = "No crew matches that code.";
 "No germs logged yet. It won't last." = "No germs logged yet. It won't last.";
 "No illness matches your search." = "No illness matches your search.";
@@ -508,6 +506,7 @@
 "Start my %lld-day free trial" = "Start my %lld-day free trial";
 "Start my season" = "Start my season";
 "Start the crew" = "Start the crew";
+"Start your countdown" = "Start your countdown";
 "Started" = "Started";
 "Still fine" = "Still fine";
 "Still under the weather?" = "Still under the weather?";
@@ -573,6 +572,7 @@
 "Tied" = "Tied";
 "Timeline" = "Timeline";
 "Timing" = "Timing";
+"Tip %1$lld of %2$lld" = "Tip %1$lld of %2$lld";
 "Tissue Apprentice" = "Tissue Apprentice";
 "Tissue Box" = "Tissue Box";
 "Tissue Tester" = "Tissue Tester";
@@ -610,7 +610,6 @@
 "When a kid gets sick, add it here. Petri starts your incubation countdown and remembers who brought what home." = "When a kid gets sick, add it here. Petri starts your incubation countdown and remembers who brought what home.";
 "When to call" = "When to call";
 "Who am I?" = "Who am I?";
-"Who am I? %@" = "Who am I? %@";
 "Who gave it to you?" = "Who gave it to you?";
 "Who was sick?" = "Who was sick?";
 "Who's patient zero?" = "Who's patient zero?";

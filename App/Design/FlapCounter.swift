@@ -5,6 +5,7 @@ struct FlapCounter: View {
     let value: Int
     var hot = false
     var tileWidth: CGFloat = 92
+    var spacing: CGFloat = 8
 
     private var digits: [Int] {
         let capped = max(0, min(value, 999))
@@ -13,7 +14,7 @@ struct FlapCounter: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: spacing) {
             ForEach(Array(digits.enumerated()), id: \.offset) { item in
                 FlapDigit(digit: item.element, hot: hot, width: tileWidth)
             }
@@ -89,7 +90,7 @@ private struct FlapFace: View, Animatable {
                 .frame(height: 2)
         }
         .frame(width: width, height: height)
-        .shadow(color: Color.black.opacity(0.22), radius: 8, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.22), radius: width * 0.09, x: 0, y: width * 0.09)
     }
 
     private func half(_ digit: Int, top: Bool) -> some View {
@@ -141,51 +142,87 @@ struct HazardStripes: View {
     }
 }
 
-/// The "days without a germ" workplace-safety sign.
+/// The "days without a germ" workplace-safety sign, full size or as a one-row strip.
 struct CounterSign: View {
     let days: Int
     let isSick: Bool
     let leadingNote: String
     let trailingNote: String
+    var tileWidth: CGFloat = 92
+    var isStrip = false
     @Environment(\.palette) private var palette
+
+    private var label: String {
+        trCount(days, one: "day without a germ", other: "days without a germ").uppercased()
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             HazardStripes()
-                .frame(height: 14)
-            VStack(spacing: 12) {
-                Text(tr("This household has gone").uppercased())
-                    .font(.footnote.weight(.heavy))
-                    .kerning(1.6)
-                    .foregroundStyle(palette.ink)
-                    .multilineTextAlignment(.center)
-                FlapCounter(value: days, hot: isSick)
-                Text(trCount(days, one: "day without a germ", other: "days without a germ").uppercased())
-                    .font(.title2.weight(.black))
-                    .foregroundStyle(palette.ink)
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.7)
-                    .lineLimit(2)
-                Rectangle()
-                    .fill(palette.hairline)
-                    .frame(height: 1)
-                HStack {
-                    Text(leadingNote)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                    Spacer()
-                    Text(trailingNote)
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
-                }
+                .frame(height: isStrip ? 10 : 14)
+            if isStrip {
+                strip
+            } else {
+                full
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 16)
-            .padding(.bottom, 16)
         }
         .frame(maxWidth: .infinity)
         .background(palette.sign)
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 14, x: 0, y: 8)
+    }
+
+    private var full: some View {
+        let roomy = tileWidth >= 78
+        let gap: CGFloat = roomy ? 12 : (tileWidth >= 66 ? 10 : 8)
+        let inset: CGFloat = roomy ? 16 : (tileWidth >= 66 ? 14 : 12)
+        return VStack(spacing: gap) {
+            Text(tr("This household has gone").uppercased())
+                .font(.footnote.weight(.heavy))
+                .kerning(1.6)
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.center)
+            FlapCounter(value: days, hot: isSick, tileWidth: tileWidth)
+            Text(label)
+                .font(roomy ? Font.title2.weight(.black) : Font.title3.weight(.black))
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.7)
+                .lineLimit(2)
+            Rectangle()
+                .fill(palette.hairline)
+                .frame(height: 1)
+            HStack {
+                Text(leadingNote)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Spacer()
+                Text(trailingNote)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, inset)
+    }
+
+    private var strip: some View {
+        HStack(spacing: 14) {
+            FlapCounter(value: days, hot: isSick, tileWidth: 38, spacing: 5)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(label)
+                    .font(.headline.weight(.black))
+                    .foregroundStyle(palette.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(isSick ? leadingNote + " · " + trailingNote : leadingNote)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .lineLimit(2)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }

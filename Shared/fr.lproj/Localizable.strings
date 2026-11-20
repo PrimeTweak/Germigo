@@ -59,6 +59,7 @@
 "A reminder due between 10 PM and 7 AM waits until morning." = "Un rappel prévu entre 22 h et 7 h attend le matin.";
 "A wide and unwanted collection." = "Une collection vaste et non désirée.";
 "About" = "À propos";
+"About a minute · +%lld pts" = "Environ une minute · +%lld pts";
 "Active" = "Active";
 "Add" = "Ajouter";
 "Add a kid" = "Ajouter un enfant";
@@ -72,7 +73,6 @@
 "Album" = "Album";
 "All clear" = "Tout va bien";
 "All clear. For now." = "Rien à signaler. Pour l'instant.";
-"All Field Notes" = "Toutes les notes de terrain";
 "All germs" = "Tous les microbes";
 "Always yours" = "Toujours à toi";
 "An outbreak radar for your group" = "Un radar des éclosions pour ton groupe";
@@ -104,6 +104,7 @@
 "Card %@" = "Carte %@";
 "Card %@ is still out there" = "La carte %@ court toujours";
 "Card %@, not caught yet" = "Carte %@, pas encore attrapée";
+"Case file and when to call" = "Dossier et quand appeler";
 "Case file sources: %@" = "Sources du dossier : %@";
 "Case files" = "Dossiers";
 "Catch 20 germs" = "Attrape 20 microbes";
@@ -203,7 +204,6 @@
 "Feed" = "Fil";
 "Feeling better?" = "Ça va mieux ?";
 "Fever Veteran" = "Vétéran de la fièvre";
-"Field Notes" = "Notes de terrain";
 "Find it in Settings." = "Tu la trouveras dans les réglages.";
 "Finish the album" = "Termine l'album";
 "Finished your first daily quiz" = "Premier quiz du jour terminé";
@@ -304,11 +304,10 @@
 "Locked" = "Verrouillé";
 "Log a germ" = "Noter un microbe";
 "Log it" = "Noter";
-"Log it to start your incubation countdown." = "Note-le pour lancer ton compte à rebours d'incubation.";
 "Logbook" = "Journal de bord";
 "Logged a germ between 1 and 5 AM" = "Un microbe noté entre 1 h et 5 h du matin";
 "Logged your first germ" = "Ton premier microbe noté";
-"Longer than usual. Check when to call in the Field Notes." = "Plus long que d'habitude. Vérifie quand appeler dans les notes de terrain.";
+"Longer than usual. Check when to call in the case file." = "Plus long que d'habitude. Vérifie quand appeler dans le dossier.";
 "Longest" = "Le plus long";
 "Longest chain" = "Plus longue chaîne";
 "Look" = "Style";
@@ -331,7 +330,6 @@
 "Myth" = "Mythe";
 "Myth Buster" = "Briseur de mythes";
 "Myth or fact?" = "Mythe ou fait ?";
-"Myth or fact? %@" = "Mythe ou fait ? %@";
 "Myth!" = "Mythe !";
 "Myth." = "Mythe.";
 "Name" = "Nom";
@@ -355,7 +353,7 @@
 "Night-shift logs" = "Prises de quart de nuit";
 "No ads, no trackers, no third-party analytics, no data sold." = "Aucune publicité, aucun traceur, aucun outil d'analyse tiers, aucune donnée vendue.";
 "No ads, no trackers, no third-party analytics. Your journal stays on this phone, and a backup goes where you save it. Crew sharing is your choice." = "Aucune publicité, aucun traceur, aucun outil d'analyse tiers. Ton journal reste sur ce téléphone, et une sauvegarde va où tu l'enregistres. Partager avec un groupe, c'est ton choix.";
-"No countdown for this one. The Field Notes explain what to watch for." = "Pas de compte à rebours pour celui-là. Les notes de terrain expliquent quoi surveiller.";
+"No countdown for this one. The case file explains what to watch for." = "Pas de compte à rebours pour celui-là. Le dossier explique quoi surveiller.";
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
 "No germs logged yet. It won't last." = "Aucun microbe noté pour l'instant. Ça ne durera pas.";
 "No illness matches your search." = "Aucune maladie ne correspond à ta recherche.";
@@ -508,6 +506,7 @@
 "Start my %lld-day free trial" = "Commencer mon essai gratuit de %lld jours";
 "Start my season" = "Commencer ma saison";
 "Start the crew" = "Créer le groupe";
+"Start your countdown" = "Lance ton compte à rebours";
 "Started" = "Début";
 "Still fine" = "Ça va encore";
 "Still under the weather?" = "Encore mal en point ?";
@@ -573,6 +572,7 @@
 "Tied" = "Égalité";
 "Timeline" = "Chronologie";
 "Timing" = "Délais";
+"Tip %1$lld of %2$lld" = "Conseil %1$lld sur %2$lld";
 "Tissue Apprentice" = "Apprenti mouchoir";
 "Tissue Box" = "Boîte de mouchoirs";
 "Tissue Tester" = "Testeur de mouchoirs";
@@ -610,7 +610,6 @@
 "When a kid gets sick, add it here. Petri starts your incubation countdown and remembers who brought what home." = "Quand un enfant tombe malade, ajoute-le ici. Petri lance ton compte à rebours d'incubation et se souvient de qui a rapporté quoi.";
 "When to call" = "Quand appeler";
 "Who am I?" = "Qui suis-je ?";
-"Who am I? %@" = "Qui suis-je ? %@";
 "Who gave it to you?" = "Qui te l'a donné ?";
 "Who was sick?" = "Qui était malade ?";
 "Who's patient zero?" = "Qui est le patient zéro ?";
