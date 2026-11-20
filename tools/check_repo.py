@@ -17,7 +17,7 @@ errors = []
 SPEC = re.compile(r"%(?:\d+\$)?(?:lld|@|d|f)")
 STRING_LINE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')
 
-# Longest "Shows up" or "Lasts" text the two-line stat tile of a germ page is given.
+# Longest "Shows up" or "Lasts" text a timeline column of a germ page is given.
 TILE_TEXT_LIMIT = 30
 
 REQUIRED = [
@@ -150,7 +150,7 @@ def check_content():
         for key in ("showsUp", "lasts"):
             for language, text in (germ.get(key) or {}).items():
                 if len(str(text)) > TILE_TEXT_LIMIT:
-                    fail(f"germs.json {gid}.{key}.{language}: longer than {TILE_TEXT_LIMIT} characters, the stat tile shows two lines")
+                    fail(f"germs.json {gid}.{key}.{language}: longer than {TILE_TEXT_LIMIT} characters, the timeline column shows two lines")
         if germ.get("rarity") not in rarities:
             fail(f"germs.json {gid}: unknown rarity")
         for key in ("tintLight", "tintDeep"):
@@ -169,9 +169,13 @@ def check_content():
             localized(item.get("body"), f"germs.json {gid}.tips[{index}].body")
         for index, item in enumerate(germ.get("deepDive", [])):
             localized(item, f"germs.json {gid}.deepDive[{index}]")
+        check_health_sheet(germ, gid)
         check_sources(germ.get("sources"), f"germs.json {gid}")
     if not articles:
         fail("articles.json: no articles")
+    thresholds = [article.get("unlockAtAnswers") for article in articles]
+    if not all(isinstance(value, int) and value >= 0 for value in thresholds) or len(set(thresholds)) != len(thresholds):
+        fail("articles.json: every article needs its own unlockAtAnswers, a whole number from 0")
     for article in articles:
         aid = article.get("id", "?")
         localized(article.get("title"), f"articles.json {aid}.title")
@@ -204,6 +208,27 @@ def check_content():
     if server_ids != {g.get("id") for g in germs}:
         fail("server/server.js: GERM_IDS must match the ids in germs.json")
     return germs
+
+
+def check_health_sheet(germ, gid):
+    """The case file's own sections: what it is, symptoms and spread, each list keyed even when empty."""
+    localized(germ.get("about"), f"germs.json {gid}.about")
+    for key in ("aboutMore", "symptomsNote", "spreadNote"):
+        if germ.get(key) is not None:
+            localized(germ.get(key), f"germs.json {gid}.{key}")
+    for key in ("symptoms", "spreads"):
+        if not isinstance(germ.get(key), list):
+            fail(f"germs.json {gid}: {key} must be a list, empty when the sources say nothing")
+    for index, item in enumerate(germ.get("symptoms") or []):
+        if not item.get("icon"):
+            fail(f"germs.json {gid}.symptoms[{index}]: needs an icon")
+        localized(item.get("text"), f"germs.json {gid}.symptoms[{index}].text")
+    for index, item in enumerate(germ.get("spreads") or []):
+        if not item.get("icon"):
+            fail(f"germs.json {gid}.spreads[{index}]: needs an icon")
+        localized(item.get("title"), f"germs.json {gid}.spreads[{index}].title")
+        if item.get("detail") is not None:
+            localized(item.get("detail"), f"germs.json {gid}.spreads[{index}].detail")
 
 
 def check_sources(sources, where):

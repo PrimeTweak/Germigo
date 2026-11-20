@@ -5,6 +5,7 @@ struct TodayScreen: View {
     @Environment(\.palette) private var palette
     @State private var showSettings = false
     @State private var showKidSheet = false
+    @State private var showQuiz = false
 
     var body: some View {
         NavigationStack {
@@ -18,10 +19,12 @@ struct TodayScreen: View {
                     if let log = model.activeLog, let germ = model.activeGerm {
                         SickNowCard(log: log, germ: germ)
                         TipsCard(germ: germ)
+                        QuizTeaser(showQuiz: $showQuiz)
                     } else {
                         HoldToLogButton {
                             model.logRequest = LogRequest()
                         }
+                        QuizTeaser(showQuiz: $showQuiz)
                         IncomingSection(showKidSheet: $showKidSheet)
                         RadarTeaser()
                     }
@@ -51,6 +54,9 @@ struct TodayScreen: View {
             .sheet(isPresented: $showKidSheet) {
                 KidIllnessSheet()
             }
+            .fullScreenCover(isPresented: $showQuiz) {
+                QuizScreen()
+            }
         }
     }
 
@@ -60,6 +66,56 @@ struct TodayScreen: View {
         let leading = sick ? tr("Last run: %lld days", model.lastRunDays()) : tr("Record: %lld days", model.recordDays())
         let trailing = sick ? tr("It was beautiful.") : tr("Season %1$lld · Week %2$lld", season.number, season.week(for: Date()))
         return CounterSign(days: model.streakDays(), isSick: sick, leadingNote: leading, trailingNote: trailing)
+    }
+}
+
+/// The daily quiz, waiting on Today until it is done.
+private struct QuizTeaser: View {
+    @Binding var showQuiz: Bool
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let plan = model.quizPlan()
+        let next = model.quizAnswers().count
+        if next < plan.count && !model.quizDone() {
+            Button {
+                showQuiz = true
+            } label: {
+                HStack(spacing: 13) {
+                    IconTile(symbol: "flask.fill", background: palette.lime, foreground: palette.night, size: 40)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(trCount(plan.count, one: "Daily quiz · %lld question", other: "Daily quiz · %lld questions"))
+                            .font(.headline)
+                            .foregroundStyle(palette.ink)
+                        Text(teaser(plan[next]))
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(palette.inkTertiary)
+                        .accessibilityHidden(true)
+                }
+                .petriCard()
+                .overlay {
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .stroke(palette.lime, lineWidth: 2)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func teaser(_ question: QuizQuestion) -> String {
+        switch question.kind {
+        case .myth: return tr("Myth or fact? %@", question.prompt)
+        case .whoAmI: return tr("Who am I? %@", question.prompt)
+        case .showsUp, .lasts: return question.prompt
+        }
     }
 }
 

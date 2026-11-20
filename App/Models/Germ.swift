@@ -76,6 +76,18 @@ struct GermMyth: Codable, Hashable {
     let explanation: LocalizedText
 }
 
+struct GermSymptom: Codable, Hashable {
+    let icon: String
+    let text: LocalizedText
+}
+
+/// One way a germ travels, with an optional precision.
+struct GermSpread: Codable, Hashable {
+    let icon: String
+    let title: LocalizedText
+    let detail: LocalizedText?
+}
+
 /// One collectible germ with its health notes.
 struct Germ: Codable, Identifiable, Hashable {
     let id: String
@@ -107,6 +119,13 @@ struct Germ: Codable, Identifiable, Hashable {
     let myth: GermMyth
     /// One of the sources that also covers children.
     let kidSource: String?
+    /// The health sheet: what it is, what it feels like, how it travels.
+    var about: LocalizedText?
+    var aboutMore: LocalizedText?
+    var symptoms: [GermSymptom] = []
+    var symptomsNote: LocalizedText?
+    var spreads: [GermSpread] = []
+    var spreadNote: LocalizedText?
 
     var assetName: String { "germ-" + id }
 
@@ -115,6 +134,16 @@ struct Germ: Codable, Identifiable, Hashable {
     }
     var numberLabel: String { String(format: "%02ld", number) }
 
+    /// Who published the sources, for a one-line credit.
+    var sourcePublishers: String {
+        var names: [String] = []
+        for source in sources {
+            let name = source.name.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) ?? source.name
+            if !names.contains(name) { names.append(name) }
+        }
+        return names.joined(separator: ", ")
+    }
+
     /// The period in which symptoms usually start after an exposure.
     func window(from start: Date) -> (opens: Date, closes: Date)? {
         guard let low = incubationMinHours, let high = incubationMaxHours else { return nil }
@@ -122,11 +151,11 @@ struct Germ: Codable, Identifiable, Hashable {
     }
 }
 
-/// A longer read that unlocks as the album grows.
+/// A longer read that unlocks with right answers in the daily quiz.
 struct Article: Codable, Identifiable, Hashable {
     let id: String
     let icon: String
-    let unlockAtGerms: Int
+    let unlockAtAnswers: Int
     let title: LocalizedText
     let summary: LocalizedText
     let paragraphs: [LocalizedText]

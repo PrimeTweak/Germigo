@@ -54,6 +54,9 @@ enum RewardEngine {
     /// A log closed sooner than this is a correction, not a recovery.
     static let speedrunMinimum: TimeInterval = 3600
 
+    /// Each right answer in the daily quiz.
+    static let quizAnswerPoints = 5
+
     static func bonuses(for draft: LogDraft, germ: Germ) -> [LogBonus] {
         var result = [LogBonus(kind: .rarity, points: germ.rarity.basePoints)]
         let hour = Calendar.current.component(.hour, from: draft.startedAt)
@@ -65,7 +68,7 @@ enum RewardEngine {
 
     static func totalPoints(data: AppData) -> Int {
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
-        return data.logs.reduce(0) { $0 + $1.points } + dodged * dodgePoints
+        return data.logs.reduce(0) { $0 + $1.points } + dodged * dodgePoints + data.quiz.rightTotal * quizAnswerPoints
     }
 
     static func earnedBadges(data: AppData, catalog: GermCatalog, now: Date) -> Set<String> {
@@ -107,6 +110,13 @@ enum RewardEngine {
 
         if data.kidIllnesses.filter({ $0.outcome == .dodged }).count >= 3 { earned.insert("dodger") }
         if StreakMath.record(data: data, now: now) >= 30 { earned.insert(BadgeCatalog.ironParent) }
+        if !data.quiz.doneDays.isEmpty { earned.insert(BadgeCatalog.labRat) }
+        if !catalog.germs.isEmpty && Set(data.quiz.mythsRight).isSuperset(of: catalog.germs.map { $0.id }) {
+            earned.insert(BadgeCatalog.mythBuster)
+        }
+        if !catalog.articles.isEmpty && Set(data.readArticles).isSuperset(of: catalog.articles.map { $0.id }) {
+            earned.insert(BadgeCatalog.professor)
+        }
         return earned
     }
 }

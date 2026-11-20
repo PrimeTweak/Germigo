@@ -161,7 +161,87 @@
       }
     ],
     "lastsUpToDays": 10,
-    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html"
+    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html",
+    "about": {
+      "en": "A virus that infects the nose and throat. Usually harmless.",
+      "fr": "Un virus qui infecte le nez et la gorge. En général sans gravité."
+    },
+    "aboutMore": {
+      "en": "More than 200 viruses can cause it; rhinoviruses are the most common.",
+      "fr": "Plus de 200 virus peuvent le causer; les rhinovirus sont les plus fréquents."
+    },
+    "symptoms": [
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny or stuffy nose",
+          "fr": "Nez qui coule ou bouché"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "allergens",
+        "text": {
+          "en": "Sneezing",
+          "fr": "Éternuements"
+        }
+      },
+      {
+        "icon": "brain.head.profile",
+        "text": {
+          "en": "Headache or mild aches",
+          "fr": "Mal de tête ou courbatures"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Low fever",
+          "fr": "Petite fièvre"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "They usually peak within 2 to 3 days.",
+      "fr": "Ils sont en général à leur pire en 2 ou 3 jours."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs and sneezes",
+          "fr": "Toux et éternuements"
+        },
+        "detail": {
+          "en": "Droplets you breathe in",
+          "fr": "Des gouttelettes qu'on respire"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Hands, surfaces and shared toys",
+          "fr": "Mains, surfaces et jouets partagés"
+        },
+        "detail": {
+          "en": "Then a touch to the eyes, nose or mouth",
+          "fr": "Puis on se touche les yeux, le nez ou la bouche"
+        }
+      }
+    ]
   },
   {
     "id": "mystery",
@@ -326,7 +406,17 @@
         "url": "https://www.cdc.gov/common-cold/treatment/index.html"
       }
     ],
-    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html"
+    "kidSource": "https://www.cdc.gov/common-cold/treatment/index.html",
+    "about": {
+      "en": "The germ with no name: you're sick, but you don't know with what.",
+      "fr": "Le microbe sans nom : tu es malade, mais sans savoir de quoi."
+    },
+    "aboutMore": {
+      "en": "More than 200 viruses can cause a cold, so most everyday infections never get a name.",
+      "fr": "Plus de 200 virus peuvent causer un rhume : la plupart des infections du quotidien n'ont jamais de nom."
+    },
+    "symptoms": [],
+    "spreads": []
   },
   {
     "id": "lingerer",
@@ -479,7 +569,17 @@
         "url": "https://www.nhs.uk/conditions/cough/"
       }
     ],
-    "lastsUpToDays": 28
+    "lastsUpToDays": 28,
+    "about": {
+      "en": "A cough that hangs on after a cold or the flu.",
+      "fr": "Une toux qui s'accroche après un rhume ou une grippe."
+    },
+    "aboutMore": {
+      "en": "Most coughs clear up on their own within 3 to 4 weeks. One that lasts longer is called persistent.",
+      "fr": "La plupart des toux passent toutes seules en 3 à 4 semaines. Au-delà, on parle de toux persistante."
+    },
+    "symptoms": [],
+    "spreads": []
   },
   {
     "id": "chesty",
@@ -633,7 +733,53 @@
       }
     ],
     "lastsUpToDays": 21,
-    "kidSource": "https://www.cdc.gov/acute-bronchitis/about/index.html"
+    "kidSource": "https://www.cdc.gov/acute-bronchitis/about/index.html",
+    "about": {
+      "en": "The airways of the lungs swell and make mucus. A virus is usually behind it.",
+      "fr": "Les voies respiratoires des poumons enflent et produisent du mucus. C'est en général un virus."
+    },
+    "symptoms": [
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough, with or without mucus",
+          "fr": "Toux, avec ou sans mucus"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Tiredness",
+          "fr": "Fatigue"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Congestion",
+          "fr": "Congestion"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Mild body aches",
+          "fr": "Courbatures légères"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "They last less than 3 weeks.",
+      "fr": "Ils durent moins de 3 semaines."
+    },
+    "spreads": []
   },
   {
     "id": "whisper",
@@ -783,7 +929,46 @@
       }
     ],
     "lastsUpToDays": 14,
-    "kidSource": "https://www.nhs.uk/conditions/laryngitis/"
+    "kidSource": "https://www.nhs.uk/conditions/laryngitis/",
+    "about": {
+      "en": "Irritation or swelling of the voice box, in the throat.",
+      "fr": "Irritation ou enflure de la boîte vocale, dans la gorge."
+    },
+    "aboutMore": {
+      "en": "It's often caused by a cold or the flu.",
+      "fr": "Elle est souvent causée par un rhume ou une grippe."
+    },
+    "symptoms": [
+      {
+        "icon": "speaker.slash.fill",
+        "text": {
+          "en": "Hoarse voice, or none at all",
+          "fr": "Voix rauque, ou plus de voix"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Irritating cough",
+          "fr": "Toux irritante"
+        }
+      },
+      {
+        "icon": "speaker.wave.2.fill",
+        "text": {
+          "en": "Always clearing your throat",
+          "fr": "Besoin de se racler la gorge"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      }
+    ],
+    "spreads": []
   },
   {
     "id": "pressure",
@@ -937,7 +1122,67 @@
       }
     ],
     "lastsUpToDays": 10,
-    "kidSource": "https://www.cdc.gov/sinus-infection/about/index.html"
+    "kidSource": "https://www.cdc.gov/sinus-infection/about/index.html",
+    "about": {
+      "en": "Fluid builds up in the air-filled sinuses of the face, and germs grow in it.",
+      "fr": "Du liquide s'accumule dans les sinus, ces cavités d'air du visage, et des microbes s'y multiplient."
+    },
+    "aboutMore": {
+      "en": "Viruses cause most of them; bacteria cause some.",
+      "fr": "La plupart sont causées par des virus; quelques-unes, par des bactéries."
+    },
+    "symptoms": [
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny or stuffy nose",
+          "fr": "Nez qui coule ou bouché"
+        }
+      },
+      {
+        "icon": "face.dashed",
+        "text": {
+          "en": "Face pain or pressure",
+          "fr": "Douleur ou pression au visage"
+        }
+      },
+      {
+        "icon": "brain.head.profile",
+        "text": {
+          "en": "Headache",
+          "fr": "Mal de tête"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "text": {
+          "en": "Drip down the throat",
+          "fr": "Écoulement dans la gorge"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "mouth.fill",
+        "text": {
+          "en": "Bad breath",
+          "fr": "Mauvaise haleine"
+        }
+      }
+    ],
+    "spreads": []
   },
   {
     "id": "noro",
@@ -1101,7 +1346,97 @@
       }
     ],
     "lastsUpToDays": 3,
-    "kidSource": "https://www.cdc.gov/norovirus/about/index.html"
+    "kidSource": "https://www.cdc.gov/norovirus/about/index.html",
+    "about": {
+      "en": "A very contagious virus that causes vomiting and diarrhea.",
+      "fr": "Un virus très contagieux qui cause vomissements et diarrhée."
+    },
+    "aboutMore": {
+      "en": "Sometimes called the stomach flu, but it has nothing to do with the flu.",
+      "fr": "On l'appelle parfois « grippe intestinale », mais ça n'a rien à voir avec la grippe."
+    },
+    "symptoms": [
+      {
+        "icon": "toilet.fill",
+        "text": {
+          "en": "Diarrhea",
+          "fr": "Diarrhée"
+        }
+      },
+      {
+        "icon": "arrow.uturn.up.circle.fill",
+        "text": {
+          "en": "Vomiting",
+          "fr": "Vomissements"
+        }
+      },
+      {
+        "icon": "tornado",
+        "text": {
+          "en": "Nausea",
+          "fr": "Nausées"
+        }
+      },
+      {
+        "icon": "bolt.fill",
+        "text": {
+          "en": "Stomach pain",
+          "fr": "Maux de ventre"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "brain.head.profile",
+        "text": {
+          "en": "Headache",
+          "fr": "Mal de tête"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Body aches",
+          "fr": "Courbatures"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "The first four are the most common.",
+      "fr": "Les quatre premiers sont les plus fréquents."
+    },
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Contact with a sick person",
+          "fr": "Contact avec une personne malade"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "title": {
+          "en": "Contaminated food or drinks",
+          "fr": "Aliments ou boissons contaminés"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Surfaces, then fingers in the mouth",
+          "fr": "Surfaces, puis doigts dans la bouche"
+        }
+      }
+    ],
+    "spreadNote": {
+      "en": "You can still spread it for days after you feel better.",
+      "fr": "On peut encore le transmettre des jours après s'être senti mieux."
+    }
   },
   {
     "id": "pinky",
@@ -1263,7 +1598,75 @@
       }
     ],
     "lastsUpToDays": 14,
-    "kidSource": "https://www.cdc.gov/conjunctivitis/about/index.html"
+    "kidSource": "https://www.cdc.gov/conjunctivitis/about/index.html",
+    "about": {
+      "en": "The white of the eye turns pink or red as its tiny blood vessels swell.",
+      "fr": "Le blanc de l'œil devient rose ou rouge parce que ses petits vaisseaux enflent."
+    },
+    "aboutMore": {
+      "en": "Viruses, bacteria or allergies can cause it. The viral and bacterial kinds are very contagious.",
+      "fr": "Virus, bactéries ou allergies peuvent la causer. Les formes virale et bactérienne sont très contagieuses."
+    },
+    "symptoms": [
+      {
+        "icon": "eye.fill",
+        "text": {
+          "en": "Pink or red eye",
+          "fr": "Œil rose ou rouge"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "text": {
+          "en": "Watery eyes",
+          "fr": "Yeux qui larmoient"
+        }
+      },
+      {
+        "icon": "sparkles",
+        "text": {
+          "en": "Itching or burning",
+          "fr": "Démangeaisons ou brûlure"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "text": {
+          "en": "Feels like something's in it",
+          "fr": "Sensation d'un grain dans l'œil"
+        }
+      },
+      {
+        "icon": "humidity.fill",
+        "text": {
+          "en": "Discharge, pus or mucus",
+          "fr": "Écoulement, pus ou mucus"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Hands that touch the eyes",
+          "fr": "Les mains qui touchent les yeux"
+        }
+      },
+      {
+        "icon": "bed.double.fill",
+        "title": {
+          "en": "Shared towels and pillowcases",
+          "fr": "Serviettes et taies d'oreiller partagées"
+        }
+      },
+      {
+        "icon": "eyeglasses",
+        "title": {
+          "en": "Shared eye drops, glasses or makeup",
+          "fr": "Gouttes, lunettes ou maquillage partagés"
+        }
+      }
+    ]
   },
   {
     "id": "rona",
@@ -1432,6 +1835,96 @@
       {
         "name": "CDC: Types of COVID-19 Treatment",
         "url": "https://www.cdc.gov/covid/treatment/index.html"
+      },
+      {
+        "name": "CDC: About COVID-19",
+        "url": "https://www.cdc.gov/covid/about/index.html"
+      }
+    ],
+    "about": {
+      "en": "A disease caused by the SARS-CoV-2 virus. It can be very contagious.",
+      "fr": "Une maladie causée par le virus SARS-CoV-2. Elle peut être très contagieuse."
+    },
+    "symptoms": [
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever or chills",
+          "fr": "Fièvre ou frissons"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Congestion or runny nose",
+          "fr": "Nez bouché ou qui coule"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "text": {
+          "en": "New loss of taste or smell",
+          "fr": "Perte du goût ou de l'odorat"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Fatigue",
+          "fr": "Fatigue"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Muscle or body aches",
+          "fr": "Douleurs musculaires"
+        }
+      },
+      {
+        "icon": "lungs.fill",
+        "text": {
+          "en": "Shortness of breath",
+          "fr": "Essoufflement"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Also possible: headache, nausea, vomiting or diarrhea.",
+      "fr": "Aussi possibles : mal de tête, nausées, vomissements ou diarrhée."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Droplets and tiny particles in the air",
+          "fr": "Gouttelettes et fines particules dans l'air"
+        },
+        "detail": {
+          "en": "Breathed in, or landing on the eyes, nose or mouth",
+          "fr": "Respirées, ou qui se posent sur les yeux, le nez ou la bouche"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Even from people without symptoms",
+          "fr": "Même par des gens sans symptômes"
+        }
       }
     ]
   },
@@ -1601,7 +2094,90 @@
       }
     ],
     "lastsUpToDays": 14,
-    "kidSource": "https://www.cdc.gov/rsv/infants-young-children/index.html"
+    "kidSource": "https://www.cdc.gov/rsv/infants-young-children/index.html",
+    "about": {
+      "en": "A common virus of the nose, throat, airways and lungs. Usually mild, like a cold.",
+      "fr": "Un virus courant du nez, de la gorge, des voies respiratoires et des poumons. En général léger, comme un rhume."
+    },
+    "symptoms": [
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny or stuffy nose",
+          "fr": "Nez qui coule ou bouché"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "allergens",
+        "text": {
+          "en": "Sneezing",
+          "fr": "Éternuements"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "waveform",
+        "text": {
+          "en": "Wheezing",
+          "fr": "Respiration sifflante"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "text": {
+          "en": "Less appetite",
+          "fr": "Moins d'appétit"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "They come in stages, not all at once.",
+      "fr": "Ils arrivent par étapes, pas tous en même temps."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs and sneezes",
+          "fr": "Toux et éternuements"
+        },
+        "detail": {
+          "en": "Droplets you breathe in",
+          "fr": "Des gouttelettes qu'on respire"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Direct contact, like kissing a child's face",
+          "fr": "Contact direct, comme embrasser le visage d'un enfant"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Surfaces, then a touch to the face",
+          "fr": "Surfaces, puis la main au visage"
+        }
+      }
+    ],
+    "spreadNote": {
+      "en": "Usually contagious for 3 to 8 days, starting a day or two before symptoms.",
+      "fr": "En général contagieux de 3 à 8 jours, à partir d'un jour ou deux avant les symptômes."
+    }
   },
   {
     "id": "strep",
@@ -1756,7 +2332,79 @@
       "en": "Strep needs a test and antibiotics.",
       "fr": "Le strepto demande un test et des antibiotiques."
     },
-    "kidSource": "https://www.cdc.gov/group-a-strep/about/strep-throat.html"
+    "kidSource": "https://www.cdc.gov/group-a-strep/about/strep-throat.html",
+    "about": {
+      "en": "A bacterial infection of the throat and tonsils.",
+      "fr": "Une infection bactérienne de la gorge et des amygdales."
+    },
+    "aboutMore": {
+      "en": "A cough, a runny nose or a hoarse voice point to a virus instead.",
+      "fr": "Une toux, un nez qui coule ou une voix rauque font plutôt penser à un virus."
+    },
+    "symptoms": [
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sudden sore throat",
+          "fr": "Mal de gorge soudain"
+        }
+      },
+      {
+        "icon": "mouth.fill",
+        "text": {
+          "en": "Pain when swallowing",
+          "fr": "Douleur en avalant"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "circle.hexagongrid.fill",
+        "text": {
+          "en": "Red, swollen tonsils",
+          "fr": "Amygdales rouges et enflées"
+        }
+      },
+      {
+        "icon": "circle.dashed",
+        "text": {
+          "en": "White patches on the tonsils",
+          "fr": "Plaques blanches sur les amygdales"
+        }
+      },
+      {
+        "icon": "stethoscope",
+        "text": {
+          "en": "Swollen glands in the neck",
+          "fr": "Ganglions enflés dans le cou"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Less often: headache, stomach pain, nausea or a rash.",
+      "fr": "Moins souvent : mal de tête, maux de ventre, nausées ou éruption."
+    },
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Close contact, often at home",
+          "fr": "Contact rapproché, souvent à la maison"
+        }
+      },
+      {
+        "icon": "house.fill",
+        "title": {
+          "en": "Crowded places like daycare",
+          "fr": "Lieux achalandés comme la garderie"
+        }
+      }
+    ]
   },
   {
     "id": "flu",
@@ -1928,7 +2576,86 @@
       }
     ],
     "lastsUpToDays": 14,
-    "kidSource": "https://www.cdc.gov/flu/signs-symptoms/index.html"
+    "kidSource": "https://www.cdc.gov/flu/signs-symptoms/index.html",
+    "about": {
+      "en": "A contagious respiratory illness caused by influenza viruses.",
+      "fr": "Une maladie respiratoire contagieuse causée par les virus de l'influenza."
+    },
+    "aboutMore": {
+      "en": "It hits the nose, the throat and sometimes the lungs.",
+      "fr": "Elle s'attaque au nez, à la gorge et parfois aux poumons."
+    },
+    "symptoms": [
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever or chills",
+          "fr": "Fièvre ou frissons"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny or stuffy nose",
+          "fr": "Nez qui coule ou bouché"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Muscle or body aches",
+          "fr": "Douleurs musculaires"
+        }
+      },
+      {
+        "icon": "brain.head.profile",
+        "text": {
+          "en": "Headache",
+          "fr": "Mal de tête"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Fatigue",
+          "fr": "Fatigue"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "They usually come on suddenly. Not everyone has a fever.",
+      "fr": "Ils arrivent en général d'un coup. Tout le monde ne fait pas de fièvre."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Droplets from coughs, sneezes and talking",
+          "fr": "Gouttelettes de toux, d'éternuements et de paroles"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Less often: surfaces, then the mouth or nose",
+          "fr": "Plus rarement : surfaces, puis la bouche ou le nez"
+        }
+      }
+    ]
   },
   {
     "id": "addy",
@@ -2091,6 +2818,77 @@
       {
         "name": "CDC: Common Cold, treatment and when to seek care",
         "url": "https://www.cdc.gov/common-cold/treatment/index.html"
+      }
+    ],
+    "about": {
+      "en": "Common viruses that usually cause a mild illness, like a cold or the flu.",
+      "fr": "Des virus courants qui causent en général une maladie légère, comme un rhume ou une grippe."
+    },
+    "symptoms": [
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Cold or flu symptoms",
+          "fr": "Symptômes de rhume ou de grippe"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "eye.fill",
+        "text": {
+          "en": "Pink eye",
+          "fr": "Conjonctivite"
+        }
+      },
+      {
+        "icon": "toilet.fill",
+        "text": {
+          "en": "Diarrhea, vomiting or nausea",
+          "fr": "Diarrhée, vomissements ou nausées"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Close contact, like a handshake",
+          "fr": "Contact rapproché, comme une poignée de main"
+        }
+      },
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs and sneezes",
+          "fr": "Toux et éternuements"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Surfaces, then the face",
+          "fr": "Surfaces, puis le visage"
+        }
+      },
+      {
+        "icon": "hands.sparkles.fill",
+        "title": {
+          "en": "Stool, during diaper changes",
+          "fr": "Les selles, au changement de couche"
+        }
       }
     ]
   },
@@ -2263,7 +3061,72 @@
         "url": "https://www.cdc.gov/common-cold/treatment/index.html"
       }
     ],
-    "kidSource": "https://medlineplus.gov/ency/article/007857.htm"
+    "kidSource": "https://medlineplus.gov/ency/article/007857.htm",
+    "about": {
+      "en": "A respiratory virus, related to RSV, that can infect the airways at any age.",
+      "fr": "Un virus respiratoire, cousin du VRS, qui peut infecter les voies respiratoires à tout âge."
+    },
+    "aboutMore": {
+      "en": "It was discovered in 2001. Most people recover on their own.",
+      "fr": "Il a été découvert en 2001. La plupart des gens guérissent seuls."
+    },
+    "symptoms": [
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Stuffy nose",
+          "fr": "Nez bouché"
+        }
+      },
+      {
+        "icon": "lungs.fill",
+        "text": {
+          "en": "Shortness of breath",
+          "fr": "Essoufflement"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs and sneezes",
+          "fr": "Toux et éternuements"
+        },
+        "detail": {
+          "en": "Droplets you breathe in",
+          "fr": "Des gouttelettes qu'on respire"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Touching and handshakes",
+          "fr": "Contacts et poignées de main"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Surfaces, then the mouth, nose or eyes",
+          "fr": "Surfaces, puis la bouche, le nez ou les yeux"
+        }
+      }
+    ]
   },
   {
     "id": "para",
@@ -2419,7 +3282,86 @@
       }
     ],
     "lastsUpToDays": 7,
-    "kidSource": "https://www.cdc.gov/parainfluenza/about/index.html"
+    "kidSource": "https://www.cdc.gov/parainfluenza/about/index.html",
+    "about": {
+      "en": "Common respiratory viruses that usually cause a mild, cold-like illness.",
+      "fr": "Des virus respiratoires courants qui causent en général une maladie légère, comme un rhume."
+    },
+    "aboutMore": {
+      "en": "In young children, they're linked to croup.",
+      "fr": "Chez les jeunes enfants, on les associe au croup."
+    },
+    "symptoms": [
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny nose",
+          "fr": "Nez qui coule"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Cough",
+          "fr": "Toux"
+        }
+      },
+      {
+        "icon": "allergens",
+        "text": {
+          "en": "Sneezing",
+          "fr": "Éternuements"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "ear.fill",
+        "text": {
+          "en": "Ear pain",
+          "fr": "Mal d'oreille"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs and sneezes",
+          "fr": "Toux et éternuements"
+        },
+        "detail": {
+          "en": "Droplets you breathe in",
+          "fr": "Des gouttelettes qu'on respire"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Touching and handshakes",
+          "fr": "Contacts et poignées de main"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Objects and surfaces, then the face",
+          "fr": "Objets et surfaces, puis le visage"
+        }
+      }
+    ]
   },
   {
     "id": "rota",
@@ -2575,7 +3517,78 @@
       }
     ],
     "lastsUpToDays": 8,
-    "kidSource": "https://www.cdc.gov/rotavirus/about/index.html"
+    "kidSource": "https://www.cdc.gov/rotavirus/about/index.html",
+    "about": {
+      "en": "A common virus that mostly hits babies and young children.",
+      "fr": "Un virus courant qui touche surtout les bébés et les jeunes enfants."
+    },
+    "symptoms": [
+      {
+        "icon": "toilet.fill",
+        "text": {
+          "en": "Severe watery diarrhea",
+          "fr": "Diarrhée liquide importante"
+        }
+      },
+      {
+        "icon": "arrow.uturn.up.circle.fill",
+        "text": {
+          "en": "Vomiting",
+          "fr": "Vomissements"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "bolt.fill",
+        "text": {
+          "en": "Stomach pain",
+          "fr": "Maux de ventre"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "text": {
+          "en": "Loss of appetite",
+          "fr": "Perte d'appétit"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "text": {
+          "en": "Dehydration",
+          "fr": "Déshydratation"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Hands, objects or surfaces to the mouth",
+          "fr": "Mains, objets ou surfaces portés à la bouche"
+        }
+      },
+      {
+        "icon": "hands.sparkles.fill",
+        "title": {
+          "en": "Stool, which carries the virus",
+          "fr": "Les selles, qui transportent le virus"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "title": {
+          "en": "Contaminated food",
+          "fr": "Aliments contaminés"
+        }
+      }
+    ]
   },
   {
     "id": "coxy",
@@ -2735,7 +3748,89 @@
       }
     ],
     "lastsUpToDays": 10,
-    "kidSource": "https://www.cdc.gov/hand-foot-mouth/about/index.html"
+    "kidSource": "https://www.cdc.gov/hand-foot-mouth/about/index.html",
+    "about": {
+      "en": "A common virus illness in children under 5, but anyone can get it.",
+      "fr": "Une maladie virale courante chez les moins de 5 ans, mais tout le monde peut l'attraper."
+    },
+    "symptoms": [
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Feeling unwell",
+          "fr": "Malaise général"
+        }
+      },
+      {
+        "icon": "mouth.fill",
+        "text": {
+          "en": "Painful mouth sores",
+          "fr": "Plaies douloureuses dans la bouche"
+        }
+      },
+      {
+        "icon": "circle.hexagongrid.fill",
+        "text": {
+          "en": "Rash on the palms and soles",
+          "fr": "Éruption aux paumes et sous les pieds"
+        }
+      },
+      {
+        "icon": "fork.knife",
+        "text": {
+          "en": "Eating or drinking less",
+          "fr": "Manger ou boire moins"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "In order: fever first, then mouth sores, then the rash.",
+      "fr": "Dans l'ordre : la fièvre, puis les plaies dans la bouche, puis l'éruption."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Coughs, sneezes and talking",
+          "fr": "Toux, éternuements et paroles"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Kisses, hugs and shared cups",
+          "fr": "Bisous, câlins et verres partagés"
+        }
+      },
+      {
+        "icon": "hands.sparkles.fill",
+        "title": {
+          "en": "Stool, then the eyes, nose or mouth",
+          "fr": "Les selles, puis les yeux, le nez ou la bouche"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Objects and surfaces, then the face",
+          "fr": "Objets et surfaces, puis le visage"
+        }
+      }
+    ]
   },
   {
     "id": "slappy",
@@ -2895,7 +3990,90 @@
       }
     ],
     "lastsUpToDays": 21,
-    "kidSource": "https://www.cdc.gov/parvovirus-b19/about/index.html"
+    "kidSource": "https://www.cdc.gov/parvovirus-b19/about/index.html",
+    "about": {
+      "en": "A virus best known for its bright red \"slapped cheek\" rash.",
+      "fr": "Un virus connu pour son éruption rouge vif aux « joues giflées »."
+    },
+    "aboutMore": {
+      "en": "About 1 in 4 people have no symptoms at all.",
+      "fr": "Environ 1 personne sur 4 n'a aucun symptôme."
+    },
+    "symptoms": [
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Fever",
+          "fr": "Fièvre"
+        }
+      },
+      {
+        "icon": "brain.head.profile",
+        "text": {
+          "en": "Headache",
+          "fr": "Mal de tête"
+        }
+      },
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "Runny nose",
+          "fr": "Nez qui coule"
+        }
+      },
+      {
+        "icon": "flame.fill",
+        "text": {
+          "en": "Sore throat",
+          "fr": "Mal de gorge"
+        }
+      },
+      {
+        "icon": "circle.hexagongrid.fill",
+        "text": {
+          "en": "Itchy rash on the body",
+          "fr": "Éruption qui pique sur le corps"
+        }
+      },
+      {
+        "icon": "figure.walk",
+        "text": {
+          "en": "Joint pain, mostly in adults",
+          "fr": "Douleurs articulaires, surtout adultes"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Flu-like first, then the rash. Joint pain usually lasts 1 to 3 weeks.",
+      "fr": "Comme une grippe d'abord, puis l'éruption. Les douleurs aux articulations durent en général 1 à 3 semaines."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Respiratory droplets",
+          "fr": "Gouttelettes respiratoires"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "title": {
+          "en": "Blood",
+          "fr": "Le sang"
+        }
+      },
+      {
+        "icon": "heart.fill",
+        "title": {
+          "en": "From mother to baby during pregnancy",
+          "fr": "De la mère au bébé pendant la grossesse"
+        }
+      }
+    ],
+    "spreadNote": {
+      "en": "Most contagious early on. Once the rash shows, the risk is low.",
+      "fr": "Plus contagieux au début. Quand l'éruption apparaît, le risque est faible."
+    }
   },
   {
     "id": "lousy",
@@ -3044,7 +4222,80 @@
         "url": "https://www.cdc.gov/lice/treatment/index.html"
       }
     ],
-    "kidSource": "https://www.cdc.gov/lice/about/head-lice.html"
+    "kidSource": "https://www.cdc.gov/lice/about/head-lice.html",
+    "about": {
+      "en": "Tiny insects, the size of a sesame seed, that live on the scalp and feed on blood.",
+      "fr": "De petits insectes, de la taille d'une graine de sésame, qui vivent sur le cuir chevelu et se nourrissent de sang."
+    },
+    "aboutMore": {
+      "en": "They have nothing to do with cleanliness and don't spread disease.",
+      "fr": "Rien à voir avec la propreté, et ils ne transmettent pas de maladie."
+    },
+    "symptoms": [
+      {
+        "icon": "sparkles",
+        "text": {
+          "en": "Itching",
+          "fr": "Démangeaisons"
+        }
+      },
+      {
+        "icon": "ant.fill",
+        "text": {
+          "en": "A tickle, like something moving",
+          "fr": "Un chatouillement, comme si ça bougeait"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Trouble sleeping, irritability",
+          "fr": "Mauvais sommeil, irritabilité"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Sores from scratching",
+          "fr": "Plaies de grattage"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Often none at first: the itching can take 4 to 6 weeks to start.",
+      "fr": "Souvent rien au début : ça peut prendre 4 à 6 semaines avant que ça pique."
+    },
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Head-to-head contact",
+          "fr": "Contact tête à tête"
+        }
+      },
+      {
+        "icon": "comb.fill",
+        "title": {
+          "en": "Shared hats, combs, brushes or towels",
+          "fr": "Tuques, peignes, brosses ou serviettes partagés"
+        }
+      },
+      {
+        "icon": "bed.double.fill",
+        "title": {
+          "en": "Pillows, couches and stuffed animals",
+          "fr": "Oreillers, divans et toutous"
+        },
+        "detail": {
+          "en": "Recently used by someone with lice",
+          "fr": "Utilisés récemment par quelqu'un qui a des poux"
+        }
+      }
+    ],
+    "spreadNote": {
+      "en": "They can't hop or fly, and pets don't spread them.",
+      "fr": "Ils ne sautent pas, ne volent pas, et les animaux ne les transmettent pas."
+    }
   },
   {
     "id": "wiggles",
@@ -3189,7 +4440,58 @@
         "url": "https://www.cdc.gov/pinworm/prevention/index.html"
       }
     ],
-    "kidSource": "https://www.cdc.gov/pinworm/about/index.html"
+    "kidSource": "https://www.cdc.gov/pinworm/about/index.html",
+    "about": {
+      "en": "An intestinal infection from tiny roundworms. Preventable and treatable.",
+      "fr": "Une infection intestinale causée par de petits vers ronds. Évitable et traitable."
+    },
+    "symptoms": [
+      {
+        "icon": "sparkles",
+        "text": {
+          "en": "Itchy bottom, mostly at night",
+          "fr": "Fesses qui piquent, surtout la nuit"
+        }
+      },
+      {
+        "icon": "moon.zzz.fill",
+        "text": {
+          "en": "Trouble sleeping, restlessness",
+          "fr": "Sommeil agité"
+        }
+      },
+      {
+        "icon": "bolt.fill",
+        "text": {
+          "en": "Stomach pain, sometimes",
+          "fr": "Maux de ventre, parfois"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Often mild, or no symptoms at all.",
+      "fr": "Souvent légers, ou aucun symptôme."
+    },
+    "spreads": [
+      {
+        "icon": "hand.raised.fill",
+        "title": {
+          "en": "Eggs on fingers, then to the mouth",
+          "fr": "Des œufs sur les doigts, puis à la bouche"
+        }
+      },
+      {
+        "icon": "bed.double.fill",
+        "title": {
+          "en": "Bedding, clothes, diapers and objects",
+          "fr": "Literie, vêtements, couches et objets"
+        },
+        "detail": {
+          "en": "The eggs can last 2 to 3 weeks",
+          "fr": "Les œufs peuvent survivre 2 à 3 semaines"
+        }
+      }
+    ]
   },
   {
     "id": "crusty",
@@ -3347,7 +4649,68 @@
       }
     ],
     "lastsUpToDays": 10,
-    "kidSource": "https://www.nhs.uk/conditions/impetigo/"
+    "kidSource": "https://www.nhs.uk/conditions/impetigo/",
+    "about": {
+      "en": "A bacterial skin infection, often mild, caused by strep, staph or both.",
+      "fr": "Une infection bactérienne de la peau, souvent légère, causée par le strepto, le staph ou les deux."
+    },
+    "symptoms": [
+      {
+        "icon": "circle.hexagongrid.fill",
+        "text": {
+          "en": "Red, itchy sores",
+          "fr": "Plaies rouges qui piquent"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "text": {
+          "en": "Sores that break open and ooze",
+          "fr": "Plaies qui s'ouvrent et suintent"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Honey-colored crusts",
+          "fr": "Croûtes couleur miel"
+        }
+      },
+      {
+        "icon": "person.fill",
+        "text": {
+          "en": "Often on arms, legs, nose, mouth",
+          "fr": "Souvent bras, jambes, nez, bouche"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "It heals without scarring.",
+      "fr": "Ça guérit sans cicatrice."
+    },
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Close contact, often at home",
+          "fr": "Contact rapproché, souvent à la maison"
+        }
+      },
+      {
+        "icon": "house.fill",
+        "title": {
+          "en": "Crowded places like daycare",
+          "fr": "Lieux achalandés comme la garderie"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "title": {
+          "en": "Cuts and scrapes raise the risk",
+          "fr": "Les coupures et éraflures augmentent le risque"
+        }
+      }
+    ]
   },
   {
     "id": "ringo",
@@ -3510,7 +4873,71 @@
     "doctorNote": {
       "en": "Scalp ringworm needs prescription medicine by mouth for 1 to 3 months.",
       "fr": "La teigne du cuir chevelu demande un médicament sur ordonnance, par la bouche, pendant 1 à 3 mois."
-    }
+    },
+    "about": {
+      "en": "Not a worm: a fungal infection of the skin, scalp or nails.",
+      "fr": "Pas un ver : une infection de la peau, du cuir chevelu ou des ongles causée par un champignon."
+    },
+    "symptoms": [
+      {
+        "icon": "circle.dashed",
+        "text": {
+          "en": "Red, itchy, ring-shaped rash",
+          "fr": "Éruption rouge en anneau qui pique"
+        }
+      },
+      {
+        "icon": "comb.fill",
+        "text": {
+          "en": "Scaly, itchy bald spot on the scalp",
+          "fr": "Plaque chauve qui pique au cuir chevelu"
+        }
+      },
+      {
+        "icon": "figure.walk",
+        "text": {
+          "en": "Peeling, itchy skin between the toes",
+          "fr": "Peau qui pèle et pique entre les orteils"
+        }
+      },
+      {
+        "icon": "hand.raised.fill",
+        "text": {
+          "en": "Thick, discolored nails",
+          "fr": "Ongles épais et décolorés"
+        }
+      }
+    ],
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Skin-to-skin contact",
+          "fr": "Contact peau à peau"
+        }
+      },
+      {
+        "icon": "pawprint.fill",
+        "title": {
+          "en": "Infected pets",
+          "fr": "Animaux infectés"
+        }
+      },
+      {
+        "icon": "tshirt.fill",
+        "title": {
+          "en": "Shared towels and bedsheets",
+          "fr": "Serviettes et draps partagés"
+        }
+      },
+      {
+        "icon": "shower.fill",
+        "title": {
+          "en": "Locker room floors",
+          "fr": "Planchers de vestiaires"
+        }
+      }
+    ]
   },
   {
     "id": "whoopy",
@@ -3682,7 +5109,79 @@
       }
     ],
     "lastsUpToDays": 70,
-    "kidSource": "https://www.cdc.gov/pertussis/signs-symptoms/index.html"
+    "kidSource": "https://www.cdc.gov/pertussis/signs-symptoms/index.html",
+    "about": {
+      "en": "A bacterial infection of the airways, known for its violent coughing fits.",
+      "fr": "Une infection bactérienne des voies respiratoires, connue pour ses quintes de toux violentes."
+    },
+    "aboutMore": {
+      "en": "It starts out looking like a cold.",
+      "fr": "Elle commence comme un rhume."
+    },
+    "symptoms": [
+      {
+        "icon": "nose.fill",
+        "text": {
+          "en": "First: runny nose, mild cough",
+          "fr": "D'abord : nez qui coule, petite toux"
+        }
+      },
+      {
+        "icon": "thermometer.medium",
+        "text": {
+          "en": "Low fever",
+          "fr": "Petite fièvre"
+        }
+      },
+      {
+        "icon": "wind",
+        "text": {
+          "en": "Then: violent coughing fits",
+          "fr": "Puis : quintes de toux violentes"
+        }
+      },
+      {
+        "icon": "speaker.wave.2.fill",
+        "text": {
+          "en": "A \"whoop\" when breathing in",
+          "fr": "Un « whoop » en inspirant"
+        }
+      },
+      {
+        "icon": "arrow.uturn.up.circle.fill",
+        "text": {
+          "en": "Vomiting after a fit",
+          "fr": "Vomir après une quinte"
+        }
+      },
+      {
+        "icon": "bed.double.fill",
+        "text": {
+          "en": "Exhaustion after a fit",
+          "fr": "Épuisement après une quinte"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "The fits start 1 to 2 weeks after the first symptoms and can last up to 10 weeks.",
+      "fr": "Les quintes arrivent 1 ou 2 semaines après les premiers symptômes et peuvent durer jusqu'à 10 semaines."
+    },
+    "spreads": [
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Droplets from coughs and sneezes",
+          "fr": "Gouttelettes de toux et d'éternuements"
+        }
+      },
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Long close contact, sharing the same air",
+          "fr": "Contact rapproché prolongé, dans le même air"
+        }
+      }
+    ]
   },
   {
     "id": "poxy",
@@ -3846,6 +5345,64 @@
       }
     ],
     "lastsUpToDays": 7,
-    "kidSource": "https://www.cdc.gov/chickenpox/about/index.html"
+    "kidSource": "https://www.cdc.gov/chickenpox/about/index.html",
+    "about": {
+      "en": "A very contagious disease caused by the varicella-zoster virus.",
+      "fr": "Une maladie très contagieuse causée par le virus varicelle-zona."
+    },
+    "symptoms": [
+      {
+        "icon": "circle.hexagongrid.fill",
+        "text": {
+          "en": "Itchy, fluid-filled blisters",
+          "fr": "Cloques remplies de liquide qui piquent"
+        }
+      },
+      {
+        "icon": "person.fill",
+        "text": {
+          "en": "Starts on the chest, back and face",
+          "fr": "Débute sur le torse, le dos, le visage"
+        }
+      },
+      {
+        "icon": "bandage.fill",
+        "text": {
+          "en": "Blisters turn into scabs",
+          "fr": "Les cloques deviennent des croûtes"
+        }
+      }
+    ],
+    "symptomsNote": {
+      "en": "Up to 500 blisters, which scab over in about a week.",
+      "fr": "Jusqu'à 500 cloques, qui deviennent des croûtes en une semaine environ."
+    },
+    "spreads": [
+      {
+        "icon": "person.2.fill",
+        "title": {
+          "en": "Close contact",
+          "fr": "Contact rapproché"
+        }
+      },
+      {
+        "icon": "wind",
+        "title": {
+          "en": "Breathing in virus particles",
+          "fr": "Respirer des particules de virus"
+        }
+      },
+      {
+        "icon": "drop.fill",
+        "title": {
+          "en": "Fluid from shingles blisters",
+          "fr": "Le liquide des cloques du zona"
+        }
+      }
+    ],
+    "spreadNote": {
+      "en": "Contagious 1 to 2 days before the rash, until every blister has scabbed.",
+      "fr": "Contagieux 1 à 2 jours avant l'éruption, jusqu'à ce que toutes les cloques soient en croûtes."
+    }
   }
 ]

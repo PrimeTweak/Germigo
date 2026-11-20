@@ -11,6 +11,9 @@ struct Badge: Identifiable, Hashable {
 enum BadgeCatalog {
     static let nightShift = "night_shift"
     static let ironParent = "iron_parent"
+    static let labRat = "lab_rat"
+    static let mythBuster = "myth_buster"
+    static let professor = "daycare_professor"
 
     static var all: [Badge] {
         [
@@ -25,7 +28,10 @@ enum BadgeCatalog {
             Badge(id: "collector", title: tr("Collector"), detail: tr("Five different germs caught"), symbol: "square.stack.3d.up.fill", tint: Swatch.grass),
             Badge(id: "half_album", title: tr("Half Album"), detail: tr("Twelve different germs caught"), symbol: "circle.lefthalf.filled", tint: Swatch.gold),
             Badge(id: "full_album", title: tr("Full Album"), detail: tr("Every germ caught"), symbol: "checkmark.seal.fill", tint: Swatch.violet),
-            Badge(id: ironParent, title: tr("Iron Parent"), detail: tr("Thirty days without a germ"), symbol: "shield.fill", tint: Swatch.green)
+            Badge(id: ironParent, title: tr("Iron Parent"), detail: tr("Thirty days without a germ"), symbol: "shield.fill", tint: Swatch.green),
+            Badge(id: labRat, title: tr("Lab Rat"), detail: tr("Finished your first daily quiz"), symbol: "flask.fill", tint: Swatch.limeInk),
+            Badge(id: mythBuster, title: tr("Myth Buster"), detail: tr("Got every myth right"), symbol: "checkmark.bubble.fill", tint: Swatch.grape),
+            Badge(id: professor, title: tr("Daycare Professor"), detail: tr("Read every lesson"), symbol: "graduationcap.fill", tint: Swatch.gold)
         ]
     }
 

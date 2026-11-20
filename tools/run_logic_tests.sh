@@ -9,5 +9,5 @@ xcrun swiftc -swift-version 5 -o "$OUT" \
   Shared/L10n.swift Shared/Swatch.swift \
   App/Models/AppData.swift App/Models/Germ.swift App/Models/Progress.swift \
   App/Store/JournalRules.swift App/Store/RewardEngine.swift App/Store/StatsEngine.swift App/Store/Persistence.swift \
-  App/Store/ProgressEngine.swift
+  App/Store/ProgressEngine.swift App/Store/QuizEngine.swift
 "$OUT"

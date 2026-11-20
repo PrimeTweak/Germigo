@@ -59,11 +59,13 @@ Settings > Your Data > Back Up shares the journal as `petri-backup.json`, in the
 
 Skill tree titles, streak milestones, the couple duel and the season story are computed from the journal in `App/Store/ProgressEngine.swift`; only the worn title and the last celebrated milestone are stored.
 
+The Lab's daily quiz is built in `App/Store/QuizEngine.swift` from the myths, boss attacks and timings in `germs.json`. The journal keeps only the day's round, the questions asked or missed, the days done and the count of right answers, which unlocks the lessons and adds points.
+
 ## Text
 
 User-facing strings go through `tr("English text")`. The English text is the key in `Shared/en.lproj` and `Shared/fr.lproj`. A string missing from either file, or no longer used, fails `check_swift.py`.
 
-Germ and article text is bilingual inside the JSON files.
+Germ and article text is bilingual inside the JSON files. A germ's `about`, `symptoms` and `spreads` restate its listed sources only; a list stays empty when the sources say nothing on the subject.
 
 ## Colors
 

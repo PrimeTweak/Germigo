@@ -15,6 +15,12 @@ struct RewardResult: Identifiable {
     let unlockedIcons: [AppIconOption]
 }
 
+/// What answering a quiz question earned.
+struct QuizOutcome {
+    let right: Bool
+    let newBadges: [Badge]
+}
+
 /// A streak milestone waiting to be celebrated.
 struct MilestoneEvent: Identifiable {
     let days: Int
@@ -204,9 +210,9 @@ final class AppModel {
         }
     }
 
-    /// Reads open with the number of germs logged, repeats included.
+    /// Lessons open with right answers in the daily quiz.
     func isArticleUnlocked(_ article: Article) -> Bool {
-        hasPass || data.logs.count >= article.unlockAtGerms
+        hasPass || data.quiz.rightTotal >= article.unlockAtAnswers
     }
 
     func deepDiveUnlocked(for germ: Germ) -> Bool {
@@ -277,10 +283,61 @@ final class AppModel {
         commit()
     }
 
-    func markArticleRead(_ id: String) {
+    func markArticleRead(_ id: String, now: Date = Date()) {
         guard !data.readArticles.contains(id) else { return }
         data.readArticles.append(id)
+        _ = awardBadges(now: now)
         commit()
+    }
+
+    // MARK: - Lab
+
+    var quizBank: [QuizQuestion] {
+        QuizEngine.bank(catalog.germs)
+    }
+
+    func quizPlan(now: Date = Date()) -> [QuizQuestion] {
+        QuizEngine.plan(progress: data.quiz, bank: quizBank, day: QuizEngine.dayKey(now))
+    }
+
+    func quizDone(now: Date = Date()) -> Bool {
+        data.quiz.doneDays.contains(QuizEngine.dayKey(now))
+    }
+
+    /// Answers already given today, in order.
+    func quizAnswers(now: Date = Date()) -> [Int] {
+        guard let round = data.quiz.round, round.day == QuizEngine.dayKey(now) else { return [] }
+        return round.answers
+    }
+
+    func labStreak(now: Date = Date()) -> Int {
+        QuizEngine.streak(doneDays: data.quiz.doneDays, now: now)
+    }
+
+    /// Fixes today's questions the first time the quiz opens, so they survive a restart.
+    func startQuiz(now: Date = Date()) -> [QuizQuestion] {
+        let day = QuizEngine.dayKey(now)
+        let plan = quizPlan(now: now)
+        if data.quiz.round?.day != day {
+            QuizEngine.start(&data.quiz, plan: plan, day: day)
+            commit()
+        }
+        return plan
+    }
+
+    func answerQuiz(_ choice: Int, to question: QuizQuestion, now: Date = Date()) -> QuizOutcome? {
+        let bankSize = quizBank.count
+        guard let right = QuizEngine.answer(choice, to: question, progress: &data.quiz,
+                                            day: QuizEngine.dayKey(now), bankSize: bankSize) else { return nil }
+        let fresh = awardBadges(now: now)
+        commit()
+        return QuizOutcome(right: right, newBadges: fresh)
+    }
+
+    /// The lesson that opens next, and how many right answers it still needs.
+    var nextLesson: (article: Article, remaining: Int)? {
+        guard !hasPass, let article = catalog.articles.first(where: { !isArticleUnlocked($0) }) else { return nil }
+        return (article, article.unlockAtAnswers - data.quiz.rightTotal)
     }
 
     // MARK: - Logging

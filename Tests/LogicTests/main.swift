@@ -277,6 +277,62 @@ do {
     check(reveal.year == 2027 && reveal.month == 6 && reveal.day == 20, "the story is announced on June 20")
 }
 
+// MARK: - Daily quiz
+
+do {
+    let quizGerms = ["alpha", "bravo", "charlie", "delta", "echo"].map { makeGerm($0, rarity: .common) }
+    let bank = QuizEngine.bank(quizGerms)
+    check(bank.count == 20, "each germ gives a myth, a boss and two timings")
+    check(bank.allSatisfy { $0.answer >= 0 && $0.answer < $0.options.count }, "every answer is one of the options")
+    check(bank.filter { $0.kind != .myth }.allSatisfy { Set($0.options).count == 3 }, "choices offer three different options")
+    check(QuizEngine.bank(quizGerms).map { $0.options } == bank.map { $0.options }, "options keep their order between launches")
+
+    let today = QuizEngine.dayKey(day(3))
+    var progress = QuizProgress()
+    let plan = QuizEngine.plan(progress: progress, bank: bank, day: today)
+    check(plan.count == QuizEngine.questionsPerDay, "a day asks three questions")
+    check(Set(plan.map { $0.germ.id }).count == plan.count, "a day never asks twice about the same germ")
+    check(QuizEngine.plan(progress: progress, bank: bank, day: today).map { $0.id } == plan.map { $0.id },
+          "the day's questions stay put")
+
+    QuizEngine.start(&progress, plan: plan, day: today)
+    check(QuizEngine.answer(0, to: plan[1], progress: &progress, day: today, bankSize: bank.count) == nil,
+          "only the next question can be answered")
+    let wrong = (plan[0].answer + 1) % plan[0].options.count
+    check(QuizEngine.answer(wrong, to: plan[0], progress: &progress, day: today, bankSize: bank.count) == false,
+          "a wrong answer is recorded")
+    check(progress.missed == [plan[0].id], "a missed question is kept for later")
+    check(QuizEngine.answer(plan[1].answer, to: plan[1], progress: &progress, day: today, bankSize: bank.count) == true,
+          "a right answer is recorded")
+    _ = QuizEngine.answer(plan[2].answer, to: plan[2], progress: &progress, day: today, bankSize: bank.count)
+    check(progress.rightTotal == 2 && progress.doneDays == [today], "the day is done after three answers")
+    check(QuizEngine.plan(progress: progress, bank: bank, day: today).map { $0.id } == plan.map { $0.id },
+          "a finished day keeps its questions")
+
+    let tomorrow = QuizEngine.dayKey(day(4))
+    check(QuizEngine.plan(progress: progress, bank: bank, day: tomorrow).first?.id == plan[0].id,
+          "the missed question comes back the next day")
+    check(QuizEngine.streak(doneDays: progress.doneDays, now: day(3)) == 1, "today's quiz starts a streak")
+    check(QuizEngine.streak(doneDays: progress.doneDays, now: day(4)) == 1, "the streak waits until the end of the next day")
+    check(QuizEngine.streak(doneDays: progress.doneDays, now: day(5)) == 0, "a skipped day ends the streak")
+
+    var learner = makeData()
+    learner.quiz = progress
+    check(RewardEngine.totalPoints(data: learner) == 2 * RewardEngine.quizAnswerPoints, "right answers add points")
+    let quizCatalog = GermCatalog(germs: quizGerms, articles: [])
+    check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.labRat),
+          "a finished quiz earns the Lab Rat badge")
+    learner.quiz.mythsRight = quizGerms.map { $0.id }
+    check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.mythBuster),
+          "every myth right earns the Myth Buster badge")
+
+    let saved = """
+    {"quiz":{"doneDays":["2026-10-04"],"rightTotal":7}}
+    """
+    let fromQuiz = try? JSONDecoder().decode(AppData.self, from: Data(saved.utf8))
+    check(fromQuiz?.quiz.rightTotal == 7 && fromQuiz?.quiz.missed == [], "a partial quiz history loads with defaults")
+}
+
 if failures == 0 {
     print("logic tests: all checks passed")
 } else {

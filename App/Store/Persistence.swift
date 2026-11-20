@@ -95,7 +95,7 @@ struct GermCatalog {
 
     init(germs: [Germ], articles: [Article]) {
         self.germs = germs.sorted { $0.number < $1.number }
-        self.articles = articles.sorted { $0.unlockAtGerms < $1.unlockAtGerms }
+        self.articles = articles.sorted { $0.unlockAtAnswers < $1.unlockAtAnswers }
         self.byID = Dictionary(uniqueKeysWithValues: germs.map { ($0.id, $0) })
     }
 

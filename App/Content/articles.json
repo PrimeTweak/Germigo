@@ -2,7 +2,7 @@
   {
     "id": "boot-camp",
     "icon": "figure.2.and.child.holdinghands",
-    "unlockAtGerms": 1,
+    "unlockAtAnswers": 0,
     "title": {
       "en": "Germ factory or boot camp?",
       "fr": "Usine à microbes ou camp d'entraînement ?"
@@ -43,7 +43,7 @@
   {
     "id": "soap",
     "icon": "hands.sparkles.fill",
-    "unlockAtGerms": 2,
+    "unlockAtAnswers": 5,
     "title": {
       "en": "Twenty seconds of soap",
       "fr": "Vingt secondes de savon"
@@ -80,7 +80,7 @@
   {
     "id": "fever",
     "icon": "thermometer.medium",
-    "unlockAtGerms": 3,
+    "unlockAtAnswers": 10,
     "title": {
       "en": "Fever, explained",
       "fr": "La fièvre, expliquée"
@@ -117,7 +117,7 @@
   {
     "id": "antibiotics",
     "icon": "pills.fill",
-    "unlockAtGerms": 4,
+    "unlockAtAnswers": 15,
     "title": {
       "en": "Antibiotics: when they help",
       "fr": "Les antibiotiques : quand ils aident"
@@ -154,7 +154,7 @@
   {
     "id": "contagious",
     "icon": "clock.fill",
-    "unlockAtGerms": 6,
+    "unlockAtAnswers": 20,
     "title": {
       "en": "How long am I contagious?",
       "fr": "Je suis contagieux combien de temps ?"
@@ -195,7 +195,7 @@
   {
     "id": "survival-kit",
     "icon": "cross.case.fill",
-    "unlockAtGerms": 8,
+    "unlockAtAnswers": 25,
     "title": {
       "en": "The sick-parent survival kit",
       "fr": "La trousse de survie du parent malade"

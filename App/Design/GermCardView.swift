@@ -30,7 +30,7 @@ struct GermCardView: View {
             if finish == .locked {
                 Text(verbatim: "?")
                     .font(.system(size: 30 * scale, weight: .black))
-                    .foregroundStyle(Color.white.opacity(0.95))
+                    .foregroundStyle(Color(hex: Swatch.night, opacity: 0.6))
                     .offset(y: -height * 0.05)
             }
             if finish == .holo {

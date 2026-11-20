@@ -124,6 +124,27 @@ struct MilestoneMark: Codable, Hashable {
     var days: Int
 }
 
+/// The day's quiz once started: its questions and the answers given so far.
+struct QuizRound: Codable, Hashable {
+    var day: String
+    var questionIDs: [String]
+    var answers: [Int]
+}
+
+/// The daily quiz history: what was asked, what to ask again, and the days it was done.
+struct QuizProgress: Codable, Hashable {
+    var round: QuizRound?
+    var doneDays: [String] = []
+    var asked: [String] = []
+    var missed: [String] = []
+    var rightTotal = 0
+    var mythsRight: [String] = []
+
+    enum CodingKeys: String, CodingKey {
+        case round, doneDays, asked, missed, rightTotal, mythsRight
+    }
+}
+
 /// Everything the app persists on the device.
 struct AppData: Codable {
     var onboardingDone = false
@@ -137,10 +158,11 @@ struct AppData: Codable {
     var settings = AppSettings()
     var readArticles: [String] = []
     var celebratedMilestone: MilestoneMark?
+    var quiz = QuizProgress()
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
-        case celebratedMilestone
+        case celebratedMilestone, quiz
     }
 }
 
@@ -215,6 +237,18 @@ extension AppSettings {
     }
 }
 
+extension QuizProgress {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        round = try? container.decodeIfPresent(QuizRound.self, forKey: .round)
+        doneDays = container.value(.doneDays, default: [String]())
+        asked = container.value(.asked, default: [String]())
+        missed = container.value(.missed, default: [String]())
+        rightTotal = container.value(.rightTotal, default: 0)
+        mythsRight = container.value(.mythsRight, default: [String]())
+    }
+}
+
 extension AppData {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -229,6 +263,7 @@ extension AppData {
         settings = container.value(.settings, default: AppSettings())
         readArticles = container.value(.readArticles, default: [String]())
         celebratedMilestone = try? container.decodeIfPresent(MilestoneMark.self, forKey: .celebratedMilestone)
+        quiz = container.value(.quiz, default: QuizProgress())
     }
 }
 

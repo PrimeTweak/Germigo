@@ -83,29 +83,34 @@ struct SeasonScreen: View {
         }
     }
 
+    /// Nothing to wrap before the first germ; the full story is announced on the reveal date.
+    @ViewBuilder
     private func wrappedBanner(_ season: Season) -> some View {
-        Button {
-            showWrapped = true
-        } label: {
-            HStack(spacing: 13) {
-                IconTile(symbol: "sparkles", background: palette.night, foreground: palette.lime, size: 44)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("Season %lld, wrapped", season.number))
-                        .font(.headline)
-                        .foregroundStyle(palette.ink)
-                    Text(tr("Your season in story cards, ready to share."))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .multilineTextAlignment(.leading)
+        if model.data.logs.contains(where: { season.contains($0.startedAt) }) {
+            let revealed = Date() >= WrapEngine.revealDate(for: season)
+            Button {
+                showWrapped = true
+            } label: {
+                HStack(spacing: 13) {
+                    IconTile(symbol: "sparkles", background: palette.night, foreground: palette.lime, size: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(revealed ? tr("Season %lld, wrapped", season.number) : tr("Your season so far"))
+                            .font(.headline)
+                            .foregroundStyle(palette.ink)
+                        Text(tr("Your season in story cards, ready to share."))
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(palette.inkTertiary)
                 }
-                Spacer(minLength: 4)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.bold))
-                    .foregroundStyle(palette.inkTertiary)
+                .petriCard()
             }
-            .petriCard()
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
     }
 
     @ViewBuilder

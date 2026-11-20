@@ -104,11 +104,12 @@ private struct ThemedRoot: View {
 enum AppTab: Hashable {
     case today
     case album
+    case lab
     case crew
     case season
 }
 
-/// The four tabs, the sick-mode accessory, and the log and reward presentations.
+/// The tabs, the sick-mode accessory, and the log and reward presentations.
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
     @State private var stagedReward: RewardResult?
@@ -122,6 +123,9 @@ struct MainTabs: View {
             AlbumScreen()
                 .tabItem { Label(tr("Album"), systemImage: "square.stack.fill") }
                 .tag(AppTab.album)
+            LabScreen()
+                .tabItem { Label(tr("Lab"), systemImage: "flask.fill") }
+                .tag(AppTab.lab)
             if AppConfig.crewEnabled {
                 CrewScreen()
                     .tabItem { Label(tr("Crew"), systemImage: "person.2.fill") }

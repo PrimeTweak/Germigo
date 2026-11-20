@@ -11,8 +11,8 @@ struct AlbumScreen: View {
     @Environment(\.palette) private var palette
     @State private var segment = Segment.germs
     @State private var lockedGerm: Germ?
-    @State private var guideRequested = false
-    @State private var showGuide = false
+    @State private var caseFileRequested: Germ?
+    @State private var caseFile: Germ?
     @Namespace private var zoom
 
     var body: some View {
@@ -56,37 +56,27 @@ struct AlbumScreen: View {
             }
             .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("Album"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        FieldGuideScreen()
-                    } label: {
-                        Image(systemName: "book.closed")
-                    }
-                    .accessibilityLabel(tr("Field Guide"))
-                }
-            }
             .navigationDestination(for: Germ.self) { germ in
                 GermDetailScreen(germ: germ)
                     .navigationTransition(.zoom(sourceID: germ.id, in: zoom))
             }
-            .navigationDestination(isPresented: $showGuide) {
-                FieldGuideScreen()
+            .navigationDestination(item: $caseFile) { germ in
+                GermDetailScreen(germ: germ)
             }
-            .sheet(item: $lockedGerm, onDismiss: openGuideIfRequested) { germ in
+            .sheet(item: $lockedGerm, onDismiss: openCaseFileIfRequested) { germ in
                 LockedCardSheet(germ: germ) {
-                    guideRequested = true
+                    caseFileRequested = germ
                 }
                 .presentationDetents([.medium])
             }
         }
     }
 
-    /// Pushes the Field Guide once the locked-card sheet is gone.
-    private func openGuideIfRequested() {
-        guard guideRequested else { return }
-        guideRequested = false
-        showGuide = true
+    /// Pushes the germ's case file once the locked-card sheet is gone.
+    private func openCaseFileIfRequested() {
+        guard let germ = caseFileRequested else { return }
+        caseFileRequested = nil
+        caseFile = germ
     }
 
     private func grid(cardWidth: CGFloat) -> some View {
@@ -116,7 +106,7 @@ struct AlbumScreen: View {
 /// Explains a locked card without spoiling which germ it is.
 private struct LockedCardSheet: View {
     let germ: Germ
-    let onOpenGuide: () -> Void
+    let onOpenCaseFile: () -> Void
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
 
@@ -127,16 +117,15 @@ private struct LockedCardSheet: View {
             Text(tr("Card %@ is still out there", germ.numberLabel))
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.ink)
-            Text(tr("Rarity: %@. Catch it to reveal the card. The health notes for every germ are always open in the Field Guide.",
-                    germ.rarity.label))
+            Text(tr("Rarity: %@. Catch it to reveal the card. Its case file is always open.", germ.rarity.label))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
             Spacer(minLength: 0)
             VStack(spacing: 10) {
-                Button(tr("Open the Field Guide")) {
-                    onOpenGuide()
+                Button(tr("Open the case file")) {
+                    onOpenCaseFile()
                     dismiss()
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
