@@ -1,0 +1,739 @@
+import SwiftUI
+
+/// Who the symptom pages are about.
+enum Patient: Hashable {
+    case kid(UUID)
+    case newKid
+    case me
+}
+
+/// What opens the symptom pages: someone newly sick, or an entry whose signs changed.
+enum SymptomFlow: Identifiable {
+    case new(Patient)
+    case kidIllness(UUID)
+    case log(UUID)
+
+    var id: String {
+        switch self {
+        case .new(.kid(let kidID)): return "new-" + kidID.uuidString
+        case .new(.newKid): return "new-kid"
+        case .new(.me): return "new-me"
+        case .kidIllness(let illnessID): return "illness-" + illnessID.uuidString
+        case .log(let logID): return "log-" + logID.uuidString
+        }
+    }
+
+    var isNew: Bool {
+        if case .new = self { return true }
+        return false
+    }
+}
+
+/// What the kid's illness form starts with when it follows the symptom pages.
+struct KidFormSeed: Hashable {
+    var kidID: UUID?
+    var germID: String?
+    var symptoms: [String] = []
+}
+
+/// The symptom pages: tick what you see, meet the suspects, pick one or keep it a mystery.
+struct SymptomFlowSheet: View {
+    let flow: SymptomFlow
+    /// Receives the request for the log sheet, which opens once this sheet has closed.
+    let onLog: (LogRequest) -> Void
+
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
+    @State private var patient = Patient.me
+    @State private var chosen: Set<String> = []
+    @State private var newKidName = ""
+    @State private var showSuspects = false
+    @State private var showUrgent = false
+    @State private var direct: KidFormSeed?
+    @State private var didPrefill = false
+
+    private var needsName: Bool {
+        patient == .newKid && newKidName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private var canProceed: Bool {
+        !chosen.isEmpty && !needsName
+    }
+
+    private var orderedIDs: [String] {
+        Symptom.ordered(chosen).map { $0.id }
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    if flow.isNew {
+                        whoRow
+                            .padding(.bottom, 18)
+                    }
+                    Text(patient == .me ? tr("What do you feel?") : tr("What do you see?"))
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Tap everything that fits. You can change it later."))
+                        .font(.callout)
+                        .foregroundStyle(palette.inkSecondary)
+                        .padding(.top, 6)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 3), spacing: 9) {
+                        ForEach(Array(Symptom.all.enumerated()), id: \.element.id) { item in
+                            SymptomTile(symptom: item.element, isOn: chosen.contains(item.element.id)) {
+                                toggle(item.element.id)
+                            }
+                            .cascadeIn(item.offset / 3)
+                        }
+                    }
+                    .padding(.top, 18)
+                    urgentRow
+                        .padding(.top, 9)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 4)
+                .padding(.bottom, 16)
+            }
+            .background(palette.background.ignoresSafeArea())
+            .navigationTitle(tr("Symptoms"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(tr("Close"))
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                bottomBar
+            }
+            .navigationDestination(isPresented: $showSuspects) {
+                SuspectsPage(flow: flow, patient: patient, chosen: chosen, close: { dismiss() }, onLog: onLog)
+            }
+            .navigationDestination(isPresented: $showUrgent) {
+                UrgentPage(flow: flow, patient: patient, chosen: chosen, close: { dismiss() }, onLog: onLog)
+            }
+            .navigationDestination(item: $direct) { seed in
+                KidIllnessForm(seed: seed) {
+                    dismiss()
+                }
+            }
+            .onAppear(perform: prefill)
+        }
+    }
+
+    private var whoRow: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ScrollView(.horizontal) {
+                HStack(spacing: 8) {
+                    ForEach(model.data.kids) { kid in
+                        whoChip(kid.name, look: kid.colorIndex, selected: patient == .kid(kid.id)) {
+                            patient = .kid(kid.id)
+                        }
+                    }
+                    if model.data.kids.isEmpty {
+                        whoChip(tr("A kid"), look: model.nextKidLook, selected: patient == .newKid) {
+                            patient = .newKid
+                        }
+                    }
+                    whoChip(tr("Me"), look: model.data.hostLook, selected: patient == .me) {
+                        patient = .me
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+            .scrollIndicators(.hidden)
+            if patient == .newKid {
+                TextField(tr("Kid's name"), text: $newKidName)
+                    .textInputAutocapitalization(.words)
+                    .padding(.horizontal, 16)
+                    .frame(height: 54)
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            }
+        }
+    }
+
+    private func whoChip(_ name: String, look: Int, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptics.tap()
+            action()
+        } label: {
+            HStack(spacing: 8) {
+                BuddyView(look: look, sick: true, size: 30)
+                Text(name)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(selected ? palette.background : palette.inkSecondary)
+            .padding(.leading, 9)
+            .padding(.trailing, 18)
+            .frame(height: 46)
+            .background(selected ? palette.ink : palette.surface, in: Capsule())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private var urgentRow: some View {
+        let isOn = chosen.contains(Symptom.urgentID)
+        return Button {
+            Haptics.tap()
+            toggle(Symptom.urgentID)
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: Symptom.urgent.symbol)
+                    .font(.title3)
+                    .foregroundStyle(isOn ? palette.accent : palette.inkSecondary)
+                    .symbolEffect(.bounce, value: isOn)
+                Text(Symptom.urgent.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Spacer(minLength: 8)
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.body)
+                    .foregroundStyle(isOn ? palette.accent : palette.inkTertiary)
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 56)
+            .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+
+    private var bottomBar: some View {
+        VStack(spacing: 12) {
+            Button {
+                proceed()
+            } label: {
+                HStack(spacing: 10) {
+                    Text(tr("See the suspects"))
+                    if !chosen.isEmpty {
+                        Text(verbatim: String(chosen.count))
+                            .font(.footnote.weight(.bold))
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                            .padding(.horizontal, 9)
+                            .frame(minWidth: 26, minHeight: 26)
+                            .background(palette.background.opacity(0.22), in: Capsule())
+                    }
+                }
+            }
+            .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
+            .disabled(!canProceed)
+            if flow.isNew {
+                Button {
+                    skipToPicker()
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(tr("I know what it is"))
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                    }
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .frame(minHeight: 30)
+                }
+                .buttonStyle(.plain)
+                .disabled(needsName)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(.ultraThinMaterial)
+        .animation(.snappy, value: chosen.count)
+    }
+
+    private func toggle(_ id: String) {
+        if chosen.contains(id) {
+            chosen.remove(id)
+        } else {
+            chosen.insert(id)
+        }
+    }
+
+    private func prefill() {
+        guard !didPrefill else { return }
+        didPrefill = true
+        switch flow {
+        case .new(let who):
+            patient = who
+        case .kidIllness(let illnessID):
+            if let illness = model.data.kidIllnesses.first(where: { $0.id == illnessID }) {
+                patient = .kid(illness.kidID)
+                chosen = Set(illness.symptoms)
+            }
+        case .log(let logID):
+            patient = .me
+            chosen = Set(model.data.logs.first(where: { $0.id == logID })?.symptoms ?? [])
+        }
+    }
+
+    /// A first kid typed on this page joins the household before the next one opens.
+    private func ensureKid() {
+        guard patient == .newKid else { return }
+        let kid = Kid(name: newKidName.trimmingCharacters(in: .whitespaces), colorIndex: model.nextKidLook)
+        model.saveKid(kid)
+        patient = .kid(kid.id)
+    }
+
+    private func proceed() {
+        guard canProceed else { return }
+        ensureKid()
+        if chosen.contains(Symptom.urgentID) {
+            showUrgent = true
+        } else {
+            showSuspects = true
+        }
+    }
+
+    /// The classic way in: the germ list, with the ticked signs kept.
+    private func skipToPicker() {
+        guard !needsName else { return }
+        ensureKid()
+        switch patient {
+        case .kid(let kidID):
+            direct = KidFormSeed(kidID: kidID, germID: nil, symptoms: orderedIDs)
+        case .newKid:
+            break
+        case .me:
+            onLog(LogRequest(symptoms: orderedIDs))
+            dismiss()
+        }
+    }
+}
+
+/// One sign of the picker: its symbol, its name, and a check once ticked.
+private struct SymptomTile: View {
+    let symptom: Symptom
+    let isOn: Bool
+    let action: () -> Void
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Button {
+            Haptics.tap()
+            action()
+        } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .top) {
+                    Image(systemName: symptom.symbol)
+                        .font(.title3)
+                        .foregroundStyle(isOn ? palette.accent : palette.inkSecondary)
+                        .symbolEffect(.bounce, value: isOn)
+                        .frame(height: 26)
+                    Spacer(minLength: 0)
+                    if isOn {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.body)
+                            .foregroundStyle(palette.accent)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                Spacer(minLength: 6)
+                Text(symptom.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 88)
+            .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isOn)
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+    }
+}
+
+/// Trouble breathing was ticked: the help lines come before any guess.
+private struct UrgentPage: View {
+    let flow: SymptomFlow
+    let patient: Patient
+    let chosen: Set<String>
+    let close: () -> Void
+    let onLog: (LogRequest) -> Void
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 14) {
+                Image(systemName: Symptom.urgent.symbol)
+                    .font(.system(size: 44, weight: .semibold))
+                    .foregroundStyle(palette.ink)
+                    .symbolEffect(.pulse)
+                    .frame(width: 108, height: 108)
+                    .background(palette.surface, in: Circle())
+                    .padding(.top, 20)
+                    .accessibilityHidden(true)
+                Text(tr("Trouble breathing can't wait"))
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                    .multilineTextAlignment(.center)
+                Text(tr("Petri doesn't guess on this one. Call a health line now, or the emergency number if it looks serious."))
+                    .font(.body)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                NavigationLink {
+                    HelpLinesScreen()
+                } label: {
+                    Text(tr("Help Lines"))
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink))
+                .padding(.top, 10)
+                if chosen.count > 1 {
+                    NavigationLink {
+                        SuspectsPage(flow: flow, patient: patient, chosen: chosen, close: close, onLog: onLog)
+                    } label: {
+                        Text(tr("See the suspects anyway"))
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost))
+                }
+                Text(HealthNotice.text)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkTertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 6)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 24)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// The germs that fit the ticked signs, best fits first. A guess for the logbook, never a diagnosis.
+private struct SuspectsPage: View {
+    let flow: SymptomFlow
+    let patient: Patient
+    let chosen: Set<String>
+    let close: () -> Void
+    let onLog: (LogRequest) -> Void
+
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var selected: String?
+    @State private var showAll = false
+    @State private var seed: KidFormSeed?
+
+    /// The germ the entry has now, when the pages reopen one that exists.
+    private var currentGermID: String? {
+        switch flow {
+        case .new: return nil
+        case .kidIllness(let illnessID): return model.data.kidIllnesses.first(where: { $0.id == illnessID })?.germID
+        case .log(let logID): return model.data.logs.first(where: { $0.id == logID })?.germID
+        }
+    }
+
+    var body: some View {
+        let lineup = SymptomEngine.lineup(for: chosen, in: model.catalog.germs)
+        let few = !lineup.top.isEmpty && lineup.top.count <= 3
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title(lineup))
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(subtitle(lineup))
+                    .font(.callout)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 6)
+                signs
+                    .padding(.top, 14)
+                VStack(spacing: 8) {
+                    if few {
+                        ForEach(Array(lineup.top.enumerated()), id: \.element.id) { item in
+                            card(item.element, index: item.offset)
+                        }
+                        if !lineup.others.isEmpty {
+                            moreRow(trCount(lineup.others.count, one: "%lld other fits less well",
+                                            other: "%lld others fit less well"))
+                            if showAll {
+                                ForEach(lineup.others) { suspect in
+                                    row(suspect, index: 0)
+                                }
+                            }
+                        }
+                    } else {
+                        let shown = showAll ? lineup.top : Array(lineup.top.prefix(4))
+                        ForEach(Array(shown.enumerated()), id: \.element.id) { item in
+                            row(item.element, index: item.offset)
+                        }
+                        if lineup.top.count > 4, !showAll {
+                            moreRow(trCount(lineup.top.count - 4, one: "%lld more suspect", other: "%lld more suspects"))
+                        }
+                    }
+                }
+                .padding(.top, 14)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 16)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) {
+            bottomBar(quiet: few)
+        }
+        .navigationDestination(item: $seed) { seed in
+            KidIllnessForm(seed: seed, onDone: close)
+        }
+    }
+
+    private func title(_ lineup: Lineup) -> String {
+        let count = lineup.top.count
+        if count == 0 { return tr("No suspect") }
+        if !lineup.isFull { return tr("No perfect match") }
+        if count == 1 { return tr("One suspect") }
+        if count <= 3 { return tr("Down to %lld", count) }
+        return tr("%lld suspects", count)
+    }
+
+    private func subtitle(_ lineup: Lineup) -> String {
+        guard let best = lineup.top.first else {
+            return tr("Nothing in the lab fits these signs yet.")
+        }
+        if !lineup.isFull {
+            return tr("The closest ones fit %1$lld of your %2$lld signs.", best.matched, lineup.chosen)
+        }
+        if lineup.top.count > 3 {
+            return tr("Lots of germs start like this. Too early to tell them apart.")
+        }
+        return lineup.top.count == 1 ? tr("It fits everything you ticked.") : tr("They fit everything you ticked.")
+    }
+
+    private var signs: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 7) {
+                ForEach(Symptom.ordered(chosen)) { symptom in
+                    Text(symptom.title)
+                        .font(.footnote)
+                        .foregroundStyle(palette.ink)
+                        .padding(.horizontal, 12)
+                        .frame(height: 32)
+                        .background(palette.surface, in: Capsule())
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    private func clueText(_ clue: SuspectClue) -> String {
+        clue.isTelltale ? tr("Telltale sign: %@", clue.text) : tr("Watch for: %@", clue.text)
+    }
+
+    /// One of a few suspects: big, moving, with its own button.
+    private func card(_ suspect: Suspect, index: Int) -> some View {
+        let germ = suspect.germ
+        return VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                LivelyCharacter(mood: .stalking, phase: Double(index) * 0.9) {
+                    GermImage(germ: germ, size: 84)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(germ.name)
+                        .font(.title3.weight(.bold))
+                    Text(germ.illness.value)
+                        .font(.subheadline)
+                        .opacity(0.75)
+                    if let clue = SymptomEngine.clue(for: germ, chosen: chosen) {
+                        Text(clueText(clue))
+                            .font(.subheadline)
+                            .opacity(0.85)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+            }
+            Button(tr("That's it")) {
+                pick(germ.id)
+            }
+            .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
+        }
+        .padding(14)
+        .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .cascadeIn(index)
+    }
+
+    /// One of many suspects: a row to select.
+    private func row(_ suspect: Suspect, index: Int) -> some View {
+        let germ = suspect.germ
+        let isOn = selected == germ.id
+        return Button {
+            Haptics.tap()
+            selected = isOn ? nil : germ.id
+        } label: {
+            HStack(spacing: 12) {
+                GermImage(germ: germ, size: 50)
+                    .frame(width: 62, height: 62)
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(alignment: .firstTextBaseline, spacing: 7) {
+                        Text(germ.name)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                        Text(germ.illness.value)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .lineLimit(1)
+                    }
+                    if let clue = SymptomEngine.clue(for: germ, chosen: chosen) {
+                        Text(clueText(clue))
+                            .font(.footnote)
+                            .foregroundStyle(palette.inkSecondary)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                Spacer(minLength: 4)
+                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isOn ? palette.accent : palette.inkTertiary)
+                    .symbolEffect(.bounce, value: isOn)
+            }
+            .padding(.vertical, 10)
+            .padding(.leading, 10)
+            .padding(.trailing, 14)
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(isOn ? .isSelected : [])
+        .cascadeIn(index)
+    }
+
+    private func moreRow(_ title: String) -> some View {
+        Button {
+            withAnimation(.snappy) {
+                showAll.toggle()
+            }
+        } label: {
+            HStack {
+                Text(title)
+                    .font(.callout)
+                    .foregroundStyle(palette.inkSecondary)
+                Spacer()
+                Image(systemName: showAll ? "chevron.up" : "chevron.down")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 50)
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var keepTitle: String {
+        guard let current = currentGermID, current != GermCatalog.mysteryID,
+              let germ = model.catalog.germ(current) else {
+            return flow.isNew ? tr("Keep it a mystery for now") : tr("Still a mystery")
+        }
+        return tr("Keep %@", germ.name)
+    }
+
+    private var footnote: String {
+        let guess = tr("A guess for your logbook, not a diagnosis.")
+        guard flow.isNew, model.data.settings.checkInsOn else { return guess }
+        return tr("Petri asks again in 2 days.") + " " + guess
+    }
+
+    private func bottomBar(quiet: Bool) -> some View {
+        VStack(spacing: 10) {
+            if let selected, let germ = model.catalog.germ(selected) {
+                Button(tr("It's %@", germ.name)) {
+                    pick(germ.id)
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
+                Button(keepTitle) {
+                    keep()
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
+            } else {
+                Button(keepTitle) {
+                    keep()
+                }
+                .buttonStyle(PillButtonStyle(kind: quiet ? .ghost : .ink, height: 58))
+            }
+            Text(footnote)
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(.ultraThinMaterial)
+        .animation(.snappy, value: selected)
+    }
+
+    /// No germ picked: a new entry becomes a mystery, an existing one keeps its germ.
+    private func keep() {
+        pick(currentGermID ?? GermCatalog.mysteryID)
+    }
+
+    private func pick(_ germID: String) {
+        let ids = Symptom.ordered(chosen).map { $0.id }
+        let changed = currentGermID.map { $0 != germID } ?? false
+        Haptics.success()
+        switch flow {
+        case .new:
+            switch patient {
+            case .kid(let kidID):
+                seed = KidFormSeed(kidID: kidID, germID: germID, symptoms: ids)
+            case .newKid:
+                break
+            case .me:
+                onLog(LogRequest(germID: germID, symptoms: ids))
+                close()
+            }
+        case .kidIllness(let illnessID):
+            model.reassignKidIllness(illnessID, germID: germID, symptoms: ids)
+            announce(germID, changed: changed)
+            close()
+        case .log(let logID):
+            model.reassignLog(logID, germID: germID, symptoms: ids)
+            announce(germID, changed: changed)
+            close()
+        }
+    }
+
+    private func announce(_ germID: String, changed: Bool) {
+        guard changed, let germ = model.catalog.germ(germID) else {
+            model.toast = tr("Symptoms updated.")
+            return
+        }
+        model.toast = tr("Now it's %@.", germ.name)
+    }
+}

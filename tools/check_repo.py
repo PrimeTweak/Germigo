@@ -219,10 +219,15 @@ def check_health_sheet(germ, gid):
     for key in ("symptoms", "spreads"):
         if not isinstance(germ.get(key), list):
             fail(f"germs.json {gid}: {key} must be a list, empty when the sources say nothing")
+    engine = (ROOT / "App/Store/SymptomEngine.swift").read_text(encoding="utf-8")
+    signs = set(re.findall(r'Symptom\(id: "([a-z_]+)"', engine))
     for index, item in enumerate(germ.get("symptoms") or []):
         if not item.get("icon"):
             fail(f"germs.json {gid}.symptoms[{index}]: needs an icon")
         localized(item.get("text"), f"germs.json {gid}.symptoms[{index}].text")
+        for tag in item.get("tags") or []:
+            if tag not in signs:
+                fail(f"germs.json {gid}.symptoms[{index}]: tag {tag!r} is not a sign of the symptom picker")
     for index, item in enumerate(germ.get("spreads") or []):
         if not item.get("icon"):
             fail(f"germs.json {gid}.spreads[{index}]: needs an icon")

@@ -254,7 +254,7 @@ private struct KidsGermsView: View {
                     GermDetailScreen(germ: germ)
                 } label: {
                     HStack(spacing: 12) {
-                        AvatarView(name: kid?.name ?? "?", gradient: AvatarColors.gradient(kid?.colorIndex ?? 0), size: 42)
+                        BuddyBadge(look: kid?.colorIndex ?? 0, size: 42)
                         VStack(alignment: .leading, spacing: 2) {
                             Text((kid?.name ?? tr("Your kid")) + " · " + germ.illness.value)
                                 .font(.callout.weight(.semibold))

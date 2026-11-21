@@ -45,7 +45,7 @@ Set in `App/Info.plist`:
 
 The app opens `petri://log` (log sheet) and `petri://today`. The streak widget uses them.
 
-Sideload builds are compiled with `PETRI_SIDELOAD`, which adds a Season Pass switch in Settings. Release builds do not have it.
+Sideload builds are compiled with `PETRI_SIDELOAD`, which adds a Season Pass switch in Settings and, while `PetriServerURL` holds the placeholder, a sample crew kept in memory. Release builds have neither.
 
 Widgets read a snapshot from the app group `group.ca.petri.app`. An unsigned or re-signed build has no app group, so its widgets stay empty.
 
@@ -59,13 +59,15 @@ Settings > Data and Privacy > Back Up shares the journal as `petri-backup.json`,
 
 Skill tree titles, streak milestones, the couple duel and the season story are computed from the journal in `App/Store/ProgressEngine.swift`; only the worn title and the last celebrated milestone are stored.
 
+The household's characters are the images `buddy-<n>-well` and `buddy-<n>-sick`. A kid's `colorIndex` picks one, as do the journal's `hostLook` and `partnerLook`.
+
 The Lab's daily quiz is built in `App/Store/QuizEngine.swift` from the myths, boss attacks and timings in `germs.json`. The journal keeps only the day's round, the questions asked or missed, the days done and the count of right answers, which unlocks the lessons and adds points.
 
 ## Text
 
 User-facing strings go through `tr("English text")`. The English text is the key in `Shared/en.lproj` and `Shared/fr.lproj`. A string missing from either file, or no longer used, fails `check_swift.py`.
 
-Germ and article text is bilingual inside the JSON files. A germ's `about`, `symptoms` and `spreads` restate its listed sources only; a list stays empty when the sources say nothing on the subject.
+Germ and article text is bilingual inside the JSON files. A germ's `about`, `symptoms` and `spreads` restate its listed sources only; a list stays empty when the sources say nothing on the subject. A symptom line may carry `tags`, the signs of the symptom pages it stands for; `App/Store/SymptomEngine.swift` ranks the germs by the tags they share with the ticked signs.
 
 ## Colors
 

@@ -12,6 +12,9 @@ enum NotificationManager {
 
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
+
+    /// How long a mystery germ waits before Petri asks about new symptoms.
+    private static let symptomCheckDelay: TimeInterval = 2 * 24 * 3600
     private static let presenter = ForegroundPresenter()
 
     private static var center: UNUserNotificationCenter {
@@ -157,6 +160,24 @@ enum NotificationManager {
 
     private static func sickKey(_ offset: Int) -> String {
         sickID + "-" + String(offset)
+    }
+
+    /// One question two days into a mystery germ: a new sign could name it.
+    static func scheduleSymptomCheck(id: UUID, name: String?, startedAt: Date, settings: AppSettings) {
+        cancelSymptomCheck(id: id)
+        let due = adjusted(startedAt.addingTimeInterval(symptomCheckDelay))
+        guard settings.checkInsOn, due > Date() else { return }
+        let body = name.map { tr("%@'s mystery bug is 2 days old. A new sign could name it.", $0) }
+            ?? tr("Your mystery bug is 2 days old. A new sign could name it.")
+        add(id: symptomKey(id), title: tr("Any new symptoms?"), body: body, at: due)
+    }
+
+    static func cancelSymptomCheck(id: UUID) {
+        center.removePendingNotificationRequests(withIdentifiers: [symptomKey(id)])
+    }
+
+    private static func symptomKey(_ id: UUID) -> String {
+        "symptoms-" + id.uuidString
     }
 
     static func notifyRadar(illness: String, crewName: String, families: Int) {

@@ -71,6 +71,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 | Risk | Detail |
 | --- | --- |
 | 5.1.1(ix) | Apple expects apps in regulated fields that collect sensitive data, health included, to be submitted by a legal entity. Petri keeps the journal on the device and offers general information only, but a reviewer may still ask. Disabling Crew removes all health data collection. |
+| 1.4.1 | The symptom pages rank the catalog's germs by the signs a parent ticks. The screen calls the result a guess for the logbook, not a diagnosis, and trouble breathing leads to the help lines instead of a list. A reviewer may still read it as a diagnostic feature. |
 | Case file review | Timing, contagion, care and "when to call" statements were re-read against the linked pages on 2026-11-19, and the "what it is", symptom and spread lines on 2026-11-20. The text has not been reviewed by a clinician, and the trivia lines of the deep dives are not covered by the linked pages. |
 | Source links | `check_links.py` fails on a broken link and lists as blocked the sites that refuse scripts. Open the blocked ones in a browser before a release. |
 | Moderation duty | Guideline 1.2 expects timely responses. The moderation page at `<server>/admin` must be checked daily once Crew is live. |

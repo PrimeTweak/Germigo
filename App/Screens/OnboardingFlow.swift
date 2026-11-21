@@ -152,7 +152,7 @@ struct OnboardingFlow: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, 8)
                     ZStack(alignment: .bottom) {
-                        AvatarView(name: kidName, gradient: AvatarColors.gradient(0), size: 108)
+                        BuddyBadge(look: 0, size: 108)
                             .padding(.bottom, 12)
                         PillLabel(text: tr("Patient zero"), foreground: palette.background, background: palette.ink)
                     }
@@ -202,7 +202,7 @@ struct OnboardingFlow: View {
                     Haptics.thud()
                     practiced = true
                 } face: {
-                    Image("mascot-awake").resizable().scaledToFit()
+                    BuddyView(look: Looks.host, sick: true, lively: true)
                 }
                 .frame(maxWidth: 190)
                 Label(practiced ? tr("That's it. Nothing was logged.") : tr("Tap the tile to try."),

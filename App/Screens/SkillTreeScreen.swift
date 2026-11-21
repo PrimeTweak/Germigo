@@ -31,7 +31,7 @@ struct SkillTreeScreen: View {
 
     private var header: some View {
         HStack(spacing: 13) {
-            AvatarView(name: model.displayName, gradient: AvatarColors.host, size: 52)
+            BuddyBadge(look: model.data.hostLook, size: 52)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.displayTitle)
                     .font(.headline)

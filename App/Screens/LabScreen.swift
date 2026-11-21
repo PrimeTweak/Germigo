@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The learning tab: the daily quiz, the lessons, the germ of the day and all the germs with their case files.
+/// The learning tab: the daily quiz, the germ of the day and all the germs with their case files. The lessons sit in the toolbar.
 struct LabScreen: View {
     private enum Filter: Hashable {
         case all
@@ -38,7 +38,6 @@ struct LabScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     QuizCard(showQuiz: $showQuiz)
-                    lessonsRow
                     germOfTheDay
                     SectionHeader(title: tr("All %lld", model.catalog.germs.count),
                                   trailing: tr("%lld caught", model.caughtGermIDs.count))
@@ -57,6 +56,11 @@ struct LabScreen: View {
             .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("Lab"))
             .searchable(text: $query, prompt: tr("Search an illness"))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    lessonsLink
+                }
+            }
             .navigationDestination(for: Germ.self) { germ in
                 GermDetailScreen(germ: germ)
             }
@@ -69,17 +73,23 @@ struct LabScreen: View {
         }
     }
 
-    private var lessonsRow: some View {
+    /// A cap inside a ring that fills as the lessons open.
+    private var lessonsLink: some View {
         let articles = model.catalog.articles
         let open = articles.filter { model.isArticleUnlocked($0) }.count
         return NavigationLink {
             LessonsScreen()
         } label: {
-            ValueRow(title: tr("Lessons"), value: tr("%1$lld of %2$lld", open, articles.count))
-                .padding(.horizontal, 18)
-                .petriCard(padding: 0)
+            Image(systemName: "graduationcap.fill")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(palette.ink)
+                .frame(width: 30, height: 30)
+                .background {
+                    ProgressRing(fraction: articles.isEmpty ? 0 : Double(open) / Double(articles.count), lineWidth: 2.5)
+                }
         }
-        .buttonStyle(.plain)
+        .accessibilityLabel(tr("Lessons"))
+        .accessibilityValue(tr("%1$lld of %2$lld", open, articles.count))
     }
 
     @ViewBuilder
@@ -87,8 +97,10 @@ struct LabScreen: View {
         if let germ = QuizEngine.germOfTheDay(model.catalog.germs, now: Date()) {
             NavigationLink(value: germ) {
                 HStack(spacing: 10) {
-                    GermImage(germ: germ, size: 96)
-                        .shadow(color: Color.black.opacity(0.14), radius: 5, x: 0, y: 5)
+                    LivelyCharacter(mood: .stalking, pokes: false) {
+                        GermImage(germ: germ, size: 96)
+                    }
+                    .shadow(color: Color.black.opacity(0.14), radius: 5, x: 0, y: 5)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tr("Today's germ"))
                             .font(.footnote)
@@ -160,6 +172,11 @@ struct LabScreen: View {
                     GermTile(germ: germ, count: model.count(of: germ.id), studied: studiedOnly.contains(germ.id))
                 }
                 .buttonStyle(.plain)
+                .scrollTransition { content, phase in
+                    content
+                        .scaleEffect(phase.isIdentity ? 1 : 0.88)
+                        .opacity(phase.isIdentity ? 1 : 0.4)
+                }
             }
         }
     }
@@ -218,11 +235,15 @@ private struct GermTile: View {
     }
 }
 
-/// The daily quiz: where it stands, what it pays, the Lab streak and the way in.
+/// The daily quiz: a bright card with the mascot, where the quiz stands, what it pays and the way in.
 private struct QuizCard: View {
     @Binding var showQuiz: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+
+    private var ground: Color {
+        palette.isDark ? Color(hex: Swatch.irisDeep) : palette.accent
+    }
 
     var body: some View {
         let plan = model.quizPlan()
@@ -230,64 +251,102 @@ private struct QuizCard: View {
         let done = model.quizDone()
         let rightToday = zip(plan, answers).filter { $0.0.answer == $0.1 }.count
         let points = (done ? rightToday : plan.count) * RewardEngine.quizAnswerPoints
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(tr("Daily quiz"))
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(palette.ink)
-                    Text(done ? tr("Done for today") : trCount(plan.count, one: "%lld question · about a minute",
-                                                              other: "%lld questions · about a minute"))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                }
-                Spacer(minLength: 8)
-                if !done {
-                    Button {
-                        showQuiz = true
-                    } label: {
-                        Text(answers.isEmpty ? tr("Start") : tr("Keep going"))
-                            .font(.callout.weight(.semibold))
-                            .foregroundStyle(palette.background)
-                            .padding(.horizontal, 20)
-                            .frame(height: 44)
-                            .background(palette.ink, in: Capsule())
-                    }
-                    .buttonStyle(PressableStyle())
-                }
-            }
-            HStack(spacing: 6) {
-                ForEach(Array(plan.enumerated()), id: \.offset) { item in
-                    Capsule()
-                        .fill(dotColor(index: item.offset, question: item.element, answers: answers))
-                        .frame(width: 28, height: 6)
-                }
-                Spacer(minLength: 8)
-                Text(tr("+%lld pts", points))
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.inkSecondary)
-            }
-            .accessibilityHidden(true)
-            Text(trCount(model.labStreak(), one: "Lab streak: %lld day", other: "Lab streak: %lld days"))
+        let streak = model.labStreak()
+        VStack(alignment: .leading, spacing: 0) {
+            Text(done ? tr("Done for today") : tr("Daily quiz"))
+                .font(.title2.weight(.bold))
+            Text(done ? tr("%1$lld of %2$lld right. A new quiz tomorrow.", rightToday, plan.count)
+                      : trCount(plan.count, one: "%lld question · about a minute", other: "%lld questions · about a minute"))
                 .font(.subheadline)
-                .foregroundStyle(palette.inkSecondary)
+                .opacity(0.92)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 4)
+                .padding(.trailing, 118)
+            HStack(spacing: 7) {
+                HStack(spacing: 6) {
+                    ForEach(Array(plan.enumerated()), id: \.offset) { item in
+                        segment(index: item.offset, question: item.element, answers: answers)
+                    }
+                }
+                .accessibilityHidden(true)
+                Spacer(minLength: 8)
+                chip(trCount(streak, one: "%lld day", other: "%lld days"), symbol: "flame.fill")
+                    .accessibilityLabel(trCount(streak, one: "Lab streak: %lld day", other: "Lab streak: %lld days"))
+                chip(tr("+%lld pts", points), symbol: nil)
+            }
+            .padding(.top, 18)
             if model.onSickLeave && !done {
                 Text(tr("Sick leave: your streak waits for you."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
+                    .font(.footnote)
+                    .opacity(0.92)
+                    .padding(.top, 10)
             }
-            if done {
-                Text(tr("A new quiz tomorrow."))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(palette.ink)
+            if !done {
+                Button {
+                    showQuiz = true
+                } label: {
+                    Text(answers.isEmpty ? tr("Start") : tr("Keep going"))
+                        .font(.headline)
+                        .foregroundStyle(ground)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(Color.white, in: Capsule())
+                }
+                .buttonStyle(PressableStyle())
+                .padding(.top, 16)
             }
         }
-        .petriCard(radius: 26, padding: 18)
+        .foregroundStyle(Color.white)
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ground, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .overlay(alignment: .topTrailing) {
+            LivelyCharacter(mood: done ? .asleep : .idle, phase: 1.3) {
+                Image(done ? "mascot-asleep" : "mascot-awake")
+                    .resizable()
+                    .scaledToFit()
+            }
+            .frame(width: 112, height: 112)
+            .rotationEffect(.degrees(7))
+            .shadow(color: Color.black.opacity(0.25), radius: 8, x: 0, y: 8)
+            .offset(x: -14, y: -34)
+            .accessibilityHidden(true)
+        }
+        .padding(.top, 30)
+        .animation(.snappy, value: answers.count)
     }
 
-    private func dotColor(index: Int, question: QuizQuestion, answers: [Int]) -> Color {
-        guard index < answers.count else { return palette.ink.opacity(0.12) }
-        return answers[index] == question.answer ? palette.accent : palette.ink.opacity(0.45)
+    /// One question of the day: waiting, right, or wrong.
+    @ViewBuilder
+    private func segment(index: Int, question: QuizQuestion, answers: [Int]) -> some View {
+        if index >= answers.count {
+            Capsule()
+                .fill(Color.white.opacity(0.32))
+                .frame(width: 30, height: 8)
+        } else if answers[index] == question.answer {
+            Capsule()
+                .fill(Color.white)
+                .frame(width: 30, height: 8)
+        } else {
+            Capsule()
+                .strokeBorder(Color.white.opacity(0.6), lineWidth: 2)
+                .frame(width: 30, height: 8)
+        }
+    }
+
+    private func chip(_ text: String, symbol: String?) -> some View {
+        HStack(spacing: 5) {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.caption.weight(.bold))
+            }
+            Text(text)
+                .font(.footnote.weight(.semibold))
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 11)
+        .frame(height: 30)
+        .background(Color.white.opacity(0.14), in: Capsule())
     }
 }
 

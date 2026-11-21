@@ -97,7 +97,7 @@ extension Germ {
     var deepTint: Color { Color(hexString: tintDeep) }
 }
 
-/// Avatar gradients, assigned in the order people are added.
+/// Avatar gradients for the share cards and the crew, by index.
 enum AvatarColors {
     private static let pairs: [(UInt32, UInt32)] = [
         (Swatch.skyLight, Swatch.blue), (Swatch.pinkLight, Swatch.pink), (Swatch.butter, Swatch.amber),
@@ -112,8 +112,4 @@ enum AvatarColors {
 
     static let you = LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeLeaf)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing)
-
-    /// The parent's own avatar inside the app.
-    static let host = LinearGradient(colors: [Color(hex: Swatch.lilacPale), Color(hex: Swatch.wisteria)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing)
 }

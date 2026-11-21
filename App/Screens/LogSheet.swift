@@ -72,6 +72,8 @@ struct GermPicker: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(selected ? germ.deepTint : Color.clear, lineWidth: 2)
         }
+        .scaleEffect(selected ? 1.04 : 1)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selected)
     }
 }
 
@@ -153,7 +155,7 @@ struct LogSheet: View {
     private var draft: LogDraft? {
         guard let germID else { return nil }
         return LogDraft(germID: germID, source: source, severity: severity, startedAt: startedAt,
-                        sufferer: sufferer, kidIllnessID: linkedIllnessID)
+                        sufferer: sufferer, kidIllnessID: linkedIllnessID, symptoms: request.symptoms)
     }
 
     private var previewPoints: Int {
@@ -274,12 +276,12 @@ struct LogSheet: View {
             HStack(spacing: 18) {
                 ForEach(model.data.kids) { kid in
                     sourceButton(.kid(kid.id), name: kid.name) {
-                        AvatarView(name: kid.name, gradient: AvatarColors.gradient(kid.colorIndex), size: 54)
+                        BuddyBadge(look: kid.colorIndex, size: 54)
                     }
                 }
                 if let partner = model.data.partnerName {
                     sourceButton(.partner, name: partner) {
-                        AvatarView(name: partner, gradient: AvatarColors.gradient(1), size: 54)
+                        BuddyBadge(look: model.data.partnerLook, size: 54)
                     }
                 }
                 sourceButton(.daycare, name: tr("Daycare")) {
@@ -431,7 +433,15 @@ struct LogSheet: View {
     private func prefill() {
         guard !didPrefill else { return }
         didPrefill = true
-        if let illness = suggestion {
+        if let picked = request.germID {
+            germID = picked
+            if let illness = suggestion, illness.germID == picked {
+                source = .kid(illness.kidID)
+                linkedIllnessID = illness.id
+            } else if let kid = model.data.kids.first {
+                source = .kid(kid.id)
+            }
+        } else if let illness = suggestion {
             germID = illness.germID
             source = .kid(illness.kidID)
             linkedIllnessID = illness.id

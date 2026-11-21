@@ -45,6 +45,11 @@ struct BadgesScreen: View {
                     .petriCard(radius: 22, padding: 14)
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(earned ? tr("Earned") : tr("Locked"))
+                    .scrollTransition { content, phase in
+                        content
+                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
+                            .opacity(phase.isIdentity ? 1 : 0.4)
+                    }
                 }
             }
             .padding(.horizontal, 20)

@@ -47,10 +47,12 @@ enum Swatch {
     static let azure: UInt32 = 0x3D7BFA
     static let azureInk: UInt32 = 0x2C62E0
     static let holoBlue: UInt32 = 0x78DCFF
+    static let periwinkle: UInt32 = 0xA9B6FF
 
     // Purples and pinks
     static let iris: UInt32 = 0x6240E0
     static let irisSoft: UInt32 = 0xB19CFF
+    static let irisDeep: UInt32 = 0x4B33B8
     static let lilac: UInt32 = 0xB48CFF
     static let lilacPale: UInt32 = 0xE4D6FF
     static let lilacMist: UInt32 = 0xEDE4FF

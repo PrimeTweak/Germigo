@@ -109,9 +109,11 @@ private struct BossKnockout: View {
     var body: some View {
         VStack(spacing: 12) {
             ZStack(alignment: .topTrailing) {
-                GermImage(germ: germ, size: 140)
-                    .saturation(0.6)
-                    .frame(maxWidth: .infinity)
+                LivelyCharacter(mood: .dizzy, pokes: false) {
+                    GermImage(germ: germ, size: 140)
+                        .saturation(0.6)
+                }
+                .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                     .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                 Text(verbatim: "K.O.")

@@ -46,6 +46,8 @@ struct FaceTile<Face: View>: View {
 /// The page background: the top takes the color of the character on screen.
 struct CharacterWash: View {
     let tint: Color
+    /// How far down the page the color reaches.
+    var reach: CGFloat = 0.62
     @Environment(\.palette) private var palette
 
     var body: some View {
@@ -54,7 +56,7 @@ struct CharacterWash: View {
                 GeometryReader { proxy in
                     LinearGradient(colors: [tint.opacity(palette.isDark ? 0.3 : 0.46), tint.opacity(0)],
                                    startPoint: .top, endPoint: .bottom)
-                        .frame(height: proxy.size.height * 0.62)
+                        .frame(height: proxy.size.height * reach)
                 }
             }
             .ignoresSafeArea()

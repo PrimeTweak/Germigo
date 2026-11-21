@@ -367,6 +367,54 @@ do {
     check(fromQuiz?.quiz.rightTotal == 7 && fromQuiz?.quiz.missed == [], "a partial quiz history loads with defaults")
 }
 
+// MARK: - Symptoms
+
+do {
+    func sign(_ name: String, tags: [String], telltale: Bool? = nil) -> GermSymptom {
+        GermSymptom(icon: "circle", text: LocalizedText(en: name, fr: name), telltale: telltale, tags: tags)
+    }
+    var cold = makeGerm("rhino", rarity: .common)
+    cold.symptoms = [sign("Runny nose", tags: ["runny_nose"]), sign("Sore throat", tags: ["sore_throat"]),
+                     sign("Low fever", tags: ["fever"])]
+    var strep = makeGerm("strep", rarity: .rare)
+    strep.symptoms = [sign("Sudden sore throat", tags: ["sore_throat"]), sign("Fever", tags: ["fever"]),
+                      sign("White patches", tags: [])]
+    var coxy = makeGerm("coxy", rarity: .rare)
+    coxy.symptoms = [sign("Fever", tags: ["fever"]), sign("Sore throat", tags: ["sore_throat"]),
+                     sign("Rash on the palms", tags: ["rash"], telltale: true)]
+    let mystery = makeGerm("mystery", rarity: .common)
+    let germs = [cold, strep, coxy, mystery]
+
+    let early = SymptomEngine.lineup(for: ["fever", "sore_throat"], in: germs)
+    check(early.top.count == 3 && early.top.first?.germ.id == "rhino", "ties rank the common germ first")
+    check(early.isFull && early.others.isEmpty, "every suspect covers both signs")
+
+    let later = SymptomEngine.lineup(for: ["fever", "sore_throat", "rash"], in: germs)
+    check(later.top.map { $0.germ.id } == ["coxy"], "a third sign narrows the suspects to one")
+    check(later.top.first?.telltaleMatched == true, "the telltale sign is recognized")
+    check(later.others.count == 2, "the partial fits stay available")
+
+    let urgent = SymptomEngine.lineup(for: ["fever", Symptom.urgentID], in: germs)
+    check(urgent.chosen == 1, "trouble breathing is never matched to a germ")
+    check(SymptomEngine.lineup(for: ["itching"], in: germs).top.isEmpty, "a sign no germ has gives no suspect")
+
+    check(SymptomEngine.clue(for: coxy, chosen: ["fever"])?.isTelltale == true, "the clue is the telltale sign when there is one")
+    check(SymptomEngine.clue(for: strep, chosen: ["fever", "sore_throat"])?.text == "white patches",
+          "without a telltale sign, the clue is the first sign not ticked")
+    check(Symptom.ordered(["rash", "fever", "unknown"]).map { $0.id } == ["fever", "rash"], "stored signs keep the picker's order")
+
+    let weeks = StatsEngine.sickWeeks(data: makeData(logs: [makeLog("rhino", from: day(8), to: day(10))]),
+                                      season: Season(number: 1, start: day(0), end: day(365)), now: day(20))
+    check(weeks == [false, true, false], "a germ marks the week it was going on")
+
+    let withSigns = """
+    {"logs":[{"id":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A11","germID":"mystery","startedAt":0,"symptoms":["fever"]}],"hostLook":3}
+    """
+    let decoded = try? JSONDecoder().decode(AppData.self, from: Data(withSigns.utf8))
+    check(decoded?.logs.first?.symptoms == ["fever"] && decoded?.hostLook == 3 && decoded?.partnerLook == Looks.partner,
+          "symptoms and looks load, with defaults for what is missing")
+}
+
 if failures == 0 {
     print("logic tests: all checks passed")
 } else {

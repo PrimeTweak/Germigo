@@ -153,8 +153,10 @@ struct QuizScreen: View {
     private func mythCard(_ question: QuizQuestion) -> some View {
         let caught = model.count(of: question.germ.id) > 0
         return VStack(spacing: 18) {
-            GermImage(germ: question.germ, size: 110, silhouette: !caught)
-                .foregroundStyle(question.germ.deepTint)
+            LivelyCharacter(mood: .stalking) {
+                GermImage(germ: question.germ, size: 110, silhouette: !caught)
+                    .foregroundStyle(question.germ.deepTint)
+            }
             Text(question.prompt)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(palette.ink)

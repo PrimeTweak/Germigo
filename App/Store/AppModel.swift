@@ -257,6 +257,23 @@ final class AppModel {
         commit()
     }
 
+    func setHostLook(_ look: Int) {
+        data.hostLook = look
+        commit()
+    }
+
+    func setPartnerLook(_ look: Int) {
+        data.partnerLook = look
+        commit()
+    }
+
+    /// The first look no kid has yet, so a new kid does not start as a twin.
+    var nextKidLook: Int {
+        let taken = Set(data.kids.map { abs($0.colorIndex) % Looks.count })
+        return (0..<Looks.count).first { !taken.contains($0) && $0 != data.hostLook && $0 != data.partnerLook }
+            ?? data.kids.count % Looks.count
+    }
+
     func saveKid(_ kid: Kid) {
         var kid = kid
         kid.name = clean(kid.name)
@@ -270,7 +287,7 @@ final class AppModel {
 
     func removeKid(_ id: UUID) {
         for illness in data.kidIllnesses where illness.kidID == id {
-            stopWatching(illness)
+            retire(illness)
         }
         data.kids.removeAll { $0.id == id }
         data.kidIllnesses.removeAll { $0.kidID == id }
@@ -366,16 +383,17 @@ final class AppModel {
         let iconsBefore = AppIconOption.allCases.filter { isIconUnlocked($0) }
 
         let bonuses = RewardEngine.bonuses(for: draft, germ: germ)
-        let entry = SickLog(germID: germ.id, source: draft.source, severity: draft.severity,
+        var entry = SickLog(germID: germ.id, source: draft.source, severity: draft.severity,
                             startedAt: draft.startedAt, endedAt: nil,
                             points: bonuses.reduce(0) { $0 + $1.points }, bonuses: bonuses,
                             sufferer: draft.sufferer, kidIllnessID: draft.kidIllnessID)
+        entry.symptoms = draft.symptoms
         data.logs = JournalRules.normalized(data.logs + [entry])
         let log = data.logs.first { $0.id == entry.id } ?? entry
 
         if let illnessID = draft.kidIllnessID,
            let index = data.kidIllnesses.firstIndex(where: { $0.id == illnessID }) {
-            stopWatching(data.kidIllnesses[index])
+            retire(data.kidIllnesses[index])
             data.kidIllnesses[index].outcome = .caught
             data.kidIllnesses[index].watching = false
         }
@@ -383,6 +401,7 @@ final class AppModel {
         let newBadges = awardBadges(now: now)
         commit()
         syncSickCheckIn()
+        syncSymptomCheck(for: log)
 
         let iconsAfter = AppIconOption.allCases.filter { isIconUnlocked($0) }
         return RewardResult(log: log, germ: germ, isNewCard: isNewCard, previousStreak: previousStreak,
@@ -402,6 +421,7 @@ final class AppModel {
         _ = awardBadges(now: now)
         commit()
         syncSickCheckIn()
+        NotificationManager.cancelSymptomCheck(id: active.id)
         if recovered, let germ = catalog.germ(active.germID) {
             pendingVictory = Victory(log: data.logs[index], germ: germ, points: RewardEngine.recoveryPoints)
         }
@@ -434,6 +454,21 @@ final class AppModel {
         _ = awardBadges(now: now)
         commit()
         syncSickCheckIn()
+        if let stored = data.logs.first(where: { $0.id == log.id }) {
+            syncSymptomCheck(for: stored)
+        }
+    }
+
+    /// Changes what a logged germ was once the symptoms say more. Its points follow the new germ's rarity.
+    func reassignLog(_ id: UUID, germID: String, symptoms: [String], now: Date = Date()) {
+        guard var log = data.logs.first(where: { $0.id == id }), let germ = catalog.germ(germID) else { return }
+        if log.germID != germID, let rarity = log.bonuses.firstIndex(where: { $0.kind == .rarity }) {
+            log.points += germ.rarity.basePoints - log.bonuses[rarity].points
+            log.bonuses[rarity].points = germ.rarity.basePoints
+        }
+        log.germID = germID
+        log.symptoms = symptoms
+        updateLog(log, now: now)
     }
 
     func deleteLog(_ id: UUID) {
@@ -441,16 +476,34 @@ final class AppModel {
         reconcileUnlocks()
         commit()
         syncSickCheckIn()
+        NotificationManager.cancelSymptomCheck(id: id)
     }
 
     // MARK: - Kid illnesses and exposures
 
     @discardableResult
-    func addKidIllness(kidID: UUID, germID: String, startedAt: Date) -> KidIllness {
-        let illness = KidIllness(kidID: kidID, germID: germID, startedAt: startedAt, watching: false, outcome: .open)
+    func addKidIllness(kidID: UUID, germID: String, startedAt: Date, symptoms: [String] = []) -> KidIllness {
+        var illness = KidIllness(kidID: kidID, germID: germID, startedAt: startedAt, watching: false, outcome: .open)
+        illness.symptoms = symptoms
         data.kidIllnesses.append(illness)
         commit()
+        syncSymptomCheck(for: illness)
         return illness
+    }
+
+    /// Changes what a kid has once the symptoms say more; the countdown follows the new germ.
+    func reassignKidIllness(_ id: UUID, germID: String, symptoms: [String]) {
+        guard let index = data.kidIllnesses.firstIndex(where: { $0.id == id }),
+              let germ = catalog.germ(germID) else { return }
+        let keepWatching = data.kidIllnesses[index].watching && germ.incubationMinHours != nil
+        stopWatching(data.kidIllnesses[index])
+        data.kidIllnesses[index].germID = germID
+        data.kidIllnesses[index].symptoms = symptoms
+        data.kidIllnesses[index].watching = false
+        let illness = data.kidIllnesses[index]
+        commit()
+        syncSymptomCheck(for: illness)
+        if keepWatching { setWatching(id, watching: true) }
     }
 
     func setWatching(_ id: UUID, watching: Bool) {
@@ -470,7 +523,7 @@ final class AppModel {
 
     func resolveExposure(_ id: UUID, outcome: ExposureOutcome, now: Date = Date()) {
         guard let index = data.kidIllnesses.firstIndex(where: { $0.id == id }) else { return }
-        stopWatching(data.kidIllnesses[index])
+        retire(data.kidIllnesses[index])
         data.kidIllnesses[index].outcome = outcome
         data.kidIllnesses[index].watching = false
         _ = awardBadges(now: now)
@@ -481,7 +534,7 @@ final class AppModel {
     }
 
     func deleteKidIllness(_ id: UUID) {
-        if let illness = data.kidIllnesses.first(where: { $0.id == id }) { stopWatching(illness) }
+        if let illness = data.kidIllnesses.first(where: { $0.id == id }) { retire(illness) }
         data.kidIllnesses.removeAll { $0.id == id }
         reconcileUnlocks()
         commit()
@@ -490,6 +543,31 @@ final class AppModel {
     private func stopWatching(_ illness: KidIllness) {
         NotificationManager.cancelExposure(id: illness.id)
         LiveActivityManager.end(exposureID: illness.id)
+    }
+
+    /// Ends everything scheduled for an illness that is over or gone.
+    private func retire(_ illness: KidIllness) {
+        stopWatching(illness)
+        NotificationManager.cancelSymptomCheck(id: illness.id)
+    }
+
+    /// A mystery germ gets one question two days in: any new symptoms?
+    private func syncSymptomCheck(for illness: KidIllness) {
+        if illness.outcome == .open, illness.germID == GermCatalog.mysteryID {
+            NotificationManager.scheduleSymptomCheck(id: illness.id, name: kid(illness.kidID)?.name,
+                                                     startedAt: illness.startedAt, settings: data.settings)
+        } else {
+            NotificationManager.cancelSymptomCheck(id: illness.id)
+        }
+    }
+
+    private func syncSymptomCheck(for log: SickLog) {
+        if log.isActive, log.germID == GermCatalog.mysteryID {
+            NotificationManager.scheduleSymptomCheck(id: log.id, name: nil, startedAt: log.startedAt,
+                                                     settings: data.settings)
+        } else {
+            NotificationManager.cancelSymptomCheck(id: log.id)
+        }
     }
 
     // MARK: - Lifecycle
@@ -504,7 +582,7 @@ final class AppModel {
             let deadline = germ.window(from: illness.startedAt)?.closes.addingTimeInterval(24 * 3600)
                 ?? illness.startedAt.addingTimeInterval(Self.openExposureLifetime)
             if now > deadline {
-                stopWatching(illness)
+                retire(illness)
                 data.kidIllnesses[index].outcome = .expired
                 data.kidIllnesses[index].watching = false
                 changed = true
@@ -536,7 +614,8 @@ final class AppModel {
 
     /// Replaces the journal with a backup, keeping the parent past onboarding.
     func restore(_ backup: AppData, now: Date = Date()) {
-        for illness in data.kidIllnesses { stopWatching(illness) }
+        for illness in data.kidIllnesses { retire(illness) }
+        for log in data.logs { NotificationManager.cancelSymptomCheck(id: log.id) }
         var restored = backup
         restored.onboardingDone = true
         data = restored
@@ -578,7 +657,8 @@ final class AppModel {
     }
 
     func eraseEverything() {
-        for illness in data.kidIllnesses { stopWatching(illness) }
+        for illness in data.kidIllnesses { retire(illness) }
+        for log in data.logs { NotificationManager.cancelSymptomCheck(id: log.id) }
         NotificationManager.cancelSickCheckIn()
         NotificationManager.cancelStreakReminders()
         Persistence.erase()
@@ -637,6 +717,8 @@ final class AppModel {
             guard let germ = catalog.germ(illness.germID) else { continue }
             NotificationManager.scheduleExposure(illness: illness, germ: germ, settings: data.settings)
         }
+        for illness in data.kidIllnesses { syncSymptomCheck(for: illness) }
+        if let log = activeLog { syncSymptomCheck(for: log) }
         syncSickCheckIn()
     }
 

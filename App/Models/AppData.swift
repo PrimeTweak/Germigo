@@ -1,8 +1,16 @@
 import Foundation
 
+/// The eight household characters, by index. Kids take the first ones in the order they are added.
+enum Looks {
+    static let count = 8
+    static let host = 6
+    static let partner = 7
+}
+
 struct Kid: Codable, Identifiable, Hashable {
     var id = UUID()
     var name: String
+    /// The kid's character, one of the household looks.
     var colorIndex: Int
 
     enum CodingKeys: String, CodingKey {
@@ -51,9 +59,11 @@ struct SickLog: Codable, Identifiable, Hashable {
     var bonuses: [LogBonus]
     var sufferer: Sufferer
     var kidIllnessID: UUID?
+    /// The signs ticked when the germ was picked from its symptoms.
+    var symptoms: [String] = []
 
     enum CodingKeys: String, CodingKey {
-        case id, germID, source, severity, startedAt, endedAt, points, bonuses, sufferer, kidIllnessID
+        case id, germID, source, severity, startedAt, endedAt, points, bonuses, sufferer, kidIllnessID, symptoms
     }
 
     var isActive: Bool { endedAt == nil }
@@ -86,9 +96,11 @@ struct KidIllness: Codable, Identifiable, Hashable {
     var outcome: ExposureOutcome
     /// Set when the parent dismissed the Live Activity, so it is not started again.
     var liveDismissed = false
+    /// The signs ticked when the germ was picked from its symptoms.
+    var symptoms: [String] = []
 
     enum CodingKeys: String, CodingKey {
-        case id, kidID, germID, startedAt, watching, outcome, liveDismissed
+        case id, kidID, germID, startedAt, watching, outcome, liveDismissed, symptoms
     }
 }
 
@@ -164,10 +176,13 @@ struct AppData: Codable {
     var quiz = QuizProgress()
     /// The Wrapped nemesis guess, by season number: true when it was right.
     var wrapGuesses: [String: Bool] = [:]
+    /// The parent's and the partner's characters.
+    var hostLook = Looks.host
+    var partnerLook = Looks.partner
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
-        case celebratedMilestone, quiz, wrapGuesses
+        case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook
     }
 }
 
@@ -213,6 +228,7 @@ extension SickLog {
             sufferer = legacy.value(.partnerSickToo, default: false) ? .both : .me
         }
         kidIllnessID = try? container.decodeIfPresent(UUID.self, forKey: .kidIllnessID)
+        symptoms = container.value(.symptoms, default: [String]())
     }
 }
 
@@ -226,6 +242,7 @@ extension KidIllness {
         watching = container.value(.watching, default: false)
         outcome = try container.decodeIfPresent(ExposureOutcome.self, forKey: .outcome) ?? .open
         liveDismissed = container.value(.liveDismissed, default: false)
+        symptoms = container.value(.symptoms, default: [String]())
     }
 }
 
@@ -271,6 +288,8 @@ extension AppData {
         celebratedMilestone = try? container.decodeIfPresent(MilestoneMark.self, forKey: .celebratedMilestone)
         quiz = container.value(.quiz, default: QuizProgress())
         wrapGuesses = container.value(.wrapGuesses, default: [String: Bool]())
+        hostLook = container.value(.hostLook, default: Looks.host)
+        partnerLook = container.value(.partnerLook, default: Looks.partner)
     }
 }
 
@@ -282,10 +301,13 @@ struct LogDraft {
     var startedAt: Date
     var sufferer: Sufferer
     var kidIllnessID: UUID?
+    var symptoms: [String] = []
 }
 
-/// A request to open the log sheet, optionally prefilled from a kid's illness.
+/// A request to open the log sheet, optionally prefilled from a kid's illness or from the symptom pages.
 struct LogRequest: Identifiable {
     let id = UUID()
     var kidIllnessID: UUID?
+    var germID: String?
+    var symptoms: [String] = []
 }

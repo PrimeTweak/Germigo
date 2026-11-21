@@ -177,21 +177,30 @@
         "text": {
           "en": "Runny or stuffy nose",
           "fr": "Nez qui coule ou bouché"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "allergens",
@@ -205,14 +214,21 @@
         "text": {
           "en": "Headache or mild aches",
           "fr": "Mal de tête ou courbatures"
-        }
+        },
+        "tags": [
+          "headache",
+          "aches"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Low fever",
           "fr": "Petite fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       }
     ],
     "symptomsNote": {
@@ -746,35 +762,50 @@
         "text": {
           "en": "Cough, with or without mucus",
           "fr": "Toux, avec ou sans mucus"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "moon.zzz.fill",
         "text": {
           "en": "Tiredness",
           "fr": "Fatigue"
-        }
+        },
+        "tags": [
+          "tired"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Congestion",
           "fr": "Congestion"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "bandage.fill",
         "text": {
           "en": "Mild body aches",
           "fr": "Courbatures légères"
-        }
+        },
+        "tags": [
+          "aches"
+        ]
       }
     ],
     "symptomsNote": {
@@ -948,14 +979,20 @@
           "en": "Hoarse voice, or none at all",
           "fr": "Voix rauque, ou plus de voix"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "hoarse"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Irritating cough",
           "fr": "Toux irritante"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "speaker.wave.2.fill",
@@ -969,7 +1006,10 @@
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       }
     ],
     "spreads": []
@@ -1141,7 +1181,10 @@
         "text": {
           "en": "Runny or stuffy nose",
           "fr": "Nez qui coule ou bouché"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "face.dashed",
@@ -1155,7 +1198,10 @@
         "text": {
           "en": "Headache",
           "fr": "Mal de tête"
-        }
+        },
+        "tags": [
+          "headache"
+        ]
       },
       {
         "icon": "drop.fill",
@@ -1169,14 +1215,20 @@
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "mouth.fill",
@@ -1367,14 +1419,20 @@
         "text": {
           "en": "Diarrhea",
           "fr": "Diarrhée"
-        }
+        },
+        "tags": [
+          "diarrhea"
+        ]
       },
       {
         "icon": "arrow.uturn.up.circle.fill",
         "text": {
           "en": "Vomiting",
           "fr": "Vomissements"
-        }
+        },
+        "tags": [
+          "vomiting"
+        ]
       },
       {
         "icon": "tornado",
@@ -1388,28 +1446,40 @@
         "text": {
           "en": "Stomach pain",
           "fr": "Maux de ventre"
-        }
+        },
+        "tags": [
+          "stomach_pain"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "brain.head.profile",
         "text": {
           "en": "Headache",
           "fr": "Mal de tête"
-        }
+        },
+        "tags": [
+          "headache"
+        ]
       },
       {
         "icon": "bandage.fill",
         "text": {
           "en": "Body aches",
           "fr": "Courbatures"
-        }
+        },
+        "tags": [
+          "aches"
+        ]
       }
     ],
     "symptomsNote": {
@@ -1620,7 +1690,10 @@
         "text": {
           "en": "Pink or red eye",
           "fr": "Œil rose ou rouge"
-        }
+        },
+        "tags": [
+          "red_eye"
+        ]
       },
       {
         "icon": "drop.fill",
@@ -1860,28 +1933,40 @@
         "text": {
           "en": "Fever or chills",
           "fr": "Fièvre ou frissons"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Congestion or runny nose",
           "fr": "Nez bouché ou qui coule"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "fork.knife",
@@ -1896,14 +1981,20 @@
         "text": {
           "en": "Fatigue",
           "fr": "Fatigue"
-        }
+        },
+        "tags": [
+          "tired"
+        ]
       },
       {
         "icon": "bandage.fill",
         "text": {
           "en": "Muscle or body aches",
           "fr": "Douleurs musculaires"
-        }
+        },
+        "tags": [
+          "aches"
+        ]
       },
       {
         "icon": "lungs.fill",
@@ -2116,14 +2207,20 @@
         "text": {
           "en": "Runny or stuffy nose",
           "fr": "Nez qui coule ou bouché"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "allergens",
@@ -2137,7 +2234,10 @@
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "waveform",
@@ -2360,21 +2460,30 @@
         "text": {
           "en": "Sudden sore throat",
           "fr": "Mal de gorge soudain"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "mouth.fill",
         "text": {
           "en": "Pain when swallowing",
           "fr": "Douleur en avalant"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "circle.hexagongrid.fill",
@@ -2606,49 +2715,70 @@
         "text": {
           "en": "Fever or chills",
           "fr": "Fièvre ou frissons"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Runny or stuffy nose",
           "fr": "Nez qui coule ou bouché"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "bandage.fill",
         "text": {
           "en": "Muscle or body aches",
           "fr": "Douleurs musculaires"
-        }
+        },
+        "tags": [
+          "aches"
+        ]
       },
       {
         "icon": "brain.head.profile",
         "text": {
           "en": "Headache",
           "fr": "Mal de tête"
-        }
+        },
+        "tags": [
+          "headache"
+        ]
       },
       {
         "icon": "moon.zzz.fill",
         "text": {
           "en": "Fatigue",
           "fr": "Fatigue"
-        }
+        },
+        "tags": [
+          "tired"
+        ]
       }
     ],
     "symptomsNote": {
@@ -2847,35 +2977,52 @@
         "text": {
           "en": "Cold or flu symptoms",
           "fr": "Symptômes de rhume ou de grippe"
-        }
+        },
+        "tags": [
+          "runny_nose",
+          "cough"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "eye.fill",
         "text": {
           "en": "Pink eye",
           "fr": "Conjonctivite"
-        }
+        },
+        "tags": [
+          "red_eye"
+        ]
       },
       {
         "icon": "toilet.fill",
         "text": {
           "en": "Diarrhea, vomiting or nausea",
           "fr": "Diarrhée, vomissements ou nausées"
-        }
+        },
+        "tags": [
+          "diarrhea",
+          "vomiting"
+        ]
       }
     ],
     "spreads": [
@@ -3094,21 +3241,30 @@
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Stuffy nose",
           "fr": "Nez bouché"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "lungs.fill",
@@ -3316,21 +3472,30 @@
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Runny nose",
           "fr": "Nez qui coule"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Cough",
           "fr": "Toux"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "allergens",
@@ -3344,14 +3509,20 @@
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "ear.fill",
         "text": {
           "en": "Ear pain",
           "fr": "Mal d'oreille"
-        }
+        },
+        "tags": [
+          "ear_pain"
+        ]
       }
     ],
     "spreads": [
@@ -3549,28 +3720,40 @@
         "text": {
           "en": "Severe watery diarrhea",
           "fr": "Diarrhée liquide importante"
-        }
+        },
+        "tags": [
+          "diarrhea"
+        ]
       },
       {
         "icon": "arrow.uturn.up.circle.fill",
         "text": {
           "en": "Vomiting",
           "fr": "Vomissements"
-        }
+        },
+        "tags": [
+          "vomiting"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "bolt.fill",
         "text": {
           "en": "Stomach pain",
           "fr": "Maux de ventre"
-        }
+        },
+        "tags": [
+          "stomach_pain"
+        ]
       },
       {
         "icon": "fork.knife",
@@ -3781,14 +3964,20 @@
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "moon.zzz.fill",
@@ -3802,7 +3991,10 @@
         "text": {
           "en": "Painful mouth sores",
           "fr": "Plaies douloureuses dans la bouche"
-        }
+        },
+        "tags": [
+          "rash"
+        ]
       },
       {
         "icon": "circle.hexagongrid.fill",
@@ -3810,7 +4002,10 @@
           "en": "Rash on the palms and soles",
           "fr": "Éruption aux paumes et sous les pieds"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "rash"
+        ]
       },
       {
         "icon": "fork.knife",
@@ -4030,42 +4225,61 @@
         "text": {
           "en": "Fever",
           "fr": "Fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "brain.head.profile",
         "text": {
           "en": "Headache",
           "fr": "Mal de tête"
-        }
+        },
+        "tags": [
+          "headache"
+        ]
       },
       {
         "icon": "nose.fill",
         "text": {
           "en": "Runny nose",
           "fr": "Nez qui coule"
-        }
+        },
+        "tags": [
+          "runny_nose"
+        ]
       },
       {
         "icon": "flame.fill",
         "text": {
           "en": "Sore throat",
           "fr": "Mal de gorge"
-        }
+        },
+        "tags": [
+          "sore_throat"
+        ]
       },
       {
         "icon": "circle.hexagongrid.fill",
         "text": {
           "en": "Itchy rash on the body",
           "fr": "Éruption qui pique sur le corps"
-        }
+        },
+        "tags": [
+          "rash",
+          "itching"
+        ]
       },
       {
         "icon": "figure.walk",
         "text": {
           "en": "Joint pain, mostly in adults",
           "fr": "Douleurs articulaires, surtout adultes"
-        }
+        },
+        "tags": [
+          "aches"
+        ]
       }
     ],
     "symptomsNote": {
@@ -4264,7 +4478,10 @@
         "text": {
           "en": "Itching",
           "fr": "Démangeaisons"
-        }
+        },
+        "tags": [
+          "itching"
+        ]
       },
       {
         "icon": "ant.fill",
@@ -4286,7 +4503,10 @@
         "text": {
           "en": "Sores from scratching",
           "fr": "Plaies de grattage"
-        }
+        },
+        "tags": [
+          "rash"
+        ]
       }
     ],
     "symptomsNote": {
@@ -4481,7 +4701,10 @@
           "en": "Itchy bottom, mostly at night",
           "fr": "Fesses qui piquent, surtout la nuit"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "itching"
+        ]
       },
       {
         "icon": "moon.zzz.fill",
@@ -4495,7 +4718,10 @@
         "text": {
           "en": "Stomach pain, sometimes",
           "fr": "Maux de ventre, parfois"
-        }
+        },
+        "tags": [
+          "stomach_pain"
+        ]
       }
     ],
     "symptomsNote": {
@@ -4692,14 +4918,21 @@
         "text": {
           "en": "Red, itchy sores",
           "fr": "Plaies rouges qui piquent"
-        }
+        },
+        "tags": [
+          "rash",
+          "itching"
+        ]
       },
       {
         "icon": "drop.fill",
         "text": {
           "en": "Sores that break open and ooze",
           "fr": "Plaies qui s'ouvrent et suintent"
-        }
+        },
+        "tags": [
+          "rash"
+        ]
       },
       {
         "icon": "bandage.fill",
@@ -4707,7 +4940,10 @@
           "en": "Honey-colored crusts",
           "fr": "Croûtes couleur miel"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "rash"
+        ]
       },
       {
         "icon": "person.fill",
@@ -4920,7 +5156,11 @@
           "en": "Red, itchy, ring-shaped rash",
           "fr": "Éruption rouge en anneau qui pique"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "rash",
+          "itching"
+        ]
       },
       {
         "icon": "comb.fill",
@@ -4934,7 +5174,10 @@
         "text": {
           "en": "Peeling, itchy skin between the toes",
           "fr": "Peau qui pèle et pique entre les orteils"
-        }
+        },
+        "tags": [
+          "itching"
+        ]
       },
       {
         "icon": "hand.raised.fill",
@@ -5162,21 +5405,31 @@
         "text": {
           "en": "First: runny nose, mild cough",
           "fr": "D'abord : nez qui coule, petite toux"
-        }
+        },
+        "tags": [
+          "runny_nose",
+          "cough"
+        ]
       },
       {
         "icon": "thermometer.medium",
         "text": {
           "en": "Low fever",
           "fr": "Petite fièvre"
-        }
+        },
+        "tags": [
+          "fever"
+        ]
       },
       {
         "icon": "wind",
         "text": {
           "en": "Then: violent coughing fits",
           "fr": "Puis : quintes de toux violentes"
-        }
+        },
+        "tags": [
+          "cough"
+        ]
       },
       {
         "icon": "speaker.wave.2.fill",
@@ -5191,14 +5444,20 @@
         "text": {
           "en": "Vomiting after a fit",
           "fr": "Vomir après une quinte"
-        }
+        },
+        "tags": [
+          "vomiting"
+        ]
       },
       {
         "icon": "bed.double.fill",
         "text": {
           "en": "Exhaustion after a fit",
           "fr": "Épuisement après une quinte"
-        }
+        },
+        "tags": [
+          "tired"
+        ]
       }
     ],
     "symptomsNote": {
@@ -5398,7 +5657,11 @@
           "en": "Itchy, fluid-filled blisters",
           "fr": "Cloques remplies de liquide qui piquent"
         },
-        "telltale": true
+        "telltale": true,
+        "tags": [
+          "rash",
+          "itching"
+        ]
       },
       {
         "icon": "person.fill",
@@ -5412,7 +5675,10 @@
         "text": {
           "en": "Blisters turn into scabs",
           "fr": "Les cloques deviennent des croûtes"
-        }
+        },
+        "tags": [
+          "rash"
+        ]
       }
     ],
     "symptomsNote": {

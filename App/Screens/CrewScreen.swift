@@ -21,7 +21,7 @@ struct CrewScreen: View {
             Group {
                 if !model.hasPass {
                     CrewTeaser(showPaywall: $showPaywall)
-                } else if !crew.isConfigured {
+                } else if !crew.isConfigured, !crew.isDemo {
                     notice(symbol: "wifi.slash", title: tr("Crew is offline"),
                            detail: tr("The crew server isn't set up for this build yet."))
                 } else if crew.isMember, let state = crew.state {
@@ -413,6 +413,9 @@ private struct CrewHome: View {
 
     private var footnote: String {
         var text = tr("Report or block anyone from the menu next to their name. Reports are reviewed within 24 hours.")
+        if crew.isDemo {
+            text = tr("A sample crew for this test build. Nothing leaves this phone.") + " " + text
+        }
         if let email = AppConfig.supportEmail {
             text += " " + tr("Contact: %@", email)
         }

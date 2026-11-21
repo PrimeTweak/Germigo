@@ -43,6 +43,17 @@ struct SeasonStats {
 
 /// Aggregates the season's logs for the Season tab and the recap card.
 enum StatsEngine {
+    /// One flag per week of the season so far: true when a germ was going on during it.
+    static func sickWeeks(data: AppData, season: Season, now: Date) -> [Bool] {
+        let calendar = Calendar.current
+        let count = min(53, season.week(for: now))
+        return (0..<count).map { index in
+            guard let start = calendar.date(byAdding: .day, value: index * 7, to: season.start),
+                  let end = calendar.date(byAdding: .day, value: 7, to: start) else { return false }
+            return data.logs.contains { $0.startedAt < end && ($0.endedAt ?? now) >= start }
+        }
+    }
+
     static func stats(data: AppData, catalog: GermCatalog, season: Season, now: Date) -> SeasonStats {
         let calendar = Calendar.current
         let logs = data.logs.filter { season.contains($0.startedAt) }.sorted { $0.startedAt < $1.startedAt }

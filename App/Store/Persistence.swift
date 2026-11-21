@@ -88,6 +88,8 @@ enum Persistence {
 struct GermCatalog {
     /// The germ that the Tissue Box icon counts.
     static let commonColdID = "rhino"
+    /// The germ logged when nobody knows what it is yet.
+    static let mysteryID = "mystery"
 
     let germs: [Germ]
     let articles: [Article]

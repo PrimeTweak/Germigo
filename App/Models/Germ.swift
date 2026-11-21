@@ -125,6 +125,8 @@ struct GermSymptom: Codable, Hashable {
     let text: LocalizedText
     /// True for the one sign that names the germ on its own.
     var telltale: Bool?
+    /// The signs of the symptom picker this line covers.
+    var tags: [String]?
 }
 
 /// One way a germ travels, with an optional precision.

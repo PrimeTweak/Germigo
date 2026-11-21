@@ -137,9 +137,9 @@ struct SeasonScreen: View {
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
                         duelSide(name: model.displayName, side: duel.me, leads: duel.leader == .me,
-                                 gradient: AvatarColors.host)
+                                 look: model.data.hostLook)
                         duelSide(name: model.partnerDisplayName, side: duel.partner, leads: duel.leader == .partner,
-                                 gradient: AvatarColors.gradient(1))
+                                 look: model.data.partnerLook)
                     }
                     Button {
                         showDuel = true
@@ -168,10 +168,10 @@ struct SeasonScreen: View {
         return tr("Tied")
     }
 
-    private func duelSide(name: String, side: DuelSide, leads: Bool, gradient: LinearGradient) -> some View {
+    private func duelSide(name: String, side: DuelSide, leads: Bool, look: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                AvatarView(name: name, gradient: gradient, size: 32)
+                BuddyBadge(look: look, size: 32)
                 Text(name)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(palette.ink)
@@ -243,7 +243,7 @@ struct SeasonScreen: View {
     private func supplierCard(_ supplier: SupplierStat) -> some View {
         HStack(spacing: 13) {
             ZStack(alignment: .bottomTrailing) {
-                AvatarView(name: supplier.kid.name, gradient: AvatarColors.gradient(supplier.kid.colorIndex), size: 52)
+                BuddyBadge(look: supplier.kid.colorIndex, size: 52)
                 Image(systemName: "trophy.fill")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(palette.onAccent)
@@ -326,14 +326,14 @@ struct SeasonScreen: View {
             SectionHeader(title: tr("Longest chain"),
                           trailing: trCount(chain.days, one: "%lld day", other: "%lld days"))
             HStack(spacing: 10) {
-                chainLink(name: chain.kid.name, gradient: AvatarColors.gradient(chain.kid.colorIndex), germ: chain.germ)
+                chainLink(name: chain.kid.name, look: chain.kid.colorIndex, germ: chain.germ)
                 if chain.sufferer.includesMe {
                     arrow
-                    chainLink(name: model.displayName, gradient: AvatarColors.host, germ: chain.germ)
+                    chainLink(name: model.displayName, look: model.data.hostLook, germ: chain.germ)
                 }
                 if chain.includesPartner {
                     arrow
-                    chainLink(name: model.data.partnerName ?? tr("Partner"), gradient: AvatarColors.gradient(4),
+                    chainLink(name: model.data.partnerName ?? tr("Partner"), look: model.data.partnerLook,
                               germ: chain.germ)
                 }
                 Spacer(minLength: 0)
@@ -349,10 +349,10 @@ struct SeasonScreen: View {
             .accessibilityHidden(true)
     }
 
-    private func chainLink(name: String, gradient: LinearGradient, germ: Germ) -> some View {
+    private func chainLink(name: String, look: Int, germ: Germ) -> some View {
         VStack(spacing: 5) {
             ZStack(alignment: .bottomTrailing) {
-                AvatarView(name: name, gradient: gradient, size: 46)
+                BuddyBadge(look: look, sick: true, size: 46)
                 GermImage(germ: germ, size: 24)
                     .offset(x: 8, y: 6)
             }

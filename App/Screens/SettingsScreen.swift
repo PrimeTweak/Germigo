@@ -24,18 +24,59 @@ struct RowChevron: View {
     }
 }
 
-/// The last tab: family, pass, look, notifications and the rest.
+/// The first row of Settings: the household's characters, and the way to the family page.
+private struct FamilyTile: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    private var title: String {
+        let names = model.data.kids.map { $0.name }
+        switch names.count {
+        case 0: return model.displayName
+        case 1: return names[0]
+        case 2: return names[0] + " & " + names[1]
+        default: return tr("%1$@ and %2$lld more", names[0], names.count - 1)
+        }
+    }
+
+    var body: some View {
+        let kids = model.data.kids
+        HStack(spacing: 14) {
+            ZStack(alignment: .bottomTrailing) {
+                BuddyBadge(look: kids.first?.colorIndex ?? model.data.hostLook, size: 62)
+                if !kids.isEmpty {
+                    BuddyBadge(look: model.data.hostLook, size: 30)
+                        .background(palette.surface, in: Circle())
+                        .overlay {
+                            Circle().strokeBorder(palette.surface, lineWidth: 3)
+                        }
+                        .offset(x: 10, y: 4)
+                }
+            }
+            .padding(.trailing, 6)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                    .lineLimit(1)
+                Text(tr("Family and partner"))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// The last tab: the family tile, then pass, look, notifications and the rest.
 struct SettingsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(PurchaseManager.self) private var purchases
-    @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
     @Environment(\.scenePhase) private var scenePhase
     @State private var showPaywall = false
     @State private var showManage = false
-    @State private var editingName = false
-    @State private var editingPartner = false
-    @State private var nameDraft = ""
     @State private var notificationsDenied = false
     @State private var restoreMessage: String?
     @State private var isRestoring = false
@@ -60,22 +101,6 @@ struct SettingsScreen: View {
                 PaywallView()
             }
             .manageSubscriptionsSheet(isPresented: $showManage)
-            .alert(tr("Your name"), isPresented: $editingName) {
-                TextField(tr("Name"), text: $nameDraft)
-                Button(tr("Save")) {
-                    model.setProfileName(nameDraft)
-                }
-                Button(tr("Cancel"), role: .cancel) {}
-            }
-            .alert(tr("Partner"), isPresented: $editingPartner) {
-                TextField(tr("Name"), text: $nameDraft)
-                Button(tr("Save")) {
-                    model.setPartnerName(nameDraft)
-                }
-                Button(tr("Cancel"), role: .cancel) {}
-            } message: {
-                Text(tr("Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove."))
-            }
             .alert(tr("Restore Purchases"), isPresented: restoreBinding) {
                 Button(tr("OK"), role: .cancel) {}
             } message: {
@@ -148,47 +173,11 @@ struct SettingsScreen: View {
     }
 
     private var familySection: some View {
-        Section(tr("Family")) {
-            Button {
-                nameDraft = model.data.profileName
-                editingName = true
-            } label: {
-                LabeledContent {
-                    valueWithChevron(model.displayName)
-                } label: {
-                    SettingsLabel(title: tr("You"))
-                }
-            }
-            .accessibilityHint(tr("Edit your name"))
+        Section {
             NavigationLink {
-                KidsScreen()
+                FamilyScreen()
             } label: {
-                LabeledContent {
-                    Text(model.data.kids.map { $0.name }.joined(separator: ", "))
-                } label: {
-                    SettingsLabel(title: tr("Kids"))
-                }
-            }
-            Button {
-                nameDraft = model.data.partnerName ?? ""
-                editingPartner = true
-            } label: {
-                LabeledContent {
-                    valueWithChevron(model.data.partnerName ?? tr("Add"))
-                } label: {
-                    SettingsLabel(title: tr("Partner"))
-                }
-            }
-            if AppConfig.crewEnabled {
-                Button {
-                    model.selectedTab = .crew
-                } label: {
-                    LabeledContent {
-                        valueWithChevron(crew.state?.crew.name ?? tr("None"))
-                    } label: {
-                        SettingsLabel(title: tr("Crew"))
-                    }
-                }
+                FamilyTile()
             }
         }
     }

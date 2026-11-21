@@ -79,9 +79,24 @@ final class CrewStore {
         sharesName = UserDefaults.standard.bool(forKey: Keys.sharesName)
         blockedIDs = Set(UserDefaults.standard.stringArray(forKey: Keys.blocked) ?? [])
         state = stored == nil ? nil : Self.cachedState()
+        #if PETRI_SIDELOAD
+        if AppConfig.serverURL == nil {
+            isMember = true
+            state = Self.demoState(crewName: "The Ladybugs", emblem: 0, displayName: "You")
+        }
+        #endif
     }
 
     var isConfigured: Bool { AppConfig.serverURL != nil }
+
+    /// True in a test build without a server: the crew is a sample that never leaves the phone.
+    var isDemo: Bool {
+        #if PETRI_SIDELOAD
+        return !isConfigured
+        #else
+        return false
+        #endif
+    }
 
     var isLoading: Bool { operations > 0 }
 
@@ -147,7 +162,14 @@ final class CrewStore {
     }
 
     func create(name: String, displayName: String, emblem: Int) async -> Bool {
-        await run {
+        #if PETRI_SIDELOAD
+        if isDemo {
+            isMember = true
+            state = Self.demoState(crewName: name, emblem: emblem, displayName: displayName)
+            return true
+        }
+        #endif
+        return await run {
             let session: CrewSession = try await self.client().send(
                 "POST", "v1/crews", CreateBody(name: name, displayName: displayName, emblem: emblem))
             self.adopt(session)
@@ -155,7 +177,14 @@ final class CrewStore {
     }
 
     func join(code: String, displayName: String) async -> Bool {
-        await run {
+        #if PETRI_SIDELOAD
+        if isDemo {
+            isMember = true
+            state = Self.demoState(crewName: "The Ladybugs", emblem: 0, displayName: displayName)
+            return true
+        }
+        #endif
+        return await run {
             let session: CrewSession = try await self.client().send(
                 "POST", "v1/crews/join", JoinBody(code: code.uppercased(), displayName: displayName))
             self.adopt(session)
@@ -175,6 +204,12 @@ final class CrewStore {
     /// Adds a logged germ to the radar, and to the feed when the name is shared.
     /// The share is queued first, so it survives a lost connection.
     func reportGerm(_ germID: String) async {
+        #if PETRI_SIDELOAD
+        if isDemo {
+            demoReport(germID)
+            return
+        }
+        #endif
         guard isMember, isConfigured else { return }
         let share = PendingShare(id: UUID().uuidString.lowercased(), germID: germID, named: sharesName, queuedAt: Date())
         pendingShares = Array((pendingShares + [share]).suffix(Self.pendingLimit))
@@ -206,6 +241,12 @@ final class CrewStore {
     }
 
     func react(to eventID: String, kind: String) async {
+        #if PETRI_SIDELOAD
+        if isDemo {
+            demoReact(to: eventID, kind: kind)
+            return
+        }
+        #endif
         _ = await run(quiet: true) {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/events/" + eventID + "/reactions", ReactionBody(kind: kind))
@@ -214,7 +255,13 @@ final class CrewStore {
     }
 
     func rename(_ displayName: String) async -> Bool {
-        await run {
+        #if PETRI_SIDELOAD
+        if isDemo {
+            demoRename(displayName)
+            return true
+        }
+        #endif
+        return await run {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/me", RenameBody(displayName: displayName))
             self.store(fresh)
@@ -222,7 +269,10 @@ final class CrewStore {
     }
 
     func report(memberID: String, reason: String) async -> Bool {
-        await run {
+        #if PETRI_SIDELOAD
+        if isDemo { return true }
+        #endif
+        return await run {
             let fresh: CrewState = try await self.client().send(
                 "POST", "v1/crew/reports", ReportBody(memberID: memberID, reason: reason))
             self.store(fresh)
@@ -247,6 +297,12 @@ final class CrewStore {
     /// Leaves the crew and deletes everything the server holds about this member.
     func leave() async -> Bool {
         guard isMember else { return true }
+        #if PETRI_SIDELOAD
+        if isDemo {
+            forget()
+            return true
+        }
+        #endif
         let done = await run {
             try await self.client().delete("v1/crew/me")
         }
@@ -295,3 +351,82 @@ final class CrewStore {
         rememberRadar(fresh.radar)
     }
 }
+
+#if PETRI_SIDELOAD
+/// The sample crew of a test build without a server: made-up families, kept in memory only.
+extension CrewStore {
+    static func demoState(crewName: String, emblem: Int, displayName: String) -> CrewState {
+        let me = CrewMember(id: "demo-me", name: displayName, germs: 2, colorIndex: 0)
+        let others = [
+            CrewMember(id: "demo-1", name: "Maude", germs: 5, colorIndex: 1),
+            CrewMember(id: "demo-2", name: "Karim", germs: 3, colorIndex: 2),
+            CrewMember(id: "demo-3", name: "Jo", germs: 1, colorIndex: 3),
+            CrewMember(id: "demo-4", name: "Elise", germs: 0, colorIndex: 4)
+        ]
+        let now = Date().timeIntervalSince1970 * 1000
+        let hour = 3_600_000.0
+        let feed = [
+            FeedEvent(id: "demo-event-1", memberID: "demo-1", name: "Maude", colorIndex: 1, germID: "noro",
+                      at: now - 3 * hour, reactions: ["soup": 2, "tissue": 1], mine: []),
+            FeedEvent(id: "demo-event-2", memberID: "demo-2", name: "Karim", colorIndex: 2, germID: "rhino",
+                      at: now - 26 * hour, reactions: ["tea": 1], mine: ["tea"]),
+            FeedEvent(id: "demo-event-3", memberID: "demo-3", name: "Jo", colorIndex: 3, germID: "coxy",
+                      at: now - 50 * hour, reactions: [:], mine: [])
+        ]
+        let radar = [RadarEntry(germID: "noro", families: 3), RadarEntry(germID: "rhino", families: 2)]
+        let info = CrewInfo(id: "demo", name: crewName, emblem: emblem, code: "TEST42", families: others.count + 1)
+        return CrewState(crew: info, me: me, members: [me] + others, radar: radar, feed: feed)
+    }
+
+    private func demoUpdate(me: CrewMember? = nil, radar: [RadarEntry]? = nil, feed: [FeedEvent]? = nil) {
+        guard let current = state else { return }
+        let member = me ?? current.me
+        state = CrewState(crew: current.crew, me: member,
+                          members: current.members.map { $0.id == member.id ? member : $0 },
+                          radar: radar ?? current.radar, feed: feed ?? current.feed)
+    }
+
+    private func demoReport(_ germID: String) {
+        guard let current = state else { return }
+        let me = CrewMember(id: current.me.id, name: current.me.name, germs: current.me.germs + 1,
+                            colorIndex: current.me.colorIndex)
+        var radar = current.radar
+        if let index = radar.firstIndex(where: { $0.germID == germID }) {
+            radar[index] = RadarEntry(germID: germID, families: radar[index].families + 1)
+        } else {
+            radar.append(RadarEntry(germID: germID, families: 2))
+        }
+        var feed = current.feed
+        if sharesName {
+            feed.insert(FeedEvent(id: UUID().uuidString, memberID: me.id, name: me.name, colorIndex: me.colorIndex,
+                                  germID: germID, at: Date().timeIntervalSince1970 * 1000, reactions: [:], mine: []), at: 0)
+        }
+        demoUpdate(me: me, radar: radar, feed: feed)
+    }
+
+    private func demoReact(to eventID: String, kind: String) {
+        guard let current = state else { return }
+        let feed = current.feed.map { event -> FeedEvent in
+            guard event.id == eventID else { return event }
+            var reactions = event.reactions
+            var mine = event.mine
+            if let index = mine.firstIndex(of: kind) {
+                mine.remove(at: index)
+                reactions[kind] = max(0, (reactions[kind] ?? 1) - 1)
+            } else {
+                mine.append(kind)
+                reactions[kind, default: 0] += 1
+            }
+            return FeedEvent(id: event.id, memberID: event.memberID, name: event.name, colorIndex: event.colorIndex,
+                             germID: event.germID, at: event.at, reactions: reactions, mine: mine)
+        }
+        demoUpdate(feed: feed)
+    }
+
+    private func demoRename(_ displayName: String) {
+        guard let current = state else { return }
+        demoUpdate(me: CrewMember(id: current.me.id, name: displayName, germs: current.me.germs,
+                                  colorIndex: current.me.colorIndex))
+    }
+}
+#endif
