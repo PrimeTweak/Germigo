@@ -5,28 +5,43 @@ enum Patient: Hashable {
     case kid(UUID)
     case newKid
     case me
+    case partner
+
+    /// Who the parent's log is for when this patient is one of the parents.
+    var sufferer: Sufferer {
+        self == .partner ? .partner : .me
+    }
 }
 
-/// What opens the symptom pages: someone newly sick, or an entry whose signs changed.
+/// What opens the symptom pages: the parent, someone else newly sick, or an entry whose signs changed.
 enum SymptomFlow: Identifiable {
-    case new(Patient)
+    case me
+    case someone
     case kidIllness(UUID)
     case log(UUID)
 
     var id: String {
         switch self {
-        case .new(.kid(let kidID)): return "new-" + kidID.uuidString
-        case .new(.newKid): return "new-kid"
-        case .new(.me): return "new-me"
+        case .me: return "me"
+        case .someone: return "someone"
         case .kidIllness(let illnessID): return "illness-" + illnessID.uuidString
         case .log(let logID): return "log-" + logID.uuidString
         }
     }
 
     var isNew: Bool {
-        if case .new = self { return true }
-        return false
+        switch self {
+        case .me, .someone: return true
+        case .kidIllness, .log: return false
+        }
     }
+}
+
+/// Where the symptom pages hand over: closing, the parent's log sheet, or a kid's new illness.
+struct FlowExits {
+    let close: () -> Void
+    let onLog: (LogRequest) -> Void
+    let onAdded: (KidIllness) -> Void
 }
 
 /// What the kid's illness form starts with when it follows the symptom pages.
@@ -36,15 +51,189 @@ struct KidFormSeed: Hashable {
     var symptoms: [String] = []
 }
 
-/// The symptom pages: tick what you see, meet the suspects, pick one or keep it a mystery.
+/// The symptom pages: who is sick when it is someone else, then the signs, the suspects, and a pick.
 struct SymptomFlowSheet: View {
     let flow: SymptomFlow
     /// Receives the request for the log sheet, which opens once this sheet has closed.
     let onLog: (LogRequest) -> Void
+    /// Receives a kid's illness added from these pages.
+    let onAdded: (KidIllness) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        let exits = FlowExits(close: { dismiss() }, onLog: onLog, onAdded: onAdded)
+        NavigationStack {
+            Group {
+                if case .someone = flow {
+                    WhoPage(exits: exits)
+                } else {
+                    SymptomPicker(flow: flow, start: .me, exits: exits)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(tr("Close"))
+                }
+            }
+        }
+    }
+}
+
+/// "Someone's sick": the kids and the partner as big characters, and a new kid.
+private struct WhoPage: View {
+    /// One person to pick, with a line about their record.
+    private struct Choice: Identifiable {
+        let patient: Patient
+        let name: String
+        let look: Int
+        let line: String
+
+        var id: Patient { patient }
+    }
+
+    let exits: FlowExits
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var picked: Patient?
+
+    private var choices: [Choice] {
+        let now = Date()
+        var list = model.data.kids.map { kid in
+            Choice(patient: .kid(kid.id), name: kid.name, look: kid.colorIndex, line: kidLine(kid, now: now))
+        }
+        if model.data.partnerName != nil {
+            list.append(Choice(patient: .partner, name: model.partnerDisplayName, look: model.data.partnerLook,
+                               line: partnerLine(now: now)))
+        }
+        return list
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(tr("Who's sick?"))
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(tr("Tap the patient."))
+                    .font(.callout)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.top, 6)
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                    ForEach(Array(choices.enumerated()), id: \.element.id) { item in
+                        card(item.element)
+                            .cascadeIn(item.offset)
+                    }
+                    if model.canAddKid {
+                        addCard
+                            .cascadeIn(choices.count)
+                    }
+                }
+                .padding(.top, 18)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 16)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $picked) { patient in
+            SymptomPicker(flow: .someone, start: patient, exits: exits)
+        }
+    }
+
+    private func card(_ choice: Choice) -> some View {
+        Button {
+            Haptics.tap()
+            picked = choice.patient
+        } label: {
+            VStack(spacing: 4) {
+                BuddyView(look: choice.look, sick: true, size: 92, lively: true)
+                    .padding(.bottom, 6)
+                Text(choice.name)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                    .lineLimit(1)
+                Text(choice.line)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+    }
+
+    private var addCard: some View {
+        Button {
+            Haptics.tap()
+            picked = .newKid
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: "plus")
+                    .font(.title.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .frame(width: 92, height: 92)
+                    .background(palette.surface, in: Circle())
+                    .padding(.bottom, 6)
+                Text(tr("A new kid"))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(tr("Add them in one step"))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 18)
+            .frame(maxWidth: .infinity)
+            .overlay {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .strokeBorder(palette.ink.opacity(0.18), style: StrokeStyle(lineWidth: 2, dash: [7, 6]))
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+    }
+
+    private func kidLine(_ kid: Kid, now: Date) -> String {
+        let illnesses = model.data.kidIllnesses.filter { $0.kidID == kid.id }
+        if illnesses.contains(where: { DayEngine.isGoingOn($0, catalog: model.catalog, now: now) }) {
+            return tr("Sick right now")
+        }
+        if illnesses.isEmpty { return tr("Clean record so far") }
+        return trCount(illnesses.count, one: "Brought home %lld germ", other: "Brought home %lld germs")
+    }
+
+    private func partnerLine(now: Date) -> String {
+        let logs = model.data.logs.filter { $0.sufferer.includesPartner }
+        if logs.contains(where: { $0.endedAt == nil }) { return tr("Sick right now") }
+        guard let last = logs.compactMap({ $0.endedAt }).max() else { return tr("Clean record so far") }
+        let calendar = Calendar.current
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: last), to: calendar.startOfDay(for: now)).day ?? 0
+        return trCount(max(0, days), one: "Clean for %lld day", other: "Clean for %lld days")
+    }
+}
+
+/// Tick what you see or feel, meet the suspects, pick one or keep it a mystery.
+private struct SymptomPicker: View {
+    let flow: SymptomFlow
+    /// Who the pages are about on a new entry; an existing entry brings its own.
+    let start: Patient
+    let exits: FlowExits
 
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.dismiss) private var dismiss
     @State private var patient = Patient.me
     @State private var chosen: Set<String> = []
     @State private var newKidName = ""
@@ -66,117 +255,88 @@ struct SymptomFlowSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    if flow.isNew {
-                        whoRow
-                            .padding(.bottom, 18)
-                    }
-                    Text(patient == .me ? tr("What do you feel?") : tr("What do you see?"))
-                        .font(.largeTitle.weight(.bold))
-                        .foregroundStyle(palette.ink)
-                    Text(tr("Tap everything that fits. You can change it later."))
-                        .font(.callout)
-                        .foregroundStyle(palette.inkSecondary)
-                        .padding(.top, 6)
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 3), spacing: 9) {
-                        ForEach(Array(Symptom.all.enumerated()), id: \.element.id) { item in
-                            SymptomTile(symptom: item.element, isOn: chosen.contains(item.element.id)) {
-                                toggle(item.element.id)
-                            }
-                            .cascadeIn(item.offset / 3)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                patientRow
+                Text(patient == .me ? tr("What do you feel?") : tr("What do you see?"))
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(tr("Tap everything that fits. You can change it later."))
+                    .font(.callout)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.top, 6)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 9), count: 3), spacing: 9) {
+                    ForEach(Array(Symptom.all.enumerated()), id: \.element.id) { item in
+                        SymptomTile(symptom: item.element, isOn: chosen.contains(item.element.id)) {
+                            toggle(item.element.id)
                         }
+                        .cascadeIn(item.offset / 3)
                     }
-                    .padding(.top, 18)
-                    urgentRow
-                        .padding(.top, 9)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 4)
-                .padding(.bottom, 16)
+                .padding(.top, 18)
+                urgentRow
+                    .padding(.top, 9)
             }
-            .background(palette.background.ignoresSafeArea())
-            .navigationTitle(tr("Symptoms"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                    .accessibilityLabel(tr("Close"))
-                }
-            }
-            .safeAreaInset(edge: .bottom) {
-                bottomBar
-            }
-            .navigationDestination(isPresented: $showSuspects) {
-                SuspectsPage(flow: flow, patient: patient, chosen: chosen, close: { dismiss() }, onLog: onLog)
-            }
-            .navigationDestination(isPresented: $showUrgent) {
-                UrgentPage(flow: flow, patient: patient, chosen: chosen, close: { dismiss() }, onLog: onLog)
-            }
-            .navigationDestination(item: $direct) { seed in
-                KidIllnessForm(seed: seed) {
-                    dismiss()
-                }
-            }
-            .onAppear(perform: prefill)
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 16)
         }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("Symptoms"))
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom) {
+            bottomBar
+        }
+        .navigationDestination(isPresented: $showSuspects) {
+            SuspectsPage(flow: flow, patient: patient, chosen: chosen, exits: exits)
+        }
+        .navigationDestination(isPresented: $showUrgent) {
+            UrgentPage(flow: flow, patient: patient, chosen: chosen, exits: exits)
+        }
+        .navigationDestination(item: $direct) { seed in
+            KidIllnessForm(seed: seed, onDone: exits.close, onAdded: exits.onAdded)
+        }
+        .onAppear(perform: prefill)
     }
 
-    private var whoRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ScrollView(.horizontal) {
-                HStack(spacing: 8) {
-                    ForEach(model.data.kids) { kid in
-                        whoChip(kid.name, look: kid.colorIndex, selected: patient == .kid(kid.id)) {
-                            patient = .kid(kid.id)
-                        }
-                    }
-                    if model.data.kids.isEmpty {
-                        whoChip(tr("A kid"), look: model.nextKidLook, selected: patient == .newKid) {
-                            patient = .newKid
-                        }
-                    }
-                    whoChip(tr("Me"), look: model.data.hostLook, selected: patient == .me) {
-                        patient = .me
-                    }
-                }
-                .padding(.vertical, 6)
-            }
-            .scrollIndicators(.hidden)
-            if patient == .newKid {
+    /// The patient's name over the signs; the parent needs none, a new kid needs one typed.
+    @ViewBuilder
+    private var patientRow: some View {
+        switch patient {
+        case .me:
+            EmptyView()
+        case .newKid:
+            VStack(alignment: .leading, spacing: 10) {
+                patientChip(tr("A new kid"), look: model.nextKidLook)
                 TextField(tr("Kid's name"), text: $newKidName)
                     .textInputAutocapitalization(.words)
                     .padding(.horizontal, 16)
                     .frame(height: 54)
                     .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             }
+            .padding(.bottom, 18)
+        case .kid(let kidID):
+            patientChip(model.name(for: .kid(kidID)), look: model.look(of: .kid(kidID)))
+                .padding(.bottom, 18)
+        case .partner:
+            patientChip(model.partnerDisplayName, look: model.data.partnerLook)
+                .padding(.bottom, 18)
         }
     }
 
-    private func whoChip(_ name: String, look: Int, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button {
-            Haptics.tap()
-            action()
-        } label: {
-            HStack(spacing: 8) {
-                BuddyView(look: look, sick: true, size: 30)
-                Text(name)
-                    .font(.callout.weight(.semibold))
-                    .lineLimit(1)
-            }
-            .foregroundStyle(selected ? palette.background : palette.inkSecondary)
-            .padding(.leading, 9)
-            .padding(.trailing, 18)
-            .frame(height: 46)
-            .background(selected ? palette.ink : palette.surface, in: Capsule())
+    private func patientChip(_ name: String, look: Int) -> some View {
+        HStack(spacing: 8) {
+            BuddyView(look: look, sick: true, size: 30)
+            Text(name)
+                .font(.callout.weight(.semibold))
+                .lineLimit(1)
         }
-        .buttonStyle(PressableStyle())
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        .foregroundStyle(palette.background)
+        .padding(.leading, 9)
+        .padding(.trailing, 18)
+        .frame(height: 46)
+        .background(palette.ink, in: Capsule())
+        .padding(.top, 6)
     }
 
     private var urgentRow: some View {
@@ -268,16 +428,17 @@ struct SymptomFlowSheet: View {
         guard !didPrefill else { return }
         didPrefill = true
         switch flow {
-        case .new(let who):
-            patient = who
+        case .me, .someone:
+            patient = start
         case .kidIllness(let illnessID):
             if let illness = model.data.kidIllnesses.first(where: { $0.id == illnessID }) {
                 patient = .kid(illness.kidID)
                 chosen = Set(illness.symptoms)
             }
         case .log(let logID):
-            patient = .me
-            chosen = Set(model.data.logs.first(where: { $0.id == logID })?.symptoms ?? [])
+            let log = model.data.logs.first { $0.id == logID }
+            patient = log?.sufferer == .partner ? .partner : .me
+            chosen = Set(log?.symptoms ?? [])
         }
     }
 
@@ -308,9 +469,9 @@ struct SymptomFlowSheet: View {
             direct = KidFormSeed(kidID: kidID, germID: nil, symptoms: orderedIDs)
         case .newKid:
             break
-        case .me:
-            onLog(LogRequest(symptoms: orderedIDs))
-            dismiss()
+        case .me, .partner:
+            exits.onLog(LogRequest(symptoms: orderedIDs, sufferer: patient.sufferer))
+            exits.close()
         }
     }
 }
@@ -372,8 +533,7 @@ private struct UrgentPage: View {
     let flow: SymptomFlow
     let patient: Patient
     let chosen: Set<String>
-    let close: () -> Void
-    let onLog: (LogRequest) -> Void
+    let exits: FlowExits
     @Environment(\.palette) private var palette
 
     var body: some View {
@@ -405,7 +565,7 @@ private struct UrgentPage: View {
                 .padding(.top, 10)
                 if chosen.count > 1 {
                     NavigationLink {
-                        SuspectsPage(flow: flow, patient: patient, chosen: chosen, close: close, onLog: onLog)
+                        SuspectsPage(flow: flow, patient: patient, chosen: chosen, exits: exits)
                     } label: {
                         Text(tr("See the suspects anyway"))
                     }
@@ -430,8 +590,7 @@ private struct SuspectsPage: View {
     let flow: SymptomFlow
     let patient: Patient
     let chosen: Set<String>
-    let close: () -> Void
-    let onLog: (LogRequest) -> Void
+    let exits: FlowExits
 
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -442,7 +601,7 @@ private struct SuspectsPage: View {
     /// The germ the entry has now, when the pages reopen one that exists.
     private var currentGermID: String? {
         switch flow {
-        case .new: return nil
+        case .me, .someone: return nil
         case .kidIllness(let illnessID): return model.data.kidIllnesses.first(where: { $0.id == illnessID })?.germID
         case .log(let logID): return model.data.logs.first(where: { $0.id == logID })?.germID
         }
@@ -499,7 +658,7 @@ private struct SuspectsPage: View {
             bottomBar(quiet: few)
         }
         .navigationDestination(item: $seed) { seed in
-            KidIllnessForm(seed: seed, onDone: close)
+            KidIllnessForm(seed: seed, onDone: exits.close, onAdded: exits.onAdded)
         }
     }
 
@@ -708,24 +867,24 @@ private struct SuspectsPage: View {
         let changed = currentGermID.map { $0 != germID } ?? false
         Haptics.success()
         switch flow {
-        case .new:
+        case .me, .someone:
             switch patient {
             case .kid(let kidID):
                 seed = KidFormSeed(kidID: kidID, germID: germID, symptoms: ids)
             case .newKid:
                 break
-            case .me:
-                onLog(LogRequest(germID: germID, symptoms: ids))
-                close()
+            case .me, .partner:
+                exits.onLog(LogRequest(germID: germID, symptoms: ids, sufferer: patient.sufferer))
+                exits.close()
             }
         case .kidIllness(let illnessID):
             model.reassignKidIllness(illnessID, germID: germID, symptoms: ids)
             announce(germID, changed: changed)
-            close()
+            exits.close()
         case .log(let logID):
             model.reassignLog(logID, germID: germID, symptoms: ids)
             announce(germID, changed: changed)
-            close()
+            exits.close()
         }
     }
 

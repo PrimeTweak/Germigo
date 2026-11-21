@@ -261,3 +261,99 @@ struct ConfettiView: View {
         .accessibilityHidden(true)
     }
 }
+
+/// One place on a podium: a character, a name, and what earned the place.
+struct PodiumPlace: Identifiable {
+    let id: String
+    let look: Int
+    var sick = false
+    let name: String
+    var title: String?
+    let detail: String
+}
+
+/// The first three places on steps with the winner in the middle, then the others in rows.
+struct Podium: View {
+    let places: [PodiumPlace]
+    @Environment(\.palette) private var palette
+
+    private static let heights: [CGFloat] = [78, 52, 34]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .bottom, spacing: 8) {
+                ForEach([1, 0, 2].filter { $0 < places.count }, id: \.self) { index in
+                    step(places[index], rank: index + 1)
+                        .cascadeIn(index)
+                }
+            }
+            ForEach(Array(places.enumerated()).dropFirst(3), id: \.element.id) { item in
+                row(item.element, rank: item.offset + 1)
+            }
+        }
+    }
+
+    private func step(_ place: PodiumPlace, rank: Int) -> some View {
+        VStack(spacing: 0) {
+            BuddyView(look: place.look, sick: place.sick, size: rank == 1 ? 62 : 52, lively: rank == 1)
+                .padding(.bottom, 4)
+            Text(verbatim: String(rank))
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.ink)
+                .padding(.top, 6)
+                .frame(maxWidth: .infinity, minHeight: Self.heights[rank - 1], alignment: .top)
+                .background(palette.accent.opacity(rank == 1 ? 0.42 : 0.22),
+                            in: UnevenRoundedRectangle(topLeadingRadius: 14, bottomLeadingRadius: 6,
+                                                       bottomTrailingRadius: 6, topTrailingRadius: 14))
+            Text(place.name)
+                .font(.callout.weight(.bold))
+                .foregroundStyle(palette.ink)
+                .lineLimit(1)
+                .padding(.top, 8)
+            Text(place.title ?? " ")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.accent)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(place.detail)
+                .font(.caption)
+                .foregroundStyle(palette.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func row(_ place: PodiumPlace, rank: Int) -> some View {
+        HStack(spacing: 12) {
+            Text(verbatim: String(rank))
+                .font(.headline.monospacedDigit())
+                .foregroundStyle(palette.inkTertiary)
+                .frame(width: 22)
+            BuddyView(look: place.look, sick: place.sick, size: 36)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(place.name)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                if let title = place.title {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(palette.accent)
+                }
+            }
+            Spacer(minLength: 8)
+            Text(place.detail)
+                .font(.subheadline)
+                .foregroundStyle(palette.inkSecondary)
+        }
+        .padding(.vertical, 9)
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(palette.ink.opacity(0.08))
+                .frame(height: 1)
+        }
+        .padding(.top, rank == 4 ? 12 : 0)
+        .accessibilityElement(children: .combine)
+    }
+}

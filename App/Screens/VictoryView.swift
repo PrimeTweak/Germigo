@@ -5,6 +5,7 @@ struct VictoryView: View {
     let victory: Victory
 
     @Environment(AppModel.self) private var model
+    @Environment(CrewStore.self) private var crew
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown = false
@@ -94,6 +95,9 @@ struct VictoryView: View {
             SoundPlayer.shared.play(.badge)
             Haptics.success()
         }
+        .task {
+            await crew.reportWin(germ.id, logID: victory.log.id)
+        }
         .sheet(isPresented: $showShare) {
             SharePreviewSheet(title: tr("Boss defeated")) {
                 VictoryShareCard(germ: germ, days: days)
@@ -157,6 +161,86 @@ private struct BossKnockout: View {
         .overlay {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .stroke(Color.white.opacity(0.1))
+        }
+    }
+}
+
+/// After a kid is marked better: their character over the knocked-out germ, and the score between them.
+struct KidVictoryView: View {
+    let victory: KidVictory
+
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+    @State private var confettiStart: Date?
+    @State private var showShare = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: Swatch.navyRaised), Color(hex: Swatch.navy)], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            if let confettiStart, !reduceMotion {
+                ConfettiView(start: confettiStart)
+                    .ignoresSafeArea()
+            }
+            VStack(spacing: 12) {
+                PillLabel(text: tr("Boss defeated"), foreground: Color(hex: Swatch.navy),
+                          background: Color(hex: Swatch.irisSoft))
+                Text(tr("%1$@ beat %2$@!", victory.kid.name, victory.germ.name))
+                    .font(.largeTitle.weight(.bold))
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.7)
+                    .lineLimit(2)
+                Text(victory.germ.illness.value + " · " + trCount(victory.days, one: "%lld day", other: "%lld days"))
+                    .font(.subheadline)
+                    .foregroundStyle(Color.white.opacity(0.65))
+                Spacer(minLength: 8)
+                KidKnockout(look: victory.kid.colorIndex, germ: victory.germ, size: 150, lively: true)
+                KidScore(name: victory.kid.name, wins: victory.wins, germ: victory.germ.name)
+                    .padding(.top, 18)
+                Text(tr("Back to full volume."))
+                    .font(.title3.weight(.heavy))
+                    .padding(.top, 10)
+                Spacer(minLength: 8)
+                HStack(spacing: 10) {
+                    Button {
+                        showShare = true
+                    } label: {
+                        Label(tr("Share the win"), systemImage: "square.and.arrow.up")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                    }
+                    .buttonStyle(.glass)
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text(tr("Done"))
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ink))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
+            .padding(.bottom, 12)
+            .scaleEffect(shown || reduceMotion ? 1 : 0.94)
+            .opacity(shown || reduceMotion ? 1 : 0)
+        }
+        .foregroundStyle(Color.white)
+        .preferredColorScheme(.dark)
+        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                shown = true
+            }
+            confettiStart = Date()
+            SoundPlayer.shared.play(.badge)
+            Haptics.success()
+        }
+        .sheet(isPresented: $showShare) {
+            SharePreviewSheet(title: tr("Boss defeated")) {
+                KidVictoryShareCard(victory: victory)
+            }
         }
     }
 }

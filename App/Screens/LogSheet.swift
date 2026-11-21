@@ -433,6 +433,7 @@ struct LogSheet: View {
     private func prefill() {
         guard !didPrefill else { return }
         didPrefill = true
+        sufferer = model.data.partnerName == nil ? .me : request.sufferer
         if let picked = request.germID {
             germID = picked
             if let illness = suggestion, illness.germID == picked {
@@ -457,7 +458,7 @@ struct LogSheet: View {
         let share = tellCrew && crew.isMember && model.hasPass
         Task {
             if model.data.settings.checkInsOn { await model.enableReminders() }
-            if share { await crew.reportGerm(draft.germID) }
+            if share { await crew.reportGerm(draft.germID, logID: result.log.id) }
         }
         onLogged(result)
         dismiss()

@@ -348,4 +348,5 @@ struct LogRequest: Identifiable {
     var kidIllnessID: UUID?
     var germID: String?
     var symptoms: [String] = []
+    var sufferer = Sufferer.me
 }

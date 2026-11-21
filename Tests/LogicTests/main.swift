@@ -524,6 +524,34 @@ do {
     check(fromOlder?.data.photos.isEmpty == true && fromOlder?.photoFiles.isEmpty == true, "an older backup has no photos")
 }
 
+// MARK: - Family league
+
+do {
+    let season = Season(number: 1, start: day(0), end: day(365))
+    let kid = Kid(name: "Livia", colorIndex: 0)
+    var data = makeData(logs: [makeLog("rhino", from: day(2), to: day(4)), makeLog("noro", from: day(9), to: day(10)),
+                               makeLog("rhino", from: day(20), to: day(20), sufferer: .partner)])
+    data.partnerName = "Nathan"
+    data.kids = [kid]
+    var first = KidIllness(kidID: kid.id, germID: "rhino", startedAt: day(1), watching: false, outcome: .open)
+    first.endedAt = day(6)
+    var second = KidIllness(kidID: kid.id, germID: "noro", startedAt: day(8), watching: false, outcome: .open)
+    second.endedAt = day(10)
+    data.kidIllnesses = [first, second]
+    let table = LeagueEngine.standings(data: data, catalog: catalog, season: season, now: day(30))
+    check(table.map { $0.person } == [.partner, .me, .kid(kid.id)], "the league ranks the fewest sick days first")
+    check(table.map { $0.sickDays } == [1, 5, 9], "a kid's sick days run from start to better")
+    check(table.map { $0.title } == [.ironWall, .germMagnet, .patientZero],
+          "the leader is the iron wall and the kid who brought germs home is patient zero")
+    let calm = makeData()
+    var pair = calm
+    pair.partnerName = "Nathan"
+    check(LeagueEngine.standings(data: pair, catalog: catalog, season: season, now: day(30)).allSatisfy { $0.title == nil },
+          "nobody gets a title while nobody stands apart")
+    check(LeagueEngine.standings(data: calm, catalog: catalog, season: season, now: day(30)).count == 1,
+          "the parent alone makes no league")
+}
+
 if failures == 0 {
     print("logic tests: all checks passed")
 } else {

@@ -222,6 +222,22 @@ async function main() {
   state = (await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'strep', named: true, clientID } })).data;
   assert.equal(state.feed.filter((event) => event.germID === 'strep').length, 1);
 
+  // A win shows in the feed under a name, and stays out of the radar and the germ count
+  now += 61000;
+  const hornets = (await call('POST', '/v1/crews', { body: { name: 'Hornets', displayName: 'Kim', emblem: 2 } })).data;
+  const lee = (await call('POST', '/v1/crews/join', { body: { code: hornets.state.crew.code, displayName: 'Lee' } })).data.token;
+  const win = (body) => call('POST', '/v1/crew/events', { token: hornets.token, body: { germID: 'flu', ...body } });
+  assert.equal((await win({ kind: 'beat', named: false })).data.error, 'invalid');
+  assert.equal((await win({ kind: 'won', named: true })).data.error, 'invalid');
+  await win({ named: true });
+  now += 1000;
+  state = (await win({ kind: 'beat', named: true })).data;
+  assert.deepEqual(state.feed.map((event) => event.kind), ['beat', 'caught']);
+  assert.equal(state.me.germs, 1);
+  state = (await call('POST', '/v1/crew/events', { token: lee, body: { germID: 'flu', kind: 'beat', named: true } })).data;
+  assert.deepEqual(state.radar, []);
+  assert.equal(state.me.germs, 0);
+
   // Daily cap on shares per member
   let accepted = 0;
   let capped = false;

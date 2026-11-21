@@ -23,6 +23,16 @@ struct Victory: Identifiable {
     let points: Int
 }
 
+/// What the kid's victory screen shows once they are better.
+struct KidVictory: Identifiable {
+    let id = UUID()
+    let kid: Kid
+    let germ: Germ
+    let days: Int
+    /// How many times this kid has beaten this germ, this time included.
+    let wins: Int
+}
+
 /// What answering a quiz question earned.
 struct QuizOutcome {
     let right: Bool
@@ -63,6 +73,7 @@ final class AppModel {
     let household = HouseholdGuide.load()
     var pendingReward: RewardResult?
     var pendingVictory: Victory?
+    var pendingKidVictory: KidVictory?
     var logRequest: LogRequest?
     var selectedTab = AppTab.today
     var journalNotice: JournalNotice?
@@ -72,8 +83,6 @@ final class AppModel {
     var pendingMilestone: MilestoneEvent?
     /// A short confirmation shown at the top of the screen.
     var toast: String?
-    /// When the last burst of confetti over the whole app started.
-    var confettiAt: Date?
 
     /// False while the journal file exists but cannot be read; nothing is saved over it then.
     @ObservationIgnored private var journalAvailable = true
@@ -733,7 +742,7 @@ final class AppModel {
         showSettings = false
         pendingMilestone = nil
         toast = nil
-        confettiAt = nil
+        pendingKidVictory = nil
         selectedTab = .today
         publishSnapshot()
     }

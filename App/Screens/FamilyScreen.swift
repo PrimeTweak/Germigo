@@ -290,12 +290,11 @@ private struct BetterButton: View {
     let status: PersonStatus
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         if !status.illnessIDs.isEmpty {
             pill {
-                model.cheerKidBetter(status.illnessIDs, on: Date(), motion: !reduceMotion)
+                model.cheerKidBetter(status.illnessIDs, on: Date())
             }
         } else if status.logID != nil, person == .me {
             pill {

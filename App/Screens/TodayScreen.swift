@@ -6,6 +6,8 @@ struct TodayScreen: View {
     @Environment(\.palette) private var palette
     @State private var flow: SymptomFlow?
     @State private var pendingLog: LogRequest?
+    @State private var pendingWanted: KidIllness?
+    @State private var wanted: KidIllness?
     @State private var exposurePage = 0
     @State private var pageHeight: CGFloat = 0
 
@@ -48,14 +50,24 @@ struct TodayScreen: View {
             .background(CharacterWash(tint: washTint(exposures: exposures, index: index)))
             .navigationTitle(tr("Today"))
             .toolbar {
+                if model.activeLog == nil, index < exposures.count {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            wanted = exposures[index]
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .accessibilityLabel(tr("Wanted poster"))
+                    }
+                }
                 if model.activeLog != nil || !exposures.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            flow = .new(kidPatient)
+                            flow = .someone
                         } label: {
                             Image(systemName: "plus")
                         }
-                        .accessibilityLabel(tr("Add a kid's germ"))
+                        .accessibilityLabel(tr("Someone's sick"))
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -69,15 +81,12 @@ struct TodayScreen: View {
                 DayScreen(day: route.day)
             }
             .sheet(item: $flow, onDismiss: handOff) { flow in
-                SymptomFlowSheet(flow: flow) { request in
-                    pendingLog = request
-                }
+                SymptomFlowSheet(flow: flow, onLog: { pendingLog = $0 }, onAdded: { pendingWanted = $0 })
+            }
+            .sheet(item: $wanted) { illness in
+                WantedSheet(illness: illness)
             }
         }
-    }
-
-    private var kidPatient: Patient {
-        model.data.kids.first.map { Patient.kid($0.id) } ?? .newKid
     }
 
     /// The page keeps the height it had under the large title, so it does not stretch while the title collapses.
@@ -86,11 +95,16 @@ struct TodayScreen: View {
         pageHeight = height
     }
 
-    /// The log sheet opens once the symptom pages have closed.
+    /// The log sheet, or a new kid's wanted poster, opens once the symptom pages have closed.
     private func handOff() {
-        guard let request = pendingLog else { return }
-        pendingLog = nil
-        model.logRequest = request
+        if let request = pendingLog {
+            pendingLog = nil
+            model.logRequest = request
+        }
+        if let illness = pendingWanted {
+            pendingWanted = nil
+            wanted = illness
+        }
     }
 
     private func washTint(exposures: [KidIllness], index: Int) -> Color {
@@ -143,7 +157,6 @@ private struct StageActions: View {
     var onSigns: () -> Void = {}
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var sickKids: [SickKid] {
         let illnesses = model.sickKidIllnesses
@@ -193,7 +206,7 @@ private struct StageActions: View {
         }
         if kids.count == 1, let sick = kids.first {
             Button {
-                model.cheerKidBetter(sick.illnessIDs, on: Date(), motion: !reduceMotion)
+                model.cheerKidBetter(sick.illnessIDs, on: Date())
             } label: {
                 better(look: sick.kid.colorIndex, title: tr("%@ is better", sick.kid.name))
             }
@@ -202,7 +215,7 @@ private struct StageActions: View {
             Menu {
                 ForEach(kids) { sick in
                     Button(tr("%@ is better", sick.kid.name)) {
-                        model.cheerKidBetter(sick.illnessIDs, on: Date(), motion: !reduceMotion)
+                        model.cheerKidBetter(sick.illnessIDs, on: Date())
                     }
                 }
             } label: {
@@ -243,7 +256,6 @@ private struct CalmStage: View {
 
     var body: some View {
         let days = model.streakDays()
-        let kids = model.data.kids
         VStack(spacing: 0) {
             Spacer(minLength: 8)
             NappingMascot(side: model.sickKidIllnesses.isEmpty ? side : side * 0.8)
@@ -267,15 +279,15 @@ private struct CalmStage: View {
                 .padding(.top, 16)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
-                FaceTile(kids.count == 1 ? tr("%@ is sick", kids[0].name) : tr("A kid is sick")) {
-                    flow = .new(kids.first.map { Patient.kid($0.id) } ?? .newKid)
-                } face: {
-                    kidFace
-                }
                 FaceTile(tr("I'm sick")) {
-                    flow = .new(.me)
+                    flow = .me
                 } face: {
                     BuddyView(look: model.data.hostLook, sick: true, lively: true)
+                }
+                FaceTile(tr("Someone's sick")) {
+                    flow = .someone
+                } face: {
+                    othersFace
                 }
             }
         }
@@ -283,19 +295,19 @@ private struct CalmStage: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// The first kid's character, a second one peeking behind it, or a plus when there is no kid yet.
+    /// The kids' and the partner's characters, two at most, or a plus when the parent is alone.
     @ViewBuilder
-    private var kidFace: some View {
-        let kids = model.data.kids
-        if kids.count > 1 {
+    private var othersFace: some View {
+        let looks = model.data.kids.map { $0.colorIndex } + (model.data.partnerName == nil ? [] : [model.data.partnerLook])
+        if looks.count > 1 {
             ZStack {
-                BuddyView(look: kids[1].colorIndex, sick: true, size: 44)
+                BuddyView(look: looks[1], sick: true, size: 44)
                     .offset(x: 16, y: -6)
-                BuddyView(look: kids[0].colorIndex, sick: true, size: 52, lively: true)
+                BuddyView(look: looks[0], sick: true, size: 52, lively: true)
                     .offset(x: -10, y: 4)
             }
-        } else if let kid = kids.first {
-            BuddyView(look: kid.colorIndex, sick: true, lively: true)
+        } else if let look = looks.first {
+            BuddyView(look: look, sick: true, lively: true)
         } else {
             Image(systemName: "plus")
                 .font(.title2.weight(.semibold))

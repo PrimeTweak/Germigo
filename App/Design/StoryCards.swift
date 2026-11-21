@@ -431,3 +431,84 @@ struct WrapCard: View {
         .background(Color.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
+
+/// The household's league for the season, sized for stories.
+struct FamilyLeagueShareCard: View {
+    let seasonNumber: Int
+    let places: [PodiumPlace]
+
+    private static let heights: [CGFloat] = [96, 66, 44]
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: Swatch.pinkPale), Color(hex: Swatch.wisteria)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            RingsBackground(color: Color.white.opacity(0.28), spacing: 34)
+            VStack(spacing: 0) {
+                Text(tr("Season %lld", seasonNumber).uppercased())
+                    .font(.system(size: 14, weight: .heavy))
+                    .kerning(2)
+                    .padding(.top, 48)
+                Text(tr("Family league"))
+                    .font(.system(size: 42, weight: .black))
+                    .kerning(-1)
+                    .padding(.top, 2)
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach([1, 0, 2].filter { $0 < places.count }, id: \.self) { index in
+                        step(places[index], rank: index + 1)
+                    }
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 34)
+                VStack(spacing: 6) {
+                    ForEach(Array(places.enumerated()).dropFirst(3).prefix(3), id: \.element.id) { item in
+                        Text(verbatim: line(item.element, rank: item.offset + 1))
+                            .font(.system(size: 15, weight: .bold))
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.top, 18)
+                Spacer(minLength: 0)
+                ShareWordmark(color: Color(hex: Swatch.night))
+                    .padding(.bottom, 36)
+            }
+            .foregroundStyle(Color(hex: Swatch.night))
+        }
+        .frame(width: 360, height: 640)
+    }
+
+    private func line(_ place: PodiumPlace, rank: Int) -> String {
+        let head = String(rank) + ". " + place.name
+        guard let title = place.title else { return head }
+        return head + ", " + title
+    }
+
+    private func step(_ place: PodiumPlace, rank: Int) -> some View {
+        VStack(spacing: 0) {
+            BuddyView(look: place.look, sick: place.sick, size: rank == 1 ? 74 : 60)
+                .padding(.bottom, 4)
+            Text(verbatim: String(rank))
+                .font(.system(size: 24, weight: .black))
+                .padding(.top, 8)
+                .frame(maxWidth: .infinity, minHeight: Self.heights[rank - 1], alignment: .top)
+                .background(Color.white.opacity(rank == 1 ? 0.94 : 0.62),
+                            in: UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 8,
+                                                       bottomTrailingRadius: 8, topTrailingRadius: 18))
+            Text(place.name)
+                .font(.system(size: 17, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .padding(.top, 10)
+            Text(place.title ?? " ")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(Color(hex: Swatch.iris))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(place.detail)
+                .font(.system(size: 12, weight: .semibold))
+                .opacity(0.65)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}

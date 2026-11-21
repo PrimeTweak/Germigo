@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The parent's game: the player card with the next goal, the season, the trophy shelf and the couple duel.
+/// The parent's game: the player card with the next goal, the family league, the season and the trophy shelf.
 struct TrophiesScreen: View {
     /// One place on the shelf: a germ, and how many times it was caught.
     private struct ShelfItem: Identifiable {
@@ -22,15 +22,16 @@ struct TrophiesScreen: View {
     @State private var nameDraft = ""
     @State private var appeared = false
     @State private var showWrapped = false
+    @State private var showLeagueShare = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     playerCard
+                    leagueCard
                     seasonCard
                     shelfCard
-                    duelCard
                     links
                 }
                 .padding(.horizontal, 20)
@@ -371,38 +372,41 @@ struct TrophiesScreen: View {
             .accessibilityLabel(badge.title)
     }
 
-    // MARK: - Duel
+    // MARK: - Family league
 
     @ViewBuilder
-    private var duelCard: some View {
-        if let partner = model.data.partnerName {
-            let stats = DuelEngine.stats(data: model.data, season: model.season, now: Date())
-            NavigationLink {
-                SeasonScreen()
-            } label: {
-                HStack(spacing: 10) {
-                    duelSide(look: model.data.hostLook, name: tr("You"))
-                    VStack(spacing: 0) {
-                        Text(tr("Couple duel"))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                        Text(verbatim: "\(stats.me.germs) – \(stats.partner.germs)")
-                            .font(.system(size: 32, weight: .bold))
-                            .monospacedDigit()
-                            .foregroundStyle(palette.ink)
-                        Text(duelLine(mine: stats.me.germs, theirs: stats.partner.germs, partner: partner))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                    duelSide(look: model.data.partnerLook, name: partner)
+    private var leagueCard: some View {
+        let entries = LeagueEngine.standings(data: model.data, catalog: model.catalog, season: model.season, now: Date())
+        if entries.count > 1 {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: tr("Family league"), trailing: tr("Season %lld", model.season.number))
+                Podium(places: places(entries, you: tr("You")))
+                    .padding(.top, 14)
+                if entries.allSatisfy({ $0.title == nil }) {
+                    Text(tr("Nobody stands out yet this season."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                        .padding(.top, 10)
                 }
-                .petriCard(radius: 26, padding: 14)
+                Button {
+                    showLeagueShare = true
+                } label: {
+                    Label(tr("Share the standings"), systemImage: "square.and.arrow.up")
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.accent)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(palette.background, in: Capsule())
+                }
+                .buttonStyle(PressableStyle())
+                .padding(.top, 14)
             }
-            .buttonStyle(.plain)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(tr("Couple duel") + ". " + tr("You %1$lld, %2$@ %3$lld", stats.me.germs, partner, stats.partner.germs))
+            .petriCard(radius: 26, padding: 16)
+            .sheet(isPresented: $showLeagueShare) {
+                SharePreviewSheet(title: tr("Family league")) {
+                    FamilyLeagueShareCard(seasonNumber: model.season.number, places: places(entries, you: model.displayName))
+                }
+            }
         } else {
             Button {
                 nameDraft = ""
@@ -411,7 +415,7 @@ struct TrophiesScreen: View {
                 HStack(spacing: 14) {
                     BuddyView(look: model.data.partnerLook, size: 46)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("Couple duel"))
+                        Text(tr("Family league"))
                             .font(.body.weight(.semibold))
                             .foregroundStyle(palette.ink)
                         Text(tr("Add your partner"))
@@ -429,21 +433,20 @@ struct TrophiesScreen: View {
         }
     }
 
-    private func duelSide(look: Int, name: String) -> some View {
-        VStack(spacing: 2) {
-            BuddyView(look: look, size: 54, lively: true)
-            Text(name)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .lineLimit(1)
+    private func places(_ entries: [LeagueEntry], you: String) -> [PodiumPlace] {
+        entries.map { entry in
+            PodiumPlace(id: placeID(entry.person), look: model.look(of: entry.person),
+                        name: entry.person == .me ? you : model.name(for: entry.person), title: entry.title?.text,
+                        detail: trCount(entry.sickDays, one: "%lld sick day", other: "%lld sick days"))
         }
-        .frame(width: 74)
     }
 
-    private func duelLine(mine: Int, theirs: Int, partner: String) -> String {
-        if mine == theirs { return tr("A tie, for now.") }
-        if mine > theirs { return tr("You caught %lld more.", mine - theirs) }
-        return tr("%1$@ caught %2$lld more.", partner, theirs - mine)
+    private func placeID(_ person: Person) -> String {
+        switch person {
+        case .me: return "me"
+        case .partner: return "partner"
+        case .kid(let kidID): return kidID.uuidString
+        }
     }
 
     // MARK: - Links

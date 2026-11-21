@@ -1,7 +1,7 @@
 'use strict';
 
 // Petri crew server: private daycare groups, an anonymous outbreak radar,
-// a small feed with preset reactions, and the app's legal pages.
+// a small feed of germs caught and beaten with preset reactions, and the app's legal pages.
 
 const http = require('node:http');
 const crypto = require('node:crypto');
@@ -13,6 +13,7 @@ const GERM_IDS = new Set([
   'addy', 'meta', 'para', 'rota', 'coxy', 'slappy', 'lousy', 'wiggles', 'crusty', 'ringo', 'whoopy', 'poxy',
 ]);
 const REACTIONS = new Set(['soup', 'tissue', 'tea', 'heart']);
+const EVENT_KINDS = new Set(['caught', 'beat']);
 const REPORT_REASONS = new Set(['name', 'abuse', 'other']);
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_MEMBERS = 40;
@@ -230,6 +231,11 @@ function createApp(options = {}) {
     return member;
   }
 
+  // Events stored before wins existed have no kind: they are germs caught.
+  function kindOf(event) {
+    return event.kind || 'caught';
+  }
+
   function isMasked(memberID) {
     const reporters = new Set(db.reports.filter((report) => report.memberID === memberID && !report.resolved)
       .map((report) => report.reporterID));
@@ -242,15 +248,16 @@ function createApp(options = {}) {
     const members = db.members.filter((member) => member.crewID === crew.id);
     const events = db.events.filter((event) => event.crewID === crew.id);
     const since = seasonStart(now);
+    const caught = events.filter((event) => kindOf(event) === 'caught');
     const shown = (member) => ({
       id: member.id,
       name: isMasked(member.id) ? MASKED_NAME : member.name,
-      germs: events.filter((event) => event.memberID === member.id && event.named && event.at >= since).length,
+      germs: caught.filter((event) => event.memberID === member.id && event.named && event.at >= since).length,
       colorIndex: member.colorIndex,
     });
 
     const families = new Map();
-    for (const event of events) {
+    for (const event of caught) {
       if (now - event.at > RADAR_WINDOW) continue;
       if (!families.has(event.germID)) families.set(event.germID, new Set());
       families.get(event.germID).add(event.memberID);
@@ -275,7 +282,7 @@ function createApp(options = {}) {
         }
         return {
           id: event.id, memberID: event.memberID, name: author.name, colorIndex: author.colorIndex,
-          germID: event.germID, at: event.at, reactions, mine,
+          germID: event.germID, kind: kindOf(event), at: event.at, reactions, mine,
         };
       });
 
@@ -525,6 +532,9 @@ document.getElementById('form').addEventListener('submit', (event) => {
       limit(me.id, 'events');
       const body = await readBody(req);
       if (!GERM_IDS.has(body.germID)) throw new ApiError(400, 'invalid');
+      const kind = body.kind === undefined ? 'caught' : body.kind;
+      // A win only makes sense in the feed, under the member's name.
+      if (!EVENT_KINDS.has(kind) || (kind === 'beat' && body.named !== true)) throw new ApiError(400, 'invalid');
       // A retried share carries the same client ID and is stored once.
       const clientID = typeof body.clientID === 'string' && UUID_PATTERN.test(body.clientID) ? body.clientID : null;
       const repeated = clientID
@@ -532,7 +542,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
       if (!repeated) {
         limit(me.id, 'eventsPerDay');
         db.events.push({
-          id: crypto.randomUUID(), crewID: me.crewID, memberID: me.id, germID: body.germID,
+          id: crypto.randomUUID(), crewID: me.crewID, memberID: me.id, germID: body.germID, kind,
           at: clock(), named: body.named === true, reactions: {}, clientID,
         });
         purge();

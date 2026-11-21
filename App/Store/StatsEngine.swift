@@ -140,3 +140,85 @@ enum StatsEngine {
                            topSupplier: topSupplier, longestChain: longestChain)
     }
 }
+
+/// The family league's funny titles; each person wears one at most.
+enum LeagueTitle {
+    case ironWall
+    case patientZero
+    case germMagnet
+    case couchChampion
+
+    var text: String {
+        switch self {
+        case .ironWall: return tr("Iron wall")
+        case .patientZero: return tr("Patient zero")
+        case .germMagnet: return tr("Germ magnet")
+        case .couchChampion: return tr("Couch champion")
+        }
+    }
+}
+
+/// One member of the household in the family league.
+struct LeagueEntry: Hashable {
+    let person: Person
+    let sickDays: Int
+    let germs: Int
+    var title: LeagueTitle?
+}
+
+/// The whole household ranked by fewest sick days this season.
+enum LeagueEngine {
+    static func standings(data: AppData, catalog: GermCatalog, season: Season, now: Date) -> [LeagueEntry] {
+        let calendar = Calendar.current
+        let logs = data.logs.filter { season.contains($0.startedAt) }
+        func parent(_ person: Person, _ includes: (Sufferer) -> Bool) -> LeagueEntry {
+            let mine = logs.filter { includes($0.sufferer) }
+            return LeagueEntry(person: person, sickDays: mine.reduce(0) { $0 + $1.dayCount(now: now) }, germs: mine.count)
+        }
+        var entries = [parent(.me) { $0.includesMe }]
+        if data.partnerName != nil {
+            entries.append(parent(.partner) { $0.includesPartner })
+        }
+        for kid in data.kids {
+            let illnesses = data.kidIllnesses.filter { $0.kidID == kid.id && season.contains($0.startedAt) && $0.startedAt <= now }
+            let days = illnesses.reduce(0) { total, illness in
+                let end = DayEngine.kidEnd(illness, catalog: catalog, now: now)
+                let span = calendar.dateComponents([.day], from: calendar.startOfDay(for: illness.startedAt),
+                                                   to: calendar.startOfDay(for: end)).day ?? 0
+                return total + max(1, span + 1)
+            }
+            entries.append(LeagueEntry(person: .kid(kid.id), sickDays: days, germs: illnesses.count))
+        }
+        let ranked = entries.enumerated()
+            .sorted { ($0.element.sickDays, $0.element.germs, $0.offset) < ($1.element.sickDays, $1.element.germs, $1.offset) }
+            .map { $0.element }
+        return titled(ranked)
+    }
+
+    /// The leader is the iron wall; then the kid who brought the most germs home, the one who caught the most,
+    /// and the one sick the longest. Nobody gets a title while nobody stands apart.
+    private static func titled(_ ranked: [LeagueEntry]) -> [LeagueEntry] {
+        guard let first = ranked.first, let last = ranked.last, first.sickDays < last.sickDays else { return ranked }
+        var result = ranked
+        var free = Array(result.indices)
+        func give(_ title: LeagueTitle, to index: Int?) {
+            guard let index else { return }
+            result[index].title = title
+            free.removeAll { $0 == index }
+        }
+        func most(_ value: (LeagueEntry) -> Int, kidsOnly: Bool = false) -> Int? {
+            free.filter { value(result[$0]) > 0 && (!kidsOnly || isKid(result[$0].person)) }
+                .max { value(result[$0]) < value(result[$1]) }
+        }
+        give(.ironWall, to: 0)
+        give(.patientZero, to: most({ $0.germs }, kidsOnly: true))
+        give(.germMagnet, to: most { $0.germs })
+        give(.couchChampion, to: most { $0.sickDays })
+        return result
+    }
+
+    private static func isKid(_ person: Person) -> Bool {
+        if case .kid = person { return true }
+        return false
+    }
+}

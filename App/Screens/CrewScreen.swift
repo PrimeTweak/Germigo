@@ -140,7 +140,7 @@ private struct CrewTeaser: View {
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
                 VStack(alignment: .leading, spacing: 0) {
-                    row("dot.radiowaves.left.and.right", tr("Outbreak radar"), tr("A germ shows up once 2 families report it. No names."))
+                    row("dot.radiowaves.left.and.right", tr("Going around"), tr("A germ shows up once 2 families report it. No names."))
                     Divider()
                     row("hand.thumbsup.fill", tr("Soup, tissues, tea"), tr("Send a little support when someone goes down."))
                     Divider()
@@ -364,7 +364,7 @@ private struct ReportTarget: Identifiable {
     let name: String
 }
 
-/// The crew itself: feed, radar, leaderboard and members.
+/// The crew itself: who is in it, what is going around, the feed, the leaderboard and the members.
 private struct CrewHome: View {
     let state: CrewState
     @Environment(AppModel.self) private var model
@@ -377,8 +377,8 @@ private struct CrewHome: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 header
-                feed
                 radar
+                feed
                 leaderboard
                 members
                 Text(footnote)
@@ -438,30 +438,57 @@ private struct CrewHome: View {
         }
     }
 
+    /// A member's character: the parent's own look for them, the crew's color for the others.
+    private func look(of member: CrewMember) -> Int {
+        member.id == state.me.id ? model.data.hostLook : member.colorIndex
+    }
+
     private var header: some View {
-        HStack(spacing: 14) {
-            Image(systemName: CrewEmblem.symbol(state.crew.emblem))
-                .font(.title2)
-                .foregroundStyle(Color.white)
-                .frame(width: 58, height: 58)
-                .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
-                                           startPoint: .top, endPoint: .bottom),
-                            in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(state.crew.name)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                Text(tr("Daycare group") + " · " + trCount(state.crew.families, one: "%lld family", other: "%lld families"))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
+        let faces = state.members.filter { !crew.blockedIDs.contains($0.id) }.prefix(6)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 14) {
+                Image(systemName: CrewEmblem.symbol(state.crew.emblem))
+                    .font(.title2)
+                    .foregroundStyle(Color.white)
+                    .frame(width: 60, height: 60)
+                    .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
+                                               startPoint: .top, endPoint: .bottom),
+                                in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(state.crew.name)
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                        .lineLimit(1)
+                    Text(tr("Daycare group") + " · " + trCount(state.crew.families, one: "%lld family", other: "%lld families"))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 0)
+            }
+            Rectangle()
+                .fill(palette.ink.opacity(0.1))
+                .frame(height: 1)
+                .padding(.vertical, 12)
+            HStack(spacing: 8) {
+                HStack(spacing: -6) {
+                    ForEach(Array(faces.enumerated()), id: \.element.id) { item in
+                        BuddyView(look: look(of: item.element), size: 40)
+                            .cascadeIn(item.offset)
+                    }
+                }
+                Spacer(minLength: 8)
                 Label(tr("Private · invite only"), systemImage: "lock.fill")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(palette.inkTertiary)
+                    .foregroundStyle(palette.inkSecondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
-            Spacer(minLength: 0)
         }
-        .petriCard()
+        .padding(16)
+        .background(LinearGradient(colors: [Color(hex: Swatch.coralPale).opacity(palette.isDark ? 0.25 : 0.45), palette.surface],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing),
+                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     @ViewBuilder
@@ -474,68 +501,51 @@ private struct CrewHome: View {
                 .petriCard()
         } else {
             ForEach(crew.visibleFeed.prefix(20)) { event in
-                FeedRow(event: event, isMine: event.memberID == state.me.id) {
+                let isMine = event.memberID == state.me.id
+                FeedRow(event: event, isMine: isMine, look: isMine ? model.data.hostLook : event.colorIndex) {
                     reportTarget = ReportTarget(id: event.memberID, name: event.name)
                 }
             }
         }
     }
 
-    @ViewBuilder
     private var radar: some View {
-        SectionHeader(title: tr("Outbreak radar"), trailing: tr("This week"))
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionHeader(title: tr("Going around"), trailing: tr("This week"))
             if state.radar.isEmpty {
                 Text(tr("All clear. For now."))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
-                    .padding(16)
             }
             ForEach(Array(state.radar.enumerated()), id: \.element.id) { item in
-                if item.offset > 0 {
-                    Divider()
-                }
                 RadarRow(entry: item.element, families: state.crew.families)
-                    .padding(.vertical, 10)
+                    .cascadeIn(item.offset)
             }
-            Divider()
             Label(tr("A germ shows up once 2 families report it. No names."), systemImage: "shield.lefthalf.filled")
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
         }
-        .petriCard(padding: 0)
+        .petriCard(radius: 26, padding: 16)
     }
 
     @ViewBuilder
     private var leaderboard: some View {
-        if !crew.leaderboard.isEmpty {
-            SectionHeader(title: tr("Most Valuable Patient"), trailing: tr("Season"))
-            VStack(spacing: 0) {
-                ForEach(Array(crew.leaderboard.prefix(5).enumerated()), id: \.element.id) { item in
-                    if item.offset > 0 {
-                        Divider()
-                    }
-                    HStack(spacing: 12) {
-                        Text(String(item.offset + 1))
-                            .font(.headline.monospacedDigit())
-                            .foregroundStyle(item.offset == 0 ? palette.ink : palette.inkTertiary)
-                            .frame(width: 22)
-                        AvatarView(name: item.element.name, gradient: AvatarColors.gradient(item.element.colorIndex), size: 36)
-                        Text(item.element.id == state.me.id ? tr("You") : item.element.name)
-                            .font(.callout.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                        Spacer()
-                        Text(trCount(item.element.germs, one: "%lld germ", other: "%lld germs"))
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                    }
-                    .padding(.vertical, 10)
-                }
+        let board = Array(crew.leaderboard.prefix(5))
+        if !board.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: tr("Most Valuable Patient"), trailing: tr("Season"))
+                Text(tr("A leaderboard nobody wants to win."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.top, 2)
+                Podium(places: board.map { member in
+                    PodiumPlace(id: member.id, look: look(of: member), sick: true,
+                                name: member.id == state.me.id ? tr("You") : member.name,
+                                detail: trCount(member.germs, one: "%lld germ", other: "%lld germs"))
+                })
+                .padding(.top, 14)
             }
-            .padding(.horizontal, 16)
-            .petriCard(padding: 0)
+            .petriCard(radius: 26, padding: 16)
         }
     }
 
@@ -550,9 +560,9 @@ private struct CrewHome: View {
                         Divider()
                     }
                     HStack(spacing: 12) {
-                        AvatarView(name: item.element.name, gradient: AvatarColors.gradient(item.element.colorIndex), size: 36)
+                        BuddyView(look: look(of: item.element), size: 36)
                         Text(item.element.name)
-                            .font(.callout)
+                            .font(.callout.weight(.semibold))
                             .foregroundStyle(palette.ink)
                         Spacer()
                         MemberMenu {
@@ -604,31 +614,41 @@ private struct MemberMenu: View {
     }
 }
 
+/// One post of the feed: who caught or beat which germ, and the stickers sent back.
 private struct FeedRow: View {
     let event: FeedEvent
     let isMine: Bool
+    let look: Int
     let onReport: () -> Void
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// How many times each sticker was just sent, to replay its flight.
+    @State private var flights: [String: Int] = [:]
+
+    private struct Flight {
+        var rise: CGFloat = 0
+        var scale: CGFloat = 0.6
+        var opacity: Double = 0
+    }
 
     var body: some View {
         if let germ = model.catalog.germ(event.germID) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
-                    AvatarView(name: event.name, gradient: AvatarColors.gradient(event.colorIndex), size: 42)
+                    BuddyView(look: look, sick: !event.isWin, size: 46)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(isMine ? tr("You caught %@", germ.phrase.value) : tr("%1$@ caught %2$@", event.name, germ.phrase.value))
+                        Text(headline(germ))
                             .font(.callout.weight(.semibold))
                             .foregroundStyle(palette.ink)
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(event.date.formatted(.relative(presentation: .named)) + " · " + tr("Card %@", germ.numberLabel))
+                        Text(event.date.formatted(.relative(presentation: .named)))
                             .font(.footnote)
                             .foregroundStyle(palette.inkSecondary)
                     }
                     Spacer(minLength: 4)
-                    GermImage(germ: germ, size: 38, silhouette: model.count(of: germ.id) == 0)
-                        .foregroundStyle(palette.ink.opacity(0.3))
+                    germTile(germ)
                     if !isMine {
                         MemberMenu {
                             onReport()
@@ -643,8 +663,40 @@ private struct FeedRow: View {
                     }
                 }
             }
-            .petriCard(radius: 22, padding: 14)
+            .padding(14)
+            .background(event.isWin ? Color(hex: Swatch.lime).opacity(palette.isDark ? 0.16 : 0.24) : palette.surface,
+                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
+    }
+
+    private func headline(_ germ: Germ) -> String {
+        if event.isWin {
+            return isMine ? tr("You beat %@", germ.phrase.value) : tr("%1$@ beat %2$@", event.name, germ.phrase.value)
+        }
+        return isMine ? tr("You caught %@", germ.phrase.value) : tr("%1$@ caught %2$@", event.name, germ.phrase.value)
+    }
+
+    /// The germ on its tint; once beaten, faded, tilted and stamped.
+    private func germTile(_ germ: Germ) -> some View {
+        GermImage(germ: germ, size: 42, silhouette: !event.isWin && model.count(of: germ.id) == 0)
+            .foregroundStyle(palette.ink.opacity(0.3))
+            .saturation(event.isWin ? 0.35 : 1)
+            .rotationEffect(.degrees(event.isWin ? -14 : 0))
+            .frame(width: 52, height: 52)
+            .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                if event.isWin {
+                    Text(verbatim: "K.O.")
+                        .font(.system(size: 11, weight: .black))
+                        .foregroundStyle(Color.white)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .rotationEffect(.degrees(8))
+                        .offset(x: 7, y: -7)
+                }
+            }
+            .accessibilityHidden(true)
     }
 
     private func reaction(_ kind: String) -> some View {
@@ -652,6 +704,7 @@ private struct FeedRow: View {
         let mine = event.mine.contains(kind)
         return Button {
             Haptics.tap()
+            if !mine && !reduceMotion { flights[kind, default: 0] += 1 }
             Task {
                 await crew.react(to: event.id, kind: kind)
             }
@@ -660,25 +713,60 @@ private struct FeedRow: View {
                 Image("sticker-" + kind)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                 if count > 0 {
                     Text(String(count))
                         .font(.footnote.weight(.bold).monospacedDigit())
                         .foregroundStyle(palette.ink)
+                        .contentTransition(.numericText())
                 }
             }
-            .padding(.horizontal, 10)
-            .frame(height: 38)
-            .frame(minWidth: 48)
+            .padding(.horizontal, 11)
+            .frame(height: 42)
+            .frame(minWidth: 54)
             .background(mine ? palette.accent.opacity(0.35) : palette.ink.opacity(0.06), in: Capsule())
             .overlay {
                 Capsule().strokeBorder(mine ? palette.ink : Color.clear, lineWidth: 2)
             }
+            .animation(.snappy, value: count)
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .top) {
+            flight(kind)
+        }
         .accessibilityLabel(reactionName(kind))
         .accessibilityValue(String(count))
         .accessibilityAddTraits(mine ? .isSelected : [])
+    }
+
+    /// The sticker leaving the button when it is sent.
+    private func flight(_ kind: String) -> some View {
+        Image("sticker-" + kind)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 40, height: 40)
+            .keyframeAnimator(initialValue: Flight(), trigger: flights[kind] ?? 0) { content, value in
+                content
+                    .scaleEffect(value.scale)
+                    .offset(y: value.rise)
+                    .opacity(value.opacity)
+            } keyframes: { _ in
+                KeyframeTrack(\.rise) {
+                    CubicKeyframe(-8, duration: 0.05)
+                    CubicKeyframe(-84, duration: 0.75)
+                }
+                KeyframeTrack(\.scale) {
+                    CubicKeyframe(1.3, duration: 0.25)
+                    CubicKeyframe(1, duration: 0.55)
+                }
+                KeyframeTrack(\.opacity) {
+                    LinearKeyframe(1, duration: 0.05)
+                    LinearKeyframe(1, duration: 0.45)
+                    LinearKeyframe(0, duration: 0.3)
+                }
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
     }
 
     private func reactionName(_ kind: String) -> String {
@@ -773,8 +861,8 @@ private struct CrewSettingsSheet: View {
     }
 }
 
-/// One illness on the crew radar: how many families reported it this week.
-struct RadarRow: View {
+/// One germ going around: its face, how many families reported it this week, out of the whole crew.
+private struct RadarRow: View {
     let entry: RadarEntry
     let families: Int
     @Environment(AppModel.self) private var model
@@ -782,23 +870,41 @@ struct RadarRow: View {
 
     var body: some View {
         if let germ = model.catalog.germ(entry.germID) {
+            let total = max(families, entry.families, 1)
             HStack(spacing: 12) {
-                GermImage(germ: germ, size: 34)
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text(germ.illness.value)
-                            .font(.callout.weight(.semibold))
+                GermImage(germ: germ, size: 42)
+                    .frame(width: 54, height: 54)
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(germ.name)
+                            .font(.body.weight(.bold))
                             .foregroundStyle(palette.ink)
-                        Spacer()
-                        Text(trCount(entry.families, one: "%lld family", other: "%lld families"))
+                        Text(germ.illness.value)
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
+                            .lineLimit(1)
+                        Spacer(minLength: 4)
+                        Text(tr("%1$lld of %2$lld", entry.families, total))
+                            .font(.subheadline.weight(.semibold))
+                            .monospacedDigit()
+                            .foregroundStyle(palette.ink)
                     }
-                    ProgressView(value: Double(entry.families), total: Double(max(families, entry.families, 1)))
-                        .tint(palette.accent)
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(palette.ink.opacity(0.09))
+                            Capsule()
+                                .fill(germ.deepTint)
+                                .frame(width: proxy.size.width * CGFloat(entry.families) / CGFloat(total))
+                        }
+                    }
+                    .frame(height: 10)
                 }
             }
-            .padding(.horizontal, 16)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(germ.name + ", " + germ.illness.value)
+            .accessibilityValue(trCount(entry.families, one: "%lld family", other: "%lld families"))
         }
     }
 }

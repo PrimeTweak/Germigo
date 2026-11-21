@@ -32,14 +32,16 @@ final class CrewStore {
         static let radarSeen = "crew.radarSeen"
         static let state = "crew.state"
         static let pending = "crew.pending"
+        static let sharedLogs = "crew.sharedLogs"
     }
 
-    /// A germ share that has not reached the server yet.
+    /// A germ share, caught or beaten, that has not reached the server yet.
     private struct PendingShare: Codable {
         let id: String
         let germID: String
         let named: Bool
         let queuedAt: Date
+        let kind: String?
     }
 
     private struct CreateBody: Encodable {
@@ -57,6 +59,7 @@ final class CrewStore {
         let germID: String
         let named: Bool
         let clientID: String
+        let kind: String?
     }
 
     private struct ReactionBody: Encodable {
@@ -119,6 +122,12 @@ final class CrewStore {
         set {
             UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: Keys.pending)
         }
+    }
+
+    /// Logs posted under the crew name, newest last, so their end can be posted too.
+    private var sharedLogIDs: [String] {
+        get { UserDefaults.standard.stringArray(forKey: Keys.sharedLogs) ?? [] }
+        set { UserDefaults.standard.set(Array(newValue.suffix(Self.pendingLimit)), forKey: Keys.sharedLogs) }
     }
 
     var visibleFeed: [FeedEvent] {
@@ -203,7 +212,8 @@ final class CrewStore {
 
     /// Adds a logged germ to the radar, and to the feed when the name is shared.
     /// The share is queued first, so it survives a lost connection.
-    func reportGerm(_ germID: String) async {
+    func reportGerm(_ germID: String, logID: UUID) async {
+        if sharesName { sharedLogIDs.append(logID.uuidString) }
         #if PETRI_SIDELOAD
         if isDemo {
             demoReport(germID)
@@ -211,7 +221,25 @@ final class CrewStore {
         }
         #endif
         guard isMember, isConfigured else { return }
-        let share = PendingShare(id: UUID().uuidString.lowercased(), germID: germID, named: sharesName, queuedAt: Date())
+        let share = PendingShare(id: UUID().uuidString.lowercased(), germID: germID, named: sharesName, queuedAt: Date(),
+                                 kind: nil)
+        pendingShares = Array((pendingShares + [share]).suffix(Self.pendingLimit))
+        await flushPending()
+    }
+
+    /// Posts a recovery to the feed, only for a germ that was posted there under the crew name.
+    func reportWin(_ germID: String, logID: UUID) async {
+        guard sharesName, sharedLogIDs.contains(logID.uuidString) else { return }
+        sharedLogIDs.removeAll { $0 == logID.uuidString }
+        #if PETRI_SIDELOAD
+        if isDemo {
+            demoWin(germID)
+            return
+        }
+        #endif
+        guard isMember, isConfigured else { return }
+        let share = PendingShare(id: UUID().uuidString.lowercased(), germID: germID, named: true, queuedAt: Date(),
+                                 kind: "beat")
         pendingShares = Array((pendingShares + [share]).suffix(Self.pendingLimit))
         await flushPending()
     }
@@ -225,7 +253,8 @@ final class CrewStore {
         while isMember, let next = pendingShares.first {
             do {
                 let fresh: CrewState = try await client().send(
-                    "POST", "v1/crew/events", EventBody(germID: next.germID, named: next.named, clientID: next.id))
+                    "POST", "v1/crew/events", EventBody(germID: next.germID, named: next.named, clientID: next.id,
+                                                        kind: next.kind))
                 store(fresh)
             } catch let error as CrewAPIError {
                 if error.code == "unauthorized" {
@@ -315,7 +344,7 @@ final class CrewStore {
         Keychain.set(nil, for: Keys.token)
         isMember = false
         state = nil
-        for key in [Keys.radarSeen, Keys.state, Keys.pending] {
+        for key in [Keys.radarSeen, Keys.state, Keys.pending, Keys.sharedLogs] {
             UserDefaults.standard.removeObject(forKey: key)
         }
     }
@@ -368,6 +397,8 @@ extension CrewStore {
         let feed = [
             FeedEvent(id: "demo-event-1", memberID: "demo-1", name: "Maude", colorIndex: 1, germID: "noro",
                       at: now - 3 * hour, reactions: ["soup": 2, "tissue": 1], mine: []),
+            FeedEvent(id: "demo-event-4", memberID: "demo-2", name: "Karim", colorIndex: 2, germID: "rhino",
+                      at: now - 5 * hour, reactions: ["heart": 2], mine: [], kind: "beat"),
             FeedEvent(id: "demo-event-2", memberID: "demo-2", name: "Karim", colorIndex: 2, germID: "rhino",
                       at: now - 26 * hour, reactions: ["tea": 1], mine: ["tea"]),
             FeedEvent(id: "demo-event-3", memberID: "demo-3", name: "Jo", colorIndex: 3, germID: "coxy",
@@ -404,6 +435,14 @@ extension CrewStore {
         demoUpdate(me: me, radar: radar, feed: feed)
     }
 
+    private func demoWin(_ germID: String) {
+        guard let current = state else { return }
+        let win = FeedEvent(id: UUID().uuidString, memberID: current.me.id, name: current.me.name,
+                            colorIndex: current.me.colorIndex, germID: germID, at: Date().timeIntervalSince1970 * 1000,
+                            reactions: [:], mine: [], kind: "beat")
+        demoUpdate(feed: [win] + current.feed)
+    }
+
     private func demoReact(to eventID: String, kind: String) {
         guard let current = state else { return }
         let feed = current.feed.map { event -> FeedEvent in
@@ -418,7 +457,7 @@ extension CrewStore {
                 reactions[kind, default: 0] += 1
             }
             return FeedEvent(id: event.id, memberID: event.memberID, name: event.name, colorIndex: event.colorIndex,
-                             germID: event.germID, at: event.at, reactions: reactions, mine: mine)
+                             germID: event.germID, at: event.at, reactions: reactions, mine: mine, kind: event.kind)
         }
         demoUpdate(feed: feed)
     }

@@ -190,10 +190,10 @@ struct NapCouponCard: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, 6)
                 VStack(alignment: .leading, spacing: 10) {
-                    line(tr("Holder"), from)
-                    line(tr("Owed by"), to ?? tr("Whoever is still standing"))
-                    line(tr("Reason"), germ.illness.value)
-                    line(tr("Valid"), tr("Until the germ leaves"))
+                    CardLine(label: tr("Holder"), value: from)
+                    CardLine(label: tr("Owed by"), value: to ?? tr("Whoever is still standing"))
+                    CardLine(label: tr("Reason"), value: germ.illness.value)
+                    CardLine(label: tr("Valid"), value: tr("Until the germ leaves"))
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -210,16 +210,96 @@ struct NapCouponCard: View {
         }
         .frame(width: 360, height: 640)
     }
+}
 
-    private func line(_ label: String, _ value: String) -> some View {
+/// A label and its value on the coupon and the wanted poster.
+private struct CardLine: View {
+    let label: String
+    let value: String
+
+    var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(label.uppercased())
                 .font(.system(size: 11, weight: .heavy))
                 .kerning(0.8)
                 .opacity(0.5)
-                .frame(width: 84, alignment: .leading)
+                .frame(width: 92, alignment: .leading)
             Text(value)
                 .font(.system(size: 16, weight: .semibold))
+        }
+    }
+}
+
+/// A wanted poster for the germ that took down someone at home.
+struct WantedShareCard: View {
+    let germ: Germ
+    let target: String
+    let since: Date
+
+    /// A reward picked by the germ, so the same germ always offers the same one.
+    private var reward: String {
+        let rewards = [tr("One full night of sleep"), tr("A hot coffee, still hot"), tr("Ten quiet minutes"), tr("A clean couch")]
+        return rewards[abs(germ.number) % rewards.count]
+    }
+
+    private var sinceText: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(since) { return tr("Today") }
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: since), to: calendar.startOfDay(for: Date())).day ?? 0
+        return days < 7 ? since.formatted(.dateTime.weekday(.wide)) : since.formatted(.dateTime.month(.abbreviated).day())
+    }
+
+    var body: some View {
+        ZStack {
+            Color(hex: Swatch.chalk)
+            VStack(spacing: 0) {
+                HazardStripes()
+                    .frame(height: 22)
+                Spacer(minLength: 0)
+                GermImage(germ: germ, size: 150)
+                Text(tr("Wanted").uppercased())
+                    .font(.system(size: 46, weight: .black))
+                    .kerning(-0.5)
+                    .padding(.top, 10)
+                Text(tr("For taking down %@.", target))
+                    .font(.system(size: 17, weight: .semibold))
+                    .opacity(0.65)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 6)
+                VStack(alignment: .leading, spacing: 10) {
+                    CardLine(label: tr("Alias"), value: germ.illness.value)
+                    CardLine(label: tr("Target"), value: target)
+                    CardLine(label: tr("Loose since"), value: sinceText)
+                    CardLine(label: tr("Reward"), value: reward)
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .padding(.horizontal, 26)
+                .padding(.top, 22)
+                Spacer(minLength: 0)
+                ShareWordmark(color: Color(hex: Swatch.night))
+                    .padding(.bottom, 26)
+                HazardStripes()
+                    .frame(height: 22)
+            }
+            .foregroundStyle(Color(hex: Swatch.night))
+        }
+        .frame(width: 360, height: 640)
+    }
+}
+
+/// A kid's illness as a wanted poster, ready to share.
+struct WantedSheet: View {
+    let illness: KidIllness
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        if let germ = model.catalog.germ(illness.germID) {
+            SharePreviewSheet(title: tr("Wanted")) {
+                WantedShareCard(germ: germ, target: model.name(for: .kid(illness.kidID)), since: illness.startedAt)
+            }
         }
     }
 }

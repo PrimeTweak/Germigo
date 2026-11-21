@@ -31,8 +31,11 @@ struct FeedEvent: Codable, Identifiable, Hashable {
     let at: Double
     let reactions: [String: Int]
     let mine: [String]
+    /// "beat" for a germ beaten; absent or "caught" for a germ caught.
+    var kind: String?
 
     var date: Date { Date(timeIntervalSince1970: at / 1000) }
+    var isWin: Bool { kind == "beat" }
 }
 
 struct CrewState: Codable, Hashable {

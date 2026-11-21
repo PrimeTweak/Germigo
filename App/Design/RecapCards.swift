@@ -130,3 +130,111 @@ struct MonthRecapCard: View {
         .background(Color.white.opacity(0.55), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
+
+/// A kid standing over the germ they beat, the germ faded and stamped K.O.
+struct KidKnockout: View {
+    let look: Int
+    let germ: Germ
+    var size: CGFloat = 150
+    var lively = false
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 4) {
+            BuddyView(look: look, size: size, lively: lively)
+            GermImage(germ: germ, size: size * 0.66)
+                .saturation(0.35)
+                .rotationEffect(.degrees(-14))
+                .overlay(alignment: .topTrailing) {
+                    Text(verbatim: "K.O.")
+                        .font(.system(size: size * 0.13, weight: .black))
+                        .foregroundStyle(Color.white)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .rotationEffect(.degrees(8))
+                        .offset(x: 8, y: -8)
+                }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// The score between a kid and a germ: every win of the kid against the germ's none.
+struct KidScore: View {
+    let name: String
+    let wins: Int
+    let germ: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            side(name)
+            number(wins)
+            Text(verbatim: "–")
+                .font(.system(size: 30, weight: .bold))
+                .opacity(0.4)
+            number(0)
+            side(germ)
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 12)
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tr("%1$@ %2$lld, %3$@ %4$lld", name, wins, germ, 0))
+    }
+
+    private func side(_ text: String) -> some View {
+        Text(text)
+            .font(.system(size: 17, weight: .semibold))
+            .opacity(0.75)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+    }
+
+    private func number(_ value: Int) -> some View {
+        Text(verbatim: String(value))
+            .font(.system(size: 46, weight: .heavy))
+            .monospacedDigit()
+    }
+}
+
+/// A kid's win over a germ, sized for stories.
+struct KidVictoryShareCard: View {
+    let victory: KidVictory
+
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
+            RadialGradient(colors: [victory.germ.deepTint.opacity(0.55), Color.clear], center: UnitPoint(x: 0.5, y: 0.42),
+                           startRadius: 0, endRadius: 230)
+            VStack(spacing: 0) {
+                PillLabel(text: tr("Boss defeated").uppercased(), foreground: Color(hex: Swatch.night),
+                          background: Color(hex: Swatch.lime))
+                    .padding(.top, 44)
+                Text(tr("%1$@ beat %2$@!", victory.kid.name, victory.germ.name))
+                    .font(.system(size: 34, weight: .black))
+                    .kerning(-0.5)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.7)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                Text(victory.germ.illness.value + " · " + trCount(victory.days, one: "%lld day", other: "%lld days"))
+                    .font(.system(size: 16, weight: .semibold))
+                    .opacity(0.7)
+                    .padding(.top, 6)
+                KidKnockout(look: victory.kid.colorIndex, germ: victory.germ, size: 130)
+                    .padding(.top, 28)
+                KidScore(name: victory.kid.name, wins: victory.wins, germ: victory.germ.name)
+                    .padding(.top, 22)
+                Spacer(minLength: 0)
+                Text(tr("Back to full volume."))
+                    .font(.system(size: 22, weight: .heavy))
+                    .padding(.bottom, 14)
+                ShareWordmark()
+                    .padding(.bottom, 36)
+            }
+            .foregroundStyle(Color.white)
+        }
+        .frame(width: 360, height: 640)
+    }
+}

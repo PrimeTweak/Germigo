@@ -25,6 +25,8 @@ struct KidIllnessForm: View {
     let seed: KidFormSeed
     /// Closes the sheet once the illness is added.
     let onDone: () -> Void
+    /// Receives the illness as soon as it is added.
+    let onAdded: (KidIllness) -> Void
 
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -37,9 +39,10 @@ struct KidIllnessForm: View {
     @State private var added: KidIllness?
     @State private var didPrefill = false
 
-    init(seed: KidFormSeed, onDone: @escaping () -> Void) {
+    init(seed: KidFormSeed, onDone: @escaping () -> Void, onAdded: @escaping (KidIllness) -> Void = { _ in }) {
         self.seed = seed
         self.onDone = onDone
+        self.onAdded = onAdded
     }
 
     /// False for the germs that have no known incubation window, so nothing to watch.
@@ -166,6 +169,7 @@ struct KidIllnessForm: View {
         guard let target else { return }
         saved = true
         let illness = model.addKidIllness(kidID: target, germID: germID, startedAt: startedAt, symptoms: seed.symptoms)
+        onAdded(illness)
         if watch && hasWindow {
             Task {
                 _ = await NotificationManager.requestAuthorization()

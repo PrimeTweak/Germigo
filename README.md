@@ -10,7 +10,7 @@ The workflow, in order:
 
 1. `tools/check_repo.py` and `tools/check_swift.py`: the repository is complete and consistent.
 2. `server/test.js`: crew server tests.
-3. `tools/run_logic_tests.sh`: journal rules, streaks, badges, levels, skill tree, milestones, couple duel, season story, stats and journal decoding, compiled and run on the build machine. It does not stop the build.
+3. `tools/run_logic_tests.sh`: journal rules, streaks, badges, levels, skill tree, milestones, couple duel, family league, season story, stats and journal decoding, compiled and run on the build machine. It does not stop the build.
 4. A type check of every Swift file, when the **typecheck** box is ticked. It does not stop the build; it lists all compiler errors at once in the step log and in `build-logs-<run>`.
 5. `tools/check_links.py`: requests every source link shown in the app. A site that refuses scripts is listed as blocked, which means not verified. Informational.
 6. XcodeGen generates `Petri.xcodeproj` from `project.yml`, then `xcodebuild` builds without signing.

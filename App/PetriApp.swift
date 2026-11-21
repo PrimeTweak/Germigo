@@ -153,22 +153,15 @@ struct MainTabs: View {
         .fullScreenCover(item: $model.pendingVictory) { victory in
             VictoryView(victory: victory)
         }
+        .fullScreenCover(item: $model.pendingKidVictory) { victory in
+            KidVictoryView(victory: victory)
+        }
         .sheet(item: $model.pendingMilestone) { event in
             SharePreviewSheet(title: tr("Milestone unlocked")) {
                 MilestoneShareCard(days: event.days)
             }
             .onAppear {
                 Haptics.success()
-            }
-        }
-        .overlay {
-            if let start = model.confettiAt {
-                ConfettiView(start: start)
-                    .ignoresSafeArea()
-                    .task(id: start) {
-                        try? await Task.sleep(nanoseconds: 3_500_000_000)
-                        if model.confettiAt == start { model.confettiAt = nil }
-                    }
             }
         }
         .overlay(alignment: .top) {

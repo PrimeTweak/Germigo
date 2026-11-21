@@ -6,17 +6,20 @@ struct DayRoute: Hashable {
 }
 
 extension AppModel {
-    /// Marks a kid better with the cheer that goes with it: a haptic, a toast and, motion allowing, confetti.
-    func cheerKidBetter(_ ids: [UUID], on day: Date, motion: Bool) {
+    /// Marks a kid better, then opens their victory: how long it took and their score against the germ.
+    func cheerKidBetter(_ ids: [UUID], on day: Date) {
         guard let first = data.kidIllnesses.first(where: { ids.contains($0.id) }) else { return }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
             for id in ids { markKidBetter(id, on: day) }
         }
         Haptics.success()
-        if let germ = catalog.germ(first.germID) {
-            toast = tr("%1$@ beat %2$@!", name(for: .kid(first.kidID)), germ.name)
-        }
-        if motion { confettiAt = Date() }
+        guard let child = kid(first.kidID), let germ = catalog.germ(first.germID),
+              let ended = data.kidIllnesses.first(where: { $0.id == first.id }) else { return }
+        let calendar = Calendar.current
+        let span = calendar.dateComponents([.day], from: calendar.startOfDay(for: ended.startedAt),
+                                           to: calendar.startOfDay(for: ended.endedAt ?? day)).day ?? 0
+        let wins = data.kidIllnesses.filter { $0.kidID == child.id && $0.germID == germ.id && $0.endedAt != nil }.count
+        pendingKidVictory = KidVictory(kid: child, germ: germ, days: max(1, span + 1), wins: max(1, wins))
     }
 
     func look(of person: Person) -> Int {
@@ -172,7 +175,6 @@ private struct DayCard: View {
     let photos: [PatientPhoto]
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var seed: PhotoSeed?
 
     var body: some View {
@@ -265,7 +267,7 @@ private struct DayCard: View {
                 }
             } else {
                 pill(isToday ? tr("%@ is better", name) : tr("Better on this day")) {
-                    model.cheerKidBetter([illnessID], on: day, motion: !reduceMotion)
+                    model.cheerKidBetter([illnessID], on: day)
                 }
             }
         } else if entry.person == .me, isToday, let logID = entry.logID,

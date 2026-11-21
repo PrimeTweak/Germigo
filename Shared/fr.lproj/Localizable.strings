@@ -1,12 +1,13 @@
 /* Generated from the keys used in code. Keys are the English text. */
 
+"%1$@ %2$lld, %3$@ %4$lld" = "%1$@ %2$lld, %3$@ %4$lld";
 "%1$@ and %2$@" = "%1$@ et %2$@";
+"%1$@ beat %2$@" = "%1$@ a battu %2$@";
 "%1$@ beat %2$@!" = "%1$@ a battu %2$@ !";
 "%1$@ brought home %2$@" = "%1$@ a ramené %2$@";
 "%1$@ catch +%2$lld" = "Prise %1$@ +%2$lld";
 "%1$@ caught %2$@" = "%1$@ a attrapé %2$@";
 "%1$@ caught %2$@!" = "%1$@ a attrapé %2$@ !";
-"%1$@ caught %2$lld more." = "%1$@ en a attrapé %2$lld de plus.";
 "%1$@ is at %2$lld%%" = "%1$@ est à %2$lld %%";
 "%1$@ is your nemesis: %2$lld times already." = "%1$@ est ton ennemi juré : déjà %2$lld fois.";
 "%1$@ to %2$@" = "De %1$@ à %2$@";
@@ -72,6 +73,8 @@
 "%lld pts" = "%lld pts";
 "%lld question · about a minute" = "%lld question · environ une minute";
 "%lld questions · about a minute" = "%lld questions · environ une minute";
+"%lld sick day" = "%lld jour malade";
+"%lld sick days" = "%lld jours malade";
 "%lld suspects" = "%lld suspects";
 "%lld time" = "%lld fois";
 "%lld times" = "%lld fois";
@@ -80,18 +83,20 @@
 "+%lld Sick Points" = "+%lld points malades";
 "3 AM Philosopher" = "Philosophe de 3 h du matin";
 "A backup goes where you save it. Petri never uploads it." = "Une sauvegarde va où tu la mets. Petri ne la téléverse jamais.";
+"A clean couch" = "Un divan propre";
 "A germ shows up once 2 families report it. No names." = "Un microbe apparaît quand 2 familles le signalent. Sans nom.";
 "A guess for your logbook, not a diagnosis." = "Une piste pour ton journal, pas un diagnostic.";
+"A hot coffee, still hot" = "Un café chaud, encore chaud";
 "A kid" = "Un enfant";
 "A kid is sick" = "Un enfant est malade";
 "A leaderboard nobody wants to win." = "Un classement que personne ne veut gagner.";
+"A new kid" = "Un nouvel enfant";
 "A new quiz tomorrow." = "Un nouveau quiz demain.";
 "A newer germ is in your journal, so this one has an end date." = "Un microbe plus récent est dans ton journal, alors celui-ci a une date de fin.";
 "A nurse answers day and night in most provinces. In Québec it's Info-Santé." = "Une infirmière répond jour et nuit dans la plupart des provinces. Au Québec, c'est Info-Santé.";
 "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses." = "Pour un enfant d'un an, la première année de garderie, c'est environ 12 à 15 infections respiratoires, 2 gastros et 1 ou 2 maladies avec éruption.";
 "A reminder due between 10 PM and 7 AM waits until morning." = "Un rappel prévu entre 22 h et 7 h attend le matin.";
 "A sample crew for this test build. Nothing leaves this phone." = "Un groupe d'exemple pour cette version de test. Rien ne quitte ce téléphone.";
-"A tie, for now." = "Égalité, pour l'instant.";
 "A wide and unwanted collection." = "Une collection vaste et non désirée.";
 "About Petri" = "À propos de Petri";
 "Active" = "Active";
@@ -99,12 +104,14 @@
 "Add a kid" = "Ajouter un enfant";
 "Add a kid's germ" = "Ajouter le microbe d'un enfant";
 "Add a photo" = "Ajouter une photo";
+"Add them in one step" = "En une seule étape";
 "Add your partner" = "Ajoute ton ou ta partenaire";
 "Add your partner in Settings, under Family, to start the couple duel." = "Ajoute ton partenaire dans les réglages, sous Famille, pour lancer le duel de couple.";
 "Adds 1 to the radar and posts to the feed." = "Ajoute 1 au radar et publie dans le fil.";
 "Adds 1 to the radar. No name shared." = "Ajoute 1 au radar. Aucun nom partagé.";
 "Advice for children: %@" = "Conseils pour les enfants : %@";
 "Airways" = "Voies respiratoires";
+"Alias" = "Alias";
 "All %lld" = "Tous les %lld";
 "All clear" = "Tout va bien";
 "All clear. For now." = "Rien à signaler. Pour l'instant.";
@@ -125,6 +132,7 @@
 "Back on their feet" = "De retour sur pied";
 "Back on your feet in a day" = "Sur pied en une journée";
 "Back to daycare?" = "Retour à la garderie ?";
+"Back to full volume." = "De retour à plein volume.";
 "Back Up" = "Sauvegarder";
 "Back Up saves your whole journal and its photos as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal et ses photos dans un fichier, où tu veux. Restaurer une sauvegarde le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
 "Backups" = "Sauvegardes";
@@ -150,6 +158,8 @@
 "Both" = "Les deux";
 "Both parents sick at the same time" = "Les deux parents malades en même temps";
 "brought home" = "ramenés";
+"Brought home %lld germ" = "A rapporté %lld microbe";
+"Brought home %lld germs" = "A rapporté %lld microbes";
 "Bucket Holder" = "Porteur de chaudière";
 "Busiest month so far: %@." = "Mois le plus chargé jusqu'ici : %@.";
 "Call it dodged" = "Le compter comme esquivé";
@@ -175,6 +185,9 @@
 "Chief Mucus Officer" = "Directeur général du mucus";
 "Choose photos" = "Choisir des photos";
 "Classic" = "Classique";
+"Clean for %lld day" = "En forme depuis %lld jour";
+"Clean for %lld days" = "En forme depuis %lld jours";
+"Clean record so far" = "Dossier vierge pour l'instant";
 "Close" = "Fermer";
 "Collector" = "Collectionneur";
 "coming home." = "débarquent à la maison.";
@@ -183,6 +196,7 @@
 "Contact: %@" = "Contact : %@";
 "Continue" = "Continuer";
 "Couch Captain" = "Capitaine du divan";
+"Couch champion" = "Champion du divan";
 "Couch day" = "Journée divan";
 "Couch time" = "Temps de divan";
 "Cough" = "Toux";
@@ -265,6 +279,7 @@
 "Fact!" = "Fait !";
 "Fact." = "Fait.";
 "Family" = "Famille";
+"Family league" = "Ligue familiale";
 "Family Sharing is included." = "Le Partage familial est inclus.";
 "Feed" = "Fil";
 "Feeling better?" = "Ça va mieux ?";
@@ -279,6 +294,7 @@
 "Five different germs caught" = "Cinq microbes différents attrapés";
 "For" = "Pour";
 "For scale" = "Pour comparer";
+"For taking down %@." = "Pour avoir terrassé %@.";
 "For the doctor" = "Pour le médecin";
 "Free and confidential, day and night." = "Gratuit et confidentiel, jour et nuit.";
 "Fresh Host" = "Hôte tout neuf";
@@ -288,6 +304,7 @@
 "germ caught" = "microbe attrapé";
 "germ dodged" = "microbe esquivé";
 "Germ Magnet" = "Aimant à microbes";
+"Germ magnet" = "Aimant à microbes";
 "Germ of the week" = "Microbe de la semaine";
 "germ this season" = "microbe cette saison";
 "Germs" = "Microbes";
@@ -297,6 +314,7 @@
 "germs dodged" = "microbes esquivés";
 "Germs dodged" = "Microbes esquivés";
 "germs this season" = "microbes cette saison";
+"Going around" = "Ça circule";
 "Going around %@" = "Ça court chez %@";
 "Golden Dish" = "Pétri doré";
 "Good for one uninterrupted nap." = "Bon pour une sieste sans interruption.";
@@ -341,6 +359,7 @@
 "Invite" = "Inviter";
 "Invite code" = "Code d'invitation";
 "Iron Parent" = "Parent de fer";
+"Iron wall" = "Mur de fer";
 "Is it your kid?" = "C'est ton enfant ?";
 "It fits everything you ticked." = "Il colle à tout ce que tu as coché.";
 "It got me" = "Il m'a eu";
@@ -394,6 +413,7 @@
 "Longest" = "Le plus long";
 "Longest chain" = "Plus longue chaîne";
 "Look" = "Style";
+"Loose since" = "En cavale depuis";
 "Loot" = "Butin";
 "Lots of germs start like this. Too early to tell them apart." = "Beaucoup de microbes commencent comme ça. Trop tôt pour les distinguer.";
 "Lucky Dodger" = "Esquiveur chanceux";
@@ -453,6 +473,7 @@
 "No suspect" = "Aucun suspect";
 "No tracking" = "Aucun suivi";
 "Nobody is sick today. Knock on wood." = "Personne n'est malade aujourd'hui. Touchons du bois.";
+"Nobody stands out yet this season." = "Personne ne se démarque encore cette saison.";
 "Nobody was sick. Suspiciously quiet." = "Personne n'était malade. Calme suspect.";
 "Nose and throat germs" = "Microbes du nez et de la gorge";
 "Not active" = "Inactive";
@@ -480,6 +501,7 @@
 "Offensive name" = "Nom offensant";
 "OK" = "OK";
 "On this phone" = "Sur ce téléphone";
+"One full night of sleep" = "Une nuit complète de sommeil";
 "One germ, ten days or more" = "Un microbe, dix jours ou plus";
 "One suspect" = "Un suspect";
 "Only a first name, and it never leaves this phone. More kids? Add them later in Settings." = "Seulement un prénom, et il ne quitte jamais ce téléphone. D'autres enfants ? Ajoute-les plus tard dans les réglages.";
@@ -489,7 +511,6 @@
 "Open the web version" = "Ouvrir la version Web";
 "Opens Petri so you can log the germ you caught." = "Ouvre Petri pour noter le microbe que tu as attrapé.";
 "Other photos" = "Autres photos";
-"Outbreak radar" = "Radar des éclosions";
 "Outbreak Survivor" = "Survivant d'éclosion";
 "Outlast it. Its bar drains a little every day." = "Tiens bon. Sa barre se vide un peu chaque jour.";
 "Owed by" = "Dû par";
@@ -566,6 +587,7 @@
 "Restore a Backup" = "Restaurer une sauvegarde";
 "Restore Purchases" = "Restaurer les achats";
 "Retreat" = "Retraite";
+"Reward" = "Récompense";
 "Right!" = "Bravo !";
 "Right! +%lld pts" = "Bravo ! +%lld pts";
 "Rough Month" = "Mois difficile";
@@ -603,6 +625,7 @@
 "Share card" = "Partager la carte";
 "Share the boss card" = "Partager la carte de boss";
 "Share the scoreboard" = "Partager le tableau";
+"Share the standings" = "Partager le classement";
 "Share the win" = "Partager la victoire";
 "Share this card" = "Partager cette carte";
 "Show %lld more" = "Afficher %lld de plus";
@@ -611,6 +634,7 @@
 "Sick %1$lld weeks out of %2$lld." = "Malade %1$lld semaines sur %2$lld.";
 "Sick leave: your streak waits for you." = "Congé de maladie : ta série t'attend.";
 "Sick Points" = "Points malades";
+"Sick right now" = "Malade en ce moment";
 "Sick: %@" = "Malade : %@";
 "Sick? Tap this." = "Malade ? Touche ça.";
 "Since" = "Depuis";
@@ -625,6 +649,7 @@
 "Sneak attack" = "Attaque sournoise";
 "Sniffle Scout" = "Éclaireur du reniflement";
 "Sniffles" = "Reniflements";
+"Someone's sick" = "Quelqu'un est malade";
 "Something else" = "Autre chose";
 "Something went wrong. Try again." = "Quelque chose a cloché. Réessaie.";
 "Sore throat" = "Mal de gorge";
@@ -674,12 +699,15 @@
 "Tap an unlocked title to wear it." = "Touche un titre obtenu pour le porter.";
 "Tap everything that fits. You can change it later." = "Touche tout ce qui colle. Tu pourras changer plus tard.";
 "Tap the character to see it sick." = "Touche le personnage pour le voir malade.";
+"Tap the patient." = "Touche le patient.";
 "Tap the tile to try." = "Touche la tuile pour essayer.";
 "Tap, or swipe the card: left for myth, right for fact." = "Touche, ou glisse la carte : à gauche pour mythe, à droite pour fait.";
+"Target" = "Cible";
 "Tell %@" = "Avertir %@";
 "Tells you how long your household has gone without a germ." = "Te dit depuis combien de temps ta maisonnée tient sans microbe.";
 "Telltale sign: %@" = "Signe qui ne ment pas : %@";
 "Ten days or more with one germ. Endurance." = "Dix jours ou plus avec le même microbe. De l'endurance.";
+"Ten quiet minutes" = "Dix minutes de silence";
 "Terms" = "Conditions";
 "Terms of Use" = "Conditions d'utilisation";
 "Thanks, daycare." = "Merci, la garderie.";
@@ -763,6 +791,8 @@
 "Virus or bacterium?" = "Virus ou bactérie ?";
 "Vomiting" = "Vomissements";
 "Waiting for approval" = "En attente d'approbation";
+"Wanted" = "Recherché";
+"Wanted poster" = "Avis de recherche";
 "Watch for: %@" = "À surveiller : %@";
 "Watch my window" = "Surveiller ma fenêtre";
 "Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Petri also puts the countdown on the Lock Screen." = "La surveillance envoie un rappel à l'ouverture et à la fermeture de ta fenêtre. Pendant les 8 dernières heures de la fenêtre, ouvrir Petri affiche aussi le décompte sur l'écran verrouillé.";
@@ -801,13 +831,12 @@
 "Yes" = "Oui";
 "Yes, I'm better" = "Oui, ça va mieux";
 "You" = "Toi";
-"You %1$lld, %2$@ %3$lld" = "Toi %1$lld, %2$@ %3$lld";
+"You beat %@" = "Tu as battu %@";
 "You beat %@!" = "Tu as battu %@ !";
 "You both beat %@!" = "Vous avez battu %@ tous les deux !";
 "You caught" = "Tu as attrapé";
 "You caught %@" = "Tu as attrapé %@";
 "You caught %@!" = "Tu as attrapé %@ !";
-"You caught %lld more." = "Tu en as attrapé %lld de plus.";
 "You caught it" = "Tu l'as attrapé";
 "You caught it, you lived, you logged it." = "Tu l'as attrapé, tu as survécu, tu l'as noté.";
 "you dodged" = "esquivés";

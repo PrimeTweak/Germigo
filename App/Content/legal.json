@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "web": {
     "privacyTitle": {
       "en": "Privacy Policy",
@@ -105,8 +105,8 @@
         "fr": "Ce qu'un groupe partage"
       },
       "body": {
-        "en": "Crews are optional. If you create or join one, the crew server stores: the crew's name and emblem, the name you choose to show, the germs you decide to share with the time you shared them, your reactions, and an anonymous session key. A shared germ is counted on the radar without your name. It appears in the feed and the leaderboard under your crew name only if you turn that on. Your kids' names, your journal and your notes are never sent. Your phone keeps a copy of the last crew view it received, and any share still waiting to be sent, so the crew opens without a connection. Both are erased when you leave the crew.",
-        "fr": "Les groupes sont facultatifs. Si tu en crées un ou t'y joins, le serveur des groupes conserve : le nom et l'emblème du groupe, le nom que tu choisis d'afficher, les microbes que tu décides de partager et le moment du partage, tes réactions et une clé de session anonyme. Un microbe partagé compte au radar sans ton nom. Il apparaît dans le fil et au classement sous ton nom de groupe seulement si tu actives cette option. Les prénoms de tes enfants, ton journal et tes notes ne sont jamais envoyés. Ton téléphone garde une copie de la dernière vue du groupe reçue, et tout partage en attente d'envoi, pour que le groupe s'ouvre sans connexion. Les deux sont effacés quand tu quittes le groupe."
+        "en": "Crews are optional. If you create or join one, the crew server stores: the crew's name and emblem, the name you choose to show, the germs you decide to share with the time you shared them, when you got over the ones shared under your name, your reactions, and an anonymous session key. A shared germ is counted on the radar without your name. It appears in the feed and the leaderboard under your crew name only if you turn that on. Your kids' names, your journal and your notes are never sent. Your phone keeps a copy of the last crew view it received, and any share still waiting to be sent, so the crew opens without a connection. Both are erased when you leave the crew.",
+        "fr": "Les groupes sont facultatifs. Si tu en crées un ou t'y joins, le serveur des groupes conserve : le nom et l'emblème du groupe, le nom que tu choisis d'afficher, les microbes que tu décides de partager et le moment du partage, le moment où tu as battu ceux partagés sous ton nom, tes réactions et une clé de session anonyme. Un microbe partagé compte au radar sans ton nom. Il apparaît dans le fil et au classement sous ton nom de groupe seulement si tu actives cette option. Les prénoms de tes enfants, ton journal et tes notes ne sont jamais envoyés. Ton téléphone garde une copie de la dernière vue du groupe reçue, et tout partage en attente d'envoi, pour que le groupe s'ouvre sans connexion. Les deux sont effacés quand tu quittes le groupe."
       }
     },
     {
