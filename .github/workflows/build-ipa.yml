@@ -47,12 +47,12 @@ jobs:
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
           STATUS=0
           xcrun swiftc -typecheck -parse-as-library -sdk "$SDK" \
-            -target arm64-apple-ios26.2 -swift-version 5 -D PETRI_SIDELOAD \
-            -module-name Petri $(find App Shared -name '*.swift') \
+            -target arm64-apple-ios26.2 -swift-version 5 -D GERMIGO_SIDELOAD \
+            -module-name Germigo $(find App Shared -name '*.swift') \
             > typecheck-app.log 2>&1 || STATUS=1
           xcrun swiftc -typecheck -parse-as-library -application-extension -sdk "$SDK" \
             -target arm64-apple-ios26.2 -swift-version 5 \
-            -module-name PetriWidgets $(find Widgets Shared -name '*.swift') \
+            -module-name GermigoWidgets $(find Widgets Shared -name '*.swift') \
             > typecheck-widgets.log 2>&1 || STATUS=1
           echo "===== App target: $(grep -c ' error: ' typecheck-app.log || true) error(s) ====="
           grep ' error: ' typecheck-app.log | sort -u || true
@@ -74,8 +74,8 @@ jobs:
         run: |
           STATUS=0
           xcodebuild build \
-            -project Petri.xcodeproj \
-            -scheme Petri \
+            -project Germigo.xcodeproj \
+            -scheme Germigo \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
@@ -84,7 +84,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
-            'SWIFT_ACTIVE_COMPILATION_CONDITIONS=$(inherited) PETRI_SIDELOAD' \
+            'SWIFT_ACTIVE_COMPILATION_CONDITIONS=$(inherited) GERMIGO_SIDELOAD' \
             > build.log 2>&1 || STATUS=1
           tail -n 25 build.log
           if [ "$STATUS" -ne 0 ]; then
@@ -95,22 +95,22 @@ jobs:
 
       - name: Verify the built bundle
         run: |
-          APP="build/Build/Products/Release-iphoneos/Petri.app"
+          APP="build/Build/Products/Release-iphoneos/Germigo.app"
           python3 tools/check_bundle.py "$APP"
 
       - name: Package as .ipa
         run: |
-          rm -rf Payload Petri.ipa
+          rm -rf Payload Germigo.ipa
           mkdir Payload
-          cp -R build/Build/Products/Release-iphoneos/Petri.app Payload/
-          zip -qry Petri.ipa Payload
-          ls -lh Petri.ipa
+          cp -R build/Build/Products/Release-iphoneos/Germigo.app Payload/
+          zip -qry Germigo.ipa Payload
+          ls -lh Germigo.ipa
 
       - name: Upload the IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Petri-ipa-${{ github.run_number }}
-          path: Petri.ipa
+          name: Germigo-ipa-${{ github.run_number }}
+          path: Germigo.ipa
           if-no-files-found: error
 
       - name: Upload build logs

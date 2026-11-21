@@ -49,11 +49,11 @@ jobs:
       - name: Archive
         run: |
           xcodebuild archive \
-            -project Petri.xcodeproj \
-            -scheme Petri \
+            -project Germigo.xcodeproj \
+            -scheme Germigo \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath build/Petri.xcarchive \
+            -archivePath build/Germigo.xcarchive \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             MARKETING_VERSION="${{ inputs.version }}" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
@@ -81,7 +81,7 @@ jobs:
           </plist>
           EOF
           xcodebuild -exportArchive \
-            -archivePath build/Petri.xcarchive \
+            -archivePath build/Germigo.xcarchive \
             -exportPath build/export \
             -exportOptionsPlist ExportOptions.plist \
             -allowProvisioningUpdates \
@@ -92,14 +92,14 @@ jobs:
 
       - name: Upload to App Store Connect
         run: |
-          xcrun altool --upload-app -f build/export/Petri.ipa -t ios \
+          xcrun altool --upload-app -f build/export/Germigo.ipa -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Keep the signed IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Petri-appstore-${{ github.run_number }}
-          path: build/export/Petri.ipa
+          name: Germigo-appstore-${{ github.run_number }}
+          path: build/export/Germigo.ipa
 
       - name: Remove the API key
         if: always()
