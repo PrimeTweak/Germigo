@@ -29,6 +29,7 @@ REQUIRED = [
     "Shared/en.lproj/Localizable.strings", "Shared/fr.lproj/Localizable.strings",
     "Widgets/Info.plist", "Widgets/GermigoWidgets.entitlements", "Widgets/PrivacyInfo.xcprivacy",
     "server/server.js", "server/test.js", "server/legal.json", "server/package.json",
+    "server/illnesses.json", "server/push.js", "server/mail.js",
     "README.md", "docs/APP-STORE.md",
     "App/Store/JournalRules.swift", "App/Store/ProgressEngine.swift", "Tests/LogicTests/main.swift", "tools/run_logic_tests.sh",
 ]
@@ -90,6 +91,8 @@ def check_plists():
         groups = read_plist(relative).get("com.apple.security.application-groups", [])
         if groups != ["group.ca.germigo.app"]:
             fail(f"{relative}: app group must be group.ca.germigo.app")
+    if read_plist("App/Germigo.entitlements").get("aps-environment") not in ("development", "production"):
+        fail("App/Germigo.entitlements: aps-environment is needed for daycare notices")
     for relative in ("App/PrivacyInfo.xcprivacy", "Widgets/PrivacyInfo.xcprivacy"):
         manifest = read_plist(relative)
         if manifest.get("NSPrivacyTracking") is not False:
@@ -192,7 +195,7 @@ def check_content():
             localized(section.get("body"), f"legal.json {kind}[{index}].body")
     for key in ("privacyTitle", "termsTitle", "supportTitle", "updatedLabel", "publisherLabel", "contactLabel",
                 "eulaLabel", "supportIntro", "supportDelete", "landingTagline", "landingIntro", "landingStore",
-                "landingSoon"):
+                "landingSoon", "daycareHeading", "daycareSteps"):
         localized((legal.get("web") or {}).get(key), f"legal.json web.{key}")
     points = (legal.get("web") or {}).get("landingPoints") or []
     if not points:
@@ -207,7 +210,26 @@ def check_content():
     server_ids = set(re.findall(r"'([a-z]+)'", block.group(1))) if block else set()
     if server_ids != {g.get("id") for g in germs}:
         fail("server/server.js: GERM_IDS must match the ids in germs.json")
+    check_illnesses(germs)
     return germs
+
+
+def check_illnesses(germs):
+    """The names the server reads in email subjects and writes in notifications follow germs.json."""
+    illnesses = read_json("server/illnesses.json") or {}
+    expected = {g.get("id"): g for g in germs if g.get("id") != "mystery"}
+    if set(illnesses) != set(expected):
+        fail("server/illnesses.json: ids must be those of germs.json, without mystery")
+    for gid, entry in illnesses.items():
+        germ = expected.get(gid)
+        if not germ:
+            continue
+        for language in ("en", "fr"):
+            if entry.get(language) != (germ.get("illness") or {}).get(language):
+                fail(f"server/illnesses.json {gid}.{language}: must match the illness name in germs.json")
+        aliases = entry.get("aliases")
+        if not isinstance(aliases, list) or not all(isinstance(alias, str) and alias.strip() for alias in aliases):
+            fail(f"server/illnesses.json {gid}: aliases must be a list of names")
 
 
 def check_health_sheet(germ, gid):

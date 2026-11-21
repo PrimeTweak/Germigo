@@ -7,6 +7,8 @@ enum IntentAction {
     case stillFine(exposureID: String)
     case dodged(exposureID: String)
     case better
+    /// From a daycare watch: the kid caught the germ the daycare announced.
+    case kidCaught(kidID: String, germID: String)
 }
 
 /// Set by the app at launch; stays nil inside the widget extension.

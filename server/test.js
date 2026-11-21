@@ -3,11 +3,16 @@
 // End-to-end checks for the crew server. Run with: node server/test.js
 
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
+const http2 = require('node:http2');
 const os = require('node:os');
 const path = require('node:path');
 const { createApp, cleanName } = require('./server.js');
+const { createPusher } = require('./push.js');
+const { parseSubject } = require('./mail.js');
 const legal = require('./legal.json');
+const illnesses = require('./illnesses.json');
 
 const DAY = 24 * 3600 * 1000;
 
@@ -321,6 +326,230 @@ async function main() {
 
   await new Promise((resolve) => slow.close(resolve));
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 2);
+
+  // Email subjects: illness first, then an optional group
+  const sampleGroups = [{ id: 'g1', name: 'Trottineurs' }, { id: 'g2', name: 'Les Grands' }];
+  assert.deepEqual(parseSubject('Gastro - Trottineurs', sampleGroups, illnesses), { germID: 'noro', groupID: 'g1' });
+  assert.deepEqual(parseSubject('TR: Gastro', sampleGroups, illnesses), { germID: 'noro', groupID: null });
+  assert.deepEqual(parseSubject('Gastro - toute la garderie', sampleGroups, illnesses), { germID: 'noro', groupID: null });
+  assert.deepEqual(parseSubject('Conjonctivite dans le groupe des Grands', sampleGroups, illnesses), { germID: 'pinky', groupID: 'g2' });
+  assert.deepEqual(parseSubject('Hand, foot & mouth - Trottineurs', sampleGroups, illnesses), { germID: 'coxy', groupID: 'g1' });
+  assert.deepEqual(parseSubject('Gastro - Trotineurs', sampleGroups, illnesses), { error: 'group' });
+  assert.deepEqual(parseSubject('Allo', sampleGroups, illnesses), { error: 'illness' });
+
+  // Daycare notices: a local push service stands in for Apple's
+  const pushed = [];
+  const apns = http2.createServer();
+  apns.on('stream', (stream, headers) => {
+    let body = '';
+    stream.setEncoding('utf8');
+    stream.on('data', (chunk) => { body += chunk; });
+    stream.on('end', () => {
+      const token = headers[':path'].split('/').pop();
+      pushed.push({ token, headers, payload: JSON.parse(body) });
+      if (token.startsWith('bb')) {
+        stream.respond({ ':status': 410 });
+        stream.end(JSON.stringify({ reason: 'Unregistered' }));
+      } else if (token.startsWith('cc')) {
+        stream.respond({ ':status': 400 });
+        stream.end(JSON.stringify({ reason: 'BadDeviceToken' }));
+      } else {
+        stream.respond({ ':status': 200 });
+        stream.end();
+      }
+    });
+  });
+  await new Promise((resolve) => apns.listen(0, resolve));
+  const connect = http2.connect;
+  http2.connect = () => connect(`http://127.0.0.1:${apns.address().port}`);
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+  const pusher = createPusher({
+    key: privateKey.export({ type: 'pkcs8', format: 'pem' }), keyID: 'KEY123', teamID: 'TEAM456', topic: 'ca.germigo.app',
+  });
+  const mailed = [];
+  const mailer = { send: async (to, subject, body) => { mailed.push({ to, subject, body }); return true; } };
+  const daycareDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-daycare-'));
+  const daycareOptions = {
+    ...options, dataDir: daycareDir, pusher, mailer, inboundToken: 'inbound-secret', inboundDomain: 'in.germigo.test',
+  };
+  let daycareServer = createApp(daycareOptions);
+  await new Promise((resolve) => daycareServer.listen(0, resolve));
+  base = `http://127.0.0.1:${daycareServer.address().port}`;
+  now += DAY;
+
+  // A director signs up; the code, the private inbox and the groups come back
+  assert.equal((await call('POST', '/v1/daycares', { body: { name: 'x' } })).data.error, 'name_rejected');
+  assert.equal((await call('POST', '/v1/daycares', { body: { name: 'CPE Test', email: 'nope' } })).data.error, 'email_rejected');
+  const tooMany = Array.from({ length: 13 }, (_, index) => `Groupe ${index + 1}`);
+  assert.equal((await call('POST', '/v1/daycares', { body: { name: 'CPE Test', groups: tooMany } })).status, 400);
+  assert.equal((await call('POST', '/v1/daycares', { body: { name: 'CPE Test' } })).status, 429);
+  now += DAY;
+  const director = (await call('POST', '/v1/daycares', {
+    body: { name: 'CPE Les Lucioles', groups: ['Poupons', 'Trottineurs', 'Les Grands', 'trottineurs'], email: 'Direction@Lucioles.ca', language: 'fr' },
+  })).data;
+  let desk = director.state;
+  assert.equal(desk.daycare.code.length, 8);
+  assert.match(desk.daycare.inbox, /^cpeleslucioles-[a-z0-9]{5}@in\.germigo\.test$/);
+  assert.equal(desk.daycare.email, 'direction@lucioles.ca');
+  assert.deepEqual(desk.daycare.groups.map((group) => group.name), ['Poupons', 'Trottineurs', 'Les Grands']);
+  const [poupons, trottineurs, grands] = desk.daycare.groups.map((group) => group.id);
+  const daycareCode = desk.daycare.code;
+
+  // Parents find the daycare by its code, written any way, and see neither the code nor the email
+  const spaced = (daycareCode.slice(0, 4) + '-' + daycareCode.slice(4)).toLowerCase();
+  const found = (await call('GET', '/v1/daycares/' + spaced)).data.daycare;
+  assert.equal(found.name, 'CPE Les Lucioles');
+  assert.equal(found.code, undefined);
+  assert.equal(found.email, undefined);
+  assert.equal(found.families, 0);
+  const poster = await call('GET', '/d/' + daycareCode + '?lang=fr');
+  assert.ok(poster.data.includes('CPE Les Lucioles'));
+  assert.ok(poster.data.includes(daycareCode.slice(0, 4) + '-' + daycareCode.slice(4)));
+  assert.ok(poster.data.includes(legal.web.daycareSteps.fr));
+  assert.ok((await call('GET', '/d/ABCDEFGH')).data.includes(legal.web.landingTagline.en));
+  assert.equal((await call('GET', '/v1/daycares/ABCDEFGH')).status, 404);
+
+  const subscribe = (groupIDs, pushToken, language) => call('POST', '/v1/daycare-subscriptions', {
+    body: { code: spaced, groupIDs, pushToken, language },
+  });
+  const ana = (await subscribe([trottineurs, 'unknown'], 'aa'.repeat(32), 'fr')).data;
+  assert.deepEqual(ana.state.groupIDs, [trottineurs]);
+  const ben = (await subscribe([poupons], 'bb'.repeat(32), 'en')).data.token;
+  const cleo = (await subscribe([], 'cc'.repeat(32), 'fr')).data.token;
+  const dan = (await subscribe([trottineurs], 'not-a-token', 'en')).data.token;
+  desk = (await call('GET', '/v1/daycare', { token: director.token })).data;
+  assert.equal(desk.daycare.families, 4);
+  assert.deepEqual(desk.daycare.groups.map((group) => group.families), [1, 2, 0]);
+
+  // A notice for one group reaches that group only, with the daycare's name as the title
+  const notify = (body) => call('POST', '/v1/daycare/notices', { token: director.token, body });
+  assert.equal((await notify({ germID: 'mystery' })).status, 400);
+  assert.equal((await notify({ germID: 'noro', groupID: 'unknown' })).status, 400);
+  assert.equal((await notify({ germID: 'noro', note: 'x'.repeat(281) })).data.error, 'note_too_long');
+  desk = (await notify({ germID: 'noro', groupID: trottineurs, note: 'Lavez bien les mains.' })).data;
+  assert.equal(desk.notices[0].recipients, 2);
+  assert.equal(pushed.length, 1);
+  assert.equal(pushed[0].token, 'aa'.repeat(32));
+  assert.deepEqual(pushed[0].payload.aps.alert, { title: 'CPE Les Lucioles', body: 'Gastro dans le groupe Trottineurs' });
+  assert.equal(pushed[0].payload.noticeID, desk.notices[0].id);
+  assert.equal(pushed[0].headers['apns-topic'], 'ca.germigo.app');
+  const [jwtHead, jwtClaims, jwtSignature] = pushed[0].headers.authorization.slice(7).split('.');
+  assert.equal(JSON.parse(Buffer.from(jwtHead, 'base64url')).kid, 'KEY123');
+  assert.equal(JSON.parse(Buffer.from(jwtClaims, 'base64url')).iss, 'TEAM456');
+  assert.ok(crypto.verify('sha256', Buffer.from(jwtHead + '.' + jwtClaims), { key: publicKey, dsaEncoding: 'ieee-p1363' },
+    Buffer.from(jwtSignature, 'base64url')));
+  let parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
+  assert.equal(parent.notices.length, 1);
+  assert.equal(parent.notices[0].note, 'Lavez bien les mains.');
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: ben })).data.notices.length, 0);
+
+  // A notice for the whole daycare reaches everyone; tokens Apple refuses are forgotten
+  pushed.length = 0;
+  now += 1000;
+  desk = (await notify({ germID: 'lousy', groupID: null })).data;
+  assert.equal(desk.notices[0].recipients, 4);
+  assert.equal(pushed.length, 3);
+  assert.equal(pushed.find((message) => message.token.startsWith('bb')).payload.aps.alert.body, 'Head lice at the daycare');
+  assert.equal(pushed.find((message) => message.token.startsWith('cc')).payload.aps.alert.body, 'Poux à la garderie');
+  let storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8'));
+  assert.deepEqual(storedDaycares.subscriptions.map((subscription) => subscription.pushToken), ['aa'.repeat(32), null, null, null]);
+  assert.equal(JSON.stringify(storedDaycares).includes(director.token), false);
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: cleo })).data.notices.length, 1);
+
+  // Each side keeps to its own routes
+  assert.equal((await call('GET', '/v1/daycare', { token: ana.token })).status, 401);
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: director.token })).status, 401);
+  assert.equal((await call('GET', '/v1/crew', { token: director.token })).status, 401);
+
+  // A parent changes groups and turns alerts back on
+  now += 61000;
+  parent = (await call('POST', '/v1/daycare-subscription', { token: ben, body: { groupIDs: [grands], pushToken: 'dd'.repeat(32) } })).data;
+  assert.deepEqual(parent.groupIDs, [grands]);
+
+  // A reported notice leaves that parent's list and waits for moderation
+  const lice = desk.notices[0].id;
+  parent = (await call('POST', '/v1/daycare-subscription/reports', { token: cleo, body: { noticeID: lice } })).data;
+  assert.equal(parent.notices.length, 0);
+  let moderation = (await call('GET', '/admin/reports', { token: 'admin-secret' })).data;
+  assert.equal(moderation.notices.length, 1);
+  assert.equal(moderation.notices[0].daycareName, 'CPE Les Lucioles');
+  assert.equal(moderation.notices[0].illness, 'Head lice');
+  await call('POST', `/admin/notices/${lice}/clear`, { token: 'admin-secret' });
+  assert.equal((await call('GET', '/admin/reports', { token: 'admin-secret' })).data.notices.length, 0);
+  await call('POST', `/admin/notices/${lice}/remove`, { token: 'admin-secret' });
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: ana.token })).data.notices.length, 1);
+
+  // Renaming keeps a group; removing one drops it from every parent's choice
+  now += 61000;
+  desk = (await call('POST', '/v1/daycare', {
+    token: director.token, body: { groups: [{ id: trottineurs, name: 'Les Trottineurs' }, { id: grands, name: 'Les Grands' }, 'Bambins'] },
+  })).data;
+  assert.deepEqual(desk.daycare.groups.map((group) => group.name), ['Les Trottineurs', 'Les Grands', 'Bambins']);
+  assert.equal(desk.daycare.groups[0].id, trottineurs);
+  assert.deepEqual((await call('GET', '/v1/daycare-subscription', { token: ana.token })).data.groupIDs, [trottineurs]);
+  assert.deepEqual(desk.daycare.groups.map((group) => group.families), [2, 1, 0]);
+
+  // By email: the webhook secret, the director's own address, then the subject decide
+  const inbound = (body, token = 'inbound-secret') => call('POST', '/v1/inbound-email?token=' + token, { body });
+  const inbox = desk.daycare.inbox;
+  const letter = (subject, from = 'Direction <direction@lucioles.ca>') => ({
+    From: from, FromFull: { Email: from.match(/<(.+)>/)[1] }, To: inbox, ToFull: [{ Email: inbox }],
+    OriginalRecipient: inbox, Subject: subject, TextBody: 'Surveillez la fièvre.\n', StrippedTextReply: '',
+  });
+  assert.equal((await inbound(letter('Gastro'), 'wrong')).status, 401);
+  assert.equal((await inbound(letter('Gastro', 'Someone <someone@spam.test>'))).data.status, 'ignored');
+  assert.equal(mailed.length, 0);
+  pushed.length = 0;
+  now += 1000;
+  assert.equal((await inbound(letter('Gastro - Trottineurs'))).data.status, 'sent');
+  assert.equal(mailed[0].to, 'direction@lucioles.ca');
+  assert.equal(mailed[0].subject, 'Envoyé : Gastro · Les Trottineurs');
+  assert.match(mailed[0].body, /2 familles/);
+  assert.equal(pushed.length, 1);
+  parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
+  assert.equal(parent.notices[0].source, 'email');
+  assert.equal(parent.notices[0].note, 'Surveillez la fièvre.');
+  assert.equal((await inbound(letter('Allo'))).data.status, 'unclear');
+  assert.equal(mailed[1].subject, 'Non envoyé : quelle maladie?');
+  await inbound(letter('Gastro - Bébés'));
+  assert.match(mailed[2].body, /Les Trottineurs, Les Grands, Bambins/);
+
+  // Ten notices a day at most, in the app or by email
+  let sentToday = 3;
+  for (let attempt = 0; attempt < 9; attempt += 1) {
+    if ((await notify({ germID: 'rhino', groupID: null })).status === 200) sentToday += 1;
+  }
+  assert.equal(sentToday, 10);
+  await inbound(letter('Rhume'));
+  assert.equal(mailed[3].subject, 'Non envoyé : limite du jour atteinte');
+
+  // Notices survive a restart
+  await new Promise((resolve) => daycareServer.close(resolve));
+  daycareServer = createApp(daycareOptions);
+  await new Promise((resolve) => daycareServer.listen(0, resolve));
+  base = `http://127.0.0.1:${daycareServer.address().port}`;
+  assert.equal((await call('GET', '/v1/daycare', { token: director.token })).data.notices.length, 9);
+
+  // Leaving deletes the subscription; closing the daycare deletes everything it holds
+  assert.equal((await call('DELETE', '/v1/daycare-subscription', { token: dan })).status, 204);
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: dan })).status, 401);
+  assert.equal((await call('GET', '/v1/daycare', { token: director.token })).data.daycare.families, 3);
+  assert.equal((await call('DELETE', '/v1/daycare', { token: director.token })).status, 204);
+  assert.equal((await call('GET', '/v1/daycare-subscription', { token: ana.token })).status, 401);
+  storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8'));
+  assert.equal(storedDaycares.daycares.length + storedDaycares.subscriptions.length + storedDaycares.notices.length, 0);
+
+  // A daycare nobody opens for that long is removed
+  now += DAY;
+  const idle = (await call('POST', '/v1/daycares', { body: { name: 'CPE Dormant', groups: [] } })).data;
+  now += 401 * DAY;
+  await call('POST', '/v1/daycares', { body: { name: 'CPE Nouveau', groups: [] } });
+  assert.equal((await call('GET', '/v1/daycare', { token: idle.token })).status, 401);
+
+  await new Promise((resolve) => daycareServer.close(resolve));
+  await new Promise((resolve) => apns.close(resolve));
+  http2.connect = connect;
+  fs.rmSync(daycareDir, { recursive: true, force: true });
 
   fs.rmSync(dataDir, { recursive: true, force: true });
   fs.rmSync(slowDir, { recursive: true, force: true });

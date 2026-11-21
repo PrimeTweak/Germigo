@@ -749,6 +749,12 @@ final class AppModel {
             resolveExposure(id, outcome: .dodged)
         case .better:
             markBetter()
+        case .kidCaught(let kidID, let germID):
+            guard let id = UUID(uuidString: kidID), let kid = data.kids.first(where: { $0.id == id }),
+                  catalog.germ(germID) != nil else { return }
+            addKidIllness(kidID: id, germID: germID, startedAt: Date())
+            selectedTab = .family
+            toast = tr("Added to %@'s history.", kid.name)
         }
     }
 

@@ -26,6 +26,30 @@ struct PhotoSeed: Identifiable {
     let link: PhotoLink
 }
 
+extension AppModel {
+    /// The illness a photo was filed under, if any.
+    func germ(of photo: PatientPhoto) -> Germ? {
+        let id = photo.logID.flatMap { id in data.logs.first { $0.id == id }?.germID }
+            ?? photo.illnessID.flatMap { id in data.kidIllnesses.first { $0.id == id }?.germID }
+        return id.flatMap { catalog.germ($0) }
+    }
+
+    /// The day of its illness a photo was taken on, 1 for the first day.
+    func sickDay(of photo: PatientPhoto) -> Int? {
+        let start = photo.logID.flatMap { id in data.logs.first { $0.id == id }?.startedAt }
+            ?? photo.illnessID.flatMap { id in data.kidIllnesses.first { $0.id == id }?.startedAt }
+        guard let start, photo.takenAt >= Calendar.current.startOfDay(for: start) else { return nil }
+        return StreakMath.days(from: start, to: photo.takenAt) + 1
+    }
+
+    /// Where a new photo of someone on a given day goes: the illness they had that day, if any.
+    func photoLink(for person: Person, on day: Date) -> PhotoLink {
+        DayEngine.entries(on: day, data: data, catalog: catalog, now: Date())
+            .first { $0.person == person }
+            .map { PhotoLink($0) } ?? .unlinked
+    }
+}
+
 /// A set of photos opened full screen, starting at one of them.
 struct PhotoFocus: Identifiable {
     let id = UUID()
@@ -82,8 +106,9 @@ struct PhotoRow: View {
                 }
                 if let onAdd {
                     Button(action: onAdd) {
-                        Image(systemName: "plus")
+                        Image(systemName: "photo.badge.plus")
                             .font(.title3.weight(.semibold))
+                            .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(palette.inkSecondary)
                             .frame(width: side, height: side)
                             .overlay {
@@ -484,24 +509,26 @@ struct PhotoViewer: View {
     private var caption: some View {
         if let photo = photos.first(where: { $0.id == selection }) {
             VStack(spacing: 2) {
-                Text(model.name(for: photo.person))
+                Text(title(photo))
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(detail(photo))
+                    .multilineTextAlignment(.center)
+                Text(photo.takenAt.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day().hour().minute()))
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.75))
             }
             .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
             .padding(.vertical, 12)
         }
     }
 
-    private func detail(_ photo: PatientPhoto) -> String {
-        let when = photo.takenAt.formatted(date: .abbreviated, time: .shortened)
-        let germID = photo.logID.flatMap { id in model.data.logs.first { $0.id == id }?.germID }
-            ?? photo.illnessID.flatMap { id in model.data.kidIllnesses.first { $0.id == id }?.germID }
-        guard let illness = germID.flatMap({ model.catalog.germ($0) })?.illness.value else { return when }
-        return illness + " · " + when
+    /// Who, with what, and which day of it.
+    private func title(_ photo: PatientPhoto) -> String {
+        var parts = [model.name(for: photo.person)]
+        if let germ = model.germ(of: photo) { parts.append(germ.illness.value) }
+        if let day = model.sickDay(of: photo) { parts.append(tr("Day %lld", day)) }
+        return parts.joined(separator: " · ")
     }
 
     private func delete() {

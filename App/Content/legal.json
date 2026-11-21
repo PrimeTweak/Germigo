@@ -66,6 +66,14 @@
     "supportDelete": {
       "en": "To delete your data: in the app, open Settings, then Data and privacy, then Delete everything. Leaving a crew deletes your data from the server.",
       "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Données et confidentialité, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
+    },
+    "daycareHeading": {
+      "en": "{name} sends its illness notices with Germigo.",
+      "fr": "{name} envoie ses avis de maladie avec Germigo."
+    },
+    "daycareSteps": {
+      "en": "Get the free app, open Crew and tap Join a daycare, then enter this code. Free for families.",
+      "fr": "Télécharge l'app gratuite, ouvre Groupe et touche Rejoindre une garderie, puis entre ce code. Gratuit pour les familles."
     }
   },
   "privacy": [
@@ -75,8 +83,8 @@
         "fr": "En bref"
       },
       "body": {
-        "en": "Germigo keeps your journal on your phone. Nothing is shared unless you join a crew, and then only what you choose. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
-        "fr": "Germigo garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe, et alors seulement ce que tu choisis. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
+        "en": "Germigo keeps your journal on your phone. Nothing is shared unless you join a crew or a daycare, and then only what is needed. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
+        "fr": "Germigo garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe ou à une garderie, et alors seulement ce qui est nécessaire. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
       }
     },
     {
@@ -111,12 +119,22 @@
     },
     {
       "title": {
+        "en": "Daycare notices",
+        "fr": "Avis de garderie"
+      },
+      "body": {
+        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups, the illness notices it sends with their optional note and, if it sends notices by email, the address it writes from. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has. A notice sent by email passes through an email delivery service, which receives the message and hands it to the server. Only messages from the daycare's own address are used, and the server keeps only the illness and the group read from the subject, and the first 280 characters of the text as the note.",
+        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes, les avis de maladie qu'elle envoie avec leur note facultative et, si elle envoie ses avis par courriel, l'adresse d'où elle écrit. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe. Un avis envoyé par courriel passe par un service d'envoi de courriels, qui reçoit le message et le remet au serveur. Seuls les messages venant de l'adresse de la garderie sont utilisés, et le serveur garde seulement la maladie et le groupe lus dans l'objet, et les 280 premiers caractères du texte comme note."
+      }
+    },
+    {
+      "title": {
         "en": "Where crew data is kept",
         "fr": "Où sont gardées les données des groupes"
       },
       "body": {
-        "en": "The crew server is run by the developer on a cloud hosting service, which may be located outside Québec or Canada. Like any web server, it sees your IP address while you are connected, in order to answer requests and limit abuse. It is not used to identify or track you.",
-        "fr": "Le serveur des groupes est exploité par le développeur sur un service d'hébergement infonuagique, qui peut se trouver hors du Québec ou du Canada. Comme tout serveur Web, il voit ton adresse IP pendant la connexion, pour répondre aux requêtes et limiter les abus. Elle ne sert pas à t'identifier ni à te suivre."
+        "en": "The crew server, which also handles daycare notices, is run by the developer on a cloud hosting service, which may be located outside Québec or Canada. Like any web server, it sees your IP address while you are connected, in order to answer requests and limit abuse. It is not used to identify or track you.",
+        "fr": "Le serveur des groupes, qui gère aussi les avis de garderie, est exploité par le développeur sur un service d'hébergement infonuagique, qui peut se trouver hors du Québec ou du Canada. Comme tout serveur Web, il voit ton adresse IP pendant la connexion, pour répondre aux requêtes et limiter les abus. Elle ne sert pas à t'identifier ni à te suivre."
       }
     },
     {
@@ -145,8 +163,8 @@
         "fr": "Notifications"
       },
       "body": {
-        "en": "Check-ins, new lessons and crew alerts are created on your phone. Germigo does not use a push notification service and does not collect a device token.",
-        "fr": "Les rappels, les nouvelles leçons et les alertes de groupe sont créés sur ton téléphone. Germigo n'utilise aucun service de notifications poussées et ne recueille aucun jeton d'appareil."
+        "en": "Check-ins, new lessons and crew alerts are created on your phone. Daycare notices are the only exception: they arrive through Apple's push notification service, which needs the address Apple gives your phone. That address is sent only when you join a daycare, is used only for its notices, and is deleted when you leave it.",
+        "fr": "Les rappels, les nouvelles leçons et les alertes de groupe sont créés sur ton téléphone. Les avis de garderie sont la seule exception : ils arrivent par le service de notifications poussées d'Apple, qui a besoin de l'adresse qu'Apple donne à ton téléphone. Cette adresse est envoyée seulement quand tu t'abonnes à une garderie, sert seulement à ses avis et est supprimée quand tu la quittes."
       }
     },
     {
@@ -155,8 +173,8 @@
         "fr": "Enfants"
       },
       "body": {
-        "en": "Germigo is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone.",
-        "fr": "Germigo est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone."
+        "en": "Germigo is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone. Daycare notices never name a child.",
+        "fr": "Germigo est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone. Les avis de garderie ne nomment jamais un enfant."
       }
     },
     {
@@ -165,8 +183,8 @@
         "fr": "Conservation et suppression"
       },
       "body": {
-        "en": "Your journal stays on your phone until you delete it. Delete everything, in Settings under Data and privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
-        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
+        "en": "Your journal stays on your phone until you delete it. Delete everything, in Settings under Data and privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Leaving a daycare deletes your subscription at once, and closing a daycare deletes its groups, its notices and its families' subscriptions. Shared germs and notices older than 13 months, daycares and subscriptions not opened for 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
+        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Quitter une garderie supprime ton abonnement sur-le-champ, et fermer une garderie supprime ses groupes, ses avis et les abonnements de ses familles. Les microbes partagés et les avis de plus de 13 mois, les garderies et les abonnements non ouverts depuis 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
       }
     },
     {
@@ -233,12 +251,22 @@
     },
     {
       "title": {
+        "en": "Daycare notices",
+        "fr": "Avis de garderie"
+      },
+      "body": {
+        "en": "Daycare notices are free, for parents and for daycares. Only a person the daycare authorizes may sign it up and send notices. Notices are for telling families that an illness is going around: never name a child or give a detail that could identify one, and do not use them for anything else. Parents can report a notice from its menu. Reports are reviewed within 24 hours, and a daycare that breaks these rules is removed. A notice is general information, not a diagnosis, and does not replace the daycare's own obligations or public health instructions.",
+        "fr": "Les avis de garderie sont gratuits, pour les parents comme pour les garderies. Seule une personne autorisée par la garderie peut l'inscrire et envoyer des avis. Les avis servent à informer les familles qu'une maladie circule : ne nomme jamais un enfant, ne donne aucun détail qui permettrait d'en reconnaître un et ne les utilise pas pour autre chose. Les parents peuvent signaler un avis depuis son menu. Les signalements sont examinés dans les 24 heures, et une garderie qui ne respecte pas ces règles est retirée. Un avis est une information générale, pas un diagnostic, et ne remplace ni les obligations de la garderie ni les consignes de santé publique."
+      }
+    },
+    {
+      "title": {
         "en": "Your content",
         "fr": "Ton contenu"
       },
       "body": {
-        "en": "You are responsible for the names you choose and for what you share in a crew. You allow Germigo to show them to the members of that crew, and nothing more.",
-        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe. Tu autorises Germigo à les montrer aux membres de ce groupe, et rien de plus."
+        "en": "You are responsible for the names you choose and for what you share in a crew or send as a daycare. You allow Germigo to show them to the members of that crew or the families of that daycare, and nothing more.",
+        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe ou envoies comme garderie. Tu autorises Germigo à les montrer aux membres de ce groupe ou aux familles de cette garderie, et rien de plus."
       }
     },
     {

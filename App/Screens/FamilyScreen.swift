@@ -113,10 +113,20 @@ struct FamilyScreen: View {
         FamilyStatus.status(of: person, model: model)
     }
 
-    /// The household's shared records: the doctor summary and the logbook.
+    /// The household's shared records: the album, the doctor summary and the logbook.
     private var records: some View {
         let entries = model.data.logs.count + model.data.kidIllnesses.count
+        let photos = model.data.photos.count
         return VStack(spacing: 0) {
+            NavigationLink {
+                AlbumScreen()
+            } label: {
+                recordRow("photo.on.rectangle.angled", tr("Album"),
+                          photos == 0 ? tr("Empty") : trCount(photos, one: "%lld photo", other: "%lld photos"))
+            }
+            .buttonStyle(.plain)
+            Divider()
+                .padding(.leading, 36)
             if model.hasPass {
                 NavigationLink {
                     DoctorSummaryScreen()
@@ -359,7 +369,7 @@ private struct PersonFileScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
                 numbers
-                HealthHistory(person: person, since: nil)
+                HealthHistory(person: person, since: nil, showsDays: true)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 28)

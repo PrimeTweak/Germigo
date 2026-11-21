@@ -26,7 +26,7 @@ The workflow, in order:
 | `App/Content/` | `germs.json`, `articles.json`, `legal.json` |
 | `Shared/` | Code and strings compiled into both targets |
 | `Widgets/` | Widget extension: streak widget, incubation widget, Live Activity |
-| `server/` | Crew server and legal pages (Node, no dependencies) |
+| `server/` | Crew server, daycare notices and legal pages (Node, no dependencies) |
 | `Tests/LogicTests/` | Logic checks that run without a simulator |
 | `tools/` | Repository, source, bundle and link checks |
 | `project.yml` | XcodeGen project definition |
@@ -94,6 +94,12 @@ node test.js
 | `APP_STORE_URL` | App Store link shown on the landing page (`/` and `/get`). Until it is set, the page says the app is coming soon. |
 | `TRUST_PROXY_HOPS` | Number of reverse proxies in front of the server. Default 0: the socket address is used and `X-Forwarded-For` is ignored. Most hosts need 1. |
 | `BLOCKED_WORDS` | Extra comma-separated words rejected in names. |
+| `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID` | The Apple push key (`.p8` content, newlines may be written `\n`), its key ID and the team ID. Without them, daycare notices are stored but no push is sent. |
+| `APNS_TOPIC` | Bundle identifier the pushes are for. Default `ca.germigo.app`. |
+| `APNS_ENV` | `sandbox` for builds run from Xcode. TestFlight and App Store builds use the default, production. |
+| `POSTMARK_TOKEN`, `MAIL_FROM` | Postmark server token and sender address for the replies to daycares that send notices by email. |
+| `INBOUND_EMAIL_DOMAIN` | Domain of the daycares' private addresses, for example `notices.germigo.app`. Without it, notices by email are off. |
+| `INBOUND_EMAIL_TOKEN` | Secret in the inbound webhook URL. |
 
 Rate limits are counted per client address, so `TRUST_PROXY_HOPS` must match the host: too low and every user shares one limit, too high and a client can forge its address.
 
@@ -102,3 +108,14 @@ Moderation: open `<server>/admin` in a browser, type the admin token, then remov
 Retention: shared germs older than 400 days, members who have not connected for 400 days and empty crews are removed automatically. One address can create 5 crews a day.
 
 `server/legal.json` must stay identical to `App/Content/legal.json`. It also holds the text of the web pages.
+
+## Daycare notices
+
+Free for daycares and families, inside the Crew tab and outside the Season Pass. A director signs the daycare up from the app (I run a daycare), with up to 12 groups. Families join with the daycare's code, typed or scanned, and pick each kid's group; which kid is in which group stays on the phone, and the server keeps only the groups chosen, the push address and the language. A notice names an illness from the catalog, a group or the whole daycare, and an optional note of up to 280 characters.
+
+- **From the app.** Daycare mode > Send a notice. Each family it reaches gets a push titled with the daycare's name.
+- **By email.** Each daycare gets a private address on `INBOUND_EMAIL_DOMAIN`. Only mail from the address the director saved is used. The subject gives the illness, then the group (`Gastro - Trottineurs`); without a group, the notice goes to the whole daycare. The server always replies: sent to how many families, or what was unclear. Point the domain's MX record to Postmark, and set the inbound webhook to `<server>/v1/inbound-email?token=<INBOUND_EMAIL_TOKEN>`.
+- **Poster.** The daycare's QR code opens `<server>/d/<code>`, a page with the code and how to join.
+
+Limits: 10 notices a day per daycare, 3 daycares a day per address. Reported notices appear on the moderation page, where a notice or a whole daycare can be removed. Notices older than 400 days, and daycares and subscriptions not opened for 400 days, are removed automatically. `server/illnesses.json` holds the illness names read in subjects and written in pushes; its names must match `germs.json`.
+

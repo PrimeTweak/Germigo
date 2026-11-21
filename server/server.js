@@ -1,12 +1,14 @@
 'use strict';
 
 // Germigo crew server: private daycare groups, an anonymous outbreak radar,
-// a small feed of germs caught and beaten with preset reactions, and the app's legal pages.
+// a small feed of germs caught and beaten with preset reactions, daycare notices, and the app's legal pages.
 
 const http = require('node:http');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const { createPusher } = require('./push.js');
+const { parseSubject, reply, createMailer, flatten } = require('./mail.js');
 
 const GERM_IDS = new Set([
   'rhino', 'mystery', 'lingerer', 'chesty', 'whisper', 'pressure', 'noro', 'pinky', 'rona', 'arsy', 'strep', 'flu',
@@ -18,6 +20,13 @@ const REPORT_REASONS = new Set(['name', 'abuse', 'other']);
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const MAX_MEMBERS = 40;
 const MAX_BODY_BYTES = 4096;
+const MAX_EMAIL_BYTES = 512 * 1024;
+const MAX_GROUPS = 12;
+const NOTE_LIMIT = 280;
+const DAYCARE_CODE_LENGTH = 8;
+const NOTICE_WINDOW = 60 * 24 * 3600 * 1000;
+const PUSH_TOKEN_PATTERN = /^[0-9a-f]{64,200}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MINUTE = 60 * 1000;
 const DAY = 24 * 3600 * 1000;
 const MAX_LIMIT_KEYS = 50000;
@@ -32,6 +41,10 @@ const LIMITS = {
   rename: [10, MINUTE],
   reports: [10, MINUTE],
   admin: [20, MINUTE],
+  daycaresPerDay: [3, DAY],
+  noticesPerDay: [10, DAY],
+  daycareUpdates: [20, MINUTE],
+  inbound: [60, MINUTE],
 };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const RADAR_WINDOW = 7 * DAY;
@@ -117,10 +130,18 @@ function createApp(options = {}) {
     .split(',').map((word) => normalize(word.trim())).filter(Boolean);
   const clock = options.now || (() => Date.now());
   const legal = JSON.parse(fs.readFileSync(path.join(__dirname, 'legal.json'), 'utf8'));
+  const illnesses = JSON.parse(fs.readFileSync(path.join(__dirname, 'illnesses.json'), 'utf8'));
+  const pusher = options.pusher || createPusher();
+  const mailer = options.mailer || createMailer();
+  const inboundToken = options.inboundToken ?? process.env.INBOUND_EMAIL_TOKEN ?? '';
+  const inboundDomain = (options.inboundDomain ?? process.env.INBOUND_EMAIL_DOMAIN ?? '').toLowerCase();
 
   let db = { crews: [], members: [], events: [], reports: [] };
   if (fs.existsSync(dataFile)) {
     db = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  }
+  for (const key of ['daycares', 'subscriptions', 'notices']) {
+    if (!Array.isArray(db[key])) db[key] = [];
   }
 
   const counters = new Map();
@@ -195,6 +216,11 @@ function createApp(options = {}) {
     const crewIDs = new Set(db.crews.map((crew) => crew.id));
     db.events = db.events.filter((event) => crewIDs.has(event.crewID));
     db.reports = db.reports.filter((report) => crewIDs.has(report.crewID));
+    db.daycares = db.daycares.filter((daycare) => now - (daycare.seenAt || daycare.createdAt) <= MEMBER_LIFETIME);
+    const daycareIDs = new Set(db.daycares.map((daycare) => daycare.id));
+    db.subscriptions = db.subscriptions.filter((subscription) => daycareIDs.has(subscription.daycareID)
+      && now - (subscription.seenAt || subscription.createdAt) <= MEMBER_LIFETIME);
+    db.notices = db.notices.filter((notice) => daycareIDs.has(notice.daycareID) && now - notice.at < EVENT_LIFETIME);
   }
 
   function newCode() {
@@ -203,6 +229,227 @@ function createApp(options = {}) {
       for (const byte of crypto.randomBytes(6)) code += CODE_ALPHABET[byte % CODE_ALPHABET.length];
       if (!db.crews.some((crew) => crew.code === code)) return code;
     }
+  }
+
+  function newDaycareCode() {
+    for (;;) {
+      let code = '';
+      for (const byte of crypto.randomBytes(DAYCARE_CODE_LENGTH)) code += CODE_ALPHABET[byte % CODE_ALPHABET.length];
+      if (!db.daycares.some((daycare) => daycare.code === code)) return code;
+    }
+  }
+
+  // The private part of the daycare's email address: its name, then a random suffix.
+  function newInbox(name) {
+    const slug = flatten(name).replace(/[^a-z0-9]/g, '').slice(0, 14) || 'daycare';
+    for (;;) {
+      let suffix = '';
+      for (const byte of crypto.randomBytes(5)) suffix += CODE_ALPHABET[byte % CODE_ALPHABET.length].toLowerCase();
+      const inbox = slug + '-' + suffix;
+      if (!db.daycares.some((daycare) => daycare.inbox === inbox)) return inbox;
+    }
+  }
+
+  function daycareByCode(raw) {
+    const code = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return code.length === DAYCARE_CODE_LENGTH ? db.daycares.find((daycare) => daycare.code === code) : undefined;
+  }
+
+  // Up to twelve groups, cleaned and without duplicates; a group keeps its ID when it is renamed.
+  function cleanGroups(raw, existing) {
+    if (!Array.isArray(raw) || raw.length > MAX_GROUPS) throw new ApiError(400, 'invalid');
+    const groups = [];
+    const seen = new Set();
+    for (const item of raw) {
+      const name = cleanName(typeof item === 'string' ? item : item && item.name, 24, extraBlocked);
+      if (!name) throw new ApiError(400, 'name_rejected');
+      const flat = flatten(name);
+      if (seen.has(flat)) continue;
+      seen.add(flat);
+      const kept = item && typeof item === 'object' && existing.find((group) => group.id === item.id);
+      groups.push({ id: kept ? kept.id : crypto.randomUUID(), name });
+    }
+    return groups;
+  }
+
+  function cleanEmail(raw) {
+    if (raw === undefined || raw === null || raw === '') return '';
+    const email = String(raw).trim().toLowerCase();
+    if (email.length > 120 || !EMAIL_PATTERN.test(email)) throw new ApiError(400, 'email_rejected');
+    return email;
+  }
+
+  function cleanNote(raw) {
+    if (raw === undefined || raw === null) return '';
+    const note = String(raw).replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    if (note.length > NOTE_LIMIT) throw new ApiError(400, 'note_too_long');
+    return note;
+  }
+
+  function cleanPushToken(raw) {
+    const token = typeof raw === 'string' ? raw.toLowerCase() : '';
+    return PUSH_TOKEN_PATTERN.test(token) ? token : null;
+  }
+
+  function cleanLanguage(raw) {
+    return raw === 'fr' ? 'fr' : 'en';
+  }
+
+  function groupIDsFor(raw, daycare) {
+    if (!Array.isArray(raw)) return [];
+    const known = new Set(daycare.groups.map((group) => group.id));
+    return [...new Set(raw.filter((id) => known.has(id)))];
+  }
+
+  function bearer(req) {
+    const header = req.headers.authorization || '';
+    return header.startsWith('Bearer ') ? header.slice(7) : '';
+  }
+
+  // The director's daycare or the parent's subscription the bearer token belongs to.
+  function holderOf(list, req) {
+    const token = bearer(req);
+    const holder = token ? list.find((candidate) => candidate.tokenHash === hashToken(token)) : undefined;
+    if (!holder) throw new ApiError(401, 'unauthorized');
+    const now = clock();
+    if (now - (holder.seenAt || 0) > DAY) {
+      holder.seenAt = now;
+      save();
+    }
+    return holder;
+  }
+
+  function reaches(subscription, notice) {
+    return notice.groupID === null || subscription.groupIDs.includes(notice.groupID);
+  }
+
+  function noticeView(notice) {
+    return { id: notice.id, groupID: notice.groupID, germID: notice.germID, note: notice.note, at: notice.at, source: notice.source };
+  }
+
+  function publicDaycare(daycare) {
+    const families = db.subscriptions.filter((subscription) => subscription.daycareID === daycare.id).length;
+    return { id: daycare.id, name: daycare.name, groups: daycare.groups, families };
+  }
+
+  function parentState(subscription) {
+    const now = clock();
+    const daycare = db.daycares.find((candidate) => candidate.id === subscription.daycareID);
+    const notices = db.notices
+      .filter((notice) => notice.daycareID === daycare.id && now - notice.at <= NOTICE_WINDOW
+        && reaches(subscription, notice) && !notice.reports.includes(subscription.id))
+      .sort((a, b) => b.at - a.at)
+      .slice(0, 30)
+      .map(noticeView);
+    return { daycare: publicDaycare(daycare), groupIDs: subscription.groupIDs, notices };
+  }
+
+  function directorState(daycare) {
+    const subscriptions = db.subscriptions.filter((subscription) => subscription.daycareID === daycare.id);
+    const notices = db.notices
+      .filter((notice) => notice.daycareID === daycare.id)
+      .sort((a, b) => b.at - a.at)
+      .slice(0, 50)
+      .map((notice) => ({ ...noticeView(notice), recipients: notice.recipients, reports: notice.reports.length }));
+    return {
+      daycare: {
+        id: daycare.id, name: daycare.name, code: daycare.code, email: daycare.email || null,
+        inbox: inboundDomain ? daycare.inbox + '@' + inboundDomain : null,
+        families: subscriptions.length,
+        groups: daycare.groups.map((group) => ({
+          id: group.id, name: group.name,
+          families: subscriptions.filter((subscription) => subscription.groupIDs.includes(group.id)).length,
+        })),
+      },
+      notices,
+    };
+  }
+
+  function alertFor(daycare, notice, lang) {
+    const illness = illnesses[notice.germID] ? illnesses[notice.germID][lang] : notice.germID;
+    const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
+    const body = lang === 'fr'
+      ? (group ? `${illness} dans le groupe ${group.name}` : `${illness} à la garderie`)
+      : (group ? `${illness} in the ${group.name} group` : `${illness} at the daycare`);
+    return { title: daycare.name, body };
+  }
+
+  // Stores a notice, then alerts every family it reaches; tokens Apple refuses are forgotten.
+  async function publish(daycare, germID, groupID, note, source) {
+    limit(daycare.id, 'noticesPerDay');
+    const recipients = db.subscriptions.filter((subscription) => subscription.daycareID === daycare.id
+      && (groupID === null || subscription.groupIDs.includes(groupID)));
+    const notice = {
+      id: crypto.randomUUID(), daycareID: daycare.id, groupID, germID, note, at: clock(), source,
+      recipients: recipients.length, reports: [],
+    };
+    db.notices.push(notice);
+    save(true);
+    const messages = recipients.filter((subscription) => subscription.pushToken).map((subscription) => ({
+      token: subscription.pushToken,
+      alert: alertFor(daycare, notice, subscription.language),
+      thread: daycare.id,
+      data: { noticeID: notice.id, daycareID: daycare.id },
+    }));
+    let result = { sent: 0, gone: [] };
+    try {
+      result = await pusher.send(messages);
+    } catch (error) {
+      console.error('[push]', error.message);
+    }
+    if (result.gone.length > 0) {
+      const gone = new Set(result.gone);
+      for (const subscription of db.subscriptions) {
+        if (gone.has(subscription.pushToken)) subscription.pushToken = null;
+      }
+      save();
+    }
+    return notice;
+  }
+
+  function removeDaycare(daycareID) {
+    db.daycares = db.daycares.filter((daycare) => daycare.id !== daycareID);
+    purge();
+  }
+
+  function emailAddress(raw) {
+    const match = String(raw || '').match(/[^\s<>"]+@[^\s<>"]+/);
+    return match ? match[0].toLowerCase() : '';
+  }
+
+  // A notice by email: the private address picks the daycare, only its director's address may send,
+  // and the subject gives the illness and the group. The sender always gets an answer, never a guess.
+  async function receiveEmail(body) {
+    const recipients = [body.OriginalRecipient, body.To, ...(Array.isArray(body.ToFull) ? body.ToFull.map((to) => to.Email) : [])]
+      .flatMap((value) => String(value || '').split(','))
+      .map(emailAddress)
+      .filter((address) => inboundDomain && address.endsWith('@' + inboundDomain));
+    const inboxes = new Set(recipients.map((address) => address.split('@')[0]));
+    const daycare = db.daycares.find((candidate) => inboxes.has(candidate.inbox));
+    const from = emailAddress(body.FromFull && body.FromFull.Email ? body.FromFull.Email : body.From);
+    if (!daycare || !daycare.email || from !== daycare.email) return { status: 'ignored' };
+    const lang = daycare.language || 'en';
+    const parsed = parseSubject(body.Subject, daycare.groups, illnesses);
+    let answer;
+    if (parsed.error === 'illness') {
+      answer = reply('illness', lang);
+    } else if (parsed.error === 'group') {
+      answer = reply('group', lang, daycare.groups.map((group) => group.name).join(', '));
+    } else {
+      const text = String(body.StrippedTextReply || body.TextBody || '');
+      const note = text.replace(/\r/g, '').trim().slice(0, NOTE_LIMIT);
+      try {
+        const notice = await publish(daycare, parsed.germID, parsed.groupID, cleanNote(note), 'email');
+        const illness = illnesses[notice.germID][lang];
+        const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
+        answer = reply('sent', lang, notice.recipients, group ? `${illness} · ${group.name}` : illness);
+      } catch (error) {
+        if (!(error instanceof ApiError) || error.code !== 'rate_limited') throw error;
+        answer = reply('limit', lang);
+      }
+    }
+    await mailer.send(daycare.email, answer.subject, answer.body);
+    return { status: parsed.error ? 'unclear' : 'sent' };
   }
 
   function addMember(crew, name) {
@@ -361,6 +608,23 @@ function createApp(options = {}) {
     return page('Germigo', lang, body, style);
   }
 
+  // Where a daycare's QR code leads: its name, its code, and how to join from the app.
+  function daycarePage(daycare, lang) {
+    const web = legal.web;
+    const code = daycare.code.slice(0, 4) + '-' + daycare.code.slice(4);
+    const store = /^https:\/\/apps\.apple\.com\//.test(appStoreURL)
+      ? `<a class="store" href="${escapeHtml(appStoreURL)}">${escapeHtml(web.landingStore[lang])}</a>`
+      : `<p class="soon">${escapeHtml(web.landingSoon[lang])}</p>`;
+    const body = '<p class="mark">germigo</p>'
+      + `<h1>${escapeHtml(web.daycareHeading[lang].replace('{name}', daycare.name))}</h1>`
+      + `<p class="lede">${escapeHtml(web.daycareSteps[lang])}</p><p class="code">${code}</p>${store}`;
+    const style = '.mark{font-size:44px;font-weight:900;letter-spacing:-2px;margin:8px 0 18px}.lede{font-size:19px}'
+      + '.code{font:800 34px/1.2 ui-monospace,Menlo,monospace;letter-spacing:4px;background:#fff;border-radius:18px;'
+      + 'padding:18px;text-align:center}.store{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:99px;'
+      + 'background:#1E1A26;color:#F6F1E7;text-decoration:none;font-weight:700}.soon{margin:18px 0;font-weight:700}';
+    return page(daycare.name, lang, body, style);
+  }
+
   // The moderation page. It holds no data: the reports load after the token is typed.
   function adminPage(nonce) {
     const script = `
@@ -373,25 +637,37 @@ async function api(method, path) {
   if (!response.ok) throw new Error(response.status === 401 ? 'Wrong token.' : 'Request failed (' + response.status + ').');
   return response.json();
 }
-async function act(memberID, action, label) {
+async function act(path, label) {
   if (!confirm(label + '?')) return;
-  try { await api('POST', '/admin/members/' + memberID + '/' + action); await load(); } catch (error) { status.textContent = error.message; }
+  try { await api('POST', path); await load(); } catch (error) { status.textContent = error.message; }
+}
+function button(label, path, question) {
+  const el = node('button', label);
+  el.addEventListener('click', () => act(path, question));
+  return el;
 }
 async function load() {
   status.textContent = 'Loading...';
   list.replaceChildren();
   try {
     const data = await api('GET', '/admin/reports');
-    status.textContent = data.reports.length ? data.reports.length + ' open report(s).' : 'No open reports.';
+    const count = data.reports.length + data.notices.length;
+    status.textContent = count ? count + ' open report(s).' : 'No open reports.';
     for (const report of data.reports) {
       const card = node('section');
       card.append(node('h2', (report.memberName || 'Removed member') + ' · ' + (report.crewName || 'Removed crew')));
       card.append(node('p', 'Reason: ' + report.reason + ' · ' + new Date(report.at).toLocaleString()));
-      const remove = node('button', 'Remove member');
-      remove.addEventListener('click', () => act(report.memberID, 'remove', 'Remove this member and everything they shared'));
-      const clear = node('button', 'Dismiss reports');
-      clear.addEventListener('click', () => act(report.memberID, 'clear', 'Dismiss every report about this member'));
-      card.append(remove, clear);
+      card.append(button('Remove member', '/admin/members/' + report.memberID + '/remove', 'Remove this member and everything they shared'),
+        button('Dismiss reports', '/admin/members/' + report.memberID + '/clear', 'Dismiss every report about this member'));
+      list.append(card);
+    }
+    for (const notice of data.notices) {
+      const card = node('section');
+      card.append(node('h2', notice.daycareName + ' · ' + notice.illness));
+      card.append(node('p', (notice.note || 'No note') + ' · ' + notice.reports + ' report(s) · ' + new Date(notice.at).toLocaleString()));
+      card.append(button('Remove notice', '/admin/notices/' + notice.id + '/remove', 'Remove this notice'),
+        button('Remove daycare', '/admin/daycares/' + notice.daycareID + '/remove', 'Remove this daycare, its notices and its families'),
+        button('Dismiss reports', '/admin/notices/' + notice.id + '/clear', 'Dismiss the reports about this notice'));
       list.append(card);
     }
   } catch (error) { status.textContent = error.message; }
@@ -429,12 +705,12 @@ document.getElementById('form').addEventListener('submit', (event) => {
     return /^fr\b/i.test(req.headers['accept-language'] || '') ? 'fr' : 'en';
   }
 
-  async function readBody(req) {
+  async function readBody(req, maxBytes = MAX_BODY_BYTES) {
     const chunks = [];
     let size = 0;
     for await (const chunk of req) {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) throw new ApiError(413, 'too_large');
+      if (size > maxBytes) throw new ApiError(413, 'too_large');
       chunks.push(chunk);
     }
     if (size === 0) return {};
@@ -456,6 +732,12 @@ document.getElementById('form').addEventListener('submit', (event) => {
     if (key === 'GET /terms') return html(res, legalPage('terms', language(req, url)));
     if (key === 'GET /support') return html(res, supportPage(language(req, url)));
     if (key === 'GET /' || key === 'GET /get') return html(res, landingPage(language(req, url)));
+    if (req.method === 'GET' && url.pathname.startsWith('/d/')) {
+      limit(ip, 'join');
+      const daycare = daycareByCode(url.pathname.slice(3));
+      const lang = language(req, url);
+      return html(res, daycare ? daycarePage(daycare, lang) : landingPage(lang));
+    }
 
     limit(ip, 'all');
 
@@ -476,7 +758,31 @@ document.getElementById('form').addEventListener('submit', (event) => {
           const crew = db.crews.find((candidate) => candidate.id === report.crewID);
           return { ...report, memberName: member ? member.name : null, crewName: crew ? crew.name : null };
         });
-        return json(res, 200, { reports: open });
+        const notices = db.notices.filter((notice) => notice.reports.length > 0 && !notice.reviewed).map((notice) => {
+          const daycare = db.daycares.find((candidate) => candidate.id === notice.daycareID);
+          return {
+            id: notice.id, daycareID: notice.daycareID, daycareName: daycare.name, note: notice.note, at: notice.at,
+            illness: illnesses[notice.germID].en, reports: notice.reports.length,
+          };
+        });
+        return json(res, 200, { reports: open, notices });
+      }
+      const notice = url.pathname.match(/^\/admin\/notices\/([0-9a-f-]{36})\/(remove|clear)$/);
+      if (req.method === 'POST' && notice) {
+        if (notice[2] === 'remove') {
+          db.notices = db.notices.filter((candidate) => candidate.id !== notice[1]);
+        } else {
+          const found = db.notices.find((candidate) => candidate.id === notice[1]);
+          if (found) found.reviewed = true;
+        }
+        save(true);
+        return json(res, 200, { ok: true });
+      }
+      const daycare = url.pathname.match(/^\/admin\/daycares\/([0-9a-f-]{36})\/remove$/);
+      if (req.method === 'POST' && daycare) {
+        removeDaycare(daycare[1]);
+        save(true);
+        return json(res, 200, { ok: true });
       }
       const match = url.pathname.match(/^\/admin\/members\/([0-9a-f-]{36})\/(remove|clear)$/);
       if (req.method === 'POST' && match) {
@@ -522,6 +828,128 @@ document.getElementById('form').addEventListener('submit', (event) => {
       const { member, token } = addMember(crew, displayName);
       save(true);
       return json(res, 200, { token, state: stateFor(member) });
+    }
+
+    if (req.method === 'GET' && url.pathname.startsWith('/v1/daycares/')) {
+      limit(ip, 'join');
+      const daycare = daycareByCode(url.pathname.slice('/v1/daycares/'.length));
+      if (!daycare) throw new ApiError(404, 'invalid_code');
+      return json(res, 200, { daycare: publicDaycare(daycare) });
+    }
+
+    if (key === 'POST /v1/daycares') {
+      limit(ip, 'join');
+      limit(ip, 'daycaresPerDay');
+      const body = await readBody(req);
+      const name = cleanName(body.name, 40, extraBlocked);
+      if (!name) throw new ApiError(400, 'name_rejected');
+      const token = crypto.randomBytes(32).toString('hex');
+      const daycare = {
+        id: crypto.randomUUID(), name, code: newDaycareCode(), inbox: newInbox(name), email: cleanEmail(body.email),
+        language: cleanLanguage(body.language), groups: cleanGroups(body.groups || [], []),
+        tokenHash: hashToken(token), createdAt: clock(), seenAt: clock(),
+      };
+      db.daycares.push(daycare);
+      save(true);
+      return json(res, 200, { token, state: directorState(daycare) });
+    }
+
+    if (key === 'POST /v1/daycare-subscriptions') {
+      limit(ip, 'join');
+      const body = await readBody(req);
+      const daycare = daycareByCode(body.code);
+      if (!daycare) throw new ApiError(404, 'invalid_code');
+      const token = crypto.randomBytes(32).toString('hex');
+      const subscription = {
+        id: crypto.randomUUID(), daycareID: daycare.id, groupIDs: groupIDsFor(body.groupIDs, daycare),
+        pushToken: cleanPushToken(body.pushToken), language: cleanLanguage(body.language),
+        tokenHash: hashToken(token), createdAt: clock(), seenAt: clock(),
+      };
+      db.subscriptions.push(subscription);
+      save(true);
+      return json(res, 200, { token, state: parentState(subscription) });
+    }
+
+    if (key === 'POST /v1/inbound-email') {
+      limit(ip, 'inbound');
+      if (!inboundToken || !sameSecret(url.searchParams.get('token') || '', inboundToken)) {
+        throw new ApiError(401, 'unauthorized');
+      }
+      return json(res, 200, await receiveEmail(await readBody(req, MAX_EMAIL_BYTES)));
+    }
+
+    if (url.pathname === '/v1/daycare' || url.pathname.startsWith('/v1/daycare/')) {
+      const daycare = holderOf(db.daycares, req);
+      if (key === 'GET /v1/daycare') return json(res, 200, directorState(daycare));
+      if (key === 'POST /v1/daycare') {
+        limit(daycare.id, 'daycareUpdates');
+        const body = await readBody(req);
+        if (body.name !== undefined) {
+          const name = cleanName(body.name, 40, extraBlocked);
+          if (!name) throw new ApiError(400, 'name_rejected');
+          daycare.name = name;
+        }
+        if (body.groups !== undefined) {
+          daycare.groups = cleanGroups(body.groups, daycare.groups);
+          const kept = new Set(daycare.groups.map((group) => group.id));
+          for (const subscription of db.subscriptions) {
+            if (subscription.daycareID === daycare.id) subscription.groupIDs = subscription.groupIDs.filter((id) => kept.has(id));
+          }
+        }
+        if (body.email !== undefined) daycare.email = cleanEmail(body.email);
+        if (body.language !== undefined) daycare.language = cleanLanguage(body.language);
+        save(true);
+        return json(res, 200, directorState(daycare));
+      }
+      if (key === 'POST /v1/daycare/notices') {
+        const body = await readBody(req);
+        if (!GERM_IDS.has(body.germID) || body.germID === 'mystery') throw new ApiError(400, 'invalid');
+        const groupID = body.groupID === null || body.groupID === undefined ? null : String(body.groupID);
+        if (groupID !== null && !daycare.groups.some((group) => group.id === groupID)) throw new ApiError(400, 'invalid');
+        await publish(daycare, body.germID, groupID, cleanNote(body.note), 'app');
+        return json(res, 200, directorState(daycare));
+      }
+      if (key === 'DELETE /v1/daycare') {
+        removeDaycare(daycare.id);
+        save(true);
+        res.writeHead(204);
+        return res.end();
+      }
+      throw new ApiError(404, 'not_found');
+    }
+
+    if (url.pathname === '/v1/daycare-subscription' || url.pathname.startsWith('/v1/daycare-subscription/')) {
+      const subscription = holderOf(db.subscriptions, req);
+      const daycare = db.daycares.find((candidate) => candidate.id === subscription.daycareID);
+      if (key === 'GET /v1/daycare-subscription') return json(res, 200, parentState(subscription));
+      if (key === 'POST /v1/daycare-subscription') {
+        limit(subscription.id, 'daycareUpdates');
+        const body = await readBody(req);
+        if (body.groupIDs !== undefined) subscription.groupIDs = groupIDsFor(body.groupIDs, daycare);
+        if (body.pushToken !== undefined) subscription.pushToken = cleanPushToken(body.pushToken);
+        if (body.language !== undefined) subscription.language = cleanLanguage(body.language);
+        save();
+        return json(res, 200, parentState(subscription));
+      }
+      if (key === 'POST /v1/daycare-subscription/reports') {
+        limit(subscription.id, 'reports');
+        const body = await readBody(req);
+        const notice = db.notices.find((candidate) => candidate.id === body.noticeID && candidate.daycareID === daycare.id);
+        if (!notice) throw new ApiError(404, 'not_found');
+        if (!notice.reports.includes(subscription.id)) {
+          notice.reports.push(subscription.id);
+          console.log(`[notice report] daycare=${daycare.id} notice=${notice.id}`);
+          save();
+        }
+        return json(res, 200, parentState(subscription));
+      }
+      if (key === 'DELETE /v1/daycare-subscription') {
+        db.subscriptions = db.subscriptions.filter((candidate) => candidate.id !== subscription.id);
+        save(true);
+        res.writeHead(204);
+        return res.end();
+      }
+      throw new ApiError(404, 'not_found');
     }
 
     const me = authenticate(req);

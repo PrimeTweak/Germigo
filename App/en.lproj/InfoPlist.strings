@@ -1,2 +1,2 @@
-"NSCameraUsageDescription" = "Germigo uses the camera only when you take a photo to add to your household's sick history.";
+"NSCameraUsageDescription" = "Germigo uses the camera only when you take a photo for your household's sick history or scan a daycare's code.";
 "NSPhotoLibraryAddUsageDescription" = "Germigo saves the share cards you choose to keep to your photo library.";

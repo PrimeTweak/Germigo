@@ -83,6 +83,7 @@ struct DataScreen: View {
 
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
+    @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @State private var showAll = false
     @State private var confirmErase = false
@@ -99,6 +100,8 @@ struct DataScreen: View {
                  detail: tr("Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one.")),
             Item(symbol: "dot.radiowaves.left.and.right", title: tr("In a crew"),
                  detail: tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent.")),
+            Item(symbol: "house", title: tr("Daycare notices"),
+                 detail: tr("Only if you follow a daycare: the groups you pick and the address Apple gives this phone for notifications. Which kid is in which group stays here.")),
             Item(symbol: "eye.slash", title: tr("No tracking"),
                  detail: tr("No ads, no trackers, no third-party analytics, no data sold.")),
             Item(symbol: "creditcard", title: tr("Purchases"),
@@ -106,7 +109,7 @@ struct DataScreen: View {
             Item(symbol: "externaldrive", title: tr("Backups"),
                  detail: tr("A backup saves your whole journal and its photos as a file, where you choose. Restore a backup reads it back on this phone or a new one. Germigo never uploads it.")),
             Item(symbol: "trash", title: tr("Your call"),
-                 detail: tr("Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server."))
+                 detail: tr("Export your journal or delete everything from here at any time. Leaving a crew or a daycare deletes your data from the server."))
         ]
     }
 
@@ -128,7 +131,7 @@ struct DataScreen: View {
                         }
                     }
                 } footer: {
-                    Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server."))
+                    Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server."))
                 }
             }
             .listRowBackground(palette.surface)
@@ -144,7 +147,7 @@ struct DataScreen: View {
             }
             Button(tr("Cancel"), role: .cancel) {}
         } message: {
-            Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server. This can't be undone."))
+            Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone."))
         }
         .alert(tr("Nothing was deleted"), isPresented: $eraseFailed) {
             Button(tr("Erase this phone only"), role: .destructive) {
@@ -152,7 +155,7 @@ struct DataScreen: View {
             }
             Button(tr("Try later"), role: .cancel) {}
         } message: {
-            Text(tr("The crew server can't be reached, so your crew data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have your crew data removed."))
+            Text(tr("The server can't be reached, so your crew and daycare data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have it removed."))
         }
         .fileImporter(isPresented: $importingBackup, allowedContentTypes: [.json]) { result in
             if case .success(let url) = result {
@@ -286,14 +289,19 @@ struct DataScreen: View {
 
     private func eraseEverything(skippingServer: Bool = false) {
         Task {
-            if crew.isMember, !skippingServer {
-                let left = await crew.leave()
-                if !left {
+            if !skippingServer {
+                var left = true
+                if crew.isMember {
+                    left = await crew.leave()
+                }
+                let erased = await daycare.eraseServerData()
+                if !left || !erased {
                     eraseFailed = true
                     return
                 }
             }
             crew.resetLocal()
+            daycare.resetLocal()
             model.eraseEverything()
             if AppIconManager.current != .germigo {
                 _ = await AppIconManager.apply(.germigo)

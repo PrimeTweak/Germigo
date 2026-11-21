@@ -1,0 +1,219 @@
+{
+  "rhino": {
+    "en": "Cold",
+    "fr": "Rhume",
+    "aliases": [
+      "cold",
+      "common cold",
+      "rhume",
+      "rhinovirus"
+    ]
+  },
+  "lingerer": {
+    "en": "Lingering cough",
+    "fr": "Toux qui traîne",
+    "aliases": [
+      "cough",
+      "toux"
+    ]
+  },
+  "chesty": {
+    "en": "Chest cold",
+    "fr": "Bronchite",
+    "aliases": [
+      "bronchitis",
+      "bronchite",
+      "chest cold"
+    ]
+  },
+  "whisper": {
+    "en": "Lost voice",
+    "fr": "Extinction de voix",
+    "aliases": [
+      "laryngitis",
+      "laryngite",
+      "lost voice"
+    ]
+  },
+  "pressure": {
+    "en": "Sinus infection",
+    "fr": "Sinusite",
+    "aliases": [
+      "sinusitis",
+      "sinusite",
+      "sinus infection"
+    ]
+  },
+  "noro": {
+    "en": "Stomach bug",
+    "fr": "Gastro",
+    "aliases": [
+      "gastro",
+      "gastroenterite",
+      "gastroenteritis",
+      "stomach bug",
+      "stomach flu",
+      "norovirus"
+    ]
+  },
+  "pinky": {
+    "en": "Pink eye",
+    "fr": "Conjonctivite",
+    "aliases": [
+      "pink eye",
+      "conjunctivitis",
+      "conjonctivite",
+      "conjo"
+    ]
+  },
+  "rona": {
+    "en": "COVID-19",
+    "fr": "COVID-19",
+    "aliases": [
+      "covid",
+      "covid-19",
+      "covid19",
+      "coronavirus"
+    ]
+  },
+  "arsy": {
+    "en": "RSV",
+    "fr": "VRS",
+    "aliases": [
+      "rsv",
+      "vrs",
+      "virus respiratoire syncytial"
+    ]
+  },
+  "strep": {
+    "en": "Strep throat",
+    "fr": "Pharyngite à strepto",
+    "aliases": [
+      "strep",
+      "strep throat",
+      "streptocoque",
+      "strepto",
+      "pharyngite"
+    ]
+  },
+  "flu": {
+    "en": "Flu",
+    "fr": "Grippe",
+    "aliases": [
+      "flu",
+      "influenza",
+      "grippe"
+    ]
+  },
+  "addy": {
+    "en": "Adenovirus",
+    "fr": "Adénovirus",
+    "aliases": [
+      "adenovirus",
+      "adenovirus"
+    ]
+  },
+  "meta": {
+    "en": "hMPV",
+    "fr": "Métapneumovirus",
+    "aliases": [
+      "hmpv",
+      "metapneumovirus",
+      "metapneumo"
+    ]
+  },
+  "para": {
+    "en": "Parainfluenza",
+    "fr": "Parainfluenza",
+    "aliases": [
+      "parainfluenza",
+      "croup",
+      "laryngite striduleuse",
+      "faux croup"
+    ]
+  },
+  "rota": {
+    "en": "Rotavirus",
+    "fr": "Rotavirus",
+    "aliases": [
+      "rotavirus",
+      "rota"
+    ]
+  },
+  "coxy": {
+    "en": "Hand, foot & mouth",
+    "fr": "Pieds-mains-bouche",
+    "aliases": [
+      "hand foot and mouth",
+      "hand, foot and mouth",
+      "hand foot mouth",
+      "hfmd",
+      "pieds mains bouche",
+      "pied main bouche",
+      "coxsackie"
+    ]
+  },
+  "slappy": {
+    "en": "Fifth disease",
+    "fr": "Cinquième maladie",
+    "aliases": [
+      "fifth disease",
+      "cinquieme maladie",
+      "5e maladie",
+      "parvovirus"
+    ]
+  },
+  "lousy": {
+    "en": "Head lice",
+    "fr": "Poux",
+    "aliases": [
+      "lice",
+      "head lice",
+      "poux",
+      "pou"
+    ]
+  },
+  "wiggles": {
+    "en": "Pinworms",
+    "fr": "Oxyures",
+    "aliases": [
+      "pinworms",
+      "pinworm",
+      "oxyures"
+    ]
+  },
+  "crusty": {
+    "en": "Impetigo",
+    "fr": "Impétigo",
+    "aliases": [
+      "impetigo"
+    ]
+  },
+  "ringo": {
+    "en": "Ringworm",
+    "fr": "Teigne",
+    "aliases": [
+      "ringworm",
+      "teigne"
+    ]
+  },
+  "whoopy": {
+    "en": "Whooping cough",
+    "fr": "Coqueluche",
+    "aliases": [
+      "whooping cough",
+      "pertussis",
+      "coqueluche"
+    ]
+  },
+  "poxy": {
+    "en": "Chickenpox",
+    "fr": "Varicelle",
+    "aliases": [
+      "chickenpox",
+      "chicken pox",
+      "varicelle",
+      "picote"
+    ]
+  }
+}

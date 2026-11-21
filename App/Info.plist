@@ -83,7 +83,7 @@
 		<string>instagram-stories</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Germigo uses the camera only when you take a photo to add to your household's sick history.</string>
+	<string>Germigo uses the camera only when you take a photo for your household's sick history or scan a daycare's code.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Germigo saves the share cards you choose to keep to your photo library.</string>
 </dict>

@@ -8,16 +8,18 @@ enum CrewEmblem {
     }
 }
 
-/// The daycare group tab: gate, sign-up, or the crew itself.
+/// The daycare group tab: daycare notices, then the crew's gate, sign-up, or the crew itself.
 struct CrewScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
+    @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @State private var showPaywall = false
     @State private var showSettings = false
+    @State private var path = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if !model.hasPass {
                     CrewTeaser(showPaywall: $showPaywall)
@@ -64,8 +66,23 @@ struct CrewScreen: View {
             .sheet(isPresented: $showSettings) {
                 CrewSettingsSheet()
             }
+            .navigationDestination(for: DaycareRoute.self) { route in
+                switch route {
+                case .daycare(let id): DaycareScreen(id: id)
+                case .notice(let id): NoticeScreen(id: id)
+                case .director: DirectorScreen()
+                }
+            }
             .task {
                 await crew.refresh()
+            }
+            .task {
+                await daycare.refresh()
+            }
+            .onChange(of: daycare.openedNoticeID, initial: true) { _, id in
+                guard let id else { return }
+                path.append(DaycareRoute.notice(id))
+                daycare.openedNoticeID = nil
             }
         }
     }
@@ -118,6 +135,8 @@ private struct CrewTeaser: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 18) {
+                DaycareSection()
+                SectionHeader(title: tr("Crew"))
                 ZStack {
                     Circle()
                         .fill(palette.accent.opacity(0.14))
@@ -228,6 +247,8 @@ private struct CrewJoinView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                DaycareSection()
+                SectionHeader(title: tr("Crew"))
                 Picker(tr("Mode"), selection: $mode) {
                     Text(tr("Join a crew")).tag(Mode.join)
                     Text(tr("Start a crew")).tag(Mode.create)
@@ -369,6 +390,7 @@ private struct CrewHome: View {
     let state: CrewState
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
+    @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @State private var reportTarget: ReportTarget?
     @State private var showReported = false
@@ -376,6 +398,8 @@ private struct CrewHome: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
+                DaycareSection()
+                SectionHeader(title: tr("Crew"))
                 header
                 radar
                 feed
@@ -391,6 +415,7 @@ private struct CrewHome: View {
         }
         .refreshable {
             await crew.refresh()
+            await daycare.refresh()
         }
         .confirmationDialog(tr("Report"), isPresented: reportBinding, titleVisibility: .visible,
                             presenting: reportTarget) { target in

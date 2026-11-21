@@ -3,7 +3,7 @@ import BackgroundTasks
 import Foundation
 import UserNotifications
 
-/// Local notifications: incubation check-ins, the daily sick check-in, new lessons, crew radar alerts.
+/// Local notifications: incubation check-ins, the daily sick check-in, new lessons, crew radar alerts, daycare watches.
 enum NotificationManager {
     private static let sickID = "sick-checkin"
     private static let milestoneID = "streak-milestone"
@@ -27,6 +27,11 @@ enum NotificationManager {
     /// Key of the exposure a check-in is about, in the reminder's user info.
     static let exposureInfoKey = "exposureID"
 
+    /// Keys of a daycare watch and of a daycare notice sent by push, in the user info.
+    static let kidInfoKey = "kidID"
+    static let germInfoKey = "germID"
+    static let noticeInfoKey = "noticeID"
+
     /// Lets reminders show as banners while the app is open, and gives them their buttons.
     static func install() {
         center.delegate = presenter
@@ -35,10 +40,13 @@ enum NotificationManager {
         let caught = UNNotificationAction(identifier: ReminderAction.caught, title: tr("It got me"), options: [.foreground])
         let stillFine = UNNotificationAction(identifier: ReminderAction.stillFine, title: tr("Still fine"), options: [])
         let dodged = UNNotificationAction(identifier: ReminderAction.dodged, title: tr("Dodged it"), options: [])
+        let kidCaught = UNNotificationAction(identifier: ReminderAction.kidCaught, title: tr("Caught it"), options: [.foreground])
+        let allGood = UNNotificationAction(identifier: ReminderAction.allGood, title: tr("All good"), options: [])
         let categories = [
             (ReminderCategory.sick, [better, stillSick]),
             (ReminderCategory.windowOpens, [caught, stillFine]),
-            (ReminderCategory.windowCloses, [dodged, caught])
+            (ReminderCategory.windowCloses, [dodged, caught]),
+            (ReminderCategory.daycareWatch, [kidCaught, allGood])
         ]
         center.setNotificationCategories(Set(categories.map { id, actions in
             UNNotificationCategory(identifier: id, actions: actions, intentIdentifiers: [], options: [])
@@ -201,6 +209,29 @@ enum NotificationManager {
         "lesson-" + id
     }
 
+    /// When the usual window after a daycare notice closes, or two days after it for a germ without one.
+    static func daycareWatchDate(noticeDate: Date, germ: Germ) -> Date {
+        let closes = germ.window(from: noticeDate)?.closes ?? noticeDate.addingTimeInterval(2 * 24 * 3600)
+        return adjusted(max(closes, Date().addingTimeInterval(3600)))
+    }
+
+    /// One question about a kid after a daycare notice: caught it or not.
+    static func scheduleDaycareWatch(noticeID: String, kid: Kid, germ: Germ, at date: Date) {
+        add(id: daycareWatchKey(noticeID, kid.id),
+            title: tr("Did %@ catch it?", kid.name),
+            body: tr("%1$@ was going around the daycare. Tap Caught it to add it to %2$@'s history.", germ.illness.value, kid.name),
+            at: date, category: ReminderCategory.daycareWatch,
+            info: [kidInfoKey: kid.id.uuidString, germInfoKey: germ.id])
+    }
+
+    static func cancelDaycareWatch(noticeID: String, kidID: UUID) {
+        center.removePendingNotificationRequests(withIdentifiers: [daycareWatchKey(noticeID, kidID)])
+    }
+
+    private static func daycareWatchKey(_ noticeID: String, _ kidID: UUID) -> String {
+        "daycare-" + noticeID + "-" + kidID.uuidString
+    }
+
     static func notifyRadar(illness: String, crewName: String, families: Int) {
         add(id: "radar-" + UUID().uuidString,
             title: tr("Going around %@", crewName),
@@ -251,6 +282,7 @@ enum ReminderCategory {
     static let sick = "sick-day"
     static let windowOpens = "window-opens"
     static let windowCloses = "window-closes"
+    static let daycareWatch = "daycare-watch"
 }
 
 enum ReminderAction {
@@ -259,18 +291,33 @@ enum ReminderAction {
     static let caught = "caught"
     static let stillFine = "still-fine"
     static let dodged = "dodged"
+    static let kidCaught = "kid-caught"
+    static let allGood = "all-good"
 }
 
 /// Shows a reminder as a banner while the app is on screen, and runs the buttons under it.
 final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        if notification.request.content.userInfo[NotificationManager.noticeInfoKey] is String {
+            Task { @MainActor in
+                await DaycareStore.shared.refresh()
+            }
+        }
         completionHandler([.banner, .sound])
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let info = response.notification.request.content.userInfo
+        if let noticeID = info[NotificationManager.noticeInfoKey] as? String {
+            Task { @MainActor in
+                AppModel.shared.selectedTab = .crew
+                await DaycareStore.shared.open(noticeID: noticeID)
+                completionHandler()
+            }
+            return
+        }
         let exposureID = info[NotificationManager.exposureInfoKey] as? String
         let action: IntentAction?
         switch response.actionIdentifier {
@@ -278,6 +325,13 @@ final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate {
         case ReminderAction.caught: action = exposureID.map { IntentAction.caught(exposureID: $0) }
         case ReminderAction.stillFine: action = exposureID.map { IntentAction.stillFine(exposureID: $0) }
         case ReminderAction.dodged: action = exposureID.map { IntentAction.dodged(exposureID: $0) }
+        case ReminderAction.kidCaught:
+            if let kidID = info[NotificationManager.kidInfoKey] as? String,
+               let germID = info[NotificationManager.germInfoKey] as? String {
+                action = .kidCaught(kidID: kidID, germID: germID)
+            } else {
+                action = nil
+            }
         default: action = nil
         }
         guard let action else {

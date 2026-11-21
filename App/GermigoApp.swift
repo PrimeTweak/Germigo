@@ -5,6 +5,8 @@ struct GermigoApp: App {
     @State private var model = AppModel.shared
     @State private var purchases = PurchaseManager.shared
     @State private var crew = CrewStore.shared
+    @State private var daycare = DaycareStore.shared
+    @UIApplicationDelegateAdaptor(PushRegistrar.self) private var pushRegistrar
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -20,6 +22,7 @@ struct GermigoApp: App {
                 .environment(model)
                 .environment(purchases)
                 .environment(crew)
+                .environment(daycare)
                 .onOpenURL { url in
                     model.open(url)
                 }
@@ -29,6 +32,9 @@ struct GermigoApp: App {
                 model.refresh()
                 Task {
                     await crew.refresh()
+                }
+                Task {
+                    await daycare.refresh()
                 }
                 Task {
                     await model.refreshLessons()
