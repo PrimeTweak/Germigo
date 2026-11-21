@@ -235,7 +235,7 @@ struct DataScreen: View {
     @State private var confirmErase = false
     @State private var eraseFailed = false
     @State private var importingBackup = false
-    @State private var pendingBackup: AppData?
+    @State private var pendingBackup: Backup?
     @State private var backupUnreadable = false
 
     private let shortList = 3
@@ -243,7 +243,7 @@ struct DataScreen: View {
     private var items: [Item] {
         [
             Item(symbol: "iphone", title: tr("On this phone"),
-                 detail: tr("Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one.")),
+                 detail: tr("Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one.")),
             Item(symbol: "dot.radiowaves.left.and.right", title: tr("In a crew"),
                  detail: tr("Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent.")),
             Item(symbol: "eye.slash", title: tr("No tracking"),
@@ -251,7 +251,7 @@ struct DataScreen: View {
             Item(symbol: "creditcard", title: tr("Purchases"),
                  detail: tr("The Season Pass is handled by Apple. Petri never sees your payment details.")),
             Item(symbol: "externaldrive", title: tr("Backups"),
-                 detail: tr("Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.")),
+                 detail: tr("Back Up saves your whole journal and its photos as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.")),
             Item(symbol: "trash", title: tr("Your call"),
                  detail: tr("Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server."))
         ]
@@ -275,7 +275,7 @@ struct DataScreen: View {
                         }
                     }
                 } footer: {
-                    Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server."))
+                    Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server."))
                 }
             }
             .listRowBackground(palette.surface)
@@ -291,7 +291,7 @@ struct DataScreen: View {
             }
             Button(tr("Cancel"), role: .cancel) {}
         } message: {
-            Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone."))
+            Text(tr("Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server. This can't be undone."))
         }
         .alert(tr("Nothing was deleted"), isPresented: $eraseFailed) {
             Button(tr("Erase this phone only"), role: .destructive) {
@@ -413,9 +413,9 @@ struct DataScreen: View {
 
     private var backupSummary: String {
         guard let backup = pendingBackup else { return "" }
-        let started = backup.installedAt.formatted(date: .abbreviated, time: .omitted)
-        return tr("The journal on this phone is replaced by the backup: %1$lld germs logged since %2$@.",
-                  backup.logs.count, started)
+        let started = backup.data.installedAt.formatted(date: .abbreviated, time: .omitted)
+        return tr("The journal and the photos on this phone are replaced by the backup: %1$lld germs logged since %2$@, %3$lld photos.",
+                  backup.data.logs.count, started, backup.data.photos.count)
     }
 
     /// Opens a file picked in Files and keeps it only if it is a Petri journal.

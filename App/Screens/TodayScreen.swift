@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The home: one character, one number or headline, two answers, and the recent days underneath.
+/// The home on one page: one character, one number or headline, the week, and two answers.
 struct TodayScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -17,30 +17,26 @@ struct TodayScreen: View {
         NavigationStack {
             GeometryReader { proxy in
                 let height = pageHeight > 0 ? pageHeight : proxy.size.height
-                let side = min(236, max(132, height * 0.3))
+                let side = min(220, max(112, height * 0.28))
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(Date(), format: .dateTime.weekday(.wide).month(.wide).day())
-                                .font(.subheadline)
-                                .foregroundStyle(palette.ink.opacity(0.8))
-                                .padding(.horizontal, 4)
-                            if let log = model.activeLog, let germ = model.activeGerm {
-                                SickStage(log: log, germ: germ, side: side, flow: $flow)
-                            } else if index < exposures.count, let germ = model.catalog.germ(exposures[index].germID) {
-                                ExposureStage(illness: exposures[index], germ: germ, side: side, page: $exposurePage,
-                                              pages: exposures.count, flow: $flow)
-                                    .id(exposures[index].id)
-                            } else {
-                                CalmStage(side: side, flow: $flow)
-                            }
+                        Text(Date(), format: .dateTime.weekday(.wide).month(.wide).day())
+                            .font(.subheadline)
+                            .foregroundStyle(palette.ink.opacity(0.8))
+                            .padding(.horizontal, 4)
+                        if let log = model.activeLog, let germ = model.activeGerm {
+                            SickStage(log: log, germ: germ, side: side, flow: $flow)
+                        } else if index < exposures.count, let germ = model.catalog.germ(exposures[index].germID) {
+                            ExposureStage(illness: exposures[index], germ: germ, side: side, page: $exposurePage,
+                                          pages: exposures.count, flow: $flow)
+                                .id(exposures[index].id)
+                        } else {
+                            CalmStage(side: side, flow: $flow)
                         }
-                        .frame(minHeight: max(0, height - 58), alignment: .top)
-                        RecentDays()
-                            .padding(.top, 14)
                     }
+                    .frame(minHeight: max(0, height - 12), alignment: .top)
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 12)
                 }
                 .onAppear {
                     settle(proxy.size.height)
@@ -66,6 +62,9 @@ struct TodayScreen: View {
             .navigationDestination(for: Germ.self) { germ in
                 GermDetailScreen(germ: germ)
             }
+            .navigationDestination(for: DayRoute.self) { route in
+                DayScreen(day: route.day)
+            }
             .sheet(item: $flow, onDismiss: handOff) { flow in
                 SymptomFlowSheet(flow: flow) { request in
                     pendingLog = request
@@ -78,7 +77,7 @@ struct TodayScreen: View {
         model.data.kids.first.map { Patient.kid($0.id) } ?? .newKid
     }
 
-    /// The first page keeps the height it had under the large title, so it does not stretch while the title collapses.
+    /// The page keeps the height it had under the large title, so it does not stretch while the title collapses.
     private func settle(_ height: CGFloat) {
         guard height > 200, pageHeight == 0 || height < pageHeight else { return }
         pageHeight = height
@@ -127,35 +126,108 @@ private struct StageText: View {
     }
 }
 
-/// The signs noted for the germ on screen, and the way back to the symptom pages.
-private struct SymptomStrip: View {
-    let ids: [String]
-    let action: () -> Void
+/// One sick kid on Today, with the illnesses that keep them in bed.
+private struct SickKid: Identifiable {
+    let kid: Kid
+    let illnessIDs: [UUID]
+    var id: UUID { kid.id }
+}
+
+/// Under the headline: the signs noted with the way back to the symptom pages, and the way out for a sick kid.
+private struct StageActions: View {
+    /// The signs of the germ on screen; nil when it was not picked from its symptoms.
+    var signs: [String]?
+    var onSigns: () -> Void = {}
+    @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var sickKids: [SickKid] {
+        let illnesses = model.sickKidIllnesses
+        return model.data.kids.compactMap { kid -> SickKid? in
+            let ids = illnesses.filter { $0.kidID == kid.id }.map { $0.id }
+            return ids.isEmpty ? nil : SickKid(kid: kid, illnessIDs: ids)
+        }
+    }
 
     var body: some View {
-        let titles = Symptom.ordered(Set(ids)).map { $0.title }
-        VStack(spacing: 10) {
-            if !titles.isEmpty {
-                Text(titles.joined(separator: " · "))
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 7)
-                    .background(palette.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        let kids = sickKids
+        let titles = Symptom.ordered(Set(signs ?? [])).map { $0.title }
+        if signs != nil || !kids.isEmpty {
+            VStack(spacing: 10) {
+                if !titles.isEmpty {
+                    Text(titles.joined(separator: " · "))
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 7)
+                        .background(palette.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 8) {
+                        buttons(kids)
+                    }
+                    VStack(spacing: 8) {
+                        buttons(kids)
+                    }
+                }
             }
-            Button(action: action) {
-                Label(tr("Symptoms changed?"), systemImage: "magnifyingglass")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(palette.accent)
-                    .padding(.horizontal, 18)
-                    .frame(height: 44)
-                    .background(palette.isDark ? palette.surface : palette.background, in: Capsule())
-                    .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 8, x: 0, y: 3)
+            .padding(.top, 12)
+            .transition(.scale(scale: 0.6).combined(with: .opacity))
+        }
+    }
+
+    @ViewBuilder
+    private func buttons(_ kids: [SickKid]) -> some View {
+        if signs != nil {
+            Button(action: onSigns) {
+                capsule {
+                    Label(tr("Symptoms changed?"), systemImage: "magnifyingglass")
+                }
             }
             .buttonStyle(PressableStyle())
         }
+        if kids.count == 1, let sick = kids.first {
+            Button {
+                model.cheerKidBetter(sick.illnessIDs, on: Date(), motion: !reduceMotion)
+            } label: {
+                better(look: sick.kid.colorIndex, title: tr("%@ is better", sick.kid.name))
+            }
+            .buttonStyle(PressableStyle())
+        } else if let first = kids.first {
+            Menu {
+                ForEach(kids) { sick in
+                    Button(tr("%@ is better", sick.kid.name)) {
+                        model.cheerKidBetter(sick.illnessIDs, on: Date(), motion: !reduceMotion)
+                    }
+                }
+            } label: {
+                better(look: first.kid.colorIndex, title: tr("Who's better?"))
+            }
+        }
+    }
+
+    private func better(look: Int, title: String) -> some View {
+        capsule {
+            HStack(spacing: 8) {
+                BuddyView(look: look, sick: true, size: 30, lively: true)
+                Text(title)
+                Image(systemName: "sparkles")
+            }
+            .padding(.leading, -10)
+        }
+    }
+
+    private func capsule<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .font(.callout.weight(.semibold))
+            .foregroundStyle(palette.accent)
+            .lineLimit(1)
+            .padding(.horizontal, 18)
+            .frame(height: 44)
+            .background(palette.isDark ? palette.surface : palette.background, in: Capsule())
+            .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 8, x: 0, y: 3)
     }
 }
 
@@ -165,21 +237,19 @@ private struct CalmStage: View {
     @Binding var flow: SymptomFlow?
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var awakeUntil = Date.distantPast
 
     var body: some View {
         let days = model.streakDays()
         let kids = model.data.kids
         VStack(spacing: 0) {
             Spacer(minLength: 8)
-            mascot
+            NappingMascot(side: model.sickKidIllnesses.isEmpty ? side : side * 0.8)
             Text(tr("This household has gone"))
                 .font(.callout)
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.top, 12)
             Text(verbatim: String(days))
-                .font(.system(size: side > 200 ? 112 : 84, weight: .bold))
+                .font(.system(size: side >= 190 ? 112 : 84, weight: .bold))
                 .monospacedDigit()
                 .foregroundStyle(palette.ink)
                 .lineLimit(1)
@@ -189,6 +259,9 @@ private struct CalmStage: View {
             Text(trCount(days, one: "day without a germ", other: "days without a germ"))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(palette.ink)
+            StageActions()
+            WeekStrip(showsRecord: true)
+                .padding(.top, 16)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 FaceTile(kids.count == 1 ? tr("%@ is sick", kids[0].name) : tr("A kid is sick")) {
@@ -205,28 +278,6 @@ private struct CalmStage: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
-    }
-
-    private var mascot: some View {
-        LivelyCharacter(mood: .asleep) {
-            TimelineView(.periodic(from: Date(), by: 0.5)) { timeline in
-                Image(timeline.date < awakeUntil ? "mascot-awake" : "mascot-asleep")
-                    .resizable()
-                    .scaledToFit()
-                    .overlay(alignment: .topTrailing) {
-                        if timeline.date >= awakeUntil {
-                            SnoreView()
-                                .offset(x: 34, y: -6)
-                        }
-                    }
-            }
-        }
-        .frame(width: side, height: side)
-        .simultaneousGesture(TapGesture().onEnded { _ in
-            awakeUntil = Date().addingTimeInterval(reduceMotion ? 4 : 2.4)
-        })
-        .accessibilityLabel(tr("The germs are napping."))
-        .accessibilityAddTraits(.isImage)
     }
 
     /// The first kid's character, a second one peeking behind it, or a plus when there is no kid yet.
@@ -274,22 +325,24 @@ private struct ExposureStage: View {
         germ.id == GermCatalog.mysteryID || !illness.symptoms.isEmpty
     }
 
+    /// Smaller art when more lines share the page.
+    private var art: CGFloat {
+        showsSymptoms || pages > 1 || !model.sickKidIllnesses.isEmpty ? side * 0.72 : side * 0.9
+    }
+
     var body: some View {
         let kidName = model.kid(illness.kidID)?.name ?? tr("Your kid")
         VStack(spacing: 0) {
             Spacer(minLength: 8)
             LivelyCharacter(mood: .stalking) {
-                GermImage(germ: germ, size: side)
+                GermImage(germ: germ, size: art)
             }
             StageText(lead: tr("%1$@ brought home %2$@", kidName, germ.phrase.value),
                       headline: tr("%@ is after you", germ.name),
                       detail: germ.id == GermCatalog.mysteryID ? nil : detail)
                 .padding(.top, 14)
-            if showsSymptoms {
-                SymptomStrip(ids: illness.symptoms) {
-                    flow = .kidIllness(illness.id)
-                }
-                .padding(.top, 12)
+            StageActions(signs: showsSymptoms ? illness.symptoms : nil) {
+                flow = .kidIllness(illness.id)
             }
             if pages > 1 {
                 Button {
@@ -308,6 +361,8 @@ private struct ExposureStage: View {
                 .accessibilityHint(tr("Next"))
                 .padding(.top, 12)
             }
+            WeekStrip(showsRecord: false)
+                .padding(.top, 14)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 FaceTile(hasPassed ? tr("Dodged it") : tr("Still fine")) {
@@ -414,7 +469,7 @@ private struct SickStage: View {
         VStack(spacing: 0) {
             Spacer(minLength: 8)
             LivelyCharacter(mood: .sick) {
-                GermImage(germ: germ, size: side)
+                GermImage(germ: germ, size: showsSymptoms || !model.sickKidIllnesses.isEmpty ? side * 0.72 : side * 0.9)
             }
             StageText(lead: lead(day: day), headline: headline(day: day))
                 .padding(.top, 14)
@@ -432,12 +487,11 @@ private struct SickStage: View {
                     .padding(.horizontal, 12)
                     .padding(.top, 10)
             }
-            if showsSymptoms {
-                SymptomStrip(ids: log.symptoms) {
-                    flow = .log(log.id)
-                }
-                .padding(.top, 12)
+            StageActions(signs: showsSymptoms ? log.symptoms : nil) {
+                flow = .log(log.id)
             }
+            WeekStrip(showsRecord: false)
+                .padding(.top, 14)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 FaceTile(tr("Still sick")) {
@@ -498,132 +552,182 @@ private struct SickStage: View {
     }
 }
 
-/// Under the first page: this week, the last germ and two numbers.
-private struct RecentDays: View {
+/// The weeks under the counter: a germ marks each sick day, and each day opens its page.
+private struct WeekStrip: View {
+    let showsRecord: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-
-    private var week: [Date] {
-        let calendar = Calendar.current
-        guard let start = calendar.dateInterval(of: .weekOfYear, for: Date())?.start else { return [] }
-        return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
-    }
-
-    /// The germ that ended last; the one still going is already at the top of the page.
-    private var lastLog: SickLog? {
-        model.data.logs.filter { !$0.isActive }.max { $0.startedAt < $1.startedAt }
-    }
+    @State private var shownWeek: Date?
 
     var body: some View {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let days = week
-        let sickDays = days.filter { $0 <= today && isSick($0) }.count
-        let seasonGerms = model.data.logs.filter { model.season.contains($0.startedAt) }.count
-        VStack(alignment: .leading, spacing: 12) {
-            SectionHeader(title: tr("This week"),
-                          trailing: sickDays == 0 ? tr("Clean so far") : trCount(sickDays, one: "%lld sick day", other: "%lld sick days"))
-            HStack(spacing: 0) {
-                ForEach(Array(days.enumerated()), id: \.element) { item in
-                    dayCell(item.element, today: today)
-                        .cascadeIn(item.offset)
+        let now = Date()
+        let first = DayEngine.firstDay(data: model.data)
+        let weeks = Self.weekStarts(from: first, to: now)
+        VStack(spacing: 4) {
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 0) {
+                    ForEach(weeks, id: \.self) { start in
+                        week(start, first: first, now: now)
+                            .containerRelativeFrame(.horizontal)
+                    }
                 }
+                .scrollTargetLayout()
             }
-            if let log = lastLog, let germ = model.catalog.germ(log.germID) {
-                SectionHeader(title: tr("Lately"))
-                lastGerm(log, germ)
-            }
-            HStack(spacing: 10) {
-                figure(tr("Best run"), trCount(model.recordDays(), one: "%lld day", other: "%lld days"))
-                figure(tr("This season"), trCount(seasonGerms, one: "%lld germ", other: "%lld germs"))
-            }
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: $shownWeek)
+            .defaultScrollAnchor(.trailing)
+            .frame(height: 62)
+            caption(current: weeks.last)
+                .frame(height: 20)
         }
     }
 
-    private func isSick(_ day: Date) -> Bool {
+    /// The start of every week from the first day to now, oldest first, two years at most.
+    static func weekStarts(from first: Date, to now: Date) -> [Date] {
         let calendar = Calendar.current
-        return model.data.logs.contains { log in
-            calendar.startOfDay(for: log.startedAt) <= day && day <= calendar.startOfDay(for: log.endedAt ?? Date())
+        guard let current = calendar.dateInterval(of: .weekOfYear, for: now)?.start else { return [] }
+        let oldest = calendar.dateInterval(of: .weekOfYear, for: first)?.start ?? current
+        let span = min(104, max(0, calendar.dateComponents([.weekOfYear], from: oldest, to: current).weekOfYear ?? 0))
+        return (0...span).reversed().compactMap { calendar.date(byAdding: .weekOfYear, value: -$0, to: current) }
+    }
+
+    private func week(_ start: Date, first: Date, now: Date) -> some View {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        return HStack(spacing: 0) {
+            ForEach(0..<7, id: \.self) { offset in
+                let day = calendar.date(byAdding: .day, value: offset, to: start) ?? start
+                DayDot(day: day, today: today, first: first, germ: germ(on: day, now: now))
+                    .cascadeIn(offset)
+            }
         }
     }
 
-    private func dayCell(_ day: Date, today: Date) -> some View {
-        let isToday = day == today
-        let past = day < today
-        let sick = day <= today && isSick(day)
-        return VStack(spacing: 7) {
+    private func germ(on day: Date, now: Date) -> Germ? {
+        DayEngine.entries(on: day, data: model.data, catalog: model.catalog, now: now).first
+            .flatMap { model.catalog.germ($0.germID) }
+    }
+
+    @ViewBuilder
+    private func caption(current: Date?) -> some View {
+        if let shown = shownWeek, let current, shown != current {
+            HStack(spacing: 10) {
+                Text(range(from: shown))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                Button(tr("This week")) {
+                    withAnimation(.snappy) {
+                        shownWeek = current
+                    }
+                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.accent)
+            }
+        } else if showsRecord {
+            RecordLine()
+        }
+    }
+
+    private func range(from start: Date) -> String {
+        let last = Calendar.current.date(byAdding: .day, value: 6, to: start) ?? start
+        return (start..<last).formatted(.interval.month(.abbreviated).day())
+    }
+}
+
+/// One day of the week: its germ when someone was sick, its number otherwise.
+private struct DayDot: View {
+    let day: Date
+    let today: Date
+    let first: Date
+    let germ: Germ?
+    @Environment(\.palette) private var palette
+
+    private var opens: Bool { day >= first && day <= today }
+
+    var body: some View {
+        VStack(spacing: 6) {
             Text(day, format: .dateTime.weekday(.narrow))
                 .font(.caption)
                 .foregroundStyle(palette.inkSecondary)
-            Text(day, format: .dateTime.day())
-                .font(.callout.weight(isToday || past ? .semibold : .regular))
-                .monospacedDigit()
-                .foregroundStyle(isToday ? palette.background : (past ? palette.ink : palette.inkSecondary))
-                .frame(width: 42, height: 42)
-                .background(isToday ? palette.ink : (past ? palette.ink.opacity(0.1) : Color.clear), in: Circle())
-            Circle()
-                .fill(sick ? palette.accent : Color.clear)
-                .frame(width: 6, height: 6)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-        .accessibilityValue(sick ? tr("Sick") : "")
-    }
-
-    private func lastGerm(_ log: SickLog, _ germ: Germ) -> some View {
-        let days = StreakMath.days(from: log.endedAt ?? log.startedAt, to: Date())
-        let when = days == 0 ? tr("Last germ, today") : trCount(days, one: "Last germ, %lld day ago", other: "Last germ, %lld days ago")
-        var detail = germ.illness.value + "."
-        if log.source != .unknown {
-            detail = tr("%1$@, from %2$@.", germ.illness.value, model.sourceName(log.source))
-        }
-        detail += " " + trCount(log.dayCount(), one: "It lasted %lld day.", other: "It lasted %lld days.")
-        return NavigationLink(value: germ) {
-            HStack(spacing: 10) {
-                LivelyCharacter(mood: .asleep, pokes: false) {
-                    GermImage(germ: germ, size: 84)
+                .frame(height: 16)
+                .accessibilityHidden(true)
+            if opens {
+                NavigationLink(value: DayRoute(day: day)) {
+                    dot
                 }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(when)
-                        .font(.footnote)
-                        .foregroundStyle(palette.ink.opacity(0.8))
-                    Text(germ.name)
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(palette.ink)
-                    Text(detail)
-                        .font(.subheadline)
-                        .foregroundStyle(palette.ink.opacity(0.8))
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 4)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.ink.opacity(0.6))
+                .buttonStyle(PressableStyle())
+                .accessibilityLabel(Text(day, format: .dateTime.weekday(.wide).month(.wide).day()))
+                .accessibilityValue(germ.map { $0.illness.value } ?? "")
+            } else {
+                dot
                     .accessibilityHidden(true)
             }
-            .padding(.vertical, 8)
-            .padding(.leading, 6)
-            .padding(.trailing, 16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
-    private func figure(_ label: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-            Text(value)
-                .font(.title2.weight(.bold))
-                .foregroundStyle(palette.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+    private var dot: some View {
+        let isToday = day == today
+        let quiet = !opens
+        return ZStack {
+            if let germ {
+                Circle()
+                    .fill(germ.tileTint(palette))
+                Group {
+                    if isToday {
+                        LivelyCharacter(mood: .stalking, pokes: false) {
+                            GermImage(germ: germ, size: 28)
+                        }
+                    } else {
+                        GermImage(germ: germ, size: 28)
+                    }
+                }
+                .transition(.scale(scale: 0.3).combined(with: .opacity))
+            } else {
+                Circle()
+                    .fill(isToday ? palette.ink : (quiet ? Color.clear : palette.ink.opacity(0.08)))
+                Text(day, format: .dateTime.day())
+                    .font(.callout.weight(quiet ? .regular : .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(isToday ? palette.background : (quiet ? palette.inkTertiary : palette.ink))
+            }
         }
-        .petriCard(radius: 24, padding: 14)
-        .accessibilityElement(children: .combine)
+        .frame(width: 40, height: 40)
+        .overlay {
+            if isToday, germ != nil {
+                Circle()
+                    .strokeBorder(palette.ink, lineWidth: 2.5)
+            }
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: germ?.id)
+    }
+}
+
+/// The best run under the week, or a cheer while the current run is the best one.
+private struct RecordLine: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var cheer = false
+
+    var body: some View {
+        let record = model.recordDays()
+        let days = model.streakDays()
+        Group {
+            if days > 0, days >= record {
+                Label(tr("Your best run yet"), systemImage: "sparkles")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .symbolEffect(.bounce, value: cheer)
+            } else if record > 0 {
+                Text(trCount(record, one: "Best run: %lld day", other: "Best run: %lld days"))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+        }
+        .onAppear {
+            cheer.toggle()
+        }
     }
 }
 

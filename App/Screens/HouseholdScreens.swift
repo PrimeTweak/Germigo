@@ -139,18 +139,15 @@ struct ProtectHomeView: View {
     }
 }
 
-/// The last six months of germs for one person, to read out or send before an appointment.
+/// The last six months for one person: illnesses, dates, signs and photos, to show or send before an appointment.
 struct DoctorSummaryScreen: View {
-    private enum Person: Hashable {
-        case me
-        case kid(UUID)
-    }
-
     private struct Line: Identifiable {
         let id: UUID
         let title: String
         let dates: String
         let length: String?
+        let signs: String?
+        let photos: [PatientPhoto]
     }
 
     @Environment(AppModel.self) private var model
@@ -161,15 +158,12 @@ struct DoctorSummaryScreen: View {
         Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date()
     }
 
-    private var current: Person {
-        person ?? model.data.kids.first.map { Person.kid($0.id) } ?? .me
+    private var people: [Person] {
+        model.data.kids.map { Person.kid($0.id) } + [.me] + (model.data.partnerName == nil ? [] : [.partner])
     }
 
-    private var name: String {
-        switch current {
-        case .me: return model.displayName
-        case .kid(let id): return model.kid(id)?.name ?? ""
-        }
+    private var current: Person {
+        person.flatMap { people.contains($0) ? $0 : nil } ?? people.first ?? .me
     }
 
     private func day(_ date: Date) -> String {
@@ -180,22 +174,52 @@ struct DoctorSummaryScreen: View {
         model.catalog.germ(germID)?.illness.value ?? germID
     }
 
+    private func signs(_ ids: [String]) -> String? {
+        let titles = Symptom.ordered(Set(ids)).map { $0.title }
+        return titles.isEmpty ? nil : titles.joined(separator: ", ")
+    }
+
     private var lines: [Line] {
+        let photos = model.data.photos.filter { $0.person == current }
         switch current {
-        case .me:
-            return model.data.logs.filter { $0.sufferer.includesMe && $0.startedAt >= since }
+        case .me, .partner:
+            let partner = current == .partner
+            return model.data.logs
+                .filter { (partner ? $0.sufferer.includesPartner : $0.sufferer.includesMe) && $0.startedAt >= since }
                 .sorted { $0.startedAt > $1.startedAt }
                 .map { log in
                     let dates = log.endedAt.map { tr("%1$@ to %2$@", day(log.startedAt), day($0)) }
                         ?? tr("Since %@", day(log.startedAt))
                     return Line(id: log.id, title: illnessName(log.germID), dates: dates,
-                                length: trCount(log.dayCount(), one: "%lld day", other: "%lld days"))
+                                length: trCount(log.dayCount(), one: "%lld day", other: "%lld days"),
+                                signs: signs(log.symptoms), photos: photos.filter { $0.logID == log.id })
                 }
         case .kid(let id):
+            let now = Date()
             return model.data.kidIllnesses.filter { $0.kidID == id && $0.startedAt >= since }
                 .sorted { $0.startedAt > $1.startedAt }
-                .map { Line(id: $0.id, title: illnessName($0.germID), dates: tr("Started %@", day($0.startedAt)), length: nil) }
+                .map { illness in
+                    var dates = tr("Started %@", day(illness.startedAt))
+                    var length: String?
+                    if let end = illness.endedAt {
+                        dates = tr("%1$@ to %2$@", day(illness.startedAt), day(end))
+                        let days = StreakMath.days(from: illness.startedAt, to: end) + 1
+                        length = trCount(days, one: "%lld day", other: "%lld days")
+                    } else if DayEngine.isGoingOn(illness, catalog: model.catalog, now: now) {
+                        dates = tr("Since %@", day(illness.startedAt))
+                    }
+                    return Line(id: illness.id, title: illnessName(illness.germID), dates: dates, length: length,
+                                signs: signs(illness.symptoms), photos: photos.filter { $0.illnessID == illness.id })
+                }
         }
+    }
+
+    /// Photos of the period that belong to none of the illnesses listed.
+    private func otherPhotos(_ lines: [Line]) -> [PatientPhoto] {
+        let listed = Set(lines.flatMap { $0.photos.map { $0.id } })
+        return model.data.photos
+            .filter { $0.person == current && $0.takenAt >= since && !listed.contains($0.id) }
+            .sorted { $0.takenAt < $1.takenAt }
     }
 
     /// What the parents caught from this kid, through the logs linked to its illnesses.
@@ -207,63 +231,80 @@ struct DoctorSummaryScreen: View {
             .map { tr("%1$@: %2$@, %3$@", model.name(of: $0.sufferer), illnessName($0.germID), day($0.startedAt)) }
     }
 
-    private var summaryText: String {
-        var rows = [tr("%@ · last 6 months", name)]
+    private var heading: String {
+        tr("%@ · last 6 months", model.name(for: current))
+    }
+
+    private func counts(_ lines: [Line], photos: Int) -> String {
+        trCount(lines.count, one: "%lld illness", other: "%lld illnesses") + ", "
+            + trCount(photos, one: "%lld photo", other: "%lld photos")
+    }
+
+    private func summaryRows(_ lines: [Line]) -> [String] {
+        var rows = [heading]
         if lines.isEmpty {
             rows.append(tr("Nothing logged in the last 6 months."))
         }
-        rows += lines.map { line in "- " + ([line.title, line.dates] + [line.length].compactMap { $0 }).joined(separator: ", ") }
+        rows += lines.map { line in
+            var row = "- " + ([line.title, line.dates] + [line.length].compactMap { $0 }).joined(separator: ", ")
+            if let signs = line.signs { row += ". " + signs }
+            return row
+        }
         if !caughtAtHome.isEmpty {
             rows.append(tr("Also caught at home:"))
             rows += caughtAtHome.map { "- " + $0 }
         }
         rows.append(tr("Dates and germs as logged in Petri, with no diagnosis."))
-        return rows.joined(separator: "\n")
+        return rows
+    }
+
+    private func packet(_ lines: [Line], others: [PatientPhoto]) -> DoctorPacket {
+        var sections = lines.map { DoctorPacket.Section(title: $0.title + ", " + $0.dates, photoIDs: $0.photos.map { $0.id }) }
+        sections.append(DoctorPacket.Section(title: tr("Other photos"), photoIDs: others.map { $0.id }))
+        return DoctorPacket(lines: summaryRows(lines), sections: sections)
     }
 
     var body: some View {
+        let found = lines
+        let others = otherPhotos(found)
+        let photoCount = found.reduce(others.count) { $0 + $1.photos.count }
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Picker(tr("Who"), selection: Binding(get: { current }, set: { person = $0 })) {
-                    ForEach(model.data.kids) { kid in
-                        Text(kid.name).tag(Person.kid(kid.id))
+                if people.count > 1 {
+                    Picker(tr("Who"), selection: Binding(get: { current }, set: { person = $0 })) {
+                        ForEach(people, id: \.self) { member in
+                            Text(model.name(for: member)).tag(member)
+                        }
                     }
-                    Text(tr("Me")).tag(Person.me)
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(tr("%@ · last 6 months", name))
+                    Text(heading)
                         .font(.headline)
                         .foregroundStyle(palette.ink)
-                    Text(trCount(lines.count, one: "%lld illness", other: "%lld illnesses"))
+                    Text(counts(found, photos: photoCount))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.bottom, 6)
-                    if lines.isEmpty {
+                    if found.isEmpty {
                         Text(tr("Nothing logged in the last 6 months."))
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
                             .padding(.vertical, 8)
                     }
-                    ForEach(lines) { line in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(line.title)
-                                    .font(.callout.weight(.semibold))
-                                    .foregroundStyle(palette.ink)
-                                Text(line.dates)
-                                    .font(.footnote)
-                                    .foregroundStyle(palette.inkSecondary)
-                            }
-                            Spacer(minLength: 8)
-                            if let length = line.length {
-                                Text(length)
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(palette.ink)
-                            }
-                        }
-                        .padding(.vertical, 8)
-                        .accessibilityElement(children: .combine)
+                    ForEach(Array(found.enumerated()), id: \.element.id) { item in
+                        lineView(item.element)
+                            .cascadeIn(item.offset)
+                    }
+                    if !others.isEmpty {
+                        Divider()
+                        Text(tr("Other photos"))
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                            .padding(.top, 12)
+                        PhotoRow(photos: others, side: 56)
+                            .padding(.top, 8)
+                            .padding(.bottom, 12)
                     }
                     if !caughtAtHome.isEmpty {
                         Text(tr("Also caught at home:"))
@@ -279,20 +320,55 @@ struct DoctorSummaryScreen: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .petriCard()
+                .id(current)
+                .transition(.opacity)
                 Text(tr("Dates and germs as you logged them. Petri adds no diagnosis."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
-                ShareLink(item: summaryText) {
-                    Label(tr("Share as text"), systemImage: "square.and.arrow.up")
+                ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
+                    Label(tr("Share"), systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
+                ShareLink(item: summaryRows(found).joined(separator: "\n")) {
+                    Label(tr("Share as text"), systemImage: "text.alignleft")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost))
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
+            .animation(.snappy, value: current)
         }
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(tr("For the doctor"))
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func lineView(_ line: Line) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Divider()
+                .padding(.bottom, 10)
+            HStack(alignment: .firstTextBaseline) {
+                Text(line.title)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Spacer(minLength: 8)
+                Text(([line.dates] + [line.length].compactMap { $0 }).joined(separator: " · "))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.trailing)
+            }
+            if let signs = line.signs {
+                Text(signs)
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            if !line.photos.isEmpty {
+                PhotoRow(photos: line.photos, side: 56)
+                    .padding(.top, 8)
+            }
+        }
+        .padding(.bottom, 12)
+        .accessibilityElement(children: .contain)
     }
 }

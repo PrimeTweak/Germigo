@@ -95,8 +95,8 @@
         "fr": "Ce qui reste sur ton téléphone"
       },
       "body": {
-        "en": "The germs you log, their dates and severity, your kids' first names, your partner's first name, your badges, points and settings. This is stored in a protected file on your device. It is included in your device backup if you use one. A backup you make from Settings is a file you save where you choose; Petri never uploads it. The developer cannot see it.",
-        "fr": "Les microbes que tu notes, leurs dates et leur intensité, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans un fichier protégé sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages est un fichier que tu enregistres où tu veux; Petri ne la téléverse jamais. Le développeur ne peut pas le voir."
+        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Petri never uploads it. The developer cannot see it. The camera is used only when you take a photo.",
+        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Petri ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo."
       }
     },
     {

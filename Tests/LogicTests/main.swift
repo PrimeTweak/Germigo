@@ -1,6 +1,6 @@
 import Foundation
 
-// Logic checks for the journal rules, streaks, badges, stats and journal decoding.
+// Logic checks for the journal rules, streaks, badges, stats, days and journal decoding.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -23,12 +23,12 @@ func makeLog(_ germID: String, from start: Date, to end: Date?, sufferer: Suffer
             points: 80, bonuses: bonuses, sufferer: sufferer, kidIllnessID: nil)
 }
 
-func makeGerm(_ id: String, rarity: Rarity, family: GermFamily = .airways) -> Germ {
+func makeGerm(_ id: String, rarity: Rarity, family: GermFamily = .airways, lasts: Int? = 10) -> Germ {
     let text = LocalizedText(en: id, fr: id)
     return Germ(id: id, number: 1, name: id, illness: text, phrase: text, scientific: text, rarity: rarity,
                 tintLight: "#FFFFFF", tintDeep: "#000000", quickPick: true, incubationMinHours: 24,
                 incubationMaxHours: 72, showsUp: text, lasts: text, facts: [], tips: [], doctor: text,
-                deepDive: [], sources: [], family: family, lastsUpToDays: 10, doctorLead: text, doctorSigns: [text],
+                deepDive: [], sources: [], family: family, lastsUpToDays: lasts, doctorLead: text, doctorSigns: [text],
                 doctorNote: nil, boss: GermBoss(attack: text, weakness: text),
                 myth: GermMyth(claim: text, isTrue: true, explanation: text), kidSource: nil)
 }
@@ -413,6 +413,96 @@ do {
     let decoded = try? JSONDecoder().decode(AppData.self, from: Data(withSigns.utf8))
     check(decoded?.logs.first?.symptoms == ["fever"] && decoded?.hostLook == 3 && decoded?.partnerLook == Looks.partner,
           "symptoms and looks load, with defaults for what is missing")
+}
+
+// MARK: - Days
+
+do {
+    let kidID = UUID()
+    var data = makeData(logs: [makeLog("rhino", from: day(2), to: day(4), sufferer: .both)])
+    data.kids = [Kid(id: kidID, name: "Kid", colorIndex: 0)]
+    var cold = KidIllness(kidID: kidID, germID: "rhino", startedAt: day(1), watching: false, outcome: .dodged)
+    data.kidIllnesses = [cold]
+
+    let third = DayEngine.entries(on: day(3), data: data, catalog: catalog, now: day(20))
+    check(third.map { $0.person } == [.me, .partner, .kid(kidID)], "a day lists the parent, the partner, then the kids")
+    check(third.first?.dayNumber == 2 && third.first?.length == 3, "a day knows the day of the illness and its length")
+    check(third.last?.length == nil, "a kid's illness without an end has no length")
+    check(DayEngine.entries(on: day(10), data: data, catalog: catalog, now: day(20)).count == 1,
+          "a kid's illness without an end lasts its germ's usual length")
+    check(DayEngine.entries(on: day(11), data: data, catalog: catalog, now: day(20)).isEmpty, "and stops after it")
+    check(DayEngine.isGoingOn(cold, catalog: catalog, now: day(10)) && !DayEngine.isGoingOn(cold, catalog: catalog, now: day(11)),
+          "a kid stays sick until the usual length runs out")
+
+    cold.endedAt = day(5)
+    data.kidIllnesses = [cold]
+    let fifth = DayEngine.entries(on: day(5), data: data, catalog: catalog, now: day(20))
+    check(fifth.count == 1 && fifth[0].isLastDay && fifth[0].length == 5, "the day a kid is better ends the illness")
+    check(DayEngine.entries(on: day(6), data: data, catalog: catalog, now: day(20)).isEmpty, "nothing after the kid is better")
+    check(!DayEngine.isGoingOn(cold, catalog: catalog, now: day(5)), "a kid marked better is not sick anymore")
+    check(DayEntry(person: .me, germID: "rhino", symptoms: [], dayNumber: 1, length: nil, logID: data.logs[0].id,
+                   illnessID: nil, isLastDay: false).id
+          != DayEntry(person: .partner, germID: "rhino", symptoms: [], dayNumber: 1, length: nil, logID: data.logs[0].id,
+                      illnessID: nil, isLastDay: false).id, "a germ shared by the couple gives two cards")
+
+    check(DayEngine.entries(on: day(21), data: data, catalog: catalog, now: day(20)).isEmpty, "a future day is empty")
+    check(DayEngine.firstDay(data: data) == Calendar.current.startOfDay(for: day(0)), "the first day is the install day")
+    data.logs.append(makeLog("rhino", from: day(-3), to: day(-1)))
+    check(DayEngine.firstDay(data: data) == Calendar.current.startOfDay(for: day(-3)), "or an older entry")
+
+    let unknownCatalog = GermCatalog(germs: [makeGerm("mystery", rarity: .common, lasts: nil)], articles: [])
+    let mystery = KidIllness(kidID: kidID, germID: "mystery", startedAt: day(1), watching: false, outcome: .open)
+    check(DayEngine.isGoingOn(mystery, catalog: unknownCatalog, now: day(7))
+          && !DayEngine.isGoingOn(mystery, catalog: unknownCatalog, now: day(8)),
+          "a germ without a usual length counts a week")
+
+    let withEnd = """
+    {"kidIllnesses":[{"id":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A12","kidID":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A13",
+    "germID":"rhino","startedAt":0,"endedAt":86400},
+    {"id":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A14","kidID":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A13","germID":"rhino","startedAt":0}]}
+    """
+    let ends = (try? JSONDecoder().decode(AppData.self, from: Data(withEnd.utf8)))?.kidIllnesses.map { $0.endedAt }
+    check(ends?.count == 2 && ends?[0] != nil && ends?[1] == nil, "a kid's end date loads, and is empty when missing")
+}
+
+// MARK: - Photos
+
+do {
+    let kidID = UUID()
+    let log = makeLog("rhino", from: day(2), to: day(4))
+    var data = makeData(logs: [log])
+    data.kids = [Kid(id: kidID, name: "Kid", colorIndex: 0)]
+    let cold = KidIllness(kidID: kidID, germID: "rhino", startedAt: day(3), watching: false, outcome: .open)
+    data.kidIllnesses = [cold]
+    let linked = PatientPhoto(person: .kid(kidID), takenAt: day(3, hour: 9), logID: nil, illnessID: cold.id)
+    let loose = PatientPhoto(person: .me, takenAt: day(3, hour: 10), logID: nil, illnessID: nil)
+    let healthy = PatientPhoto(person: .partner, takenAt: day(3, hour: 11), logID: nil, illnessID: nil)
+    let otherDay = PatientPhoto(person: .me, takenAt: day(5), logID: log.id, illnessID: nil)
+    data.photos = [linked, loose, healthy, otherDay]
+
+    let entries = DayEngine.entries(on: day(3), data: data, catalog: catalog, now: day(20))
+    let photos = DayEngine.photos(on: day(3), entries: entries, data: data)
+    let kidEntry = entries.first { $0.person == .kid(kidID) }
+    let myEntry = entries.first { $0.person == .me }
+    check(kidEntry.flatMap { photos.byEntry[$0.id] }?.map { $0.id } == [linked.id], "a photo goes on its illness's card")
+    check(myEntry.flatMap { photos.byEntry[$0.id] }?.map { $0.id } == [loose.id], "a loose photo goes on the person's card")
+    check(photos.others.map { $0.id } == [healthy.id], "a photo of someone not sick that day stays apart")
+
+    let backup = Persistence.backupData(data, photos: [linked.id: Data([1, 2, 3])])
+    let read = backup.flatMap { Persistence.readBackup($0) }
+    check(read == nil, "a journal that skipped onboarding is not a backup")
+    data.onboardingDone = true
+    let again = Persistence.backupData(data, photos: [linked.id: Data([1, 2, 3])]).flatMap { Persistence.readBackup($0) }
+    check(again?.data.photos.count == 4 && again?.photoFiles[linked.id] == Data([1, 2, 3]),
+          "a backup carries the photos and their files")
+    check(again?.data.photos.first?.person == .kid(kidID) && again?.data.photos.first?.illnessID == cold.id,
+          "a photo keeps who and what it is for")
+
+    let older = """
+    {"onboardingDone":true,"logs":[]}
+    """
+    let fromOlder = Persistence.readBackup(Data(older.utf8))
+    check(fromOlder?.data.photos.isEmpty == true && fromOlder?.photoFiles.isEmpty == true, "an older backup has no photos")
 }
 
 if failures == 0 {

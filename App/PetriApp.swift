@@ -158,6 +158,16 @@ struct MainTabs: View {
                 Haptics.success()
             }
         }
+        .overlay {
+            if let start = model.confettiAt {
+                ConfettiView(start: start)
+                    .ignoresSafeArea()
+                    .task(id: start) {
+                        try? await Task.sleep(nanoseconds: 3_500_000_000)
+                        if model.confettiAt == start { model.confettiAt = nil }
+                    }
+            }
+        }
         .overlay(alignment: .top) {
             ZStack {
                 if let toast = model.toast {

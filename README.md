@@ -53,9 +53,11 @@ Widgets read a snapshot from the app group `group.ca.petri.app`. An unsigned or 
 
 The journal is one JSON file in Application Support. Decoding is tolerant: a key missing from the file takes its default, and unknown keys are ignored, so a journal written by another version still loads. A file that cannot be decoded is renamed `journal-unreadable-<time>.json`, never overwritten, and can be exported from Settings > Your Data.
 
+Photos are JPEG files in `Application Support/Petri/Photos`, named by the id the journal lists them under.
+
 When a stored type changes, add the new field with a default in its `init(from:)` in `App/Models/AppData.swift` and extend `Tests/LogicTests/main.swift`.
 
-Settings > Data and Privacy > Back Up shares the journal as `petri-backup.json`, in the same format as the file on disk. Restore a Backup reads such a file back and replaces the journal after a confirmation.
+Settings > Data and Privacy > Back Up shares the journal as `petri-backup.json`: the same format as the file on disk, plus the photo files as base64 under `photoFiles`. Restore a Backup reads such a file back and replaces the journal and its photos after a confirmation.
 
 Skill tree titles, streak milestones, the couple duel and the season story are computed from the journal in `App/Store/ProgressEngine.swift`; only the worn title and the last celebrated milestone are stored.
 

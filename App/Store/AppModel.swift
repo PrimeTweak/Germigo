@@ -70,6 +70,8 @@ final class AppModel {
     var pendingMilestone: MilestoneEvent?
     /// A short confirmation shown at the top of the screen.
     var toast: String?
+    /// When the last burst of confetti over the whole app started.
+    var confettiAt: Date?
 
     /// False while the journal file exists but cannot be read; nothing is saved over it then.
     @ObservationIgnored private var journalAvailable = true
@@ -127,6 +129,12 @@ final class AppModel {
 
     var openExposures: [KidIllness] {
         data.kidIllnesses.filter { $0.outcome == .open }.sorted { $0.startedAt > $1.startedAt }
+    }
+
+    /// Kids' illnesses still going on today.
+    var sickKidIllnesses: [KidIllness] {
+        let now = Date()
+        return data.kidIllnesses.filter { DayEngine.isGoingOn($0, catalog: catalog, now: now) }
     }
 
     var displayName: String {
@@ -289,10 +297,13 @@ final class AppModel {
         for illness in data.kidIllnesses where illness.kidID == id {
             retire(illness)
         }
+        let photos = data.photos.filter { $0.person == .kid(id) }
         data.kids.removeAll { $0.id == id }
         data.kidIllnesses.removeAll { $0.kidID == id }
+        data.photos.removeAll { $0.person == .kid(id) }
         reconcileUnlocks()
         commit()
+        for photo in photos { PhotoStore.delete(photo.id) }
     }
 
     func updateSettings(_ change: (inout AppSettings) -> Void) {
@@ -473,6 +484,9 @@ final class AppModel {
 
     func deleteLog(_ id: UUID) {
         data.logs.removeAll { $0.id == id }
+        for index in data.photos.indices where data.photos[index].logID == id {
+            data.photos[index].logID = nil
+        }
         reconcileUnlocks()
         commit()
         syncSickCheckIn()
@@ -533,9 +547,33 @@ final class AppModel {
         }
     }
 
+    /// Ends a kid's illness on a day; on today it ends now.
+    func markKidBetter(_ id: UUID, on day: Date, now: Date = Date()) {
+        guard let index = data.kidIllnesses.firstIndex(where: { $0.id == id }) else { return }
+        let calendar = Calendar.current
+        let end = calendar.isDate(day, inSameDayAs: now)
+            ? now : calendar.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
+        data.kidIllnesses[index].endedAt = max(data.kidIllnesses[index].startedAt, end)
+        let illness = data.kidIllnesses[index]
+        commit()
+        syncSymptomCheck(for: illness)
+    }
+
+    /// Takes "better" back: the kid's illness goes on again.
+    func reopenKidIllness(_ id: UUID) {
+        guard let index = data.kidIllnesses.firstIndex(where: { $0.id == id }) else { return }
+        data.kidIllnesses[index].endedAt = nil
+        let illness = data.kidIllnesses[index]
+        commit()
+        syncSymptomCheck(for: illness)
+    }
+
     func deleteKidIllness(_ id: UUID) {
         if let illness = data.kidIllnesses.first(where: { $0.id == id }) { retire(illness) }
         data.kidIllnesses.removeAll { $0.id == id }
+        for index in data.photos.indices where data.photos[index].illnessID == id {
+            data.photos[index].illnessID = nil
+        }
         reconcileUnlocks()
         commit()
     }
@@ -553,7 +591,7 @@ final class AppModel {
 
     /// A mystery germ gets one question two days in: any new symptoms?
     private func syncSymptomCheck(for illness: KidIllness) {
-        if illness.outcome == .open, illness.germID == GermCatalog.mysteryID {
+        if illness.outcome == .open, illness.endedAt == nil, illness.germID == GermCatalog.mysteryID {
             NotificationManager.scheduleSymptomCheck(id: illness.id, name: kid(illness.kidID)?.name,
                                                      startedAt: illness.startedAt, settings: data.settings)
         } else {
@@ -568,6 +606,22 @@ final class AppModel {
         } else {
             NotificationManager.cancelSymptomCheck(id: log.id)
         }
+    }
+
+    // MARK: - Photos
+
+    /// Files pictures already written by PhotoStore under one person, moment and illness.
+    func addPhotos(_ ids: [UUID], person: Person, takenAt: Date, logID: UUID?, illnessID: UUID?) {
+        data.photos += ids.map {
+            PatientPhoto(id: $0, person: person, takenAt: takenAt, logID: logID, illnessID: illnessID)
+        }
+        commit()
+    }
+
+    func deletePhoto(_ id: UUID) {
+        data.photos.removeAll { $0.id == id }
+        commit()
+        PhotoStore.delete(id)
     }
 
     // MARK: - Lifecycle
@@ -612,12 +666,16 @@ final class AppModel {
         }
     }
 
-    /// Replaces the journal with a backup, keeping the parent past onboarding.
-    func restore(_ backup: AppData, now: Date = Date()) {
+    /// Replaces the journal and its photos with a backup, keeping the parent past onboarding.
+    func restore(_ backup: Backup, now: Date = Date()) {
         for illness in data.kidIllnesses { retire(illness) }
         for log in data.logs { NotificationManager.cancelSymptomCheck(id: log.id) }
-        var restored = backup
+        var restored = backup.data
         restored.onboardingDone = true
+        restored.photos = restored.photos.filter { photo in
+            backup.photoFiles[photo.id].map { PhotoStore.write($0, id: photo.id) } ?? false
+        }
+        PhotoStore.keepOnly(Set(restored.photos.map { $0.id }))
         data = restored
         journalAvailable = true
         reconcileUnlocks(now: now)
@@ -662,6 +720,7 @@ final class AppModel {
         NotificationManager.cancelSickCheckIn()
         NotificationManager.cancelStreakReminders()
         Persistence.erase()
+        PhotoStore.eraseAll()
         data = AppData()
         journalAvailable = true
         saveFailureReported = false
@@ -671,6 +730,7 @@ final class AppModel {
         askBetter = false
         pendingMilestone = nil
         toast = nil
+        confettiAt = nil
         selectedTab = .today
         publishSnapshot()
     }

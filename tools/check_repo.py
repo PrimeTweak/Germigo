@@ -325,8 +325,9 @@ def check_strings():
             fail(f"en Localizable.strings: format specifiers differ for {key!r}")
     for language in ("en", "fr"):
         info = parse_strings(f"App/{language}.lproj/InfoPlist.strings")
-        if "NSPhotoLibraryAddUsageDescription" not in info:
-            fail(f"App/{language}.lproj/InfoPlist.strings: missing NSPhotoLibraryAddUsageDescription")
+        for key in ("NSCameraUsageDescription", "NSPhotoLibraryAddUsageDescription"):
+            if key not in info:
+                fail(f"App/{language}.lproj/InfoPlist.strings: missing {key}")
 
 
 def main():

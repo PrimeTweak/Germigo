@@ -77,7 +77,8 @@ struct FamilyScreen: View {
 
     private func kidCard(_ kid: Kid) -> some View {
         let illnesses = model.data.kidIllnesses.filter { $0.kidID == kid.id }
-        let open = illnesses.filter { $0.outcome == .open }.max { $0.startedAt < $1.startedAt }
+        let open = illnesses.filter { DayEngine.isGoingOn($0, catalog: model.catalog, now: Date()) }
+            .max { $0.startedAt < $1.startedAt }
         let last = illnesses.max { $0.startedAt < $1.startedAt }
         let gotYou = model.data.logs.filter { $0.source == .kid(kid.id) }.count
         let dodged = illnesses.filter { $0.outcome == .dodged }.count
@@ -304,7 +305,7 @@ private struct PersonEditSheet: View {
                 Button(tr("Cancel"), role: .cancel) {}
             } message: {
                 if case .kid = member {
-                    Text(tr("Their germs and countdowns are removed too. Your own journal stays."))
+                    Text(tr("Their germs, photos and countdowns are removed too. Your own journal stays."))
                 }
             }
             .onAppear(perform: prefill)

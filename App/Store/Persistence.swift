@@ -10,6 +10,39 @@ enum JournalLoad {
     case setAside
 }
 
+/// A backup file: the journal's keys, and the photos it lists as JPEG data keyed by photo id.
+struct Backup: Codable {
+    let data: AppData
+    let photoFiles: [UUID: Data]
+
+    private enum CodingKeys: String, CodingKey {
+        case photoFiles
+    }
+
+    init(data: AppData, photoFiles: [UUID: Data]) {
+        self.data = data
+        self.photoFiles = photoFiles
+    }
+
+    init(from decoder: Decoder) throws {
+        data = try AppData(from: decoder)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let stored = container.value(.photoFiles, default: [String: Data]())
+        var files: [UUID: Data] = [:]
+        for (key, value) in stored {
+            if let id = UUID(uuidString: key) { files[id] = value }
+        }
+        photoFiles = files
+    }
+
+    func encode(to encoder: Encoder) throws {
+        try data.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        let files = Dictionary(uniqueKeysWithValues: photoFiles.map { ($0.key.uuidString, $0.value) })
+        try container.encode(files, forKey: .photoFiles)
+    }
+}
+
 /// Reads and writes the journal as one protected JSON file on the device.
 enum Persistence {
     private static let setAsidePrefix = "journal-unreadable-"
@@ -65,15 +98,15 @@ enum Persistence {
             .map { directory.appendingPathComponent($0) }
     }
 
-    /// The journal as a backup file, in the same format as on disk.
-    static func backupData(_ data: AppData) -> Data? {
-        try? encoder.encode(data)
+    /// The journal as a backup file: the same format as on disk, plus the photo files under `photoFiles`.
+    static func backupData(_ data: AppData, photos: [UUID: Data]) -> Data? {
+        try? encoder.encode(Backup(data: data, photoFiles: photos))
     }
 
     /// Reads a backup; only a journal that went through onboarding counts as one.
-    static func readBackup(_ raw: Data) -> AppData? {
-        guard let data = try? decoder.decode(AppData.self, from: raw), data.onboardingDone else { return nil }
-        return data
+    static func readBackup(_ raw: Data) -> Backup? {
+        guard let backup = try? decoder.decode(Backup.self, from: raw), backup.data.onboardingDone else { return nil }
+        return backup
     }
 
     static func erase() {

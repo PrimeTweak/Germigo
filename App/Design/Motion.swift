@@ -164,6 +164,35 @@ struct SnoreView: View {
     }
 }
 
+/// The mascot asleep and snoring; a tap wakes it for a moment.
+struct NappingMascot: View {
+    let side: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var awakeUntil = Date.distantPast
+
+    var body: some View {
+        LivelyCharacter(mood: .asleep) {
+            TimelineView(.periodic(from: Date(), by: 0.5)) { timeline in
+                Image(timeline.date < awakeUntil ? "mascot-awake" : "mascot-asleep")
+                    .resizable()
+                    .scaledToFit()
+                    .overlay(alignment: .topTrailing) {
+                        if timeline.date >= awakeUntil {
+                            SnoreView()
+                                .offset(x: 34, y: -6)
+                        }
+                    }
+            }
+        }
+        .frame(width: side, height: side)
+        .simultaneousGesture(TapGesture().onEnded { _ in
+            awakeUntil = Date().addingTimeInterval(reduceMotion ? 4 : 2.4)
+        })
+        .accessibilityLabel(tr("The germs are napping."))
+        .accessibilityAddTraits(.isImage)
+    }
+}
+
 /// Slides and fades a row in, a beat after the one before it. Instant when Reduce Motion is on.
 private struct CascadeIn: ViewModifier {
     let index: Int

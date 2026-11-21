@@ -78,6 +78,28 @@ struct SickLog: Codable, Identifiable, Hashable {
     }
 }
 
+/// Someone in the household: the parent, the partner or a kid.
+enum Person: Codable, Hashable {
+    case me
+    case partner
+    case kid(UUID)
+}
+
+/// A photo of someone in the household. The picture is a file on the phone; the journal keeps who, when and for what.
+struct PatientPhoto: Codable, Identifiable, Hashable {
+    var id = UUID()
+    var person: Person
+    var takenAt: Date
+    /// The parent's germ the photo belongs to.
+    var logID: UUID?
+    /// The kid's illness the photo belongs to.
+    var illnessID: UUID?
+
+    enum CodingKeys: String, CodingKey {
+        case id, person, takenAt, logID, illnessID
+    }
+}
+
 /// How an exposure ended; expired means the window passed without an answer.
 enum ExposureOutcome: String, Codable {
     case open
@@ -98,9 +120,11 @@ struct KidIllness: Codable, Identifiable, Hashable {
     var liveDismissed = false
     /// The signs ticked when the germ was picked from its symptoms.
     var symptoms: [String] = []
+    /// When the kid was better; nil until someone says so.
+    var endedAt: Date?
 
     enum CodingKeys: String, CodingKey {
-        case id, kidID, germID, startedAt, watching, outcome, liveDismissed, symptoms
+        case id, kidID, germID, startedAt, watching, outcome, liveDismissed, symptoms, endedAt
     }
 }
 
@@ -179,10 +203,11 @@ struct AppData: Codable {
     /// The parent's and the partner's characters.
     var hostLook = Looks.host
     var partnerLook = Looks.partner
+    var photos: [PatientPhoto] = []
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
-        case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook
+        case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook, photos
     }
 }
 
@@ -243,6 +268,18 @@ extension KidIllness {
         outcome = try container.decodeIfPresent(ExposureOutcome.self, forKey: .outcome) ?? .open
         liveDismissed = container.value(.liveDismissed, default: false)
         symptoms = container.value(.symptoms, default: [String]())
+        endedAt = try? container.decodeIfPresent(Date.self, forKey: .endedAt)
+    }
+}
+
+extension PatientPhoto {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        person = try container.decode(Person.self, forKey: .person)
+        takenAt = try container.decode(Date.self, forKey: .takenAt)
+        logID = try? container.decodeIfPresent(UUID.self, forKey: .logID)
+        illnessID = try? container.decodeIfPresent(UUID.self, forKey: .illnessID)
     }
 }
 
@@ -290,6 +327,7 @@ extension AppData {
         wrapGuesses = container.value(.wrapGuesses, default: [String: Bool]())
         hostLook = container.value(.hostLook, default: Looks.host)
         partnerLook = container.value(.partnerLook, default: Looks.partner)
+        photos = try container.decodeIfPresent([PatientPhoto].self, forKey: .photos) ?? []
     }
 }
 

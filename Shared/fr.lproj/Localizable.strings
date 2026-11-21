@@ -15,8 +15,9 @@
 "%1$@ · Day %2$lld" = "%1$@ · Jour %2$lld";
 "%1$@, %2$@, %3$@, caught %4$lld times" = "%1$@, %2$@, %3$@, attrapé %4$lld fois";
 "%1$@, day %2$lld" = "%1$@, jour %2$lld";
-"%1$@, from %2$@." = "%1$@. Source : %2$@.";
+"%1$@, day %2$lld of %3$lld" = "%1$@, jour %2$lld sur %3$lld";
 "%1$@, level %2$lld" = "%1$@, niveau %2$lld";
+"%1$@, since %2$@" = "%1$@, depuis le %2$@";
 "%1$@: %2$@, %3$@" = "%1$@ : %2$@, %3$@";
 "%1$@: %2$lld families this week." = "%1$@ : %2$lld familles cette semaine.";
 "%1$@: %2$lld. Rough." = "%1$@ : %2$lld. Ouch.";
@@ -30,6 +31,7 @@
 "%@ a month" = "%@ par mois";
 "%@ has you" = "%@ te tient";
 "%@ is after you" = "%@ en a après toi";
+"%@ is better" = "%@ va mieux";
 "%@ is sick" = "%@ est malade";
 "%@ leads" = "%@ mène";
 "%@ suffered the most." = "%@ a le plus souffert.";
@@ -66,11 +68,11 @@
 "%lld more suspects" = "%lld autres suspects";
 "%lld other fits less well" = "%lld autre colle moins bien";
 "%lld others fit less well" = "%lld autres collent moins bien";
+"%lld photo" = "%lld photo";
+"%lld photos" = "%lld photos";
 "%lld pts" = "%lld pts";
 "%lld question · about a minute" = "%lld question · environ une minute";
 "%lld questions · about a minute" = "%lld questions · environ une minute";
-"%lld sick day" = "%lld jour malade";
-"%lld sick days" = "%lld jours malade";
 "%lld suspects" = "%lld suspects";
 "%lld time" = "%lld fois";
 "%lld times" = "%lld fois";
@@ -97,6 +99,7 @@
 "Add" = "Ajouter";
 "Add a kid" = "Ajouter un enfant";
 "Add a kid's germ" = "Ajouter le microbe d'un enfant";
+"Add a photo" = "Ajouter une photo";
 "Add your partner" = "Ajoute ton ou ta partenaire";
 "Add your partner in Settings, under Family, to start the couple duel." = "Ajoute ton partenaire dans les réglages, sous Famille, pour lancer le duel de couple.";
 "Adds 1 to the radar and posts to the feed." = "Ajoute 1 au radar et publie dans le fil.";
@@ -120,10 +123,11 @@
 "Automatic" = "Automatique";
 "Back" = "Retour";
 "Back on my feet." = "Remis sur pied.";
+"Back on their feet" = "De retour sur pied";
 "Back on your feet in a day" = "Sur pied en une journée";
 "Back to daycare?" = "Retour à la garderie ?";
 "Back Up" = "Sauvegarder";
-"Back Up saves your whole journal as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal dans un fichier, où tu veux. Restaurer une sauvegarde le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
+"Back Up saves your whole journal and its photos as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it." = "Sauvegarder enregistre tout ton journal et ses photos dans un fichier, où tu veux. Restaurer une sauvegarde le relit sur ce téléphone ou sur un nouveau. Petri ne le téléverse jamais.";
 "Backups" = "Sauvegardes";
 "Bacterium" = "Bactérie";
 "Badge unlocked: %@" = "Badge débloqué : %@";
@@ -132,8 +136,10 @@
 "Be kind. No offensive names, no harassment. Offenders are removed." = "Sois gentil. Aucun nom offensant, aucun harcèlement. Les fautifs sont retirés.";
 "Before the reveal" = "Avant la révélation";
 "Behind it" = "La cause";
-"Best run" = "Meilleure série";
+"Best run: %lld day" = "Meilleure série : %lld jour";
+"Best run: %lld days" = "Meilleure série : %lld jours";
 "Better" = "Guéri";
+"Better on this day" = "Mieux ce jour-là";
 "Block" = "Bloquer";
 "Body aches" = "Courbatures";
 "Boomerang" = "Boomerang";
@@ -166,8 +172,8 @@
 "Character %lld" = "Personnage %lld";
 "Check-ins" = "Rappels";
 "Chief Mucus Officer" = "Directeur général du mucus";
+"Choose photos" = "Choisir des photos";
 "Classic" = "Classique";
-"Clean so far" = "Rien jusqu'ici";
 "Close" = "Fermer";
 "Collector" = "Collectionneur";
 "coming home." = "débarquent à la maison.";
@@ -218,6 +224,7 @@
 "Delete everything?" = "Tout supprimer ?";
 "Delete this entry?" = "Supprimer cette entrée ?";
 "Delete this log?" = "Supprimer cette entrée du journal ?";
+"Delete this photo?" = "Supprimer cette photo ?";
 "Diarrhea" = "Diarrhée";
 "Did you dodge it?" = "Tu l'as esquivé ?";
 "Do antibiotics help against %@?" = "Les antibiotiques aident-ils contre %@ ?";
@@ -242,8 +249,8 @@
 "Ended" = "Fin";
 "Epic" = "Épique";
 "Erase this phone only" = "Effacer ce téléphone seulement";
-"Erases your journal, kids, badges and settings from this phone, and your crew data from the server." = "Efface ton journal, tes enfants, tes badges et tes réglages de ce téléphone, et tes données de groupe du serveur.";
-"Erases your journal, kids, badges and settings from this phone, and your crew data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes badges et tes réglages de ce téléphone, ainsi que tes données de groupe sur le serveur. C'est irréversible.";
+"Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe du serveur.";
+"Erases your journal, kids, photos, badges and settings from this phone, and your crew data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, ainsi que tes données de groupe sur le serveur. C'est irréversible.";
 "Every deep dive" = "Tous les « Pour aller plus loin »";
 "Every germ caught" = "Tous les microbes attrapés";
 "Every kid in one journal" = "Tous tes enfants dans un seul journal";
@@ -268,6 +275,7 @@
 "Finished your first daily quiz" = "Premier quiz du jour terminé";
 "First name" = "Prénom";
 "Five different germs caught" = "Cinq microbes différents attrapés";
+"For" = "Pour";
 "For scale" = "Pour comparer";
 "For the doctor" = "Pour le médecin";
 "Free and confidential, day and night." = "Gratuit et confidentiel, jour et nuit.";
@@ -331,8 +339,6 @@
 "Is it your kid?" = "C'est ton enfant ?";
 "It fits everything you ticked." = "Il colle à tout ce que tu as coché.";
 "It got me" = "Il m'a eu";
-"It lasted %lld day." = "Il a duré %lld jour.";
-"It lasted %lld days." = "Il a duré %lld jours.";
 "It opens the couple duel." = "Ça ouvre le duel de couple.";
 "It will come back another day." = "Elle reviendra un autre jour.";
 "It's %@" = "C'est %@";
@@ -358,14 +364,10 @@
 "Lab streak" = "Série du labo";
 "Lab streak: %lld day" = "Série du labo : %lld jour";
 "Lab streak: %lld days" = "Série du labo : %lld jours";
-"Last germ, %lld day ago" = "Dernier microbe, il y a %lld jour";
-"Last germ, %lld days ago" = "Dernier microbe, il y a %lld jours";
-"Last germ, today" = "Dernier microbe, aujourd'hui";
 "Last one: %1$@, %2$@" = "Le dernier : %1$@, %2$@";
 "Last updated %@" = "Dernière mise à jour : %@";
 "Lasts" = "Durée";
 "Lasts: %@" = "Durée : %@";
-"Lately" = "Dernièrement";
 "Leads" = "En tête";
 "Leave and delete" = "Quitter et supprimer";
 "Leave crew and delete my data" = "Quitter le groupe et supprimer mes données";
@@ -421,8 +423,11 @@
 "NEW CARD" = "NOUVELLE CARTE";
 "New icons unlock as the season goes." = "De nouvelles icônes se débloquent au fil de la saison.";
 "New kid" = "Nouvel enfant";
+"New photo" = "Nouvelle photo";
+"New photos" = "Nouvelles photos";
 "Next" = "Suivant";
 "Next 48 hours" = "Prochaines 48 heures";
+"Next day" = "Jour suivant";
 "Next up" = "Prochain objectif";
 "Night" = "Nuit";
 "Night Owl" = "Oiseau de nuit";
@@ -442,6 +447,8 @@
 "No Season Pass was found for this Apple Account." = "Aucune Passe de saison trouvée pour ce compte Apple.";
 "No suspect" = "Aucun suspect";
 "No tracking" = "Aucun suivi";
+"Nobody is sick today. Knock on wood." = "Personne n'est malade aujourd'hui. Touchons du bois.";
+"Nobody was sick. Suspiciously quiet." = "Personne n'était malade. Calme suspect.";
 "Nose and throat germs" = "Microbes du nez et de la gorge";
 "Not active" = "Inactive";
 "Not bad at all." = "Pas mal du tout.";
@@ -453,8 +460,10 @@
 "Not yet" = "Pas encore";
 "Nothing brought home yet" = "Encore rien ramené";
 "Nothing here yet. It won't last." = "Rien ici pour l'instant. Ça ne durera pas.";
+"Nothing in particular" = "Rien en particulier";
 "Nothing in the lab fits these signs yet." = "Rien au labo ne colle à ces signes pour l'instant.";
 "Nothing logged in the last 6 months." = "Rien de noté dans les 6 derniers mois.";
+"Nothing to report" = "Rien à signaler";
 "Nothing was deleted" = "Rien n'a été supprimé";
 "Nothing yet. Enjoy it while it lasts." = "Rien encore. Profites-en pendant que ça dure.";
 "Notifications" = "Notifications";
@@ -473,6 +482,7 @@
 "Open the case file" = "Ouvrir le dossier";
 "Open the web version" = "Ouvrir la version Web";
 "Opens Petri so you can log the germ you caught." = "Ouvre Petri pour noter le microbe que tu as attrapé.";
+"Other photos" = "Autres photos";
 "Outbreak radar" = "Radar des éclosions";
 "Outbreak Survivor" = "Survivant d'éclosion";
 "Outlast it. Its bar drains a little every day." = "Tiens bon. Sa barre se vide un peu chaque jour.";
@@ -501,6 +511,8 @@
 "Petri · Admit one household" = "Petri · Valide pour une maisonnée";
 "Petri. Daycare germs, collected." = "Petri. Les microbes de garderie, en collection.";
 "Phase %1$lld: %2$@. %3$@" = "Phase %1$lld : %2$@. %3$@";
+"Photo" = "Photo";
+"Photos stay on this phone and in your backups. Petri never uploads them." = "Les photos restent sur ce téléphone et dans tes sauvegardes. Petri ne les téléverse jamais.";
 "Pick a file made with Back Up, in Settings." = "Choisis un fichier créé avec Sauvegarder, dans les réglages.";
 "Plan" = "Forfait";
 "Points" = "Points";
@@ -510,6 +522,7 @@
 "Poison Help" = "Centre antipoison";
 "Porcelain Diplomat" = "Diplomate de la porcelaine";
 "Post my germs to the feed" = "Publier mes microbes dans le fil";
+"Previous day" = "Jour précédent";
 "Privacy" = "Confidentialité";
 "Privacy Policy" = "Politique de confidentialité";
 "Private · invite only" = "Privé · sur invitation";
@@ -598,6 +611,8 @@
 "Skin and critter germs" = "Microbes de peau et bestioles";
 "Skip" = "Passer";
 "Sleepless Night Survivor" = "Survivant des nuits blanches";
+"Snap! It's in %@'s file." = "Clic ! C'est dans le dossier de %@.";
+"Snap! It's in your file." = "Clic ! C'est dans ton dossier.";
 "Sneak attack" = "Attaque sournoise";
 "Sniffle Scout" = "Éclaireur du reniflement";
 "Sniffles" = "Reniflements";
@@ -619,6 +634,7 @@
 "Start a private crew with the parents from your daycare group. See which germs are going around before they reach your couch." = "Crée un groupe privé avec les parents de ton groupe de garderie. Vois quels microbes courent avant qu'ils arrivent sur ton divan.";
 "Start my %lld-day free trial" = "Commencer mon essai gratuit de %lld jours";
 "Start my season" = "Commencer ma saison";
+"Start over" = "Recommencer";
 "Start the crew" = "Créer le groupe";
 "Started" = "Début";
 "Started %@" = "Début : %@";
@@ -626,6 +642,7 @@
 "Still fine" = "Ça va encore";
 "Still fine. What now?" = "Ça va encore. Et maintenant ?";
 "Still sick" = "Encore malade";
+"Still standing" = "Toujours debout";
 "Still under the weather?" = "Encore mal en point ?";
 "Stomach bugs" = "Gastros";
 "Stomach pain" = "Mal de ventre";
@@ -642,6 +659,8 @@
 "Symptoms updated." = "Symptômes mis à jour.";
 "Symptoms usually show %1$lld to %2$lld h after exposure." = "Les symptômes apparaissent en général de %1$lld à %2$lld h après l'exposition.";
 "Tag Team" = "Relais";
+"Take a photo" = "Prendre une photo";
+"Taken" = "Prise le";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Touche « Je vais mieux » quand le microbe est parti. Le compteur attend.";
 "Tap an unlocked title to wear it." = "Touche un titre obtenu pour le porter.";
 "Tap everything that fits. You can change it later." = "Touche tout ce qui colle. Tu pourras changer plus tard.";
@@ -675,12 +694,13 @@
 "The germs win this round." = "Les microbes gagnent cette manche.";
 "The incubation watch comes with the Pass." = "L'alerte d'incubation vient avec la Passe.";
 "The Iron Parent" = "Le parent de fer";
-"The journal on this phone is replaced by the backup: %1$lld germs logged since %2$@." = "Le journal de ce téléphone est remplacé par la sauvegarde : %1$lld microbes notés depuis le %2$@.";
+"The journal and the photos on this phone are replaced by the backup: %1$lld germs logged since %2$@, %3$lld photos." = "Le journal et les photos de ce téléphone sont remplacés par la sauvegarde : %1$lld microbes notés depuis le %2$@, %3$lld photos.";
 "The little one who brings it all home." = "Le petit qui rapporte tout à la maison.";
 "The Marathoner" = "Le marathonien";
 "The Night Owl" = "L'oiseau de nuit";
 "The numbers are in. Brace yourself." = "Les chiffres sont là. Accroche-toi.";
 "The ones that got away" = "Ceux qui ont filé";
+"The photo couldn't be saved." = "La photo n'a pas pu être enregistrée.";
 "The Season Pass is handled by Apple. Petri never sees your payment details." = "La Passe de saison est gérée par Apple. Petri ne voit jamais tes renseignements de paiement.";
 "The Season Pass isn't available right now. Try again later." = "La Passe de saison n'est pas offerte pour l'instant. Réessaie plus tard.";
 "The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings." = "La Passe de saison se renouvelle automatiquement jusqu'à ce que tu l'annules. Annule au moins 24 heures avant la date de renouvellement, dans les réglages de ton compte App Store.";
@@ -689,7 +709,7 @@
 "The Untouchable" = "L'intouchable";
 "The usual window for %@ has passed. Did you dodge it?" = "La fenêtre habituelle pour %@ est passée. Tu l'as esquivé ?";
 "The usual window has passed. Did you dodge it?" = "La fenêtre habituelle est passée. Tu l'as esquivé ?";
-"Their germs and countdowns are removed too. Your own journal stays." = "Ses microbes et ses décomptes sont retirés aussi. Ton propre journal reste.";
+"Their germs, photos and countdowns are removed too. Your own journal stays." = "Ses microbes, ses photos et ses décomptes sont retirés aussi. Ton propre journal reste.";
 "Themes" = "Thèmes";
 "They fit everything you ticked." = "Ils collent à tout ce que tu as coché.";
 "Thirty days without a germ" = "Trente jours sans microbe";
@@ -758,6 +778,7 @@
 "Who gave it to you?" = "Qui te l'a donné ?";
 "Who was sick?" = "Qui était malade ?";
 "Who was your nemesis this season?" = "Qui a été ton ennemi juré cette saison ?";
+"Who's better?" = "Qui va mieux ?";
 "Who's patient zero?" = "Qui est le patient zéro ?";
 "Who's sick?" = "Qui est malade ?";
 "Whoever is still standing" = "Celui qui tient encore debout";
@@ -789,6 +810,7 @@
 "You're still clear" = "Rien pour l'instant";
 "Your %@ recap" = "Ton récap du mois : %@";
 "Your %@, wrapped" = "Ton mois en bref : %@";
+"Your best run yet" = "Ta meilleure série à vie";
 "Your call" = "C'est toi qui décides";
 "Your crew is waiting" = "Ton groupe t'attend";
 "Your daycare year, in germs." = "Ton année de garderie, en microbes.";
@@ -797,7 +819,7 @@
 "Your journal" = "Ton journal";
 "Your journal couldn't be read" = "Ton journal est illisible";
 "Your journal wasn't saved" = "Ton journal n'a pas été enregistré";
-"Your journal, your kids' first names, your badges and your settings live in a protected file on this phone. It is part of your device backup if you use one." = "Ton journal, les prénoms de tes enfants, tes badges et tes réglages sont dans un fichier protégé sur ce téléphone. Il fait partie de la sauvegarde de ton appareil si tu en utilises une.";
+"Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one." = "Ton journal, tes photos, les prénoms de tes enfants, tes badges et tes réglages sont dans des fichiers protégés sur ce téléphone. Ils font partie de la sauvegarde de ton appareil si tu en utilises une.";
 "Your kid" = "Ton enfant";
 "Your month recap is ready in Season." = "Ton récap du mois t'attend dans Saison.";
 "Your mystery bug is 2 days old. A new sign could name it." = "Ton microbe mystère a 2 jours. Un nouveau signe pourrait le nommer.";
