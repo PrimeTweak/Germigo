@@ -78,7 +78,7 @@ struct RewardView: View {
 
     private var heading: some View {
         VStack(spacing: 8) {
-            PillLabel(text: reward.isNewCard ? tr("NEW CARD") : tr("REPEAT CATCH"),
+            PillLabel(text: reward.isNewCard ? tr("New card") : tr("Repeat catch"),
                       foreground: Color(hex: Swatch.navy), background: Color(hex: Swatch.irisSoft))
             Text(reward.log.sufferer == .partner ? tr("%1$@ caught %2$@!", model.partnerDisplayName, germ.name)
                                                  : tr("You caught %@!", germ.name))

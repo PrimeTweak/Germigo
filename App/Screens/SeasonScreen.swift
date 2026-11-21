@@ -1,13 +1,14 @@
 import Charts
 import SwiftUI
 
-/// The daycare year in numbers, opened from You.
+/// The daycare year in numbers, opened from Trophies.
 struct SeasonScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var showWrapped = false
     @State private var showDuel = false
     @State private var showMonth = false
+    @State private var showPartner = false
 
     /// Zero is the current season; each step goes one daycare year back.
     @State private var seasonsBack = 0
@@ -74,9 +75,13 @@ struct SeasonScreen: View {
                 MonthRecapCard(recap: model.lastMonthRecap())
             }
         }
+        .sheet(isPresented: $showPartner) {
+            PartnerEditSheet()
+        }
         .sheet(isPresented: $showDuel) {
             SharePreviewSheet(title: tr("Couple duel")) {
-                DuelShareCard(seasonNumber: season.number, me: model.displayName, partner: model.partnerDisplayName,
+                DuelShareCard(seasonNumber: season.number, me: model.displayName, meLook: model.data.hostLook,
+                              partner: model.partnerDisplayName, partnerLook: model.data.partnerLook,
                               stats: DuelEngine.stats(data: model.data, season: season, now: Date()))
             }
         }
@@ -92,7 +97,7 @@ struct SeasonScreen: View {
             } label: {
                 ValueRow(title: tr("Your %@ recap", recap.monthName))
                     .padding(.horizontal, 16)
-                    .petriCard(padding: 0)
+                    .germigoCard(padding: 0)
             }
             .buttonStyle(.plain)
         }
@@ -122,7 +127,7 @@ struct SeasonScreen: View {
                         .font(.footnote.weight(.bold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .petriCard()
+                .germigoCard()
             }
             .buttonStyle(.plain)
         }
@@ -141,24 +146,31 @@ struct SeasonScreen: View {
                         duelSide(name: model.partnerDisplayName, side: duel.partner, leads: duel.leader == .partner,
                                  look: model.data.partnerLook)
                     }
-                    Button {
+                    ShareCapsule(title: tr("Share the scoreboard")) {
                         showDuel = true
-                    } label: {
-                        Label(tr("Share the scoreboard"), systemImage: "square.and.arrow.up")
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
                 }
-                .petriCard()
+                .germigoCard()
             }
         } else {
-            HStack(spacing: 12) {
-                IconTile(symbol: "person.2.fill", size: 36)
-                Text(tr("Add your partner in Settings, under Family, to start the couple duel."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            Button {
+                showPartner = true
+            } label: {
+                HStack(spacing: 12) {
+                    BuddyView(look: model.data.partnerLook, size: 40)
+                    Text(tr("Add your partner to start the couple duel."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 8)
+                    Image(systemName: "plus")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.inkTertiary)
+                }
+                .germigoCard()
             }
-            .petriCard()
+            .buttonStyle(.plain)
         }
     }
 
@@ -193,7 +205,7 @@ struct SeasonScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(leads ? palette.accent.opacity(0.22) : palette.surfaceAlt.opacity(0.6),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 
@@ -236,14 +248,14 @@ struct SeasonScreen: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .petriCard(radius: 22, padding: 14)
+        .germigoCard(radius: 24, padding: 14)
         .accessibilityElement(children: .combine)
     }
 
     private func supplierCard(_ supplier: SupplierStat) -> some View {
         HStack(spacing: 13) {
             ZStack(alignment: .bottomTrailing) {
-                BuddyBadge(look: supplier.kid.colorIndex, size: 52)
+                BuddyBadge(look: supplier.kid.colorIndex, size: 52, lively: true)
                 Image(systemName: "trophy.fill")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(palette.onAccent)
@@ -267,7 +279,7 @@ struct SeasonScreen: View {
                 }
             }
         }
-        .petriCard()
+        .germigoCard()
     }
 
     private func chartCard(_ stats: SeasonStats, season: Season) -> some View {
@@ -306,7 +318,7 @@ struct SeasonScreen: View {
                 .frame(height: 150)
                 .accessibilityLabel(tr("Germs by month"))
             }
-            .petriCard()
+            .germigoCard()
         }
     }
 
@@ -338,7 +350,7 @@ struct SeasonScreen: View {
                 }
                 Spacer(minLength: 0)
             }
-            .petriCard()
+            .germigoCard()
         }
     }
 

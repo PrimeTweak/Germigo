@@ -68,7 +68,7 @@ struct FamilyScreen: View {
                     }
                     records
                         .padding(.top, 4)
-                    Text(tr("Only first names, and they never leave this phone. One kid is free; the Season Pass covers the whole household."))
+                    Text(tr("Only first names, and they never leave this phone. You and one kid are free; the Season Pass covers the whole household."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -78,7 +78,7 @@ struct FamilyScreen: View {
                 .padding(.bottom, 28)
                 .animation(.snappy, value: people)
             }
-            .background(CharacterWash(tint: Color(hex: Swatch.peach), reach: 0.4))
+            .background(CharacterWash(tint: TabWash.family))
             .navigationTitle(tr("Family"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -117,12 +117,21 @@ struct FamilyScreen: View {
     private var records: some View {
         let entries = model.data.logs.count + model.data.kidIllnesses.count
         return VStack(spacing: 0) {
-            NavigationLink {
-                DoctorSummaryScreen()
-            } label: {
-                recordRow("stethoscope", tr("For the doctor"), tr("Share a file"))
+            if model.hasPass {
+                NavigationLink {
+                    DoctorSummaryScreen()
+                } label: {
+                    recordRow("stethoscope", tr("For the doctor"), tr("Share a file"))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    recordRow("stethoscope", tr("For the doctor"), tr("Season Pass"), locked: true)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             Divider()
                 .padding(.leading, 36)
             NavigationLink {
@@ -134,16 +143,16 @@ struct FamilyScreen: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .petriCard(padding: 0)
+        .germigoCard(padding: 0)
     }
 
-    private func recordRow(_ symbol: String, _ title: String, _ value: String) -> some View {
+    private func recordRow(_ symbol: String, _ title: String, _ value: String, locked: Bool = false) -> some View {
         HStack(spacing: 10) {
             Image(systemName: symbol)
                 .font(.body.weight(.semibold))
                 .foregroundStyle(palette.inkSecondary)
                 .frame(width: 26)
-            ValueRow(title: title, value: value)
+            ValueRow(title: title, value: value, locked: locked)
         }
     }
 
@@ -169,10 +178,10 @@ struct FamilyScreen: View {
             }
             .padding(16)
             .overlay {
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
                     .strokeBorder(palette.ink.opacity(0.22), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
             }
-            .contentShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
         .buttonStyle(PressableStyle())
     }
@@ -267,8 +276,8 @@ private struct FamilyCard: View {
         .padding(.trailing, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(status.germ.map { $0.tileTint(palette).opacity(0.55) } ?? palette.surface,
-                    in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     /// The photos of the illness going on, newest first.
@@ -311,7 +320,7 @@ private struct BetterButton: View {
                 .padding(.horizontal, 12)
                 .frame(height: 34)
                 .background(palette.isDark ? palette.surfaceAlt : palette.background, in: Capsule())
-                .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 6, x: 0, y: 2)
+                .liftShadow()
         }
         .buttonStyle(PressableStyle())
     }
@@ -324,6 +333,8 @@ private struct PersonFileScreen: View {
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var editing: FamilyMember?
+    /// The big numbers, the same size as on Trophies and following the text size set in iOS.
+    @ScaledMetric(relativeTo: .title) private var figureSize: CGFloat = 28
 
     private var member: FamilyMember? {
         switch person {
@@ -396,7 +407,7 @@ private struct PersonFileScreen: View {
             ForEach(Array(values.enumerated()), id: \.offset) { item in
                 VStack(alignment: .leading, spacing: 0) {
                     RollingNumber(value: item.element.0)
-                        .font(.system(size: 27, weight: .bold))
+                        .font(.system(size: figureSize, weight: .bold))
                         .foregroundStyle(palette.ink)
                     Text(item.element.1)
                         .font(.footnote)
@@ -405,10 +416,17 @@ private struct PersonFileScreen: View {
                         .minimumScaleFactor(0.8)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .petriCard(radius: 22, padding: 12)
+                .germigoCard(radius: 24, padding: 12)
                 .accessibilityElement(children: .combine)
             }
         }
+    }
+}
+
+/// The partner's sheet from Family, opened wherever the partner is still missing.
+struct PartnerEditSheet: View {
+    var body: some View {
+        PersonEditSheet(member: .partner)
     }
 }
 
@@ -464,7 +482,7 @@ private struct PersonEditSheet: View {
                         .foregroundStyle(palette.ink)
                         .padding(.horizontal, 16)
                         .frame(height: 54)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                     label(tr("Character"))
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
                         ForEach(0..<Looks.count, id: \.self) { index in
@@ -475,7 +493,7 @@ private struct PersonEditSheet: View {
                         Button(tr("Remove %@", removable)) {
                             confirmRemove = true
                         }
-                        .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
+                        .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
                         .padding(.top, 26)
                     }
                 }
@@ -488,15 +506,20 @@ private struct PersonEditSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Cancel")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Cancel"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("Save")) {
+                    Button {
                         save()
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
-                    .fontWeight(.semibold)
+                    .accessibilityLabel(tr("Save"))
                     .disabled(!canSave)
                 }
             }

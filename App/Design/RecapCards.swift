@@ -127,7 +127,7 @@ struct MonthRecapCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.white.opacity(0.55), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(Color.white.opacity(0.55), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -150,7 +150,7 @@ struct KidKnockout: View {
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
-                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .rotationEffect(.degrees(8))
                         .offset(x: 8, y: -8)
                 }
@@ -177,7 +177,7 @@ struct KidScore: View {
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 12)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tr("%1$@ %2$lld, %3$@ %4$lld", name, wins, germ, 0))
     }

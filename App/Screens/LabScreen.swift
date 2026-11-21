@@ -60,7 +60,7 @@ struct LabScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 28)
             }
-            .background(palette.background.ignoresSafeArea())
+            .background(CharacterWash(tint: TabWash.lab))
             .navigationTitle(tr("Lab"))
             .searchable(text: $query, prompt: tr("Search an illness"))
             .toolbar {
@@ -83,19 +83,18 @@ struct LabScreen: View {
         }
     }
 
-    /// A cap inside a ring that fills as the lessons open.
+    /// The lessons, drawn like the gear next to it, with a small ring that fills as they open.
     private var lessonsLink: some View {
         let articles = model.catalog.articles
         let open = articles.filter { model.isArticleUnlocked($0) }.count
         return NavigationLink {
             LessonsScreen()
         } label: {
-            Image(systemName: "graduationcap.fill")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(palette.ink)
-                .frame(width: 30, height: 30)
-                .background {
-                    ProgressRing(fraction: articles.isEmpty ? 0 : Double(open) / Double(articles.count), lineWidth: 2.5)
+            Image(systemName: "graduationcap")
+                .overlay(alignment: .bottomTrailing) {
+                    ProgressRing(fraction: articles.isEmpty ? 0 : Double(open) / Double(articles.count), lineWidth: 2)
+                        .frame(width: 10, height: 10)
+                        .offset(x: 5, y: 4)
                 }
         }
         .accessibilityLabel(tr("Lessons"))
@@ -193,7 +192,7 @@ private struct GermTile: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .fill(caught || (weekly && unmasked) ? germ.tileTint(palette) : palette.surface)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
@@ -205,7 +204,7 @@ private struct GermTile: View {
                 }
                 .overlay {
                     if weekly {
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        RoundedRectangle(cornerRadius: 28, style: .continuous)
                             .strokeBorder(palette.accent, lineWidth: 3)
                     }
                 }
@@ -394,7 +393,7 @@ private struct QuizCard: View {
 struct LessonsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var showPaywall = false
+    @State private var nudged: [String: Int] = [:]
 
     var body: some View {
         ScrollView {
@@ -408,8 +407,8 @@ struct LessonsScreen: View {
                     }
                 }
                 .padding(.horizontal, 18)
-                .petriCard(padding: 0)
-                Text(tr("Lessons open with right answers in the daily quiz. The Season Pass opens them all."))
+                .germigoCard(padding: 0)
+                Text(tr("Lessons open with right answers in the daily quiz."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
@@ -420,9 +419,6 @@ struct LessonsScreen: View {
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(tr("Lessons"))
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
-        }
     }
 
     @ViewBuilder
@@ -434,7 +430,8 @@ struct LessonsScreen: View {
             .buttonStyle(.plain)
         } else {
             Button {
-                showPaywall = true
+                Haptics.tap()
+                nudged[article.id, default: 0] += 1
             } label: {
                 label(article, locked: true)
             }
@@ -462,6 +459,7 @@ struct LessonsScreen: View {
                 Image(systemName: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
+                    .symbolEffect(.wiggle, value: nudged[article.id, default: 0])
                     .accessibilityHidden(true)
             } else if !model.data.readArticles.contains(article.id) {
                 Circle()

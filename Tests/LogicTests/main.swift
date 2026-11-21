@@ -541,8 +541,8 @@ do {
     let table = LeagueEngine.standings(data: data, catalog: catalog, season: season, now: day(30))
     check(table.map { $0.person } == [.partner, .me, .kid(kid.id)], "the league ranks the fewest sick days first")
     check(table.map { $0.sickDays } == [1, 5, 9], "a kid's sick days run from start to better")
-    check(table.map { $0.title } == [.ironWall, .germMagnet, .patientZero],
-          "the leader is the iron wall and the kid who brought germs home is patient zero")
+    check(table.map { $0.title } == [.forceField, .frequentFlyer, .patientZero],
+          "the leader is the force field and the kid who brought germs home is patient zero")
     let calm = makeData()
     var pair = calm
     pair.partnerName = "Nathan"

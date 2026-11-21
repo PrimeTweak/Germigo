@@ -13,7 +13,7 @@ enum NotificationManager {
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
 
-    /// How long a mystery germ waits before Petri asks about new symptoms.
+    /// How long a mystery germ waits before Germigo asks about new symptoms.
     private static let symptomCheckDelay: TimeInterval = 2 * 24 * 3600
     private static let presenter = ForegroundPresenter()
 
@@ -125,7 +125,7 @@ enum NotificationManager {
         guard settings.checkInsOn else { return }
         addMorning(id: milestoneID, on: day,
                    title: trCount(days, one: "%lld day without a germ", other: "%lld days without a germ"),
-                   body: tr("Milestone reached. Open Petri to frame it."))
+                   body: tr("Milestone reached. Open Germigo to frame it."))
     }
 
     static func cancelMilestone() {

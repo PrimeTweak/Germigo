@@ -164,8 +164,8 @@ struct AddPhotoSheet: View {
                                 .labelsHidden()
                         }
                     }
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    Text(tr("Photos stay on this phone and in your backups. Petri never uploads them."))
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    Text(tr("Photos stay on this phone and in your backups. Germigo never uploads them."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
@@ -178,16 +178,21 @@ struct AddPhotoSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Cancel")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Cancel"))
                     .tint(palette.ink)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("Save")) {
+                    Button {
                         save()
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
-                    .fontWeight(.semibold)
+                    .accessibilityLabel(tr("Save"))
                     .tint(palette.ink)
                     .disabled(images.isEmpty || saving)
                 }
@@ -231,12 +236,12 @@ struct AddPhotoSheet: View {
                         } label: {
                             Label(tr("Take a photo"), systemImage: "camera.fill")
                         }
-                        .buttonStyle(PillButtonStyle(kind: .ink, height: 48))
+                        .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
                     }
                     PhotosPicker(selection: $picked, maxSelectionCount: 6, matching: .images) {
                         Label(tr("Choose photos"), systemImage: "photo.on.rectangle")
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 48))
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
                 }
                 .padding(.horizontal, 36)
             } else {

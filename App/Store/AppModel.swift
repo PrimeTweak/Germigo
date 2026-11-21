@@ -218,7 +218,7 @@ final class AppModel {
 
     func isIconUnlocked(_ icon: AppIconOption) -> Bool {
         switch icon {
-        case .petri, .classic: return true
+        case .germigo, .classic: return true
         case .nightShift: return hasBadge(BadgeCatalog.nightShift)
         case .tissueBox: return count(of: GermCatalog.commonColdID) >= 3
         case .goldenDish: return data.logs.count >= 20
@@ -227,26 +227,41 @@ final class AppModel {
         }
     }
 
+    /// Themes are earned with badges, or all open with the Season Pass.
     func isThemeUnlocked(_ theme: Theme) -> Bool {
         switch theme {
         case .agar: return true
-        case .nightShift: return hasBadge(BadgeCatalog.nightShift)
-        case .mint: return hasBadge(BadgeCatalog.ironParent)
+        case .nightShift: return hasPass || hasBadge(BadgeCatalog.nightShift)
+        case .mint: return hasPass || hasBadge(BadgeCatalog.ironParent)
         }
     }
 
-    /// Lessons open with right answers in the daily quiz.
+    /// Lessons open with right answers in the daily quiz, for everyone.
     func isArticleUnlocked(_ article: Article) -> Bool {
-        hasPass || data.quiz.rightTotal >= article.unlockAtAnswers
+        data.quiz.rightTotal >= article.unlockAtAnswers
     }
 
-    func deepDiveUnlocked(for germ: Germ) -> Bool {
-        hasPass || count(of: germ.id) > 0
+    /// The first day a free journal shows; nil with the Season Pass, which shows every day.
+    var historyStart: Date? {
+        guard !hasPass else { return nil }
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: Date()))
+    }
+
+    /// Entries on or after the first day the journal shows, plus anything still going on.
+    func isShown(_ start: Date, ongoing: Bool = false) -> Bool {
+        guard let first = historyStart else { return true }
+        return ongoing || start >= first
     }
 
     /// Free accounts keep one kid; the Season Pass lifts the limit.
     var canAddKid: Bool {
         hasPass || data.kids.isEmpty
+    }
+
+    /// The first kid is free; the others need the Season Pass.
+    func isKidOpen(_ kidID: UUID) -> Bool {
+        hasPass || data.kids.first?.id == kidID
     }
 
     // MARK: - Household
@@ -386,7 +401,7 @@ final class AppModel {
 
     /// The lesson that opens next, and how many right answers it still needs.
     var nextLesson: (article: Article, remaining: Int)? {
-        guard !hasPass, let article = catalog.articles.first(where: { !isArticleUnlocked($0) }) else { return nil }
+        guard let article = catalog.articles.first(where: { !isArticleUnlocked($0) }) else { return nil }
         return (article, article.unlockAtAnswers - data.quiz.rightTotal)
     }
 
@@ -669,7 +684,7 @@ final class AppModel {
 
     /// Opens what a widget or a link asked for.
     func open(_ url: URL) {
-        guard url.scheme == "petri", data.onboardingDone else { return }
+        guard url.scheme == "germigo", data.onboardingDone else { return }
         selectedTab = .today
         if url.host == "log" {
             pendingMilestone = nil
@@ -767,9 +782,9 @@ final class AppModel {
             data.settings.wornTitle = nil
         }
         let icon = AppIconManager.current
-        if icon != .petri, !isIconUnlocked(icon) {
+        if icon != .germigo, !isIconUnlocked(icon) {
             Task {
-                _ = await AppIconManager.apply(.petri)
+                _ = await AppIconManager.apply(.germigo)
             }
         }
     }

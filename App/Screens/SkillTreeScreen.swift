@@ -25,24 +25,24 @@ struct SkillTreeScreen: View {
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Skill Tree"))
+        .navigationTitle(tr("Skill tree"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
         HStack(spacing: 13) {
-            BuddyBadge(look: model.data.hostLook, size: 52)
+            BuddyBadge(look: model.data.hostLook, size: 52, lively: true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.displayTitle)
                     .font(.headline)
                     .foregroundStyle(palette.ink)
-                Text(model.wornTitle == nil ? tr("Tap an unlocked title to wear it.") : tr("Worn on Today and on your season recap."))
+                Text(model.wornTitle == nil ? tr("Tap an unlocked title to wear it.") : tr("Worn on Trophies and on your season recap."))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
             }
             Spacer(minLength: 0)
         }
-        .petriCard()
+        .germigoCard()
     }
 
     private func branchCard(_ branch: SkillBranch, nodes: [SkillNode]) -> some View {
@@ -78,7 +78,7 @@ struct SkillTreeScreen: View {
                     .accessibilityHidden(true)
             }
         }
-        .petriCard()
+        .germigoCard()
     }
 
     private func nodeButton(_ node: SkillNode, tint: Color) -> some View {
@@ -150,7 +150,7 @@ struct SkillTreeScreen: View {
                         .foregroundStyle(palette.ink)
                 }
             }
-            .petriCard()
+            .germigoCard()
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(worn ? .isSelected : [])

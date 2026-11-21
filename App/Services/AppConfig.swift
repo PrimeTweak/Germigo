@@ -3,7 +3,7 @@ import Security
 
 /// Build-time configuration read from Info.plist.
 enum AppConfig {
-    static let refreshTaskID = "ca.petri.app.refresh"
+    static let refreshTaskID = "ca.germigo.app.refresh"
 
     private static func string(_ key: String) -> String? {
         guard let value = Bundle.main.object(forInfoDictionaryKey: key) as? String,
@@ -13,32 +13,32 @@ enum AppConfig {
 
     /// Nil until a real server address replaces the placeholder.
     static var serverURL: URL? {
-        guard let raw = string("PetriServerURL") else { return nil }
+        guard let raw = string("GermigoServerURL") else { return nil }
         return URL(string: raw)
     }
 
     /// Where the QR code of a share card leads; nil until a real https address replaces the placeholder.
     static var shareURL: URL? {
-        guard let raw = string("PetriShareURL"), raw.hasPrefix("https://") else { return nil }
+        guard let raw = string("GermigoShareURL"), raw.hasPrefix("https://") else { return nil }
         return URL(string: raw)
     }
 
     static var supportEmail: String? {
-        string("PetriSupportEmail")
+        string("GermigoSupportEmail")
     }
 
     /// Instagram requires a Meta app ID to open its Stories composer; nil hides that button.
     static var metaAppID: String? {
-        string("PetriMetaAppID")
+        string("GermigoMetaAppID")
     }
 
     /// The person or company that publishes the app, named in the legal pages.
     static var publisherName: String? {
-        string("PetriPublisherName")
+        string("GermigoPublisherName")
     }
 
     static var crewEnabled: Bool {
-        (Bundle.main.object(forInfoDictionaryKey: "PetriCrewEnabled") as? Bool) ?? true
+        (Bundle.main.object(forInfoDictionaryKey: "GermigoCrewEnabled") as? Bool) ?? true
     }
 
     static var privacyURL: URL? {
@@ -62,7 +62,7 @@ enum AppConfig {
 
 /// Minimal keychain storage for the crew session token.
 enum Keychain {
-    private static let service = "ca.petri.app"
+    private static let service = "ca.germigo.app"
 
     private static func baseQuery(_ key: String) -> [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,

@@ -11,6 +11,8 @@ struct QuizScreen: View {
     @State private var lastRight = false
     @State private var newBadges: [Badge] = []
     @State private var drag: CGFloat = 0
+    /// The score, large, following the text size set in iOS.
+    @ScaledMetric(relativeTo: .largeTitle) private var scoreSize: CGFloat = 44
 
     private var finished: Bool { !questions.isEmpty && index >= questions.count }
 
@@ -110,11 +112,11 @@ struct QuizScreen: View {
                     Button(tr("Myth")) {
                         choose(0, question)
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ink, height: 64))
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
                     Button(tr("Fact")) {
                         choose(1, question)
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ink, height: 64))
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
                 }
             } else {
                 reveal(question)
@@ -175,7 +177,7 @@ struct QuizScreen: View {
             stamp(tr("Fact"), color: palette.accent)
                 .opacity(Double(max(0, drag) / 100))
         }
-        .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.1), radius: 16, x: 0, y: 8)
+        .liftShadow()
         .offset(x: drag)
         .rotationEffect(.degrees(Double(drag / 25)))
         .gesture(
@@ -219,7 +221,7 @@ struct QuizScreen: View {
             .padding(.horizontal, 22)
             .frame(maxWidth: .infinity, minHeight: 170)
             .background(palette.surface, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-            .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 14, x: 0, y: 6)
+            .liftShadow()
     }
 
     private func optionButton(_ text: String, at offset: Int, question: QuizQuestion) -> some View {
@@ -246,9 +248,9 @@ struct QuizScreen: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(border, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(border, lineWidth: 2)
             }
             .contentShape(Rectangle())
         }
@@ -316,7 +318,7 @@ struct QuizScreen: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     private func revealFacts(_ question: QuizQuestion) -> [(label: String, value: String)] {
@@ -384,7 +386,7 @@ struct QuizScreen: View {
                 .background(palette.accent, in: Circle())
                 .padding(.top, 24)
             Text(tr("%1$lld of %2$lld", score, questions.count))
-                .font(.system(size: 44, weight: .bold))
+                .font(.system(size: scoreSize, weight: .bold))
                 .foregroundStyle(palette.ink)
             Text(line)
                 .font(.title3.weight(.semibold))
@@ -403,7 +405,7 @@ struct QuizScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .petriCard(padding: 0)
+            .germigoCard(padding: 0)
             Text(tr("A new quiz tomorrow."))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)

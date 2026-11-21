@@ -143,16 +143,16 @@ enum StatsEngine {
 
 /// The family league's funny titles; each person wears one at most.
 enum LeagueTitle {
-    case ironWall
+    case forceField
     case patientZero
-    case germMagnet
+    case frequentFlyer
     case couchChampion
 
     var text: String {
         switch self {
-        case .ironWall: return tr("Iron wall")
+        case .forceField: return tr("Force field")
         case .patientZero: return tr("Patient zero")
-        case .germMagnet: return tr("Germ magnet")
+        case .frequentFlyer: return tr("Frequent flyer")
         case .couchChampion: return tr("Couch champion")
         }
     }
@@ -195,7 +195,7 @@ enum LeagueEngine {
         return titled(ranked)
     }
 
-    /// The leader is the iron wall; then the kid who brought the most germs home, the one who caught the most,
+    /// The leader is the force field; then the kid who brought the most germs home, the one who caught the most,
     /// and the one sick the longest. Nobody gets a title while nobody stands apart.
     private static func titled(_ ranked: [LeagueEntry]) -> [LeagueEntry] {
         guard let first = ranked.first, let last = ranked.last, first.sickDays < last.sickDays else { return ranked }
@@ -210,9 +210,9 @@ enum LeagueEngine {
             free.filter { value(result[$0]) > 0 && (!kidsOnly || isKid(result[$0].person)) }
                 .max { value(result[$0]) < value(result[$1]) }
         }
-        give(.ironWall, to: 0)
+        give(.forceField, to: 0)
         give(.patientZero, to: most({ $0.germs }, kidsOnly: true))
-        give(.germMagnet, to: most { $0.germs })
+        give(.frequentFlyer, to: most { $0.germs })
         give(.couchChampion, to: most { $0.sickDays })
         return result
     }

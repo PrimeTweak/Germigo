@@ -40,8 +40,11 @@ struct WrappedScreen: View {
                         sharing = page
                     } label: {
                         Label(tr("Share this card"), systemImage: "square.and.arrow.up")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ink, height: 52))
+                    .buttonStyle(.glass)
                     .disabled(page == .guess)
                 }
                 .padding(.horizontal, 24)
@@ -67,7 +70,8 @@ struct WrappedScreen: View {
         } else if item == .guess {
             NemesisGuessCard(season: season, wrap: wrap)
         } else if item == .duel {
-            DuelShareCard(seasonNumber: season.number, me: model.displayName, partner: model.partnerDisplayName,
+            DuelShareCard(seasonNumber: season.number, me: model.displayName, meLook: model.data.hostLook,
+                          partner: model.partnerDisplayName, partnerLook: model.data.partnerLook,
                           stats: DuelEngine.stats(data: model.data, season: season, now: Date()))
         } else {
             WrapCard(page: item, wrap: wrap, supplier: stats.topSupplier)

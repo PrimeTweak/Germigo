@@ -1,10 +1,10 @@
-# Petri
+# Germigo
 
 iOS app (SwiftUI, iOS 26.2+) that turns the germs a kid brings home from daycare into a card collection for the parent. English and French.
 
 ## Build
 
-**Build IPA** runs on demand: on github.com, open **Actions > Build IPA > Run workflow**. A push does not start it. The run attaches `Petri-ipa-<run>`, an unsigned IPA for sideloading.
+**Build IPA** runs on demand: on github.com, open **Actions > Build IPA > Run workflow**. A push does not start it. The run attaches `Germigo-ipa-<run>`, an unsigned IPA for sideloading.
 
 The workflow, in order:
 
@@ -13,7 +13,7 @@ The workflow, in order:
 3. `tools/run_logic_tests.sh`: journal rules, streaks, badges, levels, skill tree, milestones, couple duel, family league, season story, stats and journal decoding, compiled and run on the build machine. It does not stop the build.
 4. A type check of every Swift file, when the **typecheck** box is ticked. It does not stop the build; it lists all compiler errors at once in the step log and in `build-logs-<run>`.
 5. `tools/check_links.py`: requests every source link shown in the app. A site that refuses scripts is listed as blocked, which means not verified. Informational.
-6. XcodeGen generates `Petri.xcodeproj` from `project.yml`, then `xcodebuild` builds without signing.
+6. XcodeGen generates `Germigo.xcodeproj` from `project.yml`, then `xcodebuild` builds without signing.
 7. `tools/check_bundle.py` inspects the built app, then the IPA is packaged.
 
 **Release to TestFlight** is a manual workflow. Setup is in `docs/APP-STORE.md`.
@@ -37,27 +37,27 @@ Set in `App/Info.plist`:
 
 | Key | Purpose |
 | --- | --- |
-| `PetriServerURL` | Base URL of the deployed crew server. While it holds the placeholder, Crew shows as offline. |
-| `PetriSupportEmail` | Contact address shown in Settings, the legal screens and Crew. |
-| `PetriPublisherName` | Person or company that publishes the app, named in the legal screens. |
-| `PetriShareURL` | Page the QR code on every share card opens, normally `<server>/get`. While it holds the placeholder, cards carry no QR code. |
-| `PetriCrewEnabled` | `false` removes the Crew tab and its settings. |
+| `GermigoServerURL` | Base URL of the deployed crew server. While it holds the placeholder, Crew shows as offline. |
+| `GermigoSupportEmail` | Contact address shown in Settings, the legal screens and Crew. |
+| `GermigoPublisherName` | Person or company that publishes the app, named in the legal screens. |
+| `GermigoShareURL` | Page the QR code on every share card opens, normally `<server>/get`. While it holds the placeholder, cards carry no QR code. |
+| `GermigoCrewEnabled` | `false` removes the Crew tab and its settings. |
 
-The app opens `petri://log` (log sheet) and `petri://today`. The streak widget uses them.
+The app opens `germigo://log` (log sheet) and `germigo://today`. The streak widget uses them.
 
-Sideload builds are compiled with `PETRI_SIDELOAD`, which adds a Season Pass switch in Settings and, while `PetriServerURL` holds the placeholder, a sample crew kept in memory. Release builds have neither.
+Sideload builds are compiled with `GERMIGO_SIDELOAD`, which adds a Season Pass switch in Settings and, while `GermigoServerURL` holds the placeholder, a sample crew kept in memory. Release builds have neither.
 
-Widgets read a snapshot from the app group `group.ca.petri.app`. An unsigned or re-signed build has no app group, so its widgets stay empty.
+Widgets read a snapshot from the app group `group.ca.germigo.app`. An unsigned or re-signed build has no app group, so its widgets stay empty.
 
 ## Journal
 
 The journal is one JSON file in Application Support. Decoding is tolerant: a key missing from the file takes its default, and unknown keys are ignored, so a journal written by another version still loads. A file that cannot be decoded is renamed `journal-unreadable-<time>.json`, never overwritten, and can be exported from Settings > Your Data.
 
-Photos are JPEG files in `Application Support/Petri/Photos`, named by the id the journal lists them under.
+Photos are JPEG files in `Application Support/Germigo/Photos`, named by the id the journal lists them under.
 
 When a stored type changes, add the new field with a default in its `init(from:)` in `App/Models/AppData.swift` and extend `Tests/LogicTests/main.swift`.
 
-Settings > Data and Privacy > Back Up shares the journal as `petri-backup.json`: the same format as the file on disk, plus the photo files as base64 under `photoFiles`. Restore a Backup reads such a file back and replaces the journal and its photos after a confirmation.
+Settings > Back up now (also in Data and privacy) shares the journal as `germigo-backup.json`: the same format as the file on disk, plus the photo files as base64 under `photoFiles`. Restore a backup reads such a file back and replaces the journal and its photos after a confirmation.
 
 Skill tree titles, streak milestones, the couple duel and the season story are computed from the journal in `App/Store/ProgressEngine.swift`; only the worn title and the last celebrated milestone are stored.
 
@@ -86,7 +86,7 @@ node test.js
 | Variable | Purpose |
 | --- | --- |
 | `PORT` | Listening port. Default 8080. |
-| `DATA_DIR` | Folder for `petri.json`. Must be on a persistent disk, or crews are lost on restart. With `NODE_ENV=production` the server refuses to start without it. |
+| `DATA_DIR` | Folder for `germigo.json`. Must be on a persistent disk, or crews are lost on restart. With `NODE_ENV=production` the server refuses to start without it. |
 | `ADMIN_TOKEN` | Unlocks the moderation page and its endpoints. |
 | `SUPPORT_EMAIL` | Contact shown on `/support`, `/privacy` and `/terms`. |
 | `PUBLISHER_NAME` | Publisher named on `/privacy` and `/terms`. |

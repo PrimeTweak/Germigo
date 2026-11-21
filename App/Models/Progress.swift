@@ -104,7 +104,7 @@ struct Season: Hashable {
 
 /// A home screen icon the parent can unlock.
 enum AppIconOption: String, CaseIterable, Identifiable {
-    case petri
+    case germigo
     case classic
     case nightShift
     case tissueBox
@@ -116,7 +116,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
 
     var alternateName: String? {
         switch self {
-        case .petri: return nil
+        case .germigo: return nil
         case .classic: return "AppIconClassic"
         case .nightShift: return "AppIconNightShift"
         case .tissueBox: return "AppIconTissueBox"
@@ -130,7 +130,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .petri: return tr("Petri")
+        case .germigo: return tr("Germigo")
         case .classic: return tr("Classic")
         case .nightShift: return tr("Night Shift")
         case .tissueBox: return tr("Tissue Box")
@@ -142,7 +142,7 @@ enum AppIconOption: String, CaseIterable, Identifiable {
 
     var requirement: String {
         switch self {
-        case .petri, .classic: return tr("Always yours")
+        case .germigo, .classic: return tr("Always yours")
         case .nightShift: return tr("Earn the Night Shift badge")
         case .tissueBox: return tr("Catch 3 colds")
         case .goldenDish: return tr("Catch 20 germs")

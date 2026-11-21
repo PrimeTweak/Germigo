@@ -22,12 +22,12 @@ TILE_TEXT_LIMIT = 30
 
 REQUIRED = [
     "project.yml", ".gitignore", ".github/workflows/build-ipa.yml", ".github/workflows/release.yml",
-    "App/Info.plist", "App/Petri.entitlements", "App/PrivacyInfo.xcprivacy", "App/PetriApp.swift",
+    "App/Info.plist", "App/Germigo.entitlements", "App/PrivacyInfo.xcprivacy", "App/GermigoApp.swift",
     "App/Content/germs.json", "App/Content/articles.json", "App/Content/legal.json",
     "App/en.lproj/InfoPlist.strings", "App/fr.lproj/InfoPlist.strings",
     "App/Sounds/flap.wav", "App/Sounds/reveal.wav", "App/Sounds/badge.wav",
     "Shared/en.lproj/Localizable.strings", "Shared/fr.lproj/Localizable.strings",
-    "Widgets/Info.plist", "Widgets/PetriWidgets.entitlements", "Widgets/PrivacyInfo.xcprivacy",
+    "Widgets/Info.plist", "Widgets/GermigoWidgets.entitlements", "Widgets/PrivacyInfo.xcprivacy",
     "server/server.js", "server/test.js", "server/legal.json", "server/package.json",
     "README.md", "docs/APP-STORE.md",
     "App/Store/JournalRules.swift", "App/Store/ProgressEngine.swift", "Tests/LogicTests/main.swift", "tools/run_logic_tests.sh",
@@ -86,27 +86,27 @@ def check_plists():
             fail(f"App/Info.plist: missing {key}")
     if widgets.get("NSExtension", {}).get("NSExtensionPointIdentifier") != "com.apple.widgetkit-extension":
         fail("Widgets/Info.plist: wrong extension point")
-    for relative in ("App/Petri.entitlements", "Widgets/PetriWidgets.entitlements"):
+    for relative in ("App/Germigo.entitlements", "Widgets/GermigoWidgets.entitlements"):
         groups = read_plist(relative).get("com.apple.security.application-groups", [])
-        if groups != ["group.ca.petri.app"]:
-            fail(f"{relative}: app group must be group.ca.petri.app")
+        if groups != ["group.ca.germigo.app"]:
+            fail(f"{relative}: app group must be group.ca.germigo.app")
     for relative in ("App/PrivacyInfo.xcprivacy", "Widgets/PrivacyInfo.xcprivacy"):
         manifest = read_plist(relative)
         if manifest.get("NSPrivacyTracking") is not False:
             fail(f"{relative}: NSPrivacyTracking must be false")
     if RELEASE:
-        server = str(app.get("PetriServerURL", ""))
-        email = str(app.get("PetriSupportEmail", ""))
+        server = str(app.get("GermigoServerURL", ""))
+        email = str(app.get("GermigoSupportEmail", ""))
         if ".invalid" in email or "@" not in email:
-            fail("release: set PetriSupportEmail in App/Info.plist to a real address")
-        publisher = str(app.get("PetriPublisherName", ""))
+            fail("release: set GermigoSupportEmail in App/Info.plist to a real address")
+        publisher = str(app.get("GermigoPublisherName", ""))
         if ".invalid" in publisher or not publisher.strip():
-            fail("release: set PetriPublisherName in App/Info.plist to the person or company that publishes the app")
-        share = str(app.get("PetriShareURL", ""))
+            fail("release: set GermigoPublisherName in App/Info.plist to the person or company that publishes the app")
+        share = str(app.get("GermigoShareURL", ""))
         if ".invalid" in share or not share.startswith("https://"):
-            fail("release: set PetriShareURL in App/Info.plist to the https page the share cards' QR code opens")
-        if app.get("PetriCrewEnabled", True) and (".invalid" in server or not server.startswith("https://")):
-            fail("release: set PetriServerURL in App/Info.plist to the deployed https server, or set PetriCrewEnabled to false")
+            fail("release: set GermigoShareURL in App/Info.plist to the https page the share cards' QR code opens")
+        if app.get("GermigoCrewEnabled", True) and (".invalid" in server or not server.startswith("https://")):
+            fail("release: set GermigoServerURL in App/Info.plist to the deployed https server, or set GermigoCrewEnabled to false")
 
 
 def check_content():

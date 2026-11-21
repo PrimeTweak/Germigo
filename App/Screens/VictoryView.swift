@@ -119,7 +119,7 @@ private struct BossKnockout: View {
                 }
                 .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 Text(verbatim: "K.O.")
                     .font(.title3.weight(.bold))
                     .padding(.horizontal, 12)
@@ -152,14 +152,14 @@ private struct BossKnockout: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .stroke(Color.white.opacity(0.1))
         }
     }

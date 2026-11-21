@@ -63,10 +63,11 @@ struct BuddyBadge: View {
     let look: Int
     var sick = false
     var size: CGFloat = 40
+    var lively = false
     @Environment(\.palette) private var palette
 
     var body: some View {
-        BuddyView(look: look, sick: sick, size: size * 0.74)
+        BuddyView(look: look, sick: sick, size: size * 0.74, lively: lively)
             .frame(width: size, height: size)
             .background(Buddy.tint(look).opacity(palette.isDark ? 0.3 : 0.45), in: Circle())
     }

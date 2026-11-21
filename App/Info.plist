@@ -19,7 +19,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Petri</string>
+	<string>Germigo</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
@@ -29,10 +29,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>ca.petri.app</string>
+			<string>ca.germigo.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>petri</string>
+				<string>germigo</string>
 			</array>
 		</dict>
 	</array>
@@ -58,31 +58,31 @@
 	<true/>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>ca.petri.app.refresh</string>
+		<string>ca.germigo.app.refresh</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 	</array>
-	<key>PetriServerURL</key>
+	<key>GermigoServerURL</key>
 	<string>https://REPLACE-ME.invalid</string>
-	<key>PetriShareURL</key>
+	<key>GermigoShareURL</key>
 	<string>https://REPLACE-ME.invalid/get</string>
-	<key>PetriSupportEmail</key>
+	<key>GermigoSupportEmail</key>
 	<string>REPLACE-ME@example.invalid</string>
-	<key>PetriPublisherName</key>
+	<key>GermigoPublisherName</key>
 	<string>REPLACE-ME.invalid</string>
-	<key>PetriCrewEnabled</key>
+	<key>GermigoCrewEnabled</key>
 	<true/>
-	<key>PetriMetaAppID</key>
+	<key>GermigoMetaAppID</key>
 	<string>REPLACE-ME.invalid</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram-stories</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Petri uses the camera only when you take a photo to add to your household's sick history.</string>
+	<string>Germigo uses the camera only when you take a photo to add to your household's sick history.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Petri saves the share cards you choose to keep to your photo library.</string>
+	<string>Germigo saves the share cards you choose to keep to your photo library.</string>
 </dict>
 </plist>

@@ -14,17 +14,17 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 | 1.2: report | Report menu on every member and feed item; two reporters hide the name until reviewed | `CrewScreen.swift`, `server/server.js` |
 | 1.2: block | Block hides a member and their posts on the device | `CrewStore.block` |
 | 1.2: terms with no tolerance for abuse | Rules must be accepted before creating or joining a crew | `CrewJoinView`, `legal.json` |
-| 1.2: published contact | Support address in Settings, legal screens and Crew | `PetriSupportEmail` |
+| 1.2: published contact | Support address in Settings, legal screens and Crew | `GermigoSupportEmail` |
 | 1.4.1 Medical information | General information only, sources linked on every card, "not medical advice" on each screen, no diagnosis or dosing | `germs.json`, `GermDetailScreen.swift` |
 | 2.1 Completeness | No placeholder may ship: `check_repo.py --release` fails on them | `tools/check_repo.py` |
 | 2.5.4 Background modes | `fetch` only, used to refresh the crew radar | `App/Info.plist` |
-| 3.1.1 In-app purchase | The Season Pass is sold through StoreKit only | `PurchaseManager.swift` |
+| 3.1.1 In-app purchase | The Season Pass and the tip jar are sold through StoreKit only; tips unlock nothing | `PurchaseManager.swift`, `SettingsScreen.swift` |
 | 3.1.2 Subscription disclosure | Name, period, full price most prominent, trial length and price after it, auto-renewal, Restore, Terms, Privacy | `PaywallView.swift` |
 | 3.1.2 Manage subscription | Settings opens the system subscription sheet | `SettingsScreen.swift` |
 | 4.6 Alternate icons | Changed only by the user, from Settings | `SettingsDetailScreens.swift` |
 | 5.1.1(i) Privacy policy | In the app (offline) and on the server at `/privacy` | `LegalScreen.swift`, `server/server.js` |
 | Purpose strings | Camera, and photo library (add only), in English and French. Picking photos uses the system picker, which needs no permission. | `App/*/InfoPlist.strings` |
-| 5.1.1(v) Accounts | No account or sign-in. Leaving a crew deletes the server data. Delete Everything erases the device data. | `CrewStore.leave`, `AppModel.eraseEverything` |
+| 5.1.1(v) Accounts | No account or sign-in. Leaving a crew deletes the server data. Delete everything erases the device data. | `CrewStore.leave`, `AppModel.eraseEverything` |
 | 5.1.2 Data use | No ads, trackers or third-party SDKs | whole app |
 | 5.1.3(ii) Health data and iCloud | The journal is a local file. iCloud and HealthKit are not used. A backup is a file the user saves where they choose. | `Persistence.swift`, `SettingsScreen.swift` |
 | Accessibility | Labels on custom controls, system text styles for reading text, Reduce Motion honored | screens |
@@ -32,15 +32,18 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 ## 2. To do before the first upload
 
 1. **Apple Developer Program.** Enrollment is required for TestFlight and the App Store.
-2. **Bundle identifier.** `ca.petri.app` must be available to the account. If it is not, change it in `project.yml` (both targets), both `.entitlements` files, `Shared/AppGroup.swift`, `App/Services/AppConfig.swift` (refresh task and keychain service), `App/Info.plist` (`BGTaskSchedulerPermittedIdentifiers`) and `PassProduct` in `App/Services/PurchaseManager.swift`.
-3. **Crew server.** Deploy `server/` on a host with a persistent disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN`, `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `PetriServerURL`. To ship without Crew, set `PetriCrewEnabled` to `false`.
-4. **Support address, publisher and share page.** Put a monitored address in `PetriSupportEmail`, the publisher's name in `PetriPublisherName`, and `<server>/get` in `PetriShareURL` (the page the share cards' QR code opens). The release check fails while any of them holds its placeholder. Once the app is live, set `APP_STORE_URL` on the server so that page links to it.
-5. **Subscriptions.** In App Store Connect create one subscription group with two products, then attach them to the first version:
-   - `ca.petri.app.pass.yearly`: 1 year, with a 7-day free introductory offer
-   - `ca.petri.app.pass.monthly`: 1 month
-6. **Secrets for the Release workflow.** `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store Connect API key with the App Manager role).
-7. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`).
-8. **Name check.** Search the App Store and trademark registers for "Petri" in the target countries.
+2. **Bundle identifier.** `ca.germigo.app` must be available to the account. If it is not, change it in `project.yml` (both targets), both `.entitlements` files, `Shared/AppGroup.swift`, `App/Services/AppConfig.swift` (refresh task and keychain service), `App/Info.plist` (`BGTaskSchedulerPermittedIdentifiers`) and `PassProduct` and `TipProduct` in `App/Services/PurchaseManager.swift`.
+3. **Crew server.** Deploy `server/` on a host with a persistent disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN`, `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `GermigoServerURL`. To ship without Crew, set `GermigoCrewEnabled` to `false`.
+4. **Support address, publisher and share page.** Put a monitored address in `GermigoSupportEmail`, the publisher's name in `GermigoPublisherName`, and `<server>/get` in `GermigoShareURL` (the page the share cards' QR code opens). The release check fails while any of them holds its placeholder. Once the app is live, set `APP_STORE_URL` on the server so that page links to it.
+5. **Subscriptions.** In App Store Connect create one subscription group with two products, turn on Family Sharing for both, then attach them to the first version:
+   - `ca.germigo.app.pass.yearly`: 1 year, CA$24.99, with a 14-day free introductory offer
+   - `ca.germigo.app.pass.monthly`: 1 month, CA$3.99
+6. **Tip jar.** Create three consumable products: `ca.germigo.app.tip.small` (CA$1.99), `ca.germigo.app.tip.medium` (CA$4.99) and `ca.germigo.app.tip.large` (CA$9.99). Settings lists them cheapest first under "Offer a soup".
+7. **Offer codes.** Codes that give the Season Pass are created on the subscription's Offer Codes page. Settings opens Apple's redemption sheet with "Redeem a code".
+8. **App Store Small Business Program.** Enroll before the first sale to pay a 15% commission instead of 30%.
+9. **Secrets for the Release workflow.** `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store Connect API key with the App Manager role).
+10. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`).
+11. **Name check.** Search the App Store and trademark registers for "Germigo" in the target countries.
 
 ## 3. Answers for App Store Connect
 
@@ -61,16 +64,16 @@ If Crew is disabled, the answer is "Data Not Collected".
 
 **Review notes.** Suggested text:
 
-> Petri is a humor app for parents with general health information from public sources. It does not diagnose.
+> Germigo is a humor app for parents with general health information from public sources. It does not diagnose.
 > No account is needed. To test Crew: subscribe in the sandbox, open the Crew tab, start a crew, then join it from a second device with the invite code.
 > Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours on the server's moderation page.
-> Leaving a crew deletes the member's data from the server. Settings > Data and Privacy > Delete Everything erases all local data.
+> Leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases all local data.
 
 ## 4. Open risks
 
 | Risk | Detail |
 | --- | --- |
-| 5.1.1(ix) | Apple expects apps in regulated fields that collect sensitive data, health included, to be submitted by a legal entity. Petri keeps the journal and its photos on the device and offers general information only, but a reviewer may still ask, more so now that photos of sick kids can be kept for a doctor. Disabling Crew removes all health data collection. |
+| 5.1.1(ix) | Apple expects apps in regulated fields that collect sensitive data, health included, to be submitted by a legal entity. Germigo keeps the journal and its photos on the device and offers general information only, but a reviewer may still ask, more so now that photos of sick kids can be kept for a doctor. Disabling Crew removes all health data collection. |
 | 1.4.1 | The symptom pages rank the catalog's germs by the signs a parent ticks. The screen calls the result a guess for the logbook, not a diagnosis, and trouble breathing leads to the help lines instead of a list. A reviewer may still read it as a diagnostic feature. |
 | Case file review | Timing, contagion, care and "when to call" statements were re-read against the linked pages on 2026-11-19, and the "what it is", symptom and spread lines on 2026-11-20. The text has not been reviewed by a clinician, and the trivia lines of the deep dives are not covered by the linked pages. |
 | Source links | `check_links.py` fails on a broken link and lists as blocked the sites that refuse scripts. Open the blocked ones in a browser before a release. |

@@ -93,6 +93,7 @@ private struct WhoPage: View {
         let name: String
         let look: Int
         let line: String
+        let locked: Bool
 
         var id: Patient { patient }
     }
@@ -101,15 +102,17 @@ private struct WhoPage: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var picked: Patient?
+    @State private var showPaywall = false
 
     private var choices: [Choice] {
         let now = Date()
         var list = model.data.kids.map { kid in
-            Choice(patient: .kid(kid.id), name: kid.name, look: kid.colorIndex, line: kidLine(kid, now: now))
+            Choice(patient: .kid(kid.id), name: kid.name, look: kid.colorIndex, line: kidLine(kid, now: now),
+                   locked: !model.isKidOpen(kid.id))
         }
         if model.data.partnerName != nil {
             list.append(Choice(patient: .partner, name: model.partnerDisplayName, look: model.data.partnerLook,
-                               line: partnerLine(now: now)))
+                               line: partnerLine(now: now), locked: !model.hasPass))
         }
         return list
     }
@@ -129,10 +132,8 @@ private struct WhoPage: View {
                         card(item.element)
                             .cascadeIn(item.offset)
                     }
-                    if model.canAddKid {
-                        addCard
-                            .cascadeIn(choices.count)
-                    }
+                    addCard
+                        .cascadeIn(choices.count)
                 }
                 .padding(.top, 18)
             }
@@ -145,15 +146,25 @@ private struct WhoPage: View {
         .navigationDestination(item: $picked) { patient in
             SymptomPicker(flow: .someone, start: patient, exits: exits)
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
 
     private func card(_ choice: Choice) -> some View {
         Button {
             Haptics.tap()
-            picked = choice.patient
+            if choice.locked {
+                showPaywall = true
+            } else {
+                picked = choice.patient
+            }
         } label: {
             VStack(spacing: 4) {
                 BuddyView(look: choice.look, sick: true, size: 92, lively: true)
+                    .overlay(alignment: .topTrailing) {
+                        if choice.locked { PassLock() }
+                    }
                     .padding(.bottom, 6)
                 Text(choice.name)
                     .font(.title3.weight(.bold))
@@ -177,7 +188,11 @@ private struct WhoPage: View {
     private var addCard: some View {
         Button {
             Haptics.tap()
-            picked = .newKid
+            if model.canAddKid {
+                picked = .newKid
+            } else {
+                showPaywall = true
+            }
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: "plus")
@@ -185,6 +200,9 @@ private struct WhoPage: View {
                     .foregroundStyle(palette.accent)
                     .frame(width: 92, height: 92)
                     .background(palette.surface, in: Circle())
+                    .overlay(alignment: .topTrailing) {
+                        if !model.canAddKid { PassLock() }
+                    }
                     .padding(.bottom, 6)
                 Text(tr("A new kid"))
                     .font(.title3.weight(.bold))
@@ -312,7 +330,7 @@ private struct SymptomPicker: View {
                     .textInputAutocapitalization(.words)
                     .padding(.horizontal, 16)
                     .frame(height: 54)
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             }
             .padding(.bottom, 18)
         case .kid(let kidID):
@@ -361,12 +379,12 @@ private struct SymptomPicker: View {
             .padding(.horizontal, 14)
             .frame(height: 56)
             .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(isOn ? .isSelected : [])
@@ -390,7 +408,7 @@ private struct SymptomPicker: View {
                     }
                 }
             }
-            .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
+            .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
             .disabled(!canProceed)
             if flow.isNew {
                 Button {
@@ -515,12 +533,12 @@ private struct SymptomTile: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 88)
             .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isOn)
@@ -551,7 +569,7 @@ private struct UrgentPage: View {
                     .font(.title.weight(.bold))
                     .foregroundStyle(palette.ink)
                     .multilineTextAlignment(.center)
-                Text(tr("Petri doesn't guess on this one. Call a health line now, or the emergency number if it looks serious."))
+                Text(tr("Germigo doesn't guess on this one. Call a health line now, or the emergency number if it looks serious."))
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
@@ -559,7 +577,7 @@ private struct UrgentPage: View {
                 NavigationLink {
                     HelpLinesScreen()
                 } label: {
-                    Text(tr("Help Lines"))
+                    Text(tr("Help lines"))
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
                 .padding(.top, 10)
@@ -807,8 +825,8 @@ private struct SuspectsPage: View {
             }
             .padding(.horizontal, 16)
             .frame(height: 50)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -824,7 +842,7 @@ private struct SuspectsPage: View {
     private var footnote: String {
         let guess = tr("A guess for your logbook, not a diagnosis.")
         guard flow.isNew, model.data.settings.checkInsOn else { return guess }
-        return tr("Petri asks again in 2 days.") + " " + guess
+        return tr("Germigo asks again in 2 days.") + " " + guess
     }
 
     private func bottomBar(quiet: Bool) -> some View {
@@ -833,7 +851,7 @@ private struct SuspectsPage: View {
                 Button(tr("It's %@", germ.name)) {
                     pick(germ.id)
                 }
-                .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
+                .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
                 Button(keepTitle) {
                     keep()
                 }
@@ -842,7 +860,7 @@ private struct SuspectsPage: View {
                 Button(keepTitle) {
                     keep()
                 }
-                .buttonStyle(PillButtonStyle(kind: quiet ? .ghost : .ink, height: 58))
+                .buttonStyle(PillButtonStyle(kind: quiet ? .ghost : .ink, height: 56))
             }
             Text(footnote)
                 .font(.footnote)

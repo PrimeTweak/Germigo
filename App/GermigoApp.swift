@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct PetriApp: App {
+struct GermigoApp: App {
     @State private var model = AppModel.shared
     @State private var purchases = PurchaseManager.shared
     @State private var crew = CrewStore.shared
@@ -96,8 +96,8 @@ private struct ThemedRoot: View {
 
     private var noticeMessage: String {
         model.journalNotice == .saveFailed
-            ? tr("Petri couldn't write to this phone. Free up some storage, then make your change again.")
-            : tr("Petri kept the file and started a new journal. You can export the kept file from Settings, under Data and Privacy.")
+            ? tr("Germigo couldn't write to this phone. Free up some storage, then make your change again.")
+            : tr("Germigo kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy.")
     }
 }
 
@@ -212,7 +212,7 @@ private struct ToastView: View {
             .padding(.horizontal, 18)
             .frame(minHeight: 42)
             .background(palette.ink, in: Capsule())
-            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 6)
+            .liftShadow()
             .padding(.top, 6)
             .accessibilityAddTraits(.isStaticText)
     }

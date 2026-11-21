@@ -10,6 +10,8 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedID = PassProduct.yearlyID
     @State private var legal: LegalKind?
+    /// The ticket's title, following the text size set in iOS.
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 42
 
     private let backdrop = Color(hex: Swatch.navy)
     private let panel = Color(hex: Swatch.navySurface)
@@ -112,11 +114,11 @@ struct PaywallView: View {
     private var ticket: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2) {
-                Text(tr("Petri · Admit one household"))
+                Text(tr("Germigo · Admit one household"))
                     .font(.caption2.weight(.bold))
                     .opacity(0.7)
                 Text(tr("Season Pass"))
-                    .font(.system(size: 42, weight: .bold))
+                    .font(.system(size: titleSize, weight: .bold))
                     .kerning(-1)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -148,7 +150,7 @@ struct PaywallView: View {
         .foregroundStyle(night)
         .frame(maxWidth: .infinity)
         .background(frost)
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         .rotationEffect(.degrees(-2))
         .padding(.horizontal, 8)
         .accessibilityElement(children: .ignore)
@@ -157,12 +159,13 @@ struct PaywallView: View {
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 14) {
-            benefit("person.2.fill", tr("Your whole household"), tr("Every kid in one journal"))
+            benefit("person.2.fill", tr("Your whole household"), tr("Your partner, the couple duel and every kid"))
+            benefit("calendar", tr("The whole history"), tr("Past weeks, photos and the file for the doctor"))
+            benefit("chart.bar.fill", tr("Your season in numbers"), tr("Top supplier, germs by month and the longest chain"))
             if AppConfig.crewEnabled {
                 benefit("dot.radiowaves.left.and.right", tr("Daycare Crew"), tr("An outbreak radar for your group"))
             }
-            benefit("book.fill", tr("Every deep dive"), tr("The fun science on every germ, and every read"))
-            benefit("sparkles", tr("Holo cards and extras"), tr("The Soup Bowl icon and the incubation widget"))
+            benefit("sparkles", tr("Holo cards and extras"), tr("Icons, themes and the incubation widget"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -237,9 +240,9 @@ struct PaywallView: View {
             }
             .padding(.horizontal, 16)
             .frame(minHeight: 70)
-            .background(panel, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(isSelected ? glow : Color.clear, lineWidth: 2)
             }
         }
@@ -319,7 +322,7 @@ struct PaywallView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(panel, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var unavailableCard: some View {
@@ -344,12 +347,12 @@ struct PaywallView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(panel, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var footerLinks: some View {
         HStack(spacing: 18) {
-            Button(tr("Restore Purchases")) {
+            Button(tr("Restore purchases")) {
                 Task {
                     let failure = await purchases.restore()
                     if model.hasPass {
@@ -373,7 +376,8 @@ struct PaywallView: View {
     }
 }
 
-private struct TicketDash: Shape {
+/// The tear line across a ticket.
+struct TicketDash: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
         path.move(to: CGPoint(x: rect.minX, y: rect.midY))

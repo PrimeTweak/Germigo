@@ -20,7 +20,8 @@ struct BadgesScreen: View {
         let counts = BadgeProgress.counts(data: model.data, catalog: model.catalog, now: Date())
         ScrollView {
             LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(BadgeCatalog.all) { badge in
+                ForEach(Array(BadgeCatalog.all.enumerated()), id: \.element.id) { item in
+                    let badge = item.element
                     let earned = model.hasBadge(badge.id)
                     let count = earned ? nil : counts[badge.id].flatMap { $0.target > 0 ? $0 : nil }
                     VStack(alignment: .leading, spacing: 8) {
@@ -42,14 +43,10 @@ struct BadgesScreen: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 138, alignment: .topLeading)
-                    .petriCard(radius: 22, padding: 14)
+                    .germigoCard(radius: 24, padding: 14)
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(earned ? tr("Earned") : tr("Locked"))
-                    .scrollTransition { content, phase in
-                        content
-                            .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                            .opacity(phase.isIdentity ? 1 : 0.4)
-                    }
+                    .cascadeIn(item.offset / 2)
                 }
             }
             .padding(.horizontal, 20)

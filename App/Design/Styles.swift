@@ -13,9 +13,23 @@ private struct CardBackground: ViewModifier {
     }
 }
 
+/// The one shadow of floating controls; none on dark surfaces.
+private struct LiftShadow: ViewModifier {
+    @Environment(\.palette) private var palette
+
+    func body(content: Content) -> some View {
+        content.shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.1), radius: 10, x: 0, y: 4)
+    }
+}
+
 extension View {
+    /// Lifts a floating control off the page.
+    func liftShadow() -> some View {
+        modifier(LiftShadow())
+    }
+
     /// The rounded quiet surface used for grouped content.
-    func petriCard(radius: CGFloat = 24, padding: CGFloat = 16) -> some View {
+    func germigoCard(radius: CGFloat = 24, padding: CGFloat = 16) -> some View {
         modifier(CardBackground(radius: radius, padding: padding))
     }
 }
@@ -23,7 +37,7 @@ extension View {
 /// The one health disclaimer, shown wherever health notes appear.
 enum HealthNotice {
     static var text: String {
-        tr("Petri shares general information from public health sources. It is not medical advice and does not replace a health professional.")
+        tr("Germigo shares general information from public health sources. It is not medical advice and does not replace a health professional.")
     }
 }
 
@@ -108,29 +122,6 @@ struct PillLabel: View {
     }
 }
 
-struct AvatarView: View {
-    let name: String
-    let gradient: LinearGradient
-    var size: CGFloat = 40
-
-    private var initial: String {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "?" : String(trimmed.prefix(1)).uppercased()
-    }
-
-    var body: some View {
-        Circle()
-            .fill(gradient)
-            .frame(width: size, height: size)
-            .overlay {
-                Text(initial)
-                    .font(.system(size: size * 0.42, weight: .bold))
-                    .foregroundStyle(Color(hex: Swatch.night))
-            }
-            .accessibilityHidden(true)
-    }
-}
-
 /// A germ mascot, or its silhouette while the card is still locked.
 struct GermImage: View {
     let germ: Germ
@@ -176,6 +167,8 @@ struct ValueRow: View {
     let title: String
     var value: String?
     var showsChevron = true
+    /// Shows a padlock in place of the chevron, for what the Season Pass opens.
+    var locked = false
     @Environment(\.palette) private var palette
 
     var body: some View {
@@ -191,7 +184,12 @@ struct ValueRow: View {
                     .foregroundStyle(palette.inkSecondary)
                     .lineLimit(1)
             }
-            if showsChevron {
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .accessibilityLabel(tr("Needs the Season Pass"))
+            } else if showsChevron {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.inkTertiary)

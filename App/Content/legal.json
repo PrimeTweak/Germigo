@@ -18,8 +18,8 @@
       "fr": "Dernière mise à jour :"
     },
     "publisherLabel": {
-      "en": "Petri is published by",
-      "fr": "Petri est publiée par"
+      "en": "Germigo is published by",
+      "fr": "Germigo est publié par"
     },
     "contactLabel": {
       "en": "Contact:",
@@ -38,8 +38,8 @@
       "fr": "Les microbes de garderie, en collection."
     },
     "landingIntro": {
-      "en": "The first year of daycare, logged one germ at a time. Petri turns every cold your kid brings home into a card, a badge and a reason to laugh about it.",
-      "fr": "La première année de garderie, notée un microbe à la fois. Petri transforme chaque rhume rapporté à la maison en carte, en badge et en raison d'en rire."
+      "en": "The first year of daycare, logged one germ at a time. Germigo turns every cold your kid brings home into a card, a badge and a reason to laugh about it.",
+      "fr": "La première année de garderie, notée un microbe à la fois. Germigo transforme chaque rhume rapporté à la maison en carte, en badge et en raison d'en rire."
     },
     "landingPoints": [
       {
@@ -64,7 +64,7 @@
       "fr": "Bientôt dans l'App Store."
     },
     "supportDelete": {
-      "en": "To delete your data: in the app, open Settings, then Data and Privacy, then Delete Everything. Leaving a crew deletes your data from the server.",
+      "en": "To delete your data: in the app, open Settings, then Data and privacy, then Delete everything. Leaving a crew deletes your data from the server.",
       "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Données et confidentialité, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
     }
   },
@@ -75,8 +75,8 @@
         "fr": "En bref"
       },
       "body": {
-        "en": "Petri keeps your journal on your phone. Nothing is shared unless you join a crew, and then only what you choose. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
-        "fr": "Petri garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe, et alors seulement ce que tu choisis. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
+        "en": "Germigo keeps your journal on your phone. Nothing is shared unless you join a crew, and then only what you choose. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
+        "fr": "Germigo garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe, et alors seulement ce que tu choisis. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
       }
     },
     {
@@ -85,8 +85,8 @@
         "fr": "Qui est responsable"
       },
       "body": {
-        "en": "Petri is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them through Contact Support in the app's settings or on the App Store page.",
-        "fr": "Petri est publiée par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire avec Contacter le soutien, dans les réglages de l'app, ou depuis la page de l'App Store."
+        "en": "Germigo is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them through Contact Support in the app's settings or on the App Store page.",
+        "fr": "Germigo est publié par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire avec Contacter le soutien, dans les réglages de l'app, ou depuis la page de l'App Store."
       }
     },
     {
@@ -95,8 +95,8 @@
         "fr": "Ce qui reste sur ton téléphone"
       },
       "body": {
-        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Petri never uploads it. The developer cannot see it. The camera is used only when you take a photo.",
-        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Petri ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo."
+        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Germigo never uploads it. The developer cannot see it. The camera is used only when you take a photo.",
+        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Germigo ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo."
       }
     },
     {
@@ -125,8 +125,8 @@
         "fr": "Achats"
       },
       "body": {
-        "en": "The Season Pass is sold and billed by Apple. Petri receives only the confirmation that a subscription is active. It never sees your name, your Apple Account or your payment details.",
-        "fr": "La Passe de saison est vendue et facturée par Apple. Petri reçoit seulement la confirmation qu'un abonnement est actif. Elle ne voit jamais ton nom, ton compte Apple ni tes renseignements de paiement."
+        "en": "The Season Pass and tips are sold and billed by Apple. Germigo receives only the confirmation that a subscription is active or a tip went through. It never sees your name, your Apple Account or your payment details.",
+        "fr": "La Passe de saison et les pourboires sont vendus et facturés par Apple. Germigo reçoit seulement la confirmation qu'un abonnement est actif ou qu'un pourboire est passé. Il ne voit jamais ton nom, ton compte Apple ni tes renseignements de paiement."
       }
     },
     {
@@ -135,8 +135,8 @@
         "fr": "Notifications"
       },
       "body": {
-        "en": "Check-ins and crew alerts are created on your phone. Petri does not use a push notification service and does not collect a device token.",
-        "fr": "Les rappels et les alertes de groupe sont créés sur ton téléphone. Petri n'utilise aucun service de notifications poussées et ne recueille aucun jeton d'appareil."
+        "en": "Check-ins and crew alerts are created on your phone. Germigo does not use a push notification service and does not collect a device token.",
+        "fr": "Les rappels et les alertes de groupe sont créés sur ton téléphone. Germigo n'utilise aucun service de notifications poussées et ne recueille aucun jeton d'appareil."
       }
     },
     {
@@ -145,8 +145,8 @@
         "fr": "Enfants"
       },
       "body": {
-        "en": "Petri is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone.",
-        "fr": "Petri est conçue pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone."
+        "en": "Germigo is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone.",
+        "fr": "Germigo est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone."
       }
     },
     {
@@ -155,7 +155,7 @@
         "fr": "Conservation et suppression"
       },
       "body": {
-        "en": "Your journal stays on your phone until you delete it. Delete Everything, in Settings under Data and Privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
+        "en": "Your journal stays on your phone until you delete it. Delete everything, in Settings under Data and privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Shared germs older than 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
         "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Les microbes partagés depuis plus de 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
       }
     },
@@ -183,12 +183,12 @@
   "terms": [
     {
       "title": {
-        "en": "What Petri is",
-        "fr": "Ce qu'est Petri"
+        "en": "What Germigo is",
+        "fr": "Ce qu'est Germigo"
       },
       "body": {
-        "en": "Petri is an entertainment app with general health information for parents. It is not a medical device. It does not diagnose, treat or prevent any illness.",
-        "fr": "Petri est une app de divertissement qui offre de l'information générale sur la santé aux parents. Ce n'est pas un instrument médical. Elle ne diagnostique, ne traite et ne prévient aucune maladie."
+        "en": "Germigo is an entertainment app with general health information for parents. It is not a medical device. It does not diagnose, treat or prevent any illness.",
+        "fr": "Germigo est une app de divertissement qui offre de l'information générale sur la santé aux parents. Ce n'est pas un instrument médical. Il ne diagnostique, ne traite et ne prévient aucune maladie."
       }
     },
     {
@@ -207,8 +207,8 @@
         "fr": "Passe de saison"
       },
       "body": {
-        "en": "The Season Pass is an auto-renewing subscription, monthly or yearly, sold through your Apple Account. The price and any free trial are shown before you confirm. It renews automatically unless you cancel at least 24 hours before the end of the current period. You manage or cancel it in your App Store account settings. Refunds are handled by Apple.",
-        "fr": "La Passe de saison est un abonnement à renouvellement automatique, mensuel ou annuel, vendu par l'entremise de ton compte Apple. Le prix et tout essai gratuit sont affichés avant la confirmation. Il se renouvelle automatiquement, sauf si tu l'annules au moins 24 heures avant la fin de la période en cours. Tu le gères ou l'annules dans les réglages de ton compte App Store. Les remboursements sont traités par Apple."
+        "en": "The Season Pass is an auto-renewing subscription, monthly or yearly, sold through your Apple Account. The price and any free trial are shown before you confirm. It renews automatically unless you cancel at least 24 hours before the end of the current period. You manage or cancel it in your App Store account settings. Tips are one-time purchases that unlock nothing. Refunds are handled by Apple.",
+        "fr": "La Passe de saison est un abonnement à renouvellement automatique, mensuel ou annuel, vendu par l'entremise de ton compte Apple. Le prix et tout essai gratuit sont affichés avant la confirmation. Il se renouvelle automatiquement, sauf si tu l'annules au moins 24 heures avant la fin de la période en cours. Tu le gères ou l'annules dans les réglages de ton compte App Store. Les pourboires sont des achats uniques qui ne débloquent rien. Les remboursements sont traités par Apple."
       }
     },
     {
@@ -227,8 +227,8 @@
         "fr": "Ton contenu"
       },
       "body": {
-        "en": "You are responsible for the names you choose and for what you share in a crew. You allow Petri to show them to the members of that crew, and nothing more.",
-        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe. Tu autorises Petri à les montrer aux membres de ce groupe, et rien de plus."
+        "en": "You are responsible for the names you choose and for what you share in a crew. You allow Germigo to show them to the members of that crew, and nothing more.",
+        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe. Tu autorises Germigo à les montrer aux membres de ce groupe, et rien de plus."
       }
     },
     {
@@ -237,8 +237,8 @@
         "fr": "Aucune garantie"
       },
       "body": {
-        "en": "Petri is provided as is. The developer does their best to keep it accurate and available but cannot promise it will be free of errors or interruptions. Nothing in these terms limits the rights that consumer protection law gives you.",
-        "fr": "Petri est fournie telle quelle. Le développeur fait de son mieux pour la garder exacte et accessible, sans pouvoir promettre qu'elle sera exempte d'erreurs ou d'interruptions. Rien dans ces conditions ne limite les droits que te donne la loi sur la protection du consommateur."
+        "en": "Germigo is provided as is. The developer does their best to keep it accurate and available but cannot promise it will be free of errors or interruptions. Nothing in these terms limits the rights that consumer protection law gives you.",
+        "fr": "Germigo est fourni tel quel. Le développeur fait de son mieux pour le garder exact et accessible, sans pouvoir promettre qu'il sera exempt d'erreurs ou d'interruptions. Rien dans ces conditions ne limite les droits que te donne la loi sur la protection du consommateur."
       }
     },
     {

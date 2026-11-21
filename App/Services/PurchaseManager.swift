@@ -4,9 +4,17 @@ import StoreKit
 
 /// Product identifiers, as created in App Store Connect.
 enum PassProduct {
-    static let yearlyID = "ca.petri.app.pass.yearly"
-    static let monthlyID = "ca.petri.app.pass.monthly"
+    static let yearlyID = "ca.germigo.app.pass.yearly"
+    static let monthlyID = "ca.germigo.app.pass.monthly"
     static let all = [yearlyID, monthlyID]
+}
+
+/// The tip jar: three consumable soups, as created in App Store Connect.
+enum TipProduct {
+    static let smallID = "ca.germigo.app.tip.small"
+    static let mediumID = "ca.germigo.app.tip.medium"
+    static let largeID = "ca.germigo.app.tip.large"
+    static let all = [smallID, mediumID, largeID]
 }
 
 /// Season Pass products and entitlement, through StoreKit 2.
@@ -16,6 +24,8 @@ final class PurchaseManager {
     static let shared = PurchaseManager()
 
     private(set) var products: [Product] = []
+    /// The tip jar's products, cheapest first.
+    private(set) var tips: [Product] = []
     private(set) var storePass = false
     private(set) var activeProductID: String?
     private(set) var introEligible = false
@@ -47,7 +57,7 @@ final class PurchaseManager {
     }
 
     var hasPass: Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if AppModel.shared.data.settings.sideloadPass { return true }
         #endif
         return storePass
@@ -65,13 +75,16 @@ final class PurchaseManager {
         isLoading = true
         defer { isLoading = false }
         do {
-            products = try await Product.products(for: PassProduct.all)
+            let found = try await Product.products(for: PassProduct.all + TipProduct.all)
+            products = found.filter { PassProduct.all.contains($0.id) }
+            tips = found.filter { TipProduct.all.contains($0.id) }.sorted { $0.price < $1.price }
             loadFailed = false
             if let subscription = yearly?.subscription {
                 introEligible = await subscription.isEligibleForIntroOffer
             }
         } catch {
             products = []
+            tips = []
             loadFailed = true
         }
     }
@@ -107,6 +120,28 @@ final class PurchaseManager {
             case .userCancelled:
                 return false
             @unknown default:
+                return false
+            }
+        } catch {
+            lastError = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Buys one soup from the tip jar; true once Apple confirms it.
+    func tip(_ product: Product) async -> Bool {
+        isPurchasing = true
+        defer { isPurchasing = false }
+        do {
+            switch try await product.purchase() {
+            case .success(let verification):
+                guard case .verified(let transaction) = verification else { return false }
+                await transaction.finish()
+                return true
+            case .pending:
+                pendingNotice = true
+                return false
+            default:
                 return false
             }
         } catch {

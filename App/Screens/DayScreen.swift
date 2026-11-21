@@ -45,6 +45,7 @@ struct DayScreen: View {
     @Environment(\.palette) private var palette
     @State private var day: Date
     @State private var forward = true
+    @State private var showPaywall = false
 
     init(day: Date) {
         _day = State(initialValue: Calendar.current.startOfDay(for: day))
@@ -55,13 +56,16 @@ struct DayScreen: View {
         let today = Calendar.current.startOfDay(for: now)
         let entries = DayEngine.entries(on: day, data: model.data, catalog: model.catalog, now: now)
         let photos = DayEngine.photos(on: day, entries: entries, data: model.data)
+        let locked = model.historyStart.map { day < $0 } ?? false
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Text(subtitle(today: today))
                     .font(.subheadline)
                     .foregroundStyle(palette.ink.opacity(0.8))
                     .padding(.horizontal, 4)
-                if entries.isEmpty {
+                if locked {
+                    LockedDay()
+                } else if entries.isEmpty {
                     QuietDay(isToday: day == today)
                 } else {
                     ForEach(Array(entries.enumerated()), id: \.element.id) { item in
@@ -72,7 +76,7 @@ struct DayScreen: View {
                     standing(entries)
                         .cascadeIn(entries.count)
                 }
-                if !photos.others.isEmpty {
+                if !locked, !photos.others.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(tr("Other photos"))
                             .font(.footnote.weight(.semibold))
@@ -89,12 +93,16 @@ struct DayScreen: View {
             .transition(.asymmetric(insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
                                     removal: .opacity))
         }
-        .background(CharacterWash(tint: washTint(entries), reach: 0.45))
+        .background(CharacterWash(tint: washTint(locked ? [] : entries), reach: 0.45))
         .navigationTitle(day.formatted(.dateTime.weekday(.wide)).localizedCapitalized)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
-                    step(-1)
+                    if let first = model.historyStart, day <= first {
+                        showPaywall = true
+                    } else {
+                        step(-1)
+                    }
                 } label: {
                     Image(systemName: "chevron.left")
                 }
@@ -108,6 +116,9 @@ struct DayScreen: View {
                 .disabled(day >= today)
                 .accessibilityLabel(tr("Next day"))
             }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 
@@ -176,6 +187,7 @@ private struct DayCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var seed: PhotoSeed?
+    @State private var showPaywall = false
 
     var body: some View {
         if let germ = model.catalog.germ(entry.germID) {
@@ -214,6 +226,10 @@ private struct DayCard: View {
                     }
                 }
                 PhotoRow(photos: photos) {
+                    guard model.hasPass else {
+                        showPaywall = true
+                        return
+                    }
                     seed = PhotoSeed(person: entry.person, takenAt: moment, link: PhotoLink(entry))
                 }
                 actions(name: name)
@@ -232,6 +248,9 @@ private struct DayCard: View {
             }
             .sheet(item: $seed) { seed in
                 AddPhotoSheet(seed: seed)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
         }
     }
@@ -286,9 +305,39 @@ private struct DayCard: View {
                 .padding(.horizontal, 18)
                 .frame(height: 44)
                 .background(palette.isDark ? palette.surfaceAlt : palette.background, in: Capsule())
-                .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 8, x: 0, y: 3)
+                .liftShadow()
         }
         .buttonStyle(PressableStyle())
+    }
+}
+
+/// A day older than a week, on a free journal.
+private struct LockedDay: View {
+    @Environment(\.palette) private var palette
+    @State private var showPaywall = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            NappingMascot(side: 150)
+                .overlay(alignment: .topTrailing) { PassLock() }
+            Text(tr("This day is in the archives"))
+                .font(.title2.weight(.bold))
+                .foregroundStyle(palette.ink)
+            Text(tr("Days older than a week come with the Season Pass."))
+                .font(.callout)
+                .foregroundStyle(palette.inkSecondary)
+                .multilineTextAlignment(.center)
+            Button(tr("See the Season Pass")) {
+                showPaywall = true
+            }
+            .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
+            .padding(.top, 6)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 36)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
 }
 

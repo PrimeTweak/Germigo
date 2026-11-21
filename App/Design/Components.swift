@@ -90,6 +90,14 @@ struct ChipRows: Layout {
     }
 }
 
+/// The wash color of each tab after Today, whose color follows its character.
+enum TabWash {
+    static let family = Color(hex: Swatch.peach)
+    static let lab = Color(hex: Swatch.aqua)
+    static let trophies = Color(hex: Swatch.goldFoil)
+    static let crew = Color(hex: Swatch.skyLight)
+}
+
 /// The page background: the top takes the color of the character on screen.
 struct CharacterWash: View {
     let tint: Color
@@ -262,6 +270,79 @@ struct ConfettiView: View {
     }
 }
 
+/// Entries older than the free week: how many there are, and the way to the Season Pass.
+struct LockedHistoryRow: View {
+    let count: Int
+    @Environment(\.palette) private var palette
+    @State private var showPaywall = false
+
+    var body: some View {
+        Button {
+            showPaywall = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "lock.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.inkSecondary)
+                    .frame(width: 44, height: 44)
+                    .background(palette.ink.opacity(0.07), in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(trCount(count, one: "%lld older entry", other: "%lld older entries"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("The whole history comes with the Season Pass."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .multilineTextAlignment(.leading)
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .germigoCard(radius: 24, padding: 12)
+        }
+        .buttonStyle(.plain)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
+    }
+}
+
+/// The small padlock on something the Season Pass opens.
+struct PassLock: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Image(systemName: "lock.fill")
+            .font(.caption.weight(.bold))
+            .foregroundStyle(palette.onAccent)
+            .frame(width: 28, height: 28)
+            .background(palette.accent, in: Circle())
+            .overlay { Circle().strokeBorder(palette.surface, lineWidth: 2.5) }
+            .accessibilityLabel(tr("Needs the Season Pass"))
+    }
+}
+
+/// The share button inside a card: a quiet capsule in the accent color.
+struct ShareCapsule: View {
+    let title: String
+    let action: () -> Void
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: "square.and.arrow.up")
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(palette.accent)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(palette.background, in: Capsule())
+        }
+        .buttonStyle(PressableStyle())
+    }
+}
+
 /// One place on a podium: a character, a name, and what earned the place.
 struct PodiumPlace: Identifiable {
     let id: String
@@ -303,8 +384,8 @@ struct Podium: View {
                 .padding(.top, 6)
                 .frame(maxWidth: .infinity, minHeight: Self.heights[rank - 1], alignment: .top)
                 .background(palette.accent.opacity(rank == 1 ? 0.42 : 0.22),
-                            in: UnevenRoundedRectangle(topLeadingRadius: 14, bottomLeadingRadius: 6,
-                                                       bottomTrailingRadius: 6, topTrailingRadius: 14))
+                            in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 8,
+                                                       bottomTrailingRadius: 8, topTrailingRadius: 16))
             Text(place.name)
                 .font(.callout.weight(.bold))
                 .foregroundStyle(palette.ink)

@@ -1,6 +1,6 @@
 'use strict';
 
-// Petri crew server: private daycare groups, an anonymous outbreak radar,
+// Germigo crew server: private daycare groups, an anonymous outbreak radar,
 // a small feed of germs caught and beaten with preset reactions, and the app's legal pages.
 
 const http = require('node:http');
@@ -106,7 +106,7 @@ function sameSecret(given, expected) {
 
 function createApp(options = {}) {
   const dataDir = options.dataDir || process.env.DATA_DIR || path.join(__dirname, 'data');
-  const dataFile = path.join(dataDir, 'petri.json');
+  const dataFile = path.join(dataDir, 'germigo.json');
   const adminToken = options.adminToken || process.env.ADMIN_TOKEN || '';
   const supportEmail = options.supportEmail || process.env.SUPPORT_EMAIL || '';
   const publisherName = options.publisherName || process.env.PUBLISHER_NAME || '';
@@ -322,7 +322,7 @@ function createApp(options = {}) {
       ? `<p><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">${escapeHtml(web.eulaLabel[lang])}</a></p>`
       : '';
     const body = `<h1>${escapeHtml(title)}</h1><p class="meta">${updated}</p>${publisher}${sections}${eula}${contactBlock(lang)}`;
-    return page(`Petri · ${title}`, lang, body);
+    return page(`Germigo · ${title}`, lang, body);
   }
 
   function contactBlock(lang) {
@@ -338,7 +338,7 @@ function createApp(options = {}) {
       + `<p>${escapeHtml(web.supportDelete[lang])}</p>`;
     const links = `<p><a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a> · `
       + `<a href="/terms${suffix}">${escapeHtml(web.termsTitle[lang])}</a></p>`;
-    return page(`Petri · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
+    return page(`Germigo · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
   }
 
   // The page a share card's QR code opens.
@@ -349,7 +349,7 @@ function createApp(options = {}) {
       ? `<a class="store" href="${escapeHtml(appStoreURL)}">${escapeHtml(web.landingStore[lang])}</a>`
       : `<p class="soon">${escapeHtml(web.landingSoon[lang])}</p>`;
     const suffix = lang === 'fr' ? '?lang=fr' : '';
-    const body = '<p class="mark">petri</p>'
+    const body = '<p class="mark">germigo</p>'
       + `<h1>${escapeHtml(web.landingTagline[lang])}</h1><p class="lede">${escapeHtml(web.landingIntro[lang])}</p>`
       + `<ul>${points}</ul>${store}`
       + `<p class="links"><a href="/support${suffix}">${escapeHtml(web.supportTitle[lang])}</a> · `
@@ -358,7 +358,7 @@ function createApp(options = {}) {
       + '.lede{font-size:19px}ul{padding:0;list-style:none}li{background:#fff;border-radius:16px;padding:14px 16px;margin:8px 0}'
       + '.store{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:99px;background:#1E1A26;color:#F6F1E7;'
       + 'text-decoration:none;font-weight:700}.soon{margin:18px 0;font-weight:700}.links{color:#6b6675;font-size:15px}';
-    return page('Petri', lang, body, style);
+    return page('Germigo', lang, body, style);
   }
 
   // The moderation page. It holds no data: the reports load after the token is typed.
@@ -402,7 +402,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
   load();
 });`;
     return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
-      + '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Petri · Moderation</title>'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Germigo · Moderation</title>'
       + '<style>body{font:17px/1.5 -apple-system,system-ui,sans-serif;color:#1E1A26;background:#F6F1E7;margin:0}'
       + 'main{max-width:680px;margin:0 auto;padding:32px 22px 64px}h1{font-size:30px;margin:0 0 12px}'
       + 'h2{font-size:18px;margin:0 0 4px}section{background:#fff;border-radius:18px;padding:16px;margin:12px 0}'
@@ -656,7 +656,7 @@ if (require.main === module) {
   const port = Number(process.env.PORT) || 8080;
   const server = createApp();
   server.listen(port, () => {
-    console.log(`Petri crew server listening on ${port}`);
+    console.log(`Germigo crew server listening on ${port}`);
   });
   for (const signal of ['SIGTERM', 'SIGINT']) {
     process.on(signal, () => {

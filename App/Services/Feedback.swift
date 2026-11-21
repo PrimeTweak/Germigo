@@ -68,7 +68,7 @@ enum Haptics {
 enum AppIconManager {
     static var current: AppIconOption {
         let name = UIApplication.shared.alternateIconName
-        return AppIconOption.allCases.first { $0.alternateName == name } ?? .petri
+        return AppIconOption.allCases.first { $0.alternateName == name } ?? .germigo
     }
 
     static func apply(_ option: AppIconOption) async -> Bool {
@@ -91,7 +91,7 @@ struct JournalBackup: Transferable {
             let photos = PhotoStore.files(for: backup.data.photos.map { $0.id })
             return Persistence.backupData(backup.data, photos: photos) ?? Data()
         }
-        .suggestedFileName("petri-backup.json")
+        .suggestedFileName("germigo-backup.json")
     }
 }
 
@@ -109,7 +109,7 @@ struct DoctorPacket: Transferable {
         DataRepresentation(exportedContentType: .pdf) { (packet: DoctorPacket) in
             packet.pdf()
         }
-        .suggestedFileName("petri-for-the-doctor.pdf")
+        .suggestedFileName("germigo-for-the-doctor.pdf")
     }
 
     func pdf() -> Data {
@@ -172,7 +172,7 @@ struct JournalExport: Transferable {
         DataRepresentation(exportedContentType: .commaSeparatedText) { (export: JournalExport) in
             Data(export.csv.utf8)
         }
-        .suggestedFileName("petri-journal.csv")
+        .suggestedFileName("germigo-journal.csv")
     }
 
     var csv: String {

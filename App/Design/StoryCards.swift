@@ -39,7 +39,9 @@ struct MilestoneShareCard: View {
 struct DuelShareCard: View {
     let seasonNumber: Int
     let me: String
+    let meLook: Int
     let partner: String
+    let partnerLook: Int
     let stats: DuelStats
 
     private var verdict: String {
@@ -62,12 +64,11 @@ struct DuelShareCard: View {
                     .kerning(-1)
                     .padding(.top, 2)
                 HStack(alignment: .center, spacing: 8) {
-                    column(name: me, side: stats.me, leads: stats.leader == .me, gradient: AvatarColors.you)
+                    column(name: me, look: meLook, side: stats.me, leads: stats.leader == .me)
                     Text(verbatim: "VS")
                         .font(.system(size: 16, weight: .black))
                         .opacity(0.6)
-                    column(name: partner, side: stats.partner, leads: stats.leader == .partner,
-                           gradient: AvatarColors.gradient(1))
+                    column(name: partner, look: partnerLook, side: stats.partner, leads: stats.leader == .partner)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 30)
@@ -85,9 +86,9 @@ struct DuelShareCard: View {
         .frame(width: 360, height: 640)
     }
 
-    private func column(name: String, side: DuelSide, leads: Bool, gradient: LinearGradient) -> some View {
+    private func column(name: String, look: Int, side: DuelSide, leads: Bool) -> some View {
         VStack(spacing: 8) {
-            AvatarView(name: name, gradient: gradient, size: 62)
+            BuddyView(look: look, size: 62)
                 .overlay(alignment: .top) {
                     if leads {
                         Image(systemName: "crown.fill")
@@ -326,7 +327,7 @@ struct WrapCard: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
             .padding(.top, 16)
         case .days:
             kicker(tr("Couch time"))
@@ -366,7 +367,7 @@ struct WrapCard: View {
                 .font(.system(size: 24, weight: .heavy))
             if let supplier {
                 HStack(spacing: 12) {
-                    AvatarView(name: supplier.kid.name, gradient: AvatarColors.gradient(supplier.kid.colorIndex), size: 52)
+                    BuddyView(look: supplier.kid.colorIndex, size: 52)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tr("Top supplier: %@", supplier.kid.name))
                             .font(.system(size: 17, weight: .heavy))
@@ -377,7 +378,7 @@ struct WrapCard: View {
                     Spacer(minLength: 0)
                 }
                 .padding(14)
-                .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .padding(.top, 30)
             }
         case .persona:
@@ -491,8 +492,8 @@ struct FamilyLeagueShareCard: View {
                 .padding(.top, 8)
                 .frame(maxWidth: .infinity, minHeight: Self.heights[rank - 1], alignment: .top)
                 .background(Color.white.opacity(rank == 1 ? 0.94 : 0.62),
-                            in: UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 8,
-                                                       bottomTrailingRadius: 8, topTrailingRadius: 18))
+                            in: UnevenRoundedRectangle(topLeadingRadius: 20, bottomLeadingRadius: 8,
+                                                       bottomTrailingRadius: 8, topTrailingRadius: 20))
             Text(place.name)
                 .font(.system(size: 17, weight: .heavy))
                 .lineLimit(1)

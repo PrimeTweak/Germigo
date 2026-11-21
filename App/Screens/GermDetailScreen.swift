@@ -6,7 +6,6 @@ struct GermDetailScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var showShare = false
-    @State private var showPaywall = false
     @State private var showBossShare = false
     @State private var checkedSigns: Set<Int> = []
     @State private var mythAnswer: Bool?
@@ -58,9 +57,6 @@ struct GermDetailScreen: View {
                 GermShareCard(germ: germ, count: caught, finish: finish)
             }
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
-        }
         .sheet(isPresented: $showBossShare) {
             SharePreviewSheet(title: tr("Boss card")) {
                 BossShareCard(germ: germ, survived: caught)
@@ -70,7 +66,9 @@ struct GermDetailScreen: View {
 
     private var hero: some View {
         HStack(spacing: 16) {
-            GermCardView(germ: germ, width: 104, finish: finish, count: caught)
+            LivelyCharacter(mood: .idle) {
+                GermCardView(germ: germ, width: 104, finish: finish, count: caught)
+            }
             VStack(alignment: .leading, spacing: 6) {
                 Text(germ.illness.value)
                     .font(.title.weight(.bold))
@@ -123,7 +121,7 @@ struct GermDetailScreen: View {
                         }
                     }
                 }
-                .petriCard()
+                .germigoCard()
             }
         }
     }
@@ -156,7 +154,7 @@ struct GermDetailScreen: View {
                             .padding(.horizontal, 2)
                     }
                 }
-                .petriCard(padding: 12)
+                .germigoCard(padding: 12)
             }
         }
     }
@@ -172,7 +170,7 @@ struct GermDetailScreen: View {
         }
         .padding(8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(palette.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(palette.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     /// Exposure, first symptoms and length, from the timings in the notes.
@@ -207,7 +205,7 @@ struct GermDetailScreen: View {
                 .font(.caption)
                 .foregroundStyle(palette.inkSecondary)
             }
-            .petriCard()
+            .germigoCard()
         }
     }
 
@@ -262,7 +260,7 @@ struct GermDetailScreen: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
             }
         }
     }
@@ -291,7 +289,7 @@ struct GermDetailScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .petriCard(padding: 0)
+            .germigoCard(padding: 0)
         }
     }
 
@@ -319,7 +317,7 @@ struct GermDetailScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .petriCard(padding: 0)
+            .germigoCard(padding: 0)
         }
     }
 
@@ -403,7 +401,7 @@ struct GermDetailScreen: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.12),
-                    in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
     }
 
     /// The germ as a boss: a joke health bar, the fight in phases, and the weakness from its notes.
@@ -429,15 +427,12 @@ struct GermDetailScreen: View {
                 bossRow(symbol: "gift.fill", label: tr("Loot"),
                         text: tr("+%lld Sick Points", germ.rarity.basePoints))
                 if caught > 0 {
-                    Button {
+                    ShareCapsule(title: tr("Share the boss card")) {
                         showBossShare = true
-                    } label: {
-                        Label(tr("Share the boss card"), systemImage: "square.and.arrow.up")
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
                 }
             }
-            .petriCard()
+            .germigoCard()
         }
     }
 
@@ -514,7 +509,7 @@ struct GermDetailScreen: View {
                     }
                 }
             }
-            .petriCard()
+            .germigoCard()
         }
     }
 
@@ -530,32 +525,15 @@ struct GermDetailScreen: View {
         if !germ.deepDive.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(title: tr("Deep dive"))
-                if model.deepDiveUnlocked(for: germ) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(Array(germ.deepDive.enumerated()), id: \.offset) { item in
-                            Text(item.element.value)
-                                .font(.callout)
-                                .foregroundStyle(palette.ink)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Array(germ.deepDive.enumerated()), id: \.offset) { item in
+                        Text(item.element.value)
+                            .font(.callout)
+                            .foregroundStyle(palette.ink)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .petriCard()
-                } else {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 12) {
-                            IconTile(symbol: "lock.fill", size: 36)
-                            Text(tr("The fun science unlocks when you catch this germ, or right away with the Season Pass."))
-                                .font(.subheadline)
-                                .foregroundStyle(palette.inkSecondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Button(tr("See the Season Pass")) {
-                            showPaywall = true
-                        }
-                        .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
-                    }
-                    .petriCard()
                 }
+                .germigoCard()
             }
         }
     }
@@ -590,7 +568,7 @@ struct GermDetailScreen: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
             }
         }
     }
@@ -635,7 +613,7 @@ struct SourceList: View {
             }
         }
         .padding(.horizontal, 16)
-        .petriCard(padding: 0)
+        .germigoCard(padding: 0)
     }
 }
 

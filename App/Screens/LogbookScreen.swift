@@ -13,31 +13,54 @@ struct LogbookScreen: View {
     }
 
     private var mine: some View {
-        List {
-            Group {
+        let shown = logs.filter { model.isShown($0.startedAt, ongoing: $0.isActive) }
+        return ScrollView {
+            LazyVStack(spacing: 8) {
                 if logs.isEmpty {
                     Text(tr("No germs logged yet. It won't last."))
+                        .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .germigoCard()
                 }
-                ForEach(logs) { log in
-                    Button {
-                        editing = log
-                    } label: {
-                        row(log)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button {
-                            pendingDelete = log
-                        } label: {
-                            Label(tr("Delete"), systemImage: "trash")
-                        }
-                        .tint(palette.ink)
-                    }
+                ForEach(Array(shown.enumerated()), id: \.element.id) { item in
+                    card(item.element)
+                        .cascadeIn(min(item.offset, 8))
+                }
+                if shown.count < logs.count {
+                    LockedHistoryRow(count: logs.count - shown.count)
                 }
             }
-            .listRowBackground(palette.surface)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 28)
         }
-        .scrollContentBackground(.hidden)
+    }
+
+    private func card(_ log: SickLog) -> some View {
+        HStack(spacing: 4) {
+            Button {
+                editing = log
+            } label: {
+                row(log)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            Menu {
+                Button(role: .destructive) {
+                    pendingDelete = log
+                } label: {
+                    Label(tr("Delete"), systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.body.weight(.bold))
+                    .foregroundStyle(palette.inkSecondary)
+                    .frame(width: 40, height: 40)
+                    .contentShape(Rectangle())
+            }
+            .accessibilityLabel(tr("More"))
+        }
+        .germigoCard(radius: 24, padding: 12)
     }
 
     var body: some View {
@@ -89,7 +112,9 @@ struct LogbookScreen: View {
         let germ = model.catalog.germ(log.germID)
         return HStack(spacing: 12) {
             if let germ {
-                GermImage(germ: germ, size: 38)
+                GermImage(germ: germ, size: 34)
+                    .frame(width: 44, height: 44)
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(germ?.illness.value ?? log.germID)
@@ -158,7 +183,7 @@ private struct LogEditSheet: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    if let partner = model.data.partnerName {
+                    if model.hasPass, let partner = model.data.partnerName {
                         Picker(tr("Who was sick?"), selection: $draft.sufferer) {
                             Text(tr("Me")).tag(Sufferer.me)
                             Text(verbatim: partner).tag(Sufferer.partner)
@@ -174,19 +199,24 @@ private struct LogEditSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Cancel")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Cancel"))
                     .tint(palette.ink)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("Save")) {
+                    Button {
                         var updated = draft
                         updated.endedAt = recovered || !canStayOpen ? max(endDate, draft.startedAt) : nil
                         model.updateLog(updated)
                         dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
-                    .fontWeight(.semibold)
+                    .accessibilityLabel(tr("Save"))
                     .tint(palette.ink)
                 }
             }
@@ -212,15 +242,20 @@ private struct KidsGermsView: View {
             } label: {
                 Label(tr("Add a kid's germ"), systemImage: "plus")
             }
-            .buttonStyle(PillButtonStyle(kind: .ink, height: 50))
+            .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
             if illnesses.isEmpty {
-                Text(tr("When a kid gets sick, add it here. Petri starts your incubation countdown and remembers who brought what home."))
+                Text(tr("When a kid gets sick, add it here. Germigo starts your incubation countdown and remembers who brought what home."))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
             }
-            ForEach(illnesses) { illness in
-                row(illness)
+            let shown = illnesses.filter { model.isShown($0.startedAt, ongoing: DayEngine.isGoingOn($0, catalog: model.catalog, now: Date())) }
+            ForEach(Array(shown.enumerated()), id: \.element.id) { item in
+                row(item.element)
+                    .cascadeIn(min(item.offset, 8))
+            }
+            if shown.count < illnesses.count {
+                LockedHistoryRow(count: illnesses.count - shown.count)
             }
         }
         .sheet(isPresented: $showSheet) {
@@ -284,7 +319,7 @@ private struct KidsGermsView: View {
                 }
                 .accessibilityLabel(tr("More"))
             }
-            .petriCard(radius: 22, padding: 12)
+            .germigoCard(radius: 24, padding: 12)
         }
     }
 

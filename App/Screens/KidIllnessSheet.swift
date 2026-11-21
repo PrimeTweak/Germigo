@@ -11,9 +11,12 @@ struct KidIllnessSheet: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Cancel")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Cancel"))
                 }
             }
         }
@@ -38,6 +41,7 @@ struct KidIllnessForm: View {
     @State private var saved = false
     @State private var added: KidIllness?
     @State private var didPrefill = false
+    @State private var showPaywall = false
 
     init(seed: KidFormSeed, onDone: @escaping () -> Void, onAdded: @escaping (KidIllness) -> Void = { _ in }) {
         self.seed = seed
@@ -59,7 +63,7 @@ struct KidIllnessForm: View {
                         .textInputAutocapitalization(.words)
                         .padding(.horizontal, 16)
                         .frame(height: 54)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                 } else {
                     kidRow
                 }
@@ -78,12 +82,12 @@ struct KidIllnessForm: View {
                             .frame(minHeight: 54)
                     }
                 }
-                .tint(.green)
+                .tint(palette.accent)
                 .foregroundStyle(palette.ink)
                 .padding(.horizontal, 16)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
                 Text(hasWindow
-                     ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Petri also puts the countdown on the Lock Screen.")
+                     ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Germigo also puts the countdown on the Lock Screen.")
                      : tr("No countdown for this one. The case file explains what to watch for."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
@@ -102,14 +106,19 @@ struct KidIllnessForm: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(tr("Add")) {
+                Button {
                     save()
+                } label: {
+                    Image(systemName: "checkmark")
                 }
-                .fontWeight(.semibold)
+                .accessibilityLabel(tr("Add"))
                 .disabled(!canSave)
             }
         }
         .onAppear(perform: prefill)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
     }
 
     private var kidRow: some View {
@@ -117,9 +126,14 @@ struct KidIllnessForm: View {
             HStack(spacing: 16) {
                 ForEach(model.data.kids) { kid in
                     let isOn = kidID == kid.id
+                    let open = model.isKidOpen(kid.id)
                     Button {
                         Haptics.tap()
-                        kidID = kid.id
+                        if open {
+                            kidID = kid.id
+                        } else {
+                            showPaywall = true
+                        }
                     } label: {
                         VStack(spacing: 6) {
                             BuddyView(look: kid.colorIndex, sick: true, size: 44)
@@ -127,6 +141,9 @@ struct KidIllnessForm: View {
                                 .background(isOn ? Buddy.tint(kid.colorIndex).opacity(0.4) : palette.surface, in: Circle())
                                 .overlay {
                                     Circle().strokeBorder(isOn ? palette.ink : Color.clear, lineWidth: 2.5)
+                                }
+                                .overlay(alignment: .topTrailing) {
+                                    if !open { PassLock().scaleEffect(0.8).offset(x: 4, y: -4) }
                                 }
                             Text(kid.name)
                                 .font(.caption.weight(.semibold))

@@ -80,44 +80,76 @@ struct GermPicker: View {
 private struct AllGermsList: View {
     @Binding var selection: String?
     @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        let germs = model.catalog.germs.sorted { $0.illness.value < $1.illness.value }
         NavigationStack {
-            List(model.catalog.germs.sorted { $0.illness.value < $1.illness.value }) { germ in
-                Button {
-                    selection = germ.id
-                    dismiss()
-                } label: {
-                    HStack(spacing: 12) {
-                        GermImage(germ: germ, size: 36, silhouette: model.count(of: germ.id) == 0)
-                            .foregroundStyle(germ.deepTint)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(germ.illness.value)
-                                .font(.body)
-                            Text(germ.scientific.value)
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        if selection == germ.id {
-                            Image(systemName: "checkmark")
-                                .font(.body.weight(.semibold))
-                        }
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    ForEach(Array(germs.enumerated()), id: \.element.id) { item in
+                        row(item.element)
+                            .cascadeIn(min(item.offset, 8))
                     }
                 }
-                .foregroundStyle(.primary)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
             }
+            .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("All germs"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Close")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Close"))
                 }
             }
         }
+    }
+
+    private func row(_ germ: Germ) -> some View {
+        let isOn = selection == germ.id
+        return Button {
+            Haptics.tap()
+            selection = germ.id
+            dismiss()
+        } label: {
+            HStack(spacing: 12) {
+                GermImage(germ: germ, size: 40, silhouette: model.count(of: germ.id) == 0)
+                    .foregroundStyle(germ.deepTint)
+                    .frame(width: 52, height: 52)
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(germ.illness.value)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(germ.scientific.value)
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .multilineTextAlignment(.leading)
+                Spacer(minLength: 8)
+                if isOn {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(palette.accent)
+                }
+            }
+            .padding(10)
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }
 
@@ -261,9 +293,9 @@ struct LogSheet: View {
             .padding(.horizontal, 12)
             .frame(height: 70)
             .background(germ.lightTint.opacity(palette.isDark ? 0.18 : 1),
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .strokeBorder(active ? germ.deepTint : Color.clear, lineWidth: 2)
             }
         }
@@ -349,7 +381,7 @@ struct LogSheet: View {
         }
         .frame(height: 76)
         .padding(.horizontal, 10)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
         .animation(.snappy(duration: 0.2), value: severity)
     }
 
@@ -370,7 +402,7 @@ struct LogSheet: View {
                 }
                 .padding(.bottom, 10)
             }
-            if let partner = model.data.partnerName {
+            if model.hasPass, let partner = model.data.partnerName {
                 Divider()
                 HStack(spacing: 12) {
                     IconTile(symbol: "person.2.fill")
@@ -401,10 +433,10 @@ struct LogSheet: View {
                 .frame(minHeight: 60)
             }
         }
-        .tint(.green)
+        .tint(palette.accent)
         .foregroundStyle(palette.ink)
         .padding(.horizontal, 16)
-        .petriCard(padding: 0)
+        .germigoCard(padding: 0)
     }
 
     private var logButton: some View {
@@ -422,7 +454,7 @@ struct LogSheet: View {
                 }
             }
         }
-        .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
+        .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
         .disabled(germID == nil)
         .padding(.horizontal, 20)
         .padding(.top, 10)
@@ -433,7 +465,7 @@ struct LogSheet: View {
     private func prefill() {
         guard !didPrefill else { return }
         didPrefill = true
-        sufferer = model.data.partnerName == nil ? .me : request.sufferer
+        sufferer = model.hasPass && model.data.partnerName != nil ? request.sufferer : .me
         if let picked = request.germID {
             germID = picked
             if let illness = suggestion, illness.germID == picked {

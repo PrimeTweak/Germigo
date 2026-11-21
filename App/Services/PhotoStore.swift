@@ -10,7 +10,7 @@ enum PhotoStore {
 
     private static var directory: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Petri/Photos", isDirectory: true)
+            .appendingPathComponent("Germigo/Photos", isDirectory: true)
     }
 
     static func url(for id: UUID) -> URL {

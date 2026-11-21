@@ -33,12 +33,12 @@ struct CrewScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(palette.background.ignoresSafeArea())
+            .background(CharacterWash(tint: TabWash.crew))
             .navigationTitle(tr("Crew"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if model.hasPass, crew.isMember, let state = crew.state {
-                        ShareLink(item: tr("Join my Petri crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
+                        ShareLink(item: tr("Join my Germigo crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
                             Image(systemName: "person.badge.plus")
                         }
                         .accessibilityLabel(tr("Invite"))
@@ -144,10 +144,10 @@ private struct CrewTeaser: View {
                     Divider()
                     row("hand.thumbsup.fill", tr("Soup, tissues, tea"), tr("Send a little support when someone goes down."))
                     Divider()
-                    row("trophy.fill", tr("Most Valuable Patient"), tr("A leaderboard nobody wants to win."))
+                    row("trophy.fill", tr("Most valuable patient"), tr("A leaderboard nobody wants to win."))
                 }
                 .padding(.horizontal, 16)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
                 Button(tr("See the Season Pass")) {
                     showPaywall = true
                 }
@@ -156,7 +156,7 @@ private struct CrewTeaser: View {
                     Button(tr("Leave crew and delete my data")) {
                         confirmLeave = true
                     }
-                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
                     .disabled(crew.isLoading)
                     if let message = crew.errorMessage {
                         Text(message)
@@ -251,7 +251,7 @@ private struct CrewJoinView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
                 if mode == .create {
                     emblemPicker
                 }
@@ -265,10 +265,10 @@ private struct CrewJoinView: View {
                             .foregroundStyle(palette.inkSecondary)
                     }
                 }
-                .tint(.green)
+                .tint(palette.accent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .petriCard(padding: 0)
+                .germigoCard(padding: 0)
                 Button(tr("Read the Terms of Use")) {
                     showRules = true
                 }
@@ -453,7 +453,7 @@ private struct CrewHome: View {
                     .frame(width: 60, height: 60)
                     .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
                                                startPoint: .top, endPoint: .bottom),
-                                in: RoundedRectangle(cornerRadius: 19, style: .continuous))
+                                in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(state.crew.name)
@@ -498,7 +498,7 @@ private struct CrewHome: View {
             Text(tr("Quiet week. Suspicious."))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
-                .petriCard()
+                .germigoCard()
         } else {
             ForEach(crew.visibleFeed.prefix(20)) { event in
                 let isMine = event.memberID == state.me.id
@@ -525,7 +525,7 @@ private struct CrewHome: View {
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
         }
-        .petriCard(radius: 26, padding: 16)
+        .germigoCard(radius: 28, padding: 16)
     }
 
     @ViewBuilder
@@ -533,7 +533,7 @@ private struct CrewHome: View {
         let board = Array(crew.leaderboard.prefix(5))
         if !board.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                SectionHeader(title: tr("Most Valuable Patient"), trailing: tr("Season"))
+                SectionHeader(title: tr("Most valuable patient"), trailing: tr("Season"))
                 Text(tr("A leaderboard nobody wants to win."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
@@ -545,7 +545,7 @@ private struct CrewHome: View {
                 })
                 .padding(.top, 14)
             }
-            .petriCard(radius: 26, padding: 16)
+            .germigoCard(radius: 28, padding: 16)
         }
     }
 
@@ -575,7 +575,7 @@ private struct CrewHome: View {
                 }
             }
             .padding(.horizontal, 16)
-            .petriCard(padding: 0)
+            .germigoCard(padding: 0)
         }
     }
 }
@@ -691,7 +691,7 @@ private struct FeedRow: View {
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
-                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                         .rotationEffect(.degrees(8))
                         .offset(x: 7, y: -7)
                 }
@@ -835,14 +835,17 @@ private struct CrewSettingsSheet: View {
                     Text(tr("Removes your name, your reactions and the germs you shared from the server. Your journal stays on this phone."))
                 }
             }
-            .tint(.green)
+            .tint(palette.accent)
             .navigationTitle(tr("Crew settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(tr("Done")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
                     }
+                    .accessibilityLabel(tr("Done"))
                     .tint(palette.ink)
                 }
             }
@@ -874,7 +877,7 @@ private struct RadarRow: View {
             HStack(spacing: 12) {
                 GermImage(germ: germ, size: 42)
                     .frame(width: 54, height: 54)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(germ.name)

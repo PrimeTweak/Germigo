@@ -96,7 +96,7 @@ struct OnboardingFlow: View {
                 .font(.system(.largeTitle).weight(.bold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.center)
-                Text(tr("In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Petri turns each one into a card, points and a good laugh."))
+                Text(tr("In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Germigo turns each one into a card, points and a good laugh."))
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
@@ -162,8 +162,8 @@ struct OnboardingFlow: View {
                         .frame(minHeight: 54)
                         .foregroundStyle(palette.ink)
                         .padding(.horizontal, 16)
-                        .petriCard(padding: 0)
-                    Text(tr("Only a first name, and it never leaves this phone. More kids? Add them later in Settings."))
+                        .germigoCard(padding: 0)
+                    Text(tr("Only a first name, and it never leaves this phone. More kids? Add them later in Family."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
                         .multilineTextAlignment(.center)
@@ -287,7 +287,7 @@ private struct SplashView: View {
             await play()
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(tr("Petri. Daycare germs, collected."))
+        .accessibilityLabel(tr("Germigo. Daycare germs, collected."))
     }
 
     private func play() async {
@@ -324,25 +324,26 @@ private struct SplashView: View {
     }
 }
 
-/// The "petri" wordmark, with a germ as the dot of the i.
+/// The "germigo" wordmark, with a germ as the dot of the i.
 struct Wordmark: View {
     let size: CGFloat
     @Environment(\.palette) private var palette
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 0) {
-            Text(verbatim: "petr")
+            Text(verbatim: "germ")
             Text(verbatim: "ı")
                 .overlay(alignment: .top) {
                     dot
                         .offset(y: size * 0.1)
                 }
+            Text(verbatim: "go")
         }
         .font(.system(size: size, weight: .bold))
         .kerning(-size * 0.03)
         .foregroundStyle(palette.ink)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: "Petri"))
+        .accessibilityLabel(Text(verbatim: "Germigo"))
     }
 
     private var dot: some View {

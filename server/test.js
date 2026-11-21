@@ -12,7 +12,7 @@ const legal = require('./legal.json');
 const DAY = 24 * 3600 * 1000;
 
 async function main() {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-test-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-test-'));
   let now = Date.UTC(2026, 10, 17, 15, 0, 0);
   const options = {
     dataDir, adminToken: 'admin-secret', supportEmail: 'help@example.org', publisherName: 'Test Publisher',
@@ -178,7 +178,7 @@ async function main() {
   assert.equal(state.crew.families, 2);
   assert.deepEqual(state.feed, []);
   assert.deepEqual(state.radar, []);
-  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'petri.json'), 'utf8'));
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8'));
   assert.equal(stored.members.some((member) => member.id === marieID), false);
   assert.equal(stored.events.some((event) => event.memberID === marieID), false);
   assert.equal(JSON.stringify(stored).includes(alex), false);
@@ -191,7 +191,7 @@ async function main() {
   assert.notEqual(rotated, code);
   assert.equal((await call('POST', '/v1/crews/join', { body: { code, displayName: 'Jonathan' } })).data.error, 'invalid_code');
   assert.equal((await call('DELETE', '/v1/crew/me', { token: alex })).status, 204);
-  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'petri.json'), 'utf8')).crews.length, 0);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8')).crews.length, 0);
 
   // Old events expire and the radar window is seven days
   now += 61000;
@@ -209,7 +209,7 @@ async function main() {
   assert.equal((await call('GET', '/v1/crew', { token: pat })).data.feed.length, 0);
   now += 400 * DAY;
   await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'rhino', named: false } });
-  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'petri.json'), 'utf8')).events.length, 1);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8')).events.length, 1);
 
   // A member who has not connected for that long is removed with the old events
   assert.equal((await call('GET', '/v1/crew', { token: second.token })).status, 401);
@@ -271,8 +271,8 @@ async function main() {
   await new Promise((resolve) => server.close(resolve));
 
   // Behind one trusted proxy, the address the proxy appended decides, not the client's own claim
-  const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'petri-proxy-')), trustProxyHops: 1 });
-  const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'petri-store-')),
+  const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-proxy-')), trustProxyHops: 1 });
+  const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-store-')),
     appStoreURL: 'https://apps.apple.com/app/id000000000' });
   await new Promise((resolve) => listed.listen(0, resolve));
   const listedPage = await (await fetch(`http://127.0.0.1:${listed.address().port}/get`)).text();
@@ -296,13 +296,13 @@ async function main() {
   await new Promise((resolve) => proxied.close(resolve));
 
   // Small changes are grouped into one write; membership changes are written at once
-  const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'petri-slow-'));
+  const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-slow-'));
   const slow = createApp({ ...options, dataDir: slowDir, writeDelay: 60000 });
   await new Promise((resolve) => slow.listen(0, resolve));
   base = `http://127.0.0.1:${slow.address().port}`;
   now += DAY;
   const solo = (await call('POST', '/v1/crews', { body: { name: 'Fireflies', displayName: 'Lou', emblem: 1 } })).data;
-  const slowFile = path.join(slowDir, 'petri.json');
+  const slowFile = path.join(slowDir, 'germigo.json');
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).members.length, 1);
   await call('POST', '/v1/crew/events', { token: solo.token, body: { germID: 'flu', named: true } });
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 0);

@@ -1,8 +1,8 @@
 {
-  "name": "petri-crew-server",
+  "name": "germigo-crew-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Crew server and legal pages for the Petri app. No dependencies.",
+  "description": "Crew server and legal pages for the Germigo app. No dependencies.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

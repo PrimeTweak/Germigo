@@ -243,7 +243,7 @@ private struct StageActions: View {
             .padding(.horizontal, 18)
             .frame(height: 44)
             .background(palette.isDark ? palette.surface : palette.background, in: Capsule())
-            .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 8, x: 0, y: 3)
+            .liftShadow()
     }
 }
 
@@ -573,17 +573,26 @@ private struct WeekStrip: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var shownWeek: Date?
+    @State private var showPaywall = false
 
     var body: some View {
         let now = Date()
         let first = DayEngine.firstDay(data: model.data)
-        let weeks = Self.weekStarts(from: first, to: now)
+        let all = Self.weekStarts(from: first, to: now)
+        let weeks = model.hasPass ? all : Array(all.suffix(2))
+        let lockedWeek = model.hasPass || weeks.count < 2 ? nil : weeks.first
         VStack(spacing: 4) {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(weeks, id: \.self) { start in
-                        week(start, first: first, now: now)
-                            .containerRelativeFrame(.horizontal)
+                        Group {
+                            if start == lockedWeek {
+                                locked
+                            } else {
+                                week(start, first: first, now: now)
+                            }
+                        }
+                        .containerRelativeFrame(.horizontal)
                     }
                 }
                 .scrollTargetLayout()
@@ -596,6 +605,32 @@ private struct WeekStrip: View {
             caption(current: weeks.last)
                 .frame(height: 20)
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
+    }
+
+    /// The week before this one, on a free journal: a door to the Season Pass.
+    private var locked: some View {
+        Button {
+            Haptics.tap()
+            showPaywall = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "lock.fill")
+                    .symbolEffect(.wiggle, value: shownWeek)
+                Text(tr("Past weeks come with the Season Pass"))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.accent)
+            .padding(.horizontal, 16)
+            .frame(height: 44)
+            .background(palette.accent.opacity(0.12), in: Capsule())
+        }
+        .buttonStyle(PressableStyle())
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// The start of every week from the first day to now, oldest first, two years at most.
@@ -778,13 +813,13 @@ private struct SickKitSheet: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .petriCard(padding: 0)
+                    .germigoCard(padding: 0)
                     NavigationLink {
                         GermDetailScreen(germ: germ)
                     } label: {
                         ValueRow(title: tr("Case file and when to call"))
                             .padding(.horizontal, 16)
-                            .petriCard(padding: 0)
+                            .germigoCard(padding: 0)
                     }
                     .buttonStyle(.plain)
                     Button {

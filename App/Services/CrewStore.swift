@@ -82,7 +82,7 @@ final class CrewStore {
         sharesName = UserDefaults.standard.bool(forKey: Keys.sharesName)
         blockedIDs = Set(UserDefaults.standard.stringArray(forKey: Keys.blocked) ?? [])
         state = stored == nil ? nil : Self.cachedState()
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if AppConfig.serverURL == nil {
             isMember = true
             state = Self.demoState(crewName: "The Ladybugs", emblem: 0, displayName: "You")
@@ -94,7 +94,7 @@ final class CrewStore {
 
     /// True in a test build without a server: the crew is a sample that never leaves the phone.
     var isDemo: Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         return !isConfigured
         #else
         return false
@@ -171,7 +171,7 @@ final class CrewStore {
     }
 
     func create(name: String, displayName: String, emblem: Int) async -> Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             isMember = true
             state = Self.demoState(crewName: name, emblem: emblem, displayName: displayName)
@@ -186,7 +186,7 @@ final class CrewStore {
     }
 
     func join(code: String, displayName: String) async -> Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             isMember = true
             state = Self.demoState(crewName: "The Ladybugs", emblem: 0, displayName: displayName)
@@ -214,7 +214,7 @@ final class CrewStore {
     /// The share is queued first, so it survives a lost connection.
     func reportGerm(_ germID: String, logID: UUID) async {
         if sharesName { sharedLogIDs.append(logID.uuidString) }
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             demoReport(germID)
             return
@@ -231,7 +231,7 @@ final class CrewStore {
     func reportWin(_ germID: String, logID: UUID) async {
         guard sharesName, sharedLogIDs.contains(logID.uuidString) else { return }
         sharedLogIDs.removeAll { $0 == logID.uuidString }
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             demoWin(germID)
             return
@@ -270,7 +270,7 @@ final class CrewStore {
     }
 
     func react(to eventID: String, kind: String) async {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             demoReact(to: eventID, kind: kind)
             return
@@ -284,7 +284,7 @@ final class CrewStore {
     }
 
     func rename(_ displayName: String) async -> Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             demoRename(displayName)
             return true
@@ -298,7 +298,7 @@ final class CrewStore {
     }
 
     func report(memberID: String, reason: String) async -> Bool {
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo { return true }
         #endif
         return await run {
@@ -326,7 +326,7 @@ final class CrewStore {
     /// Leaves the crew and deletes everything the server holds about this member.
     func leave() async -> Bool {
         guard isMember else { return true }
-        #if PETRI_SIDELOAD
+        #if GERMIGO_SIDELOAD
         if isDemo {
             forget()
             return true
@@ -349,7 +349,7 @@ final class CrewStore {
         }
     }
 
-    /// Clears what the crew feature keeps on this device; used by Delete Everything.
+    /// Clears what the crew feature keeps on this device; used by Delete everything.
     func resetLocal() {
         forget()
         unblockAll()
@@ -381,7 +381,7 @@ final class CrewStore {
     }
 }
 
-#if PETRI_SIDELOAD
+#if GERMIGO_SIDELOAD
 /// The sample crew of a test build without a server: made-up families, kept in memory only.
 extension CrewStore {
     static func demoState(crewName: String, emblem: Int, displayName: String) -> CrewState {

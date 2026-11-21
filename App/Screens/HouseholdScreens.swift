@@ -29,7 +29,7 @@ struct ProtectHomeView: View {
                     HStack(spacing: 12) {
                         GermImage(germ: germ, size: 46)
                             .padding(4)
-                            .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(germ.illness.value)
                                 .font(.headline)
@@ -40,7 +40,7 @@ struct ProtectHomeView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .petriCard()
+                    .germigoCard()
                 }
                 if !steps.isEmpty {
                     SectionHeader(title: tr("Protect the rest of the house"))
@@ -59,7 +59,7 @@ struct ProtectHomeView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .petriCard()
+                    .germigoCard()
                     VStack(alignment: .leading, spacing: 4) {
                         Text(tr("Sources"))
                             .font(.footnote.weight(.semibold))
@@ -94,7 +94,7 @@ struct ProtectHomeView: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    .petriCard()
+                    .germigoCard()
                 }
             }
             .padding(.horizontal, 20)
@@ -106,10 +106,12 @@ struct ProtectHomeView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(tr("Done")) {
+                Button {
                     onDone()
+                } label: {
+                    Image(systemName: "checkmark")
                 }
-                .fontWeight(.semibold)
+                .accessibilityLabel(tr("Done"))
             }
         }
     }
@@ -187,6 +189,8 @@ struct HealthHistory: View {
         let length: String?
         let signs: String?
         let photos: [PatientPhoto]
+        let start: Date
+        let ongoing: Bool
     }
 
     let person: Person
@@ -194,6 +198,7 @@ struct HealthHistory: View {
     let since: Date?
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    @State private var showPaywall = false
 
     private func kept(_ date: Date) -> Bool {
         since.map { date >= $0 } ?? true
@@ -225,7 +230,8 @@ struct HealthHistory: View {
                         ?? tr("Since %@", day(log.startedAt))
                     return Line(id: log.id, title: illnessName(log.germID), dates: dates,
                                 length: trCount(log.dayCount(), one: "%lld day", other: "%lld days"),
-                                signs: signs(log.symptoms), photos: photos.filter { $0.logID == log.id })
+                                signs: signs(log.symptoms), photos: photos.filter { $0.logID == log.id },
+                                start: log.startedAt, ongoing: log.endedAt == nil)
                 }
         case .kid(let id):
             let now = Date()
@@ -234,15 +240,17 @@ struct HealthHistory: View {
                 .map { illness in
                     var dates = tr("Started %@", day(illness.startedAt))
                     var length: String?
+                    let going = illness.endedAt == nil && DayEngine.isGoingOn(illness, catalog: model.catalog, now: now)
                     if let end = illness.endedAt {
                         dates = tr("%1$@ to %2$@", day(illness.startedAt), day(end))
                         let days = StreakMath.days(from: illness.startedAt, to: end) + 1
                         length = trCount(days, one: "%lld day", other: "%lld days")
-                    } else if DayEngine.isGoingOn(illness, catalog: model.catalog, now: now) {
+                    } else if going {
                         dates = tr("Since %@", day(illness.startedAt))
                     }
                     return Line(id: illness.id, title: illnessName(illness.germID), dates: dates, length: length,
-                                signs: signs(illness.symptoms), photos: photos.filter { $0.illnessID == illness.id })
+                                signs: signs(illness.symptoms), photos: photos.filter { $0.illnessID == illness.id },
+                                start: illness.startedAt, ongoing: going)
                 }
         }
     }
@@ -251,14 +259,15 @@ struct HealthHistory: View {
     private func otherPhotos(_ lines: [Line]) -> [PatientPhoto] {
         let listed = Set(lines.flatMap { $0.photos.map { $0.id } })
         return model.data.photos
-            .filter { $0.person == person && kept($0.takenAt) && !listed.contains($0.id) }
+            .filter { $0.person == person && kept($0.takenAt) && model.isShown($0.takenAt) && !listed.contains($0.id) }
             .sorted { $0.takenAt < $1.takenAt }
     }
 
     /// What the parents caught from this kid, through the logs linked to its illnesses.
     private var caughtAtHome: [String] {
         guard case .kid(let id) = person else { return [] }
-        let ids = Set(model.data.kidIllnesses.filter { $0.kidID == id && kept($0.startedAt) }.map { $0.id })
+        let ids = Set(model.data.kidIllnesses.filter { $0.kidID == id && kept($0.startedAt) && model.isShown($0.startedAt) }
+            .map { $0.id })
         return model.data.logs.filter { log in log.kidIllnessID.map { ids.contains($0) } ?? false }
             .sorted { $0.startedAt < $1.startedAt }
             .map { tr("%1$@: %2$@, %3$@", model.name(of: $0.sufferer), illnessName($0.germID), day($0.startedAt)) }
@@ -291,7 +300,7 @@ struct HealthHistory: View {
             rows.append(tr("Also caught at home:"))
             rows += caughtAtHome.map { "- " + $0 }
         }
-        rows.append(tr("Dates and germs as logged in Petri, with no diagnosis."))
+        rows.append(tr("Dates and germs as logged in Germigo, with no diagnosis."))
         return rows
     }
 
@@ -302,7 +311,8 @@ struct HealthHistory: View {
     }
 
     var body: some View {
-        let found = lines
+        let all = lines
+        let found = all.filter { model.isShown($0.start, ongoing: $0.ongoing) }
         let others = otherPhotos(found)
         let photoCount = found.reduce(others.count) { $0 + $1.photos.count }
         VStack(alignment: .leading, spacing: 14) {
@@ -347,19 +357,34 @@ struct HealthHistory: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .petriCard()
-            Text(tr("Dates and germs as you logged them. Petri adds no diagnosis."))
+            .germigoCard()
+            if all.count > found.count {
+                LockedHistoryRow(count: all.count - found.count)
+            }
+            Text(tr("Dates and germs as you logged them. Germigo adds no diagnosis."))
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.horizontal, 4)
-            ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
-                Label(tr("Share"), systemImage: "square.and.arrow.up")
+            if model.hasPass {
+                ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
+                    Label(tr("Share"), systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink))
+                ShareLink(item: summaryRows(found).joined(separator: "\n")) {
+                    Label(tr("Share as text"), systemImage: "text.alignleft")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost))
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Label(tr("Share for the doctor"), systemImage: "lock.fill")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost))
             }
-            .buttonStyle(PillButtonStyle(kind: .ink))
-            ShareLink(item: summaryRows(found).joined(separator: "\n")) {
-                Label(tr("Share as text"), systemImage: "text.alignleft")
-            }
-            .buttonStyle(PillButtonStyle(kind: .ghost))
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 

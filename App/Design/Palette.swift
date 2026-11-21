@@ -96,20 +96,3 @@ extension Germ {
     var lightTint: Color { Color(hexString: tintLight) }
     var deepTint: Color { Color(hexString: tintDeep) }
 }
-
-/// Avatar gradients for the share cards and the crew, by index.
-enum AvatarColors {
-    private static let pairs: [(UInt32, UInt32)] = [
-        (Swatch.skyLight, Swatch.blue), (Swatch.pinkLight, Swatch.pink), (Swatch.butter, Swatch.amber),
-        (Swatch.aqua, Swatch.teal), (Swatch.lavender, Swatch.violetSoft), (Swatch.peach, Swatch.peachDeep)
-    ]
-
-    static func gradient(_ index: Int) -> LinearGradient {
-        let pair = pairs[abs(index) % pairs.count]
-        return LinearGradient(colors: [Color(hex: pair.0), Color(hex: pair.1)],
-                              startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-
-    static let you = LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeLeaf)],
-                                    startPoint: .topLeading, endPoint: .bottomTrailing)
-}

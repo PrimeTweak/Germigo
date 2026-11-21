@@ -1,9 +1,9 @@
 import AppIntents
 
-/// Opens Petri on the log sheet.
+/// Opens Germigo on the log sheet.
 struct LogGermIntent: AppIntent {
     static let title: LocalizedStringResource = "Log a germ"
-    static let description = IntentDescription("Opens Petri so you can log the germ you caught.")
+    static let description = IntentDescription("Opens Germigo so you can log the germ you caught.")
     static let openAppWhenRun = true
 
     @MainActor
@@ -30,7 +30,7 @@ struct GermFreeDaysIntent: AppIntent {
     }
 }
 
-struct PetriShortcuts: AppShortcutsProvider {
+struct GermigoShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(intent: LogGermIntent(),
                     phrases: ["Log a germ in \(.applicationName)", "I'm sick in \(.applicationName)"],

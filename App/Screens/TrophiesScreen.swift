@@ -18,11 +18,13 @@ struct TrophiesScreen: View {
 
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var editingPartner = false
-    @State private var nameDraft = ""
+    @State private var showPartner = false
+    @State private var showPaywall = false
     @State private var appeared = false
     @State private var showWrapped = false
     @State private var showLeagueShare = false
+    /// The big numbers of the cards, following the text size set in iOS.
+    @ScaledMetric(relativeTo: .title) private var figureSize: CGFloat = 28
 
     var body: some View {
         NavigationStack {
@@ -37,7 +39,7 @@ struct TrophiesScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 28)
             }
-            .background(CharacterWash(tint: Buddy.tint(model.data.hostLook), reach: 0.4))
+            .background(CharacterWash(tint: TabWash.trophies))
             .navigationTitle(tr("Trophies"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -53,14 +55,11 @@ struct TrophiesScreen: View {
             .fullScreenCover(isPresented: $showWrapped) {
                 WrappedScreen(season: model.season)
             }
-            .alert(tr("Partner"), isPresented: $editingPartner) {
-                TextField(tr("Name"), text: $nameDraft)
-                Button(tr("Save")) {
-                    model.setPartnerName(nameDraft)
-                }
-                Button(tr("Cancel"), role: .cancel) {}
-            } message: {
-                Text(tr("Used for the couple duel, the nap coupon and Tag Team. Leave it empty to remove."))
+            .sheet(isPresented: $showPartner) {
+                PartnerEditSheet()
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
             }
         }
     }
@@ -148,56 +147,77 @@ struct TrophiesScreen: View {
     // MARK: - Season
 
     private var seasonCard: some View {
+        Group {
+            if model.hasPass {
+                NavigationLink {
+                    SeasonScreen()
+                } label: {
+                    seasonContent
+                }
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    seasonContent
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var seasonContent: some View {
         let season = model.season
         let now = Date()
         let stats = model.seasonStats(for: season, now: now)
         let weeks = StatsEngine.sickWeekGerms(data: model.data, season: season, now: now)
-        return NavigationLink {
-            SeasonScreen()
-        } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 6) {
-                    Text(tr("Season %lld", season.number))
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(palette.ink)
-                    Spacer(minLength: 8)
-                    Text(tr("Week %lld", season.week(for: now)))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Text(tr("Season %lld", season.number))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Spacer(minLength: 8)
+                Text(tr("Week %lld", season.week(for: now)))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                if model.hasPass {
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                         .accessibilityHidden(true)
+                } else {
+                    Image(systemName: "lock.fill")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.accent)
+                        .accessibilityLabel(tr("Needs the Season Pass"))
                 }
-                HStack(alignment: .top, spacing: 8) {
-                    figure(stats.germsCaught, tr("germs caught"))
-                    figure(stats.daysSick, tr("days sick"))
-                    figure(stats.dodged, tr("germs dodged"))
-                }
-                .padding(.top, 10)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
-                    ForEach(Array(weeks.enumerated()), id: \.offset) { item in
-                        weekCell(item.element, isNow: item.offset == weeks.count - 1)
-                            .cascadeIn(item.offset / 4)
-                    }
-                }
-                .padding(.top, 12)
-                .accessibilityHidden(true)
-                Text(seasonLine(weeks, season: season))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .multilineTextAlignment(.leading)
-                    .padding(.top, 10)
             }
-            .petriCard(radius: 26, padding: 16)
+            HStack(alignment: .top, spacing: 8) {
+                figure(stats.germsCaught, tr("germs caught"))
+                figure(stats.daysSick, tr("days sick"))
+                figure(stats.dodged, tr("germs dodged"))
+            }
+            .padding(.top, 10)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
+                ForEach(Array(weeks.enumerated()), id: \.offset) { item in
+                    weekCell(item.element, isNow: item.offset == weeks.count - 1)
+                        .cascadeIn(item.offset / 4)
+                }
+            }
+            .padding(.top, 12)
+            .accessibilityHidden(true)
+            Text(seasonLine(weeks, season: season))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .multilineTextAlignment(.leading)
+                .padding(.top, 10)
         }
-        .buttonStyle(.plain)
+        .germigoCard(radius: 28, padding: 16)
     }
 
     private func figure(_ value: Int, _ label: String) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             RollingNumber(value: value)
-                .font(.system(size: 28, weight: .bold))
+                .font(.system(size: figureSize, weight: .bold))
                 .foregroundStyle(palette.ink)
             Text(label)
                 .font(.footnote)
@@ -212,7 +232,7 @@ struct TrophiesScreen: View {
     /// A week of the season: its germ's face when one was going on, the current week outlined.
     private func weekCell(_ germID: String?, isNow: Bool) -> some View {
         let germ = germID.flatMap { model.catalog.germ($0) }
-        return RoundedRectangle(cornerRadius: 7, style: .continuous)
+        return RoundedRectangle(cornerRadius: 8, style: .continuous)
             .fill(germ.map { $0.tileTint(palette) } ?? palette.ink.opacity(0.1))
             .aspectRatio(1, contentMode: .fit)
             .overlay {
@@ -225,7 +245,7 @@ struct TrophiesScreen: View {
             }
             .overlay {
                 if isNow {
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .strokeBorder(palette.accent, lineWidth: 2)
                 }
             }
@@ -311,13 +331,13 @@ struct TrophiesScreen: View {
             .buttonStyle(.plain)
             .padding(.top, 16)
         }
-        .petriCard(radius: 26, padding: 16)
+        .germigoCard(radius: 28, padding: 16)
     }
 
     private func slot(_ item: ShelfItem, index: Int) -> some View {
         let caught = item.count > 0
         return NavigationLink(value: item.germ) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(caught ? item.germ.tileTint(palette) : palette.background)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
@@ -377,7 +397,9 @@ struct TrophiesScreen: View {
     @ViewBuilder
     private var leagueCard: some View {
         let entries = LeagueEngine.standings(data: model.data, catalog: model.catalog, season: model.season, now: Date())
-        if entries.count > 1 {
+        if !model.hasPass {
+            lockedLeague
+        } else if entries.count > 1 {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: tr("Family league"), trailing: tr("Season %lld", model.season.number))
                 Podium(places: places(entries, you: tr("You")))
@@ -388,20 +410,12 @@ struct TrophiesScreen: View {
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.top, 10)
                 }
-                Button {
+                ShareCapsule(title: tr("Share the standings")) {
                     showLeagueShare = true
-                } label: {
-                    Label(tr("Share the standings"), systemImage: "square.and.arrow.up")
-                        .font(.callout.weight(.semibold))
-                        .foregroundStyle(palette.accent)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(palette.background, in: Capsule())
                 }
-                .buttonStyle(PressableStyle())
                 .padding(.top, 14)
             }
-            .petriCard(radius: 26, padding: 16)
+            .germigoCard(radius: 28, padding: 16)
             .sheet(isPresented: $showLeagueShare) {
                 SharePreviewSheet(title: tr("Family league")) {
                     FamilyLeagueShareCard(seasonNumber: model.season.number, places: places(entries, you: model.displayName))
@@ -409,8 +423,7 @@ struct TrophiesScreen: View {
             }
         } else {
             Button {
-                nameDraft = ""
-                editingPartner = true
+                showPartner = true
             } label: {
                 HStack(spacing: 14) {
                     BuddyView(look: model.data.partnerLook, size: 46)
@@ -427,10 +440,40 @@ struct TrophiesScreen: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .petriCard(radius: 26, padding: 14)
+                .germigoCard(radius: 28, padding: 14)
             }
             .buttonStyle(.plain)
         }
+    }
+
+    /// The league without the pass: the household's characters and the way to the pass.
+    private var lockedLeague: some View {
+        let looks = [model.data.hostLook, model.data.partnerLook] + model.data.kids.prefix(1).map { $0.colorIndex }
+        return Button {
+            showPaywall = true
+        } label: {
+            HStack(spacing: 14) {
+                HStack(spacing: -14) {
+                    ForEach(Array(looks.enumerated()), id: \.offset) { item in
+                        BuddyView(look: item.element, size: 46)
+                    }
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("Family league"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Podium, titles and the couple duel"))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "lock.fill")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .germigoCard(radius: 28, padding: 14)
+        }
+        .buttonStyle(.plain)
     }
 
     private func places(_ entries: [LeagueEntry], you: String) -> [PodiumPlace] {
@@ -458,7 +501,7 @@ struct TrophiesScreen: View {
             NavigationLink {
                 SkillTreeScreen()
             } label: {
-                row("tree.fill", tr("Skill Tree"), model.displayTitle)
+                row("tree.fill", tr("Skill tree"), model.displayTitle)
             }
             .buttonStyle(.plain)
             Divider()
@@ -472,7 +515,7 @@ struct TrophiesScreen: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .petriCard(padding: 0)
+        .germigoCard(padding: 0)
     }
 
     private func row(_ symbol: String, _ title: String, _ value: String) -> some View {

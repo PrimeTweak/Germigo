@@ -25,7 +25,7 @@ struct StreakWidgetView: View {
 
     /// A tap opens the log sheet, or Today while a germ is active.
     private var link: URL? {
-        URL(string: isSick ? "petri://today" : "petri://log")
+        URL(string: isSick ? "germigo://today" : "germigo://log")
     }
 
     var body: some View {
@@ -80,7 +80,7 @@ struct StreakWidgetView: View {
                 Capsule()
                     .fill(WidgetInk.accent)
                     .frame(width: 18, height: 6)
-                Text(verbatim: "Petri")
+                Text(verbatim: "Germigo")
                     .font(.system(size: 10, weight: .bold))
                     .opacity(0.6)
             }

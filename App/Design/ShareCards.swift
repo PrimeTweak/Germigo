@@ -49,9 +49,12 @@ struct SharePreviewSheet<Card: View>: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(tr("Close")) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .accessibilityLabel(tr("Close"))
                 }
             }
             .task {
@@ -89,7 +92,7 @@ struct ShareWordmark: View {
         let link = AppConfig.shareURL
         HStack(spacing: 14) {
             VStack(alignment: link == nil ? .center : .leading, spacing: 2) {
-                Text(verbatim: "petri")
+                Text(verbatim: "germigo")
                     .font(.system(size: 30, weight: .black))
                     .kerning(-1.2)
                 Text(tr("Daycare germs, collected."))
@@ -107,7 +110,7 @@ struct ShareWordmark: View {
                     .resizable()
                     .frame(width: 56, height: 56)
                     .padding(5)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
         .foregroundStyle(color)
@@ -197,7 +200,7 @@ struct NapCouponCard: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .padding(.horizontal, 26)
                 .padding(.top, 24)
                 Spacer(minLength: 0)
@@ -275,7 +278,7 @@ struct WantedShareCard: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .padding(.horizontal, 26)
                 .padding(.top, 22)
                 Spacer(minLength: 0)
@@ -359,6 +362,6 @@ struct SeasonRecapCard: View {
         }
         .padding(.horizontal, 18)
         .frame(height: 58)
-        .background(Color.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(Color.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }

@@ -51,7 +51,7 @@ struct LegalScreen: View {
                         .foregroundStyle(palette.inkSecondary)
                 }
                 if let publisher = AppConfig.publisherName {
-                    Text(tr("Petri is published by %@.", publisher))
+                    Text(tr("Germigo is published by %@.", publisher))
                         .font(.subheadline)
                         .foregroundStyle(palette.ink)
                 }
@@ -94,9 +94,12 @@ struct LegalScreen: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button(tr("Done")) {
+                Button {
                     dismiss()
+                } label: {
+                    Image(systemName: "checkmark")
                 }
+                .accessibilityLabel(tr("Done"))
             }
         }
     }

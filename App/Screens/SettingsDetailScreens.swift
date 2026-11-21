@@ -1,153 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Home screen icons and color themes, unlocked by playing.
-struct AppIconScreen: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.palette) private var palette
-    @State private var current = AppIconOption.petri
-    @State private var showPaywall = false
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(tr("New icons unlock as the season goes."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .padding(.horizontal, 4)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 16) {
-                    ForEach(AppIconOption.allCases) { option in
-                        iconCell(option)
-                    }
-                }
-                SectionHeader(title: tr("Themes"))
-                HStack(spacing: 12) {
-                    ForEach(Theme.allCases, id: \.self) { theme in
-                        themeCell(theme)
-                    }
-                }
-                Text(tr("Night Shift unlocks with its badge. Mint unlocks after 30 days without a germ. Good luck with that."))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkTertiary)
-                    .padding(.horizontal, 4)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-        }
-        .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Icon and Theme"))
-        .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            current = AppIconManager.current
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
-        }
-    }
-
-    private func iconCell(_ option: AppIconOption) -> some View {
-        let unlocked = model.isIconUnlocked(option)
-        let inUse = current == option
-        return Button {
-            guard unlocked else {
-                if option == .soupBowl { showPaywall = true }
-                return
-            }
-            Task {
-                if await AppIconManager.apply(option) {
-                    current = option
-                    Haptics.success()
-                }
-            }
-        } label: {
-            VStack(spacing: 6) {
-                ZStack(alignment: .bottomTrailing) {
-                    Image(option.previewAsset)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 76, height: 76)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                        .saturation(unlocked ? 1 : 0.15)
-                        .opacity(unlocked ? 1 : 0.55)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .strokeBorder(inUse ? palette.ink : Color.clear, lineWidth: 3)
-                        }
-                    if !unlocked {
-                        Image(systemName: "lock.fill")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(palette.background)
-                            .frame(width: 24, height: 24)
-                            .background(palette.ink, in: Circle())
-                            .offset(x: 6, y: 6)
-                    }
-                }
-                Text(option.title)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                Text(inUse ? tr("In use") : (unlocked ? tr("Unlocked") : option.requirement))
-                    .font(.caption)
-                    .foregroundStyle(palette.inkSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                    .frame(minHeight: 30, alignment: .top)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(inUse ? .isSelected : [])
-    }
-
-    private func themeTitle(_ theme: Theme) -> String {
-        switch theme {
-        case .agar: return tr("Standard")
-        case .nightShift: return tr("Night Shift")
-        case .mint: return tr("Mint")
-        }
-    }
-
-    private func themeCell(_ theme: Theme) -> some View {
-        let unlocked = model.isThemeUnlocked(theme)
-        let inUse = model.data.settings.theme == theme
-        let sample = Palette.make(theme: theme, scheme: .light)
-        return Button {
-            guard unlocked else { return }
-            model.updateSettings { $0.theme = theme }
-        } label: {
-            VStack(spacing: 6) {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(sample.background)
-                    .frame(height: 72)
-                    .overlay {
-                        HStack(spacing: 6) {
-                            Circle().fill(sample.accent).frame(width: 18, height: 18)
-                            Circle().fill(sample.ink).frame(width: 18, height: 18)
-                        }
-                        .opacity(unlocked ? 1 : 0.3)
-                    }
-                    .overlay {
-                        if !unlocked {
-                            Image(systemName: "lock.fill")
-                                .foregroundStyle(sample.ink.opacity(0.6))
-                        }
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .strokeBorder(inUse ? palette.ink : palette.hairline, lineWidth: inUse ? 3 : 1)
-                    }
-                Text(themeTitle(theme))
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(themeTitle(theme))
-        .accessibilityValue(unlocked ? (inUse ? tr("In use") : tr("Unlocked")) : tr("Locked"))
-    }
-}
-
 /// Phone numbers worth having, picked for the phone's region.
 struct HelpLinesScreen: View {
     private struct HelpLine: Identifiable {
@@ -215,7 +68,7 @@ struct HelpLinesScreen: View {
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Help Lines"))
+        .navigationTitle(tr("Help lines"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -249,9 +102,9 @@ struct DataScreen: View {
             Item(symbol: "eye.slash", title: tr("No tracking"),
                  detail: tr("No ads, no trackers, no third-party analytics, no data sold.")),
             Item(symbol: "creditcard", title: tr("Purchases"),
-                 detail: tr("The Season Pass is handled by Apple. Petri never sees your payment details.")),
+                 detail: tr("The Season Pass and tips are handled by Apple. Germigo never sees your payment details.")),
             Item(symbol: "externaldrive", title: tr("Backups"),
-                 detail: tr("Back Up saves your whole journal and its photos as a file, where you choose. Restore a Backup reads it back on this phone or a new one. Petri never uploads it.")),
+                 detail: tr("A backup saves your whole journal and its photos as a file, where you choose. Restore a backup reads it back on this phone or a new one. Germigo never uploads it.")),
             Item(symbol: "trash", title: tr("Your call"),
                  detail: tr("Export your journal or delete everything from here at any time. Leaving a crew deletes your data from the server."))
         ]
@@ -267,7 +120,7 @@ struct DataScreen: View {
                         confirmErase = true
                     } label: {
                         Label {
-                            Text(tr("Delete Everything"))
+                            Text(tr("Delete everything"))
                                 .fontWeight(.semibold)
                                 .foregroundStyle(palette.ink)
                         } icon: {
@@ -283,7 +136,7 @@ struct DataScreen: View {
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
         .tint(palette.ink)
-        .navigationTitle(tr("Data and Privacy"))
+        .navigationTitle(tr("Data and privacy"))
         .navigationBarTitleDisplayMode(.inline)
         .confirmationDialog(tr("Delete everything?"), isPresented: $confirmErase, titleVisibility: .visible) {
             Button(tr("Delete everything"), role: .destructive) {
@@ -320,10 +173,10 @@ struct DataScreen: View {
         } message: {
             Text(backupSummary)
         }
-        .alert(tr("This file isn't a Petri backup"), isPresented: $backupUnreadable) {
+        .alert(tr("This file isn't a Germigo backup"), isPresented: $backupUnreadable) {
             Button(tr("OK"), role: .cancel) {}
         } message: {
-            Text(tr("Pick a file made with Back Up, in Settings."))
+            Text(tr("Pick a backup file made by Germigo."))
         }
     }
 
@@ -371,7 +224,7 @@ struct DataScreen: View {
     private var journalSection: some View {
         Section {
             if !model.data.logs.isEmpty {
-                ShareLink(item: journalExport, preview: SharePreview(tr("Petri journal"))) {
+                ShareLink(item: journalExport, preview: SharePreview(tr("Germigo journal"))) {
                     LabeledContent {
                         Text(verbatim: "CSV")
                     } label: {
@@ -379,22 +232,22 @@ struct DataScreen: View {
                     }
                 }
             }
-            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Petri backup"))) {
+            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germigo backup"))) {
                 LabeledContent {
                     Text(verbatim: "JSON")
                 } label: {
-                    SettingsLabel(title: tr("Back Up"))
+                    SettingsLabel(title: tr("Back up"))
                 }
             }
             Button {
                 importingBackup = true
             } label: {
-                SettingsLabel(title: tr("Restore a Backup"))
+                SettingsLabel(title: tr("Restore a backup"))
             }
         } header: {
             Text(tr("Your journal"))
         } footer: {
-            Text(tr("A backup goes where you save it. Petri never uploads it."))
+            Text(tr("A backup goes where you save it. Germigo never uploads it."))
         }
     }
 
@@ -418,7 +271,7 @@ struct DataScreen: View {
                   backup.data.logs.count, started, backup.data.photos.count)
     }
 
-    /// Opens a file picked in Files and keeps it only if it is a Petri journal.
+    /// Opens a file picked in Files and keeps it only if it is a Germigo journal.
     private func readBackup(_ url: URL) {
         let scoped = url.startAccessingSecurityScopedResource()
         defer {
@@ -442,8 +295,8 @@ struct DataScreen: View {
             }
             crew.resetLocal()
             model.eraseEverything()
-            if AppIconManager.current != .petri {
-                _ = await AppIconManager.apply(.petri)
+            if AppIconManager.current != .germigo {
+                _ = await AppIconManager.apply(.germigo)
             }
         }
     }
@@ -477,7 +330,7 @@ struct AboutScreen: View {
                             LabeledContent {
                                 RowChevron()
                             } label: {
-                                SettingsLabel(title: tr("Contact Support"))
+                                SettingsLabel(title: tr("Contact support"))
                             }
                         }
                     }
@@ -489,7 +342,7 @@ struct AboutScreen: View {
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("About Petri"))
+        .navigationTitle(tr("About Germigo"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
