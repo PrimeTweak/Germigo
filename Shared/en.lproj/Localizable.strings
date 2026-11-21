@@ -1,7 +1,6 @@
 /* Generated from the keys used in code. Keys are the English text. */
 
 "%1$@ and %2$@" = "%1$@ and %2$@";
-"%1$@ and %2$lld more" = "%1$@ and %2$lld more";
 "%1$@ beat %2$@!" = "%1$@ beat %2$@!";
 "%1$@ brought home %2$@" = "%1$@ brought home %2$@";
 "%1$@ catch +%2$lld" = "%1$@ catch +%2$lld";
@@ -9,6 +8,7 @@
 "%1$@ caught %2$@!" = "%1$@ caught %2$@!";
 "%1$@ caught %2$lld more." = "%1$@ caught %2$lld more.";
 "%1$@ is at %2$lld%%" = "%1$@ is at %2$lld%%";
+"%1$@ is your nemesis: %2$lld times already." = "%1$@ is your nemesis: %2$lld times already.";
 "%1$@ to %2$@" = "%1$@ to %2$@";
 "%1$@ to %2$@ · Week %3$lld" = "%1$@ to %2$@ · Week %3$lld";
 "%1$@ · caught %2$@" = "%1$@ · caught %2$@";
@@ -36,6 +36,7 @@
 "%@ leads" = "%@ leads";
 "%@ suffered the most." = "%@ suffered the most.";
 "%@ watch" = "%@ watch";
+"%@ · history" = "%@ · history";
 "%@ · last 6 months" = "%@ · last 6 months";
 "%@'s mystery bug is 2 days old. A new sign could name it." = "%@'s mystery bug is 2 days old. A new sign could name it.";
 "%@: how long does it usually last?" = "%@: how long does it usually last?";
@@ -43,12 +44,10 @@
 "%@: when do symptoms usually start?" = "%@: when do symptoms usually start?";
 "%lld caught" = "%lld caught";
 "%lld day" = "%lld day";
-"%lld day ago" = "%lld day ago";
 "%lld day without a germ" = "%lld day without a germ";
 "%lld day without a germ is on the line." = "%lld day without a germ is on the line.";
 "%lld day without a germ." = "%lld day without a germ.";
 "%lld days" = "%lld days";
-"%lld days ago" = "%lld days ago";
 "%lld days free" = "%lld days free";
 "%lld days without a germ" = "%lld days without a germ";
 "%lld days without a germ are on the line." = "%lld days without a germ are on the line.";
@@ -139,7 +138,9 @@
 "Best run: %lld day" = "Best run: %lld day";
 "Best run: %lld days" = "Best run: %lld days";
 "Better" = "Better";
+"Better now" = "Better now";
 "Better on this day" = "Better on this day";
+"Better today" = "Better today";
 "Block" = "Block";
 "Body aches" = "Body aches";
 "Boomerang" = "Boomerang";
@@ -264,13 +265,14 @@
 "Fact!" = "Fact!";
 "Fact." = "Fact.";
 "Family" = "Family";
-"Family and partner" = "Family and partner";
 "Family Sharing is included." = "Family Sharing is included.";
 "Feed" = "Feed";
 "Feeling better?" = "Feeling better?";
 "Fever" = "Fever";
 "Fever Veteran" = "Fever Veteran";
 "Find it in Settings." = "Find it in Settings.";
+"Fine for %lld day" = "Fine for %lld day";
+"Fine for %lld days" = "Fine for %lld days";
 "Finish the album" = "Finish the album";
 "Finished your first daily quiz" = "Finished your first daily quiz";
 "First name" = "First name";
@@ -286,6 +288,7 @@
 "germ caught" = "germ caught";
 "germ dodged" = "germ dodged";
 "Germ Magnet" = "Germ Magnet";
+"Germ of the week" = "Germ of the week";
 "germ this season" = "germ this season";
 "Germs" = "Germs";
 "Germs by month" = "Germs by month";
@@ -323,6 +326,8 @@
 "I'm sick" = "I'm sick";
 "Icon and Theme" = "Icon and Theme";
 "Immune Legend" = "Immune Legend";
+"In %lld week" = "In %lld week";
+"In %lld weeks" = "In %lld weeks";
 "In a crew" = "In a crew";
 "In an emergency, call your local emergency number." = "In an emergency, call your local emergency number.";
 "In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "In an emergency, call your local emergency number. For advice, call your doctor or your local health line.";
@@ -364,7 +369,6 @@
 "Lab streak" = "Lab streak";
 "Lab streak: %lld day" = "Lab streak: %lld day";
 "Lab streak: %lld days" = "Lab streak: %lld days";
-"Last one: %1$@, %2$@" = "Last one: %1$@, %2$@";
 "Last updated %@" = "Last updated %@";
 "Lasts" = "Lasts";
 "Lasts: %@" = "Lasts: %@";
@@ -429,6 +433,7 @@
 "Next 48 hours" = "Next 48 hours";
 "Next day" = "Next day";
 "Next up" = "Next up";
+"Next: %1$@, %2$lld of %3$lld." = "Next: %1$@, %2$lld of %3$lld.";
 "Night" = "Night";
 "Night Owl" = "Night Owl";
 "Night Shift" = "Night Shift";
@@ -463,6 +468,7 @@
 "Nothing in particular" = "Nothing in particular";
 "Nothing in the lab fits these signs yet." = "Nothing in the lab fits these signs yet.";
 "Nothing logged in the last 6 months." = "Nothing logged in the last 6 months.";
+"Nothing logged yet." = "Nothing logged yet.";
 "Nothing to report" = "Nothing to report";
 "Nothing was deleted" = "Nothing was deleted";
 "Nothing yet. Enjoy it while it lasts." = "Nothing yet. Enjoy it while it lasts.";
@@ -538,6 +544,7 @@
 "Reach rank 2 in three branches. %1$lld of %2$lld so far." = "Reach rank 2 in three branches. %1$lld of %2$lld so far.";
 "Read every lesson" = "Read every lesson";
 "Read the Terms of Use" = "Read the Terms of Use";
+"Ready" = "Ready";
 "Reason" = "Reason";
 "Record: %lld" = "Record: %lld";
 "Recovered" = "Recovered";
@@ -576,6 +583,7 @@
 "Season %lld" = "Season %lld";
 "Season %lld, wrapped" = "Season %lld, wrapped";
 "Season Pass" = "Season Pass";
+"Season story" = "Season story";
 "Season wrapped" = "Season wrapped";
 "Seasons" = "Seasons";
 "Section" = "Section";
@@ -590,6 +598,7 @@
 "Send tissues" = "Send tissues";
 "Settings" = "Settings";
 "Share" = "Share";
+"Share a file" = "Share a file";
 "Share as text" = "Share as text";
 "Share card" = "Share card";
 "Share the boss card" = "Share the boss card";
@@ -728,11 +737,10 @@
 "Tissue Tester" = "Tissue Tester";
 "Titles follow your journal: delete a log and its titles can go with it." = "Titles follow your journal: delete a log and its titles can go with it.";
 "Today" = "Today";
-"today" = "today";
-"Today's germ" = "Today's germ";
 "Together." = "Together.";
 "Too many tries. Wait a minute." = "Too many tries. Wait a minute.";
 "Top supplier: %@" = "Top supplier: %@";
+"Trophies" = "Trophies";
 "Trouble breathing" = "Trouble breathing";
 "Trouble breathing can't wait" = "Trouble breathing can't wait";
 "Trouble breathing, a seizure, or a child who won't wake up." = "Trouble breathing, a seizure, or a child who won't wake up.";

@@ -139,8 +139,47 @@ struct ProtectHomeView: View {
     }
 }
 
-/// The last six months for one person: illnesses, dates, signs and photos, to show or send before an appointment.
+/// The last six months for one person, picked at the top, to show or send before an appointment.
 struct DoctorSummaryScreen: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var person: Person?
+
+    private var people: [Person] {
+        model.data.kids.map { Person.kid($0.id) } + [.me] + (model.data.partnerName == nil ? [] : [.partner])
+    }
+
+    private var current: Person {
+        person.flatMap { people.contains($0) ? $0 : nil } ?? people.first ?? .me
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                if people.count > 1 {
+                    Picker(tr("Who"), selection: Binding(get: { current }, set: { person = $0 })) {
+                        ForEach(people, id: \.self) { member in
+                            Text(model.name(for: member)).tag(member)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()))
+                    .id(current)
+                    .transition(.opacity)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
+            .animation(.snappy, value: current)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("For the doctor"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// One person's illnesses, with dates, signs and photos, and the ways to send them to a doctor.
+struct HealthHistory: View {
     private struct Line: Identifiable {
         let id: UUID
         let title: String
@@ -150,20 +189,14 @@ struct DoctorSummaryScreen: View {
         let photos: [PatientPhoto]
     }
 
+    let person: Person
+    /// The oldest illness shown; nil shows everything.
+    let since: Date?
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var person: Person?
 
-    private var since: Date {
-        Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date()
-    }
-
-    private var people: [Person] {
-        model.data.kids.map { Person.kid($0.id) } + [.me] + (model.data.partnerName == nil ? [] : [.partner])
-    }
-
-    private var current: Person {
-        person.flatMap { people.contains($0) ? $0 : nil } ?? people.first ?? .me
+    private func kept(_ date: Date) -> Bool {
+        since.map { date >= $0 } ?? true
     }
 
     private func day(_ date: Date) -> String {
@@ -180,12 +213,12 @@ struct DoctorSummaryScreen: View {
     }
 
     private var lines: [Line] {
-        let photos = model.data.photos.filter { $0.person == current }
-        switch current {
+        let photos = model.data.photos.filter { $0.person == person }
+        switch person {
         case .me, .partner:
-            let partner = current == .partner
+            let partner = person == .partner
             return model.data.logs
-                .filter { (partner ? $0.sufferer.includesPartner : $0.sufferer.includesMe) && $0.startedAt >= since }
+                .filter { (partner ? $0.sufferer.includesPartner : $0.sufferer.includesMe) && kept($0.startedAt) }
                 .sorted { $0.startedAt > $1.startedAt }
                 .map { log in
                     let dates = log.endedAt.map { tr("%1$@ to %2$@", day(log.startedAt), day($0)) }
@@ -196,7 +229,7 @@ struct DoctorSummaryScreen: View {
                 }
         case .kid(let id):
             let now = Date()
-            return model.data.kidIllnesses.filter { $0.kidID == id && $0.startedAt >= since }
+            return model.data.kidIllnesses.filter { $0.kidID == id && kept($0.startedAt) }
                 .sorted { $0.startedAt > $1.startedAt }
                 .map { illness in
                     var dates = tr("Started %@", day(illness.startedAt))
@@ -218,21 +251,25 @@ struct DoctorSummaryScreen: View {
     private func otherPhotos(_ lines: [Line]) -> [PatientPhoto] {
         let listed = Set(lines.flatMap { $0.photos.map { $0.id } })
         return model.data.photos
-            .filter { $0.person == current && $0.takenAt >= since && !listed.contains($0.id) }
+            .filter { $0.person == person && kept($0.takenAt) && !listed.contains($0.id) }
             .sorted { $0.takenAt < $1.takenAt }
     }
 
     /// What the parents caught from this kid, through the logs linked to its illnesses.
     private var caughtAtHome: [String] {
-        guard case .kid(let id) = current else { return [] }
-        let ids = Set(model.data.kidIllnesses.filter { $0.kidID == id && $0.startedAt >= since }.map { $0.id })
+        guard case .kid(let id) = person else { return [] }
+        let ids = Set(model.data.kidIllnesses.filter { $0.kidID == id && kept($0.startedAt) }.map { $0.id })
         return model.data.logs.filter { log in log.kidIllnessID.map { ids.contains($0) } ?? false }
             .sorted { $0.startedAt < $1.startedAt }
             .map { tr("%1$@: %2$@, %3$@", model.name(of: $0.sufferer), illnessName($0.germID), day($0.startedAt)) }
     }
 
     private var heading: String {
-        tr("%@ · last 6 months", model.name(for: current))
+        since == nil ? tr("%@ · history", model.name(for: person)) : tr("%@ · last 6 months", model.name(for: person))
+    }
+
+    private var emptyLine: String {
+        since == nil ? tr("Nothing logged yet.") : tr("Nothing logged in the last 6 months.")
     }
 
     private func counts(_ lines: [Line], photos: Int) -> String {
@@ -243,7 +280,7 @@ struct DoctorSummaryScreen: View {
     private func summaryRows(_ lines: [Line]) -> [String] {
         var rows = [heading]
         if lines.isEmpty {
-            rows.append(tr("Nothing logged in the last 6 months."))
+            rows.append(emptyLine)
         }
         rows += lines.map { line in
             var row = "- " + ([line.title, line.dates] + [line.length].compactMap { $0 }).joined(separator: ", ")
@@ -268,80 +305,62 @@ struct DoctorSummaryScreen: View {
         let found = lines
         let others = otherPhotos(found)
         let photoCount = found.reduce(others.count) { $0 + $1.photos.count }
-        ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                if people.count > 1 {
-                    Picker(tr("Who"), selection: Binding(get: { current }, set: { person = $0 })) {
-                        ForEach(people, id: \.self) { member in
-                            Text(model.name(for: member)).tag(member)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(heading)
-                        .font(.headline)
-                        .foregroundStyle(palette.ink)
-                    Text(counts(found, photos: photoCount))
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(heading)
+                    .font(.headline)
+                    .foregroundStyle(palette.ink)
+                Text(counts(found, photos: photoCount))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.bottom, 6)
+                if found.isEmpty {
+                    Text(emptyLine)
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
-                        .padding(.bottom, 6)
-                    if found.isEmpty {
-                        Text(tr("Nothing logged in the last 6 months."))
-                            .font(.subheadline)
+                        .padding(.vertical, 8)
+                }
+                ForEach(Array(found.enumerated()), id: \.element.id) { item in
+                    lineView(item.element)
+                        .cascadeIn(item.offset)
+                }
+                if !others.isEmpty {
+                    Divider()
+                    Text(tr("Other photos"))
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .padding(.top, 12)
+                    PhotoRow(photos: others, side: 56)
+                        .padding(.top, 8)
+                        .padding(.bottom, 12)
+                }
+                if !caughtAtHome.isEmpty {
+                    Text(tr("Also caught at home:"))
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .padding(.top, 8)
+                    ForEach(caughtAtHome, id: \.self) { item in
+                        Text(item)
+                            .font(.footnote)
                             .foregroundStyle(palette.inkSecondary)
-                            .padding(.vertical, 8)
-                    }
-                    ForEach(Array(found.enumerated()), id: \.element.id) { item in
-                        lineView(item.element)
-                            .cascadeIn(item.offset)
-                    }
-                    if !others.isEmpty {
-                        Divider()
-                        Text(tr("Other photos"))
-                            .font(.callout.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                            .padding(.top, 12)
-                        PhotoRow(photos: others, side: 56)
-                            .padding(.top, 8)
-                            .padding(.bottom, 12)
-                    }
-                    if !caughtAtHome.isEmpty {
-                        Text(tr("Also caught at home:"))
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                            .padding(.top, 8)
-                        ForEach(caughtAtHome, id: \.self) { item in
-                            Text(item)
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                        }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .petriCard()
-                .id(current)
-                .transition(.opacity)
-                Text(tr("Dates and germs as you logged them. Petri adds no diagnosis."))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .padding(.horizontal, 4)
-                ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
-                    Label(tr("Share"), systemImage: "square.and.arrow.up")
-                }
-                .buttonStyle(PillButtonStyle(kind: .ink))
-                ShareLink(item: summaryRows(found).joined(separator: "\n")) {
-                    Label(tr("Share as text"), systemImage: "text.alignleft")
-                }
-                .buttonStyle(PillButtonStyle(kind: .ghost))
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .animation(.snappy, value: current)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .petriCard()
+            Text(tr("Dates and germs as you logged them. Petri adds no diagnosis."))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.horizontal, 4)
+            ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
+                Label(tr("Share"), systemImage: "square.and.arrow.up")
+            }
+            .buttonStyle(PillButtonStyle(kind: .ink))
+            ShareLink(item: summaryRows(found).joined(separator: "\n")) {
+                Label(tr("Share as text"), systemImage: "text.alignleft")
+            }
+            .buttonStyle(PillButtonStyle(kind: .ghost))
         }
-        .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("For the doctor"))
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func lineView(_ line: Line) -> some View {

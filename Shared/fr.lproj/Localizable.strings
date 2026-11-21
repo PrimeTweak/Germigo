@@ -1,7 +1,6 @@
 /* Generated from the keys used in code. Keys are the English text. */
 
 "%1$@ and %2$@" = "%1$@ et %2$@";
-"%1$@ and %2$lld more" = "%1$@ et %2$lld de plus";
 "%1$@ beat %2$@!" = "%1$@ a battu %2$@ !";
 "%1$@ brought home %2$@" = "%1$@ a ramené %2$@";
 "%1$@ catch +%2$lld" = "Prise %1$@ +%2$lld";
@@ -9,6 +8,7 @@
 "%1$@ caught %2$@!" = "%1$@ a attrapé %2$@ !";
 "%1$@ caught %2$lld more." = "%1$@ en a attrapé %2$lld de plus.";
 "%1$@ is at %2$lld%%" = "%1$@ est à %2$lld %%";
+"%1$@ is your nemesis: %2$lld times already." = "%1$@ est ton ennemi juré : déjà %2$lld fois.";
 "%1$@ to %2$@" = "De %1$@ à %2$@";
 "%1$@ to %2$@ · Week %3$lld" = "De %1$@ à %2$@ · Semaine %3$lld";
 "%1$@ · caught %2$@" = "%1$@ · attrapé %2$@";
@@ -36,6 +36,7 @@
 "%@ leads" = "%@ mène";
 "%@ suffered the most." = "%@ a le plus souffert.";
 "%@ watch" = "Alerte %@";
+"%@ · history" = "%@ · historique";
 "%@ · last 6 months" = "%@ · 6 derniers mois";
 "%@'s mystery bug is 2 days old. A new sign could name it." = "Le microbe mystère de %@ a 2 jours. Un nouveau signe pourrait le nommer.";
 "%@: how long does it usually last?" = "%@ : combien de temps ça dure, en général ?";
@@ -43,12 +44,10 @@
 "%@: when do symptoms usually start?" = "%@ : quand les symptômes commencent-ils, en général ?";
 "%lld caught" = "Attrapés : %lld";
 "%lld day" = "%lld jour";
-"%lld day ago" = "il y a %lld jour";
 "%lld day without a germ" = "%lld jour sans microbe";
 "%lld day without a germ is on the line." = "%lld jour sans microbe est en jeu.";
 "%lld day without a germ." = "%lld jour sans microbe.";
 "%lld days" = "%lld jours";
-"%lld days ago" = "il y a %lld jours";
 "%lld days free" = "%lld jours gratuits";
 "%lld days without a germ" = "%lld jours sans microbe";
 "%lld days without a germ are on the line." = "%lld jours sans microbe sont en jeu.";
@@ -139,7 +138,9 @@
 "Best run: %lld day" = "Meilleure série : %lld jour";
 "Best run: %lld days" = "Meilleure série : %lld jours";
 "Better" = "Guéri";
+"Better now" = "Va mieux";
 "Better on this day" = "Mieux ce jour-là";
+"Better today" = "Sur pied depuis aujourd'hui";
 "Block" = "Bloquer";
 "Body aches" = "Courbatures";
 "Boomerang" = "Boomerang";
@@ -264,13 +265,14 @@
 "Fact!" = "Fait !";
 "Fact." = "Fait.";
 "Family" = "Famille";
-"Family and partner" = "Famille et partenaire";
 "Family Sharing is included." = "Le Partage familial est inclus.";
 "Feed" = "Fil";
 "Feeling better?" = "Ça va mieux ?";
 "Fever" = "Fièvre";
 "Fever Veteran" = "Vétéran de la fièvre";
 "Find it in Settings." = "Tu la trouveras dans les réglages.";
+"Fine for %lld day" = "En forme depuis %lld jour";
+"Fine for %lld days" = "En forme depuis %lld jours";
 "Finish the album" = "Termine l'album";
 "Finished your first daily quiz" = "Premier quiz du jour terminé";
 "First name" = "Prénom";
@@ -286,6 +288,7 @@
 "germ caught" = "microbe attrapé";
 "germ dodged" = "microbe esquivé";
 "Germ Magnet" = "Aimant à microbes";
+"Germ of the week" = "Microbe de la semaine";
 "germ this season" = "microbe cette saison";
 "Germs" = "Microbes";
 "Germs by month" = "Microbes par mois";
@@ -323,6 +326,8 @@
 "I'm sick" = "Je suis malade";
 "Icon and Theme" = "Icône et thème";
 "Immune Legend" = "Légende immunitaire";
+"In %lld week" = "Dans %lld semaine";
+"In %lld weeks" = "Dans %lld semaines";
 "In a crew" = "Dans un groupe";
 "In an emergency, call your local emergency number." = "En cas d'urgence, appelle ton numéro d'urgence local.";
 "In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "En cas d'urgence, appelle ton numéro d'urgence local. Pour un conseil, appelle ton médecin ou ta ligne santé locale.";
@@ -364,7 +369,6 @@
 "Lab streak" = "Série du labo";
 "Lab streak: %lld day" = "Série du labo : %lld jour";
 "Lab streak: %lld days" = "Série du labo : %lld jours";
-"Last one: %1$@, %2$@" = "Le dernier : %1$@, %2$@";
 "Last updated %@" = "Dernière mise à jour : %@";
 "Lasts" = "Durée";
 "Lasts: %@" = "Durée : %@";
@@ -429,6 +433,7 @@
 "Next 48 hours" = "Prochaines 48 heures";
 "Next day" = "Jour suivant";
 "Next up" = "Prochain objectif";
+"Next: %1$@, %2$lld of %3$lld." = "Prochain : %1$@, %2$lld sur %3$lld.";
 "Night" = "Nuit";
 "Night Owl" = "Oiseau de nuit";
 "Night Shift" = "Quart de nuit";
@@ -463,6 +468,7 @@
 "Nothing in particular" = "Rien en particulier";
 "Nothing in the lab fits these signs yet." = "Rien au labo ne colle à ces signes pour l'instant.";
 "Nothing logged in the last 6 months." = "Rien de noté dans les 6 derniers mois.";
+"Nothing logged yet." = "Rien de noté pour l'instant.";
 "Nothing to report" = "Rien à signaler";
 "Nothing was deleted" = "Rien n'a été supprimé";
 "Nothing yet. Enjoy it while it lasts." = "Rien encore. Profites-en pendant que ça dure.";
@@ -538,6 +544,7 @@
 "Reach rank 2 in three branches. %1$lld of %2$lld so far." = "Atteins le rang 2 dans trois branches. %1$lld sur %2$lld pour l'instant.";
 "Read every lesson" = "Toutes les leçons lues";
 "Read the Terms of Use" = "Lire les conditions d'utilisation";
+"Ready" = "Prêt";
 "Reason" = "Motif";
 "Record: %lld" = "Record : %lld";
 "Recovered" = "Guéri";
@@ -576,6 +583,7 @@
 "Season %lld" = "Saison %lld";
 "Season %lld, wrapped" = "Bilan de la saison %lld";
 "Season Pass" = "Passe de saison";
+"Season story" = "Récit de la saison";
 "Season wrapped" = "Bilan de saison";
 "Seasons" = "Saisons";
 "Section" = "Section";
@@ -590,6 +598,7 @@
 "Send tissues" = "Envoyer des mouchoirs";
 "Settings" = "Réglages";
 "Share" = "Partager";
+"Share a file" = "Partager un dossier";
 "Share as text" = "Partager en texte";
 "Share card" = "Partager la carte";
 "Share the boss card" = "Partager la carte de boss";
@@ -728,11 +737,10 @@
 "Tissue Tester" = "Testeur de mouchoirs";
 "Titles follow your journal: delete a log and its titles can go with it." = "Les titres suivent ton journal : supprime une entrée et ses titres peuvent partir avec.";
 "Today" = "Aujourd'hui";
-"today" = "aujourd'hui";
-"Today's germ" = "Le microbe du jour";
 "Together." = "Ensemble.";
 "Too many tries. Wait a minute." = "Trop d'essais. Attends une minute.";
 "Top supplier: %@" = "Fournisseur numéro un : %@";
+"Trophies" = "Trophées";
 "Trouble breathing" = "Difficulté à respirer";
 "Trouble breathing can't wait" = "Une difficulté à respirer n'attend pas";
 "Trouble breathing, a seizure, or a child who won't wake up." = "Difficulté à respirer, convulsions ou enfant impossible à réveiller.";

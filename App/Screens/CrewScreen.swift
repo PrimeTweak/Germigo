@@ -49,10 +49,13 @@ struct CrewScreen: View {
                         Button {
                             showSettings = true
                         } label: {
-                            Image(systemName: "gearshape")
+                            Image(systemName: "person.2.badge.gearshape")
                         }
                         .accessibilityLabel(tr("Crew settings"))
                     }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsButton()
                 }
             }
             .sheet(isPresented: $showPaywall) {

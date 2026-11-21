@@ -241,9 +241,19 @@ enum QuizEngine {
     }
 
     /// The germ shown on a given day, in turn through the album.
-    static func germOfTheDay(_ germs: [Germ], now: Date) -> Germ? {
-        guard !germs.isEmpty else { return nil }
-        let index = Calendar.current.ordinality(of: .day, in: .era, for: now) ?? 0
-        return germs[index % germs.count]
+    /// Weeks counted from a Monday, so the count turns every Monday.
+    static func weekIndex(_ now: Date) -> Int {
+        let calendar = Calendar.current
+        let monday = calendar.date(from: DateComponents(year: 2024, month: 1, day: 1)) ?? Date(timeIntervalSince1970: 0)
+        let days = calendar.dateComponents([.day], from: monday, to: calendar.startOfDay(for: now)).day ?? 0
+        return Int((Double(days) / 7).rounded(.down))
+    }
+
+    /// The germ that opens the Lab's collection for the week; the mystery germ never does.
+    static func germOfTheWeek(_ germs: [Germ], now: Date) -> Germ? {
+        let pool = germs.filter { $0.id != GermCatalog.mysteryID }
+        guard !pool.isEmpty else { return nil }
+        let index = weekIndex(now) % pool.count
+        return pool[(index + pool.count) % pool.count]
     }
 }

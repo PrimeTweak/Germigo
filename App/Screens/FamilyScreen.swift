@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Who a card or the edit sheet of the family page is about.
+/// Who the edit sheet of the family tab is about.
 private enum FamilyMember: Identifiable, Hashable {
     case kid(Kid)
     case newKid
@@ -17,7 +17,26 @@ private enum FamilyMember: Identifiable, Hashable {
     }
 }
 
-/// The household: one card per person, built from numbers the journal already holds.
+/// What the family tab knows about one person today: sick with what, or fine since when.
+private struct PersonStatus {
+    let germ: Germ?
+    let line: String
+    /// The kid's illnesses still going on, for "Better".
+    let illnessIDs: [UUID]
+    /// The parent's germ still going on, for "Better".
+    let logID: UUID?
+
+    var sick: Bool { germ != nil }
+}
+
+extension AppModel {
+    /// Everyone in the household: the kids, the parent, then the partner when there is one.
+    var household: [Person] {
+        data.kids.map { Person.kid($0.id) } + [.me] + (data.partnerName == nil ? [] : [.partner])
+    }
+}
+
+/// The household tab: the sick ones first, each card opening that person's file.
 struct FamilyScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -25,188 +44,372 @@ struct FamilyScreen: View {
     @State private var showPaywall = false
 
     var body: some View {
-        let kids = model.data.kids
-        ScrollView {
-            VStack(spacing: 12) {
-                ForEach(Array(kids.enumerated()), id: \.element.id) { item in
-                    kidCard(item.element)
+        let household = model.household
+        let people = household.filter { status(of: $0).sick } + household.filter { !status(of: $0).sick }
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 12) {
+                    ForEach(Array(people.enumerated()), id: \.element) { item in
+                        let state = status(of: item.element)
+                        NavigationLink(value: item.element) {
+                            FamilyCard(person: item.element, status: state)
+                        }
+                        .buttonStyle(PressableStyle())
+                        .overlay(alignment: .bottomTrailing) {
+                            BetterButton(person: item.element, status: state)
+                                .padding(.trailing, 16)
+                                .padding(.bottom, 12)
+                        }
                         .cascadeIn(item.offset)
+                    }
+                    if model.data.partnerName == nil {
+                        partnerCard
+                            .cascadeIn(people.count)
+                    }
+                    records
+                        .padding(.top, 4)
+                    Text(tr("Only first names, and they never leave this phone. One kid is free; the Season Pass covers the whole household."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
                 }
-                meCard
-                    .cascadeIn(kids.count)
-                partnerCard
-                    .cascadeIn(kids.count + 1)
-                Text(tr("Only first names, and they never leave this phone. One kid is free; the Season Pass covers the whole household."))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
-                    .padding(.top, 4)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 28)
+                .animation(.snappy, value: people)
+            }
+            .background(CharacterWash(tint: Color(hex: Swatch.peach), reach: 0.4))
+            .navigationTitle(tr("Family"))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        if model.canAddKid {
+                            editing = .newKid
+                        } else {
+                            showPaywall = true
+                        }
+                    } label: {
+                        Image(systemName: model.canAddKid ? "plus" : "lock.fill")
+                    }
+                    .accessibilityLabel(tr("Add a kid"))
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsButton()
+                }
+            }
+            .navigationDestination(for: Person.self) { person in
+                PersonFileScreen(person: person)
+            }
+            .sheet(item: $editing) { member in
+                PersonEditSheet(member: member)
+            }
+            .sheet(isPresented: $showPaywall) {
+                PaywallView()
+            }
+        }
+    }
+
+    private func status(of person: Person) -> PersonStatus {
+        FamilyStatus.status(of: person, model: model)
+    }
+
+    /// The household's shared records: the doctor summary and the logbook.
+    private var records: some View {
+        let entries = model.data.logs.count + model.data.kidIllnesses.count
+        return VStack(spacing: 0) {
+            NavigationLink {
+                DoctorSummaryScreen()
+            } label: {
+                recordRow("stethoscope", tr("For the doctor"), tr("Share a file"))
+            }
+            .buttonStyle(.plain)
+            Divider()
+                .padding(.leading, 36)
+            NavigationLink {
+                LogbookScreen()
+            } label: {
+                recordRow("list.bullet", tr("Logbook"),
+                          entries == 0 ? tr("Empty") : trCount(entries, one: "%lld entry", other: "%lld entries"))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .petriCard(padding: 0)
+    }
+
+    private func recordRow(_ symbol: String, _ title: String, _ value: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(palette.inkSecondary)
+                .frame(width: 26)
+            ValueRow(title: title, value: value)
+        }
+    }
+
+    private var partnerCard: some View {
+        Button {
+            editing = .partner
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "plus")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                    .frame(width: 48, height: 48)
+                    .background(palette.surface, in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("Add your partner"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("It opens the couple duel."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(16)
+            .overlay {
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .strokeBorder(palette.ink.opacity(0.22), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+    }
+}
+
+/// How each person is doing today, from the journal.
+private enum FamilyStatus {
+    @MainActor
+    static func status(of person: Person, model: AppModel) -> PersonStatus {
+        let now = Date()
+        switch person {
+        case .kid(let id):
+            let going = model.sickKidIllnesses.filter { $0.kidID == id }.sorted { $0.startedAt > $1.startedAt }
+            if let illness = going.first, let germ = model.catalog.germ(illness.germID) {
+                return PersonStatus(germ: germ, line: tr("%1$@, day %2$lld", germ.illness.value,
+                                                         StreakMath.days(from: illness.startedAt, to: now) + 1),
+                                    illnessIDs: going.map { $0.id }, logID: nil)
+            }
+            let ends = model.data.kidIllnesses.filter { $0.kidID == id }
+                .map { DayEngine.kidEnd($0, catalog: model.catalog, now: now) }
+            guard let last = ends.max() else {
+                return PersonStatus(germ: nil, line: tr("Nothing brought home yet"), illnessIDs: [], logID: nil)
+            }
+            return PersonStatus(germ: nil, line: fine(since: last, now: now), illnessIDs: [], logID: nil)
+        case .me, .partner:
+            let mine = person == .me
+            let logs = model.data.logs.filter { mine ? $0.sufferer.includesMe : $0.sufferer.includesPartner }
+            if let log = logs.first(where: { $0.isActive }), let germ = model.catalog.germ(log.germID) {
+                return PersonStatus(germ: germ, line: tr("%1$@, day %2$lld", germ.illness.value, log.dayCount(now: now)),
+                                    illnessIDs: [], logID: log.id)
+            }
+            let last = logs.compactMap { $0.endedAt }.max() ?? model.data.installedAt
+            return PersonStatus(germ: nil, line: fine(since: last, now: now), illnessIDs: [], logID: nil)
+        }
+    }
+
+    private static func fine(since date: Date, now: Date) -> String {
+        let days = StreakMath.days(from: date, to: now)
+        return days == 0 ? tr("Better today") : trCount(days, one: "Fine for %lld day", other: "Fine for %lld days")
+    }
+}
+
+/// One person on the family tab: their character, how they are, and while sick the germ and its photos.
+private struct FamilyCard: View {
+    let person: Person
+    let status: PersonStatus
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 16) {
+                BuddyView(look: model.look(of: person), sick: status.sick, size: 60, lively: true)
+                    .id(status.sick)
+                    .transition(.scale(scale: 0.4).combined(with: .opacity))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(model.name(for: person))
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                        .lineLimit(1)
+                    Text(status.line)
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 4)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkTertiary)
+                    .accessibilityHidden(true)
+            }
+            if let germ = status.germ {
+                HStack(spacing: 8) {
+                    HStack(spacing: 6) {
+                        GermImage(germ: germ, size: 26)
+                        Text(germ.name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                    }
+                    .padding(.leading, 6)
+                    .padding(.trailing, 12)
+                    .frame(height: 34)
+                    .background(germ.tileTint(palette), in: Capsule())
+                    ForEach(recentPhotos.prefix(2)) { photo in
+                        PhotoThumb(id: photo.id, side: 42, radius: 11)
+                    }
+                    Spacer(minLength: 96)
+                }
+            }
+        }
+        .padding(.vertical, 12)
+        .padding(.leading, 12)
+        .padding(.trailing, 16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(status.germ.map { $0.tileTint(palette).opacity(0.55) } ?? palette.surface,
+                    in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+    }
+
+    /// The photos of the illness going on, newest first.
+    private var recentPhotos: [PatientPhoto] {
+        model.data.photos
+            .filter { photo in
+                photo.person == person
+                    && (photo.logID.map { $0 == status.logID } ?? false
+                        || photo.illnessID.map { status.illnessIDs.contains($0) } ?? false)
+            }
+            .sorted { $0.takenAt > $1.takenAt }
+    }
+
+}
+
+/// "Better" on a sick card, laid over it so the tap never opens the file.
+private struct BetterButton: View {
+    let person: Person
+    let status: PersonStatus
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        if !status.illnessIDs.isEmpty {
+            pill {
+                model.cheerKidBetter(status.illnessIDs, on: Date(), motion: !reduceMotion)
+            }
+        } else if status.logID != nil, person == .me {
+            pill {
+                model.askBetter = true
+            }
+        }
+    }
+
+    private func pill(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(tr("Better now"), systemImage: "sparkles")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(palette.accent)
+                .padding(.horizontal, 12)
+                .frame(height: 34)
+                .background(palette.isDark ? palette.surfaceAlt : palette.background, in: Capsule())
+                .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.08), radius: 6, x: 0, y: 2)
+        }
+        .buttonStyle(PressableStyle())
+    }
+}
+
+/// One person's file: who they are, then every illness with its signs and photos, ready for a doctor.
+private struct PersonFileScreen: View {
+    let person: Person
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
+    @State private var editing: FamilyMember?
+
+    private var member: FamilyMember? {
+        switch person {
+        case .kid(let id): return model.kid(id).map { FamilyMember.kid($0) }
+        case .me: return .me
+        case .partner: return .partner
+        }
+    }
+
+    var body: some View {
+        let status = FamilyStatus.status(of: person, model: model)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(spacing: 8) {
+                    BuddyView(look: model.look(of: person), sick: status.sick, size: 96, lively: true, pokes: true)
+                        .frame(width: 140, height: 140)
+                        .background(Buddy.tint(model.look(of: person)).opacity(palette.isDark ? 0.24 : 0.34), in: Circle())
+                    Text(status.line)
+                        .font(.callout)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 4)
+                numbers
+                HealthHistory(person: person, since: nil)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 28)
         }
-        .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Family"))
+        .background(CharacterWash(tint: Buddy.tint(model.look(of: person)), reach: 0.4))
+        .navigationTitle(model.name(for: person))
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    if model.canAddKid {
-                        editing = .newKid
-                    } else {
-                        showPaywall = true
+            if let member {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        editing = member
+                    } label: {
+                        Image(systemName: "pencil")
                     }
-                } label: {
-                    Image(systemName: model.canAddKid ? "plus" : "lock.fill")
+                    .accessibilityLabel(tr("Edit %@", model.name(for: person)))
                 }
-                .accessibilityLabel(tr("Add a kid"))
             }
         }
         .sheet(item: $editing) { member in
             PersonEditSheet(member: member)
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
+        .onChange(of: model.household) { _, people in
+            if !people.contains(person) { dismiss() }
         }
     }
 
-    private func ago(_ date: Date) -> String {
-        let days = StreakMath.days(from: date, to: Date())
-        return days == 0 ? tr("today") : trCount(days, one: "%lld day ago", other: "%lld days ago")
-    }
-
-    private func kidCard(_ kid: Kid) -> some View {
-        let illnesses = model.data.kidIllnesses.filter { $0.kidID == kid.id }
-        let open = illnesses.filter { DayEngine.isGoingOn($0, catalog: model.catalog, now: Date()) }
-            .max { $0.startedAt < $1.startedAt }
-        let last = illnesses.max { $0.startedAt < $1.startedAt }
-        let gotYou = model.data.logs.filter { $0.source == .kid(kid.id) }.count
-        let dodged = illnesses.filter { $0.outcome == .dodged }.count
-        var status = tr("Nothing brought home yet")
-        if let open, let germ = model.catalog.germ(open.germID) {
-            status = tr("%1$@, day %2$lld", germ.illness.value, StreakMath.days(from: open.startedAt, to: Date()) + 1)
-        } else if let last, let germ = model.catalog.germ(last.germID) {
-            status = tr("Last one: %1$@, %2$@", germ.illness.value, ago(last.startedAt))
-        }
-        return PersonCard(look: kid.colorIndex, sick: open != nil, name: kid.name, status: status,
-                          numbers: [(illnesses.count, tr("brought home")), (gotYou, tr("got you")), (dodged, tr("you dodged"))]) {
-            editing = .kid(kid)
-        }
-    }
-
-    private var meCard: some View {
-        let logs = model.data.logs
-        let daysSick = logs.reduce(0) { $0 + $1.dayCount() }
-        let dodged = model.data.kidIllnesses.filter { $0.outcome == .dodged }.count
-        return PersonCard(look: model.data.hostLook, sick: model.onSickLeave, name: model.displayName,
-                          status: tr("%1$@, level %2$lld", model.displayTitle, model.level.number),
-                          numbers: [(logs.count, tr("germs caught")), (daysSick, tr("days sick")), (dodged, tr("germs dodged"))]) {
-            editing = .me
-        }
-    }
-
-    @ViewBuilder
-    private var partnerCard: some View {
-        if let partner = model.data.partnerName {
+    /// Up to three numbers about this person, from the journal.
+    private var numbers: some View {
+        let values: [(Int, String)]
+        switch person {
+        case .kid(let id):
+            let illnesses = model.data.kidIllnesses.filter { $0.kidID == id }
+            values = [(illnesses.count, tr("brought home")),
+                      (model.data.logs.filter { $0.source == .kid(id) }.count, tr("got you")),
+                      (illnesses.filter { $0.outcome == .dodged }.count, tr("you dodged"))]
+        case .me:
+            let logs = model.data.logs.filter { $0.sufferer.includesMe }
+            values = [(logs.count, tr("germs caught")), (logs.reduce(0) { $0 + $1.dayCount() }, tr("days sick")),
+                      (model.data.kidIllnesses.filter { $0.outcome == .dodged }.count, tr("germs dodged"))]
+        case .partner:
             let logs = model.data.logs.filter { $0.sufferer.includesPartner }
-            let daysSick = logs.reduce(0) { $0 + $1.dayCount() }
-            PersonCard(look: model.data.partnerLook, sick: model.activeLog?.sufferer.includesPartner == true,
-                       name: partner, status: tr("Partner"),
-                       numbers: [(logs.count, tr("germs caught")), (daysSick, tr("days sick"))]) {
-                editing = .partner
-            }
-        } else {
-            Button {
-                editing = .partner
-            } label: {
-                HStack(spacing: 14) {
-                    Image(systemName: "plus")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                        .frame(width: 48, height: 48)
-                        .background(palette.surface, in: Circle())
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("Add your partner"))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                        Text(tr("It opens the couple duel."))
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(16)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 30, style: .continuous)
-                        .strokeBorder(palette.ink.opacity(0.22), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
-                }
-                .contentShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-            }
-            .buttonStyle(PressableStyle())
+            values = [(logs.count, tr("germs caught")), (logs.reduce(0) { $0 + $1.dayCount() }, tr("days sick"))]
         }
-    }
-}
-
-/// One member of the household: a character, a name, a line about them and up to three numbers.
-private struct PersonCard: View {
-    let look: Int
-    let sick: Bool
-    let name: String
-    let status: String
-    let numbers: [(value: Int, label: String)]
-    let edit: () -> Void
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 14) {
-                BuddyView(look: look, sick: sick, size: 64, lively: true, pokes: true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(name)
-                        .font(.title2.weight(.bold))
+        return HStack(alignment: .top, spacing: 8) {
+            ForEach(Array(values.enumerated()), id: \.offset) { item in
+                VStack(alignment: .leading, spacing: 0) {
+                    RollingNumber(value: item.element.0)
+                        .font(.system(size: 27, weight: .bold))
                         .foregroundStyle(palette.ink)
+                    Text(item.element.1)
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
                         .lineLimit(1)
-                    Text(status)
-                        .font(.subheadline)
-                        .foregroundStyle(palette.ink.opacity(0.78))
-                        .fixedSize(horizontal: false, vertical: true)
+                        .minimumScaleFactor(0.8)
                 }
-                Spacer(minLength: 4)
-                Button(action: edit) {
-                    Image(systemName: "pencil")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                        .frame(width: 40, height: 40)
-                        .background(palette.background.opacity(0.62), in: Circle())
-                }
-                .buttonStyle(PressableStyle())
-                .accessibilityLabel(tr("Edit %@", name))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .petriCard(radius: 22, padding: 12)
+                .accessibilityElement(children: .combine)
             }
-            Rectangle()
-                .fill(palette.ink.opacity(0.12))
-                .frame(height: 1)
-                .padding(.top, 14)
-            HStack(alignment: .top, spacing: 6) {
-                ForEach(Array(numbers.enumerated()), id: \.offset) { item in
-                    VStack(alignment: .leading, spacing: 0) {
-                        RollingNumber(value: item.element.value)
-                            .font(.system(size: 27, weight: .bold))
-                            .foregroundStyle(palette.ink)
-                        Text(item.element.label)
-                            .font(.footnote)
-                            .foregroundStyle(palette.ink.opacity(0.76))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .accessibilityElement(children: .combine)
-                }
-            }
-            .padding(.top, 12)
         }
-        .padding(16)
-        .background(Buddy.tint(look).opacity(palette.isDark ? 0.2 : 0.3),
-                    in: RoundedRectangle(cornerRadius: 30, style: .continuous))
     }
 }
 

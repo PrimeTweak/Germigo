@@ -403,9 +403,15 @@ do {
           "without a telltale sign, the clue is the first sign not ticked")
     check(Symptom.ordered(["rash", "fever", "unknown"]).map { $0.id } == ["fever", "rash"], "stored signs keep the picker's order")
 
-    let weeks = StatsEngine.sickWeeks(data: makeData(logs: [makeLog("rhino", from: day(8), to: day(10))]),
-                                      season: Season(number: 1, start: day(0), end: day(365)), now: day(20))
-    check(weeks == [false, true, false], "a germ marks the week it was going on")
+    let season = Season(number: 1, start: day(0), end: day(365))
+    let weeks = StatsEngine.sickWeekGerms(data: makeData(logs: [makeLog("rhino", from: day(8), to: day(10))]),
+                                          season: season, now: day(20))
+    check(weeks == [nil, "rhino", nil], "a germ marks the week it was going on")
+    let twice = makeData(logs: [makeLog("rhino", from: day(2), to: day(4)), makeLog("noro", from: day(9), to: day(10)),
+                                makeLog("rhino", from: day(15), to: day(16))])
+    check(StatsEngine.nemesis(data: twice, season: season) == Nemesis(germID: "rhino", count: 2), "the germ caught twice is the nemesis")
+    check(StatsEngine.nemesis(data: makeData(logs: [makeLog("noro", from: day(2), to: day(3))]), season: season) == nil,
+          "one catch makes no nemesis")
 
     let withSigns = """
     {"logs":[{"id":"7F0C1B1E-2B58-4B67-9C1B-0B1E7D0C1A11","germID":"mystery","startedAt":0,"symptoms":["fever"]}],"hostLook":3}
@@ -463,6 +469,19 @@ do {
     """
     let ends = (try? JSONDecoder().decode(AppData.self, from: Data(withEnd.utf8)))?.kidIllnesses.map { $0.endedAt }
     check(ends?.count == 2 && ends?[0] != nil && ends?[1] == nil, "a kid's end date loads, and is empty when missing")
+}
+
+// MARK: - Germ of the week
+
+do {
+    let pool = [makeGerm("a", rarity: .common), makeGerm("b", rarity: .common), makeGerm(GermCatalog.mysteryID, rarity: .common)]
+    let monday = day(4)
+    check(QuizEngine.germOfTheWeek(pool, now: monday)?.id == QuizEngine.germOfTheWeek(pool, now: day(10))?.id,
+          "the germ of the week holds from Monday to Sunday")
+    check(QuizEngine.germOfTheWeek(pool, now: monday)?.id != QuizEngine.germOfTheWeek(pool, now: day(11))?.id,
+          "a new germ comes on Monday")
+    check((0..<10).allSatisfy { QuizEngine.germOfTheWeek(pool, now: day(4 + 7 * $0))?.id != GermCatalog.mysteryID },
+          "the mystery germ is never the germ of the week")
 }
 
 // MARK: - Photos

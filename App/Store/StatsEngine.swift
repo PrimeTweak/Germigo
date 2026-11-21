@@ -32,6 +32,12 @@ struct ChainStat {
     var includesPartner: Bool { sufferer.includesPartner }
 }
 
+/// The germ that keeps coming back, and how many times it did.
+struct Nemesis: Hashable {
+    let germID: String
+    let count: Int
+}
+
 struct SeasonStats {
     let germsCaught: Int
     let daysSick: Int
@@ -43,15 +49,30 @@ struct SeasonStats {
 
 /// Aggregates the season's logs for the Season tab and the recap card.
 enum StatsEngine {
-    /// One flag per week of the season so far: true when a germ was going on during it.
-    static func sickWeeks(data: AppData, season: Season, now: Date) -> [Bool] {
+    /// One entry per week of the season so far: the first germ going on that week, or nil.
+    static func sickWeekGerms(data: AppData, season: Season, now: Date) -> [String?] {
         let calendar = Calendar.current
         let count = min(53, season.week(for: now))
+        let logs = data.logs.sorted { $0.startedAt < $1.startedAt }
         return (0..<count).map { index in
             guard let start = calendar.date(byAdding: .day, value: index * 7, to: season.start),
-                  let end = calendar.date(byAdding: .day, value: 7, to: start) else { return false }
-            return data.logs.contains { $0.startedAt < end && ($0.endedAt ?? now) >= start }
+                  let end = calendar.date(byAdding: .day, value: 7, to: start) else { return nil }
+            return logs.first { $0.startedAt < end && ($0.endedAt ?? now) >= start }?.germID
         }
+    }
+
+    /// The germ caught most often this season, once it has come back at least once.
+    static func nemesis(data: AppData, season: Season) -> Nemesis? {
+        var counts: [String: Int] = [:]
+        var last: [String: Date] = [:]
+        for log in data.logs where season.contains(log.startedAt) {
+            counts[log.germID, default: 0] += 1
+            last[log.germID] = max(last[log.germID] ?? log.startedAt, log.startedAt)
+        }
+        let best = counts.filter { $0.value >= 2 }.max { lhs, rhs in
+            lhs.value != rhs.value ? lhs.value < rhs.value : (last[lhs.key] ?? .distantPast) < (last[rhs.key] ?? .distantPast)
+        }
+        return best.map { Nemesis(germID: $0.key, count: $0.value) }
     }
 
     static func stats(data: AppData, catalog: GermCatalog, season: Season, now: Date) -> SeasonStats {

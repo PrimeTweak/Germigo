@@ -58,6 +58,9 @@ struct TodayScreen: View {
                         .accessibilityLabel(tr("Add a kid's germ"))
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsButton()
+                }
             }
             .navigationDestination(for: Germ.self) { germ in
                 GermDetailScreen(germ: germ)

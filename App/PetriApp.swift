@@ -103,13 +103,13 @@ private struct ThemedRoot: View {
 
 enum AppTab: Hashable {
     case today
+    case family
     case lab
-    case you
+    case trophies
     case crew
-    case settings
 }
 
-/// The tabs, the sick-mode accessory, and the log and reward presentations.
+/// The tabs, the sick-mode accessory, Settings, and the log and reward presentations.
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
     @State private var stagedReward: RewardResult?
@@ -120,25 +120,28 @@ struct MainTabs: View {
             TodayScreen()
                 .tabItem { Label(tr("Today"), systemImage: "house.fill") }
                 .tag(AppTab.today)
+            FamilyScreen()
+                .tabItem { Label(tr("Family"), systemImage: "figure.2.and.child.holdinghands") }
+                .tag(AppTab.family)
             LabScreen()
                 .tabItem { Label(tr("Lab"), systemImage: "flask.fill") }
                 .tag(AppTab.lab)
-            YouScreen()
-                .tabItem { Label(tr("You"), systemImage: "person.fill") }
-                .tag(AppTab.you)
+            TrophiesScreen()
+                .tabItem { Label(tr("Trophies"), systemImage: "trophy.fill") }
+                .tag(AppTab.trophies)
             if AppConfig.crewEnabled {
                 CrewScreen()
-                    .tabItem { Label(tr("Crew"), systemImage: "person.2.fill") }
+                    .tabItem { Label(tr("Crew"), systemImage: "person.3.fill") }
                     .tag(AppTab.crew)
             }
-            SettingsScreen()
-                .tabItem { Label(tr("Settings"), systemImage: "gearshape.fill") }
-                .tag(AppTab.settings)
         }
         .tabViewBottomAccessory(isEnabled: model.activeLog != nil && model.selectedTab != .today) {
             SickAccessory()
         }
         .tabBarMinimizeBehavior(.never)
+        .sheet(isPresented: $model.showSettings) {
+            SettingsScreen()
+        }
         .sheet(item: $model.logRequest, onDismiss: presentStagedReward) { request in
             LogSheet(request: request) { result in
                 stagedReward = result

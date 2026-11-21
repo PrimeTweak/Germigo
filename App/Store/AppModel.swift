@@ -67,6 +67,8 @@ final class AppModel {
     var selectedTab = AppTab.today
     var journalNotice: JournalNotice?
     var askBetter = false
+    /// Settings, opened from the gear in the corner of every tab.
+    var showSettings = false
     var pendingMilestone: MilestoneEvent?
     /// A short confirmation shown at the top of the screen.
     var toast: String?
@@ -728,6 +730,7 @@ final class AppModel {
         pendingReward = nil
         logRequest = nil
         askBetter = false
+        showSettings = false
         pendingMilestone = nil
         toast = nil
         confettiAt = nil

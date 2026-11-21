@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The learning tab: the daily quiz, the germ of the day and all the germs with their case files. The lessons sit in the toolbar.
+/// The learning tab: the daily quiz and all the germs with their case files, the germ of the week first.
+/// The lessons sit in the toolbar.
 struct LabScreen: View {
     private enum Filter: Hashable {
         case all
@@ -19,9 +20,14 @@ struct LabScreen: View {
         model.studiedGermIDs.subtracting(model.caughtGermIDs)
     }
 
+    private var weekly: Germ? {
+        QuizEngine.germOfTheWeek(model.catalog.germs, now: Date())
+    }
+
+    /// The germs the filter and the search keep; the germ of the week leads the full list.
     private var germs: [Germ] {
         let needle = query.trimmingCharacters(in: .whitespaces).lowercased()
-        return model.catalog.germs.filter { germ in
+        let kept = model.catalog.germs.filter { germ in
             switch filter {
             case .all: break
             case .caught: if !model.caughtGermIDs.contains(germ.id) { return false }
@@ -31,6 +37,8 @@ struct LabScreen: View {
             return germ.name.lowercased().contains(needle) || germ.illness.value.lowercased().contains(needle)
                 || germ.scientific.value.lowercased().contains(needle)
         }
+        guard filter == .all, needle.isEmpty, let weekly else { return kept }
+        return [weekly] + kept.filter { $0.id != weekly.id }
     }
 
     var body: some View {
@@ -38,7 +46,6 @@ struct LabScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     QuizCard(showQuiz: $showQuiz)
-                    germOfTheDay
                     SectionHeader(title: tr("All %lld", model.catalog.germs.count),
                                   trailing: tr("%lld caught", model.caughtGermIDs.count))
                         .padding(.top, 8)
@@ -59,6 +66,9 @@ struct LabScreen: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     lessonsLink
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    SettingsButton()
                 }
             }
             .navigationDestination(for: Germ.self) { germ in
@@ -90,44 +100,6 @@ struct LabScreen: View {
         }
         .accessibilityLabel(tr("Lessons"))
         .accessibilityValue(tr("%1$lld of %2$lld", open, articles.count))
-    }
-
-    @ViewBuilder
-    private var germOfTheDay: some View {
-        if let germ = QuizEngine.germOfTheDay(model.catalog.germs, now: Date()) {
-            NavigationLink(value: germ) {
-                HStack(spacing: 10) {
-                    LivelyCharacter(mood: .stalking, pokes: false) {
-                        GermImage(germ: germ, size: 96)
-                    }
-                    .shadow(color: Color.black.opacity(0.14), radius: 5, x: 0, y: 5)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("Today's germ"))
-                            .font(.footnote)
-                            .foregroundStyle(palette.ink.opacity(0.8))
-                        Text(germ.name)
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(palette.ink)
-                        Text(germ.about.map { germ.illness.value + ". " + $0.value } ?? germ.illness.value)
-                            .font(.subheadline)
-                            .foregroundStyle(palette.ink.opacity(0.8))
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                    }
-                    Spacer(minLength: 4)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.ink.opacity(0.6))
-                        .accessibilityHidden(true)
-                }
-                .padding(.vertical, 8)
-                .padding(.leading, 6)
-                .padding(.trailing, 16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-            }
-            .buttonStyle(.plain)
-        }
     }
 
     private var chips: some View {
@@ -166,10 +138,13 @@ struct LabScreen: View {
                 .padding(.horizontal, 4)
                 .padding(.vertical, 12)
         }
+        let week = QuizEngine.weekIndex(Date())
+        let weeklyID = filter == .all && query.isEmpty ? weekly?.id : nil
         LazyVGrid(columns: columns, spacing: 18) {
             ForEach(shown) { germ in
                 NavigationLink(value: germ) {
-                    GermTile(germ: germ, count: model.count(of: germ.id), studied: studiedOnly.contains(germ.id))
+                    GermTile(germ: germ, count: model.count(of: germ.id), studied: studiedOnly.contains(germ.id),
+                             week: germ.id == weeklyID ? week : nil)
                 }
                 .buttonStyle(.plain)
                 .scrollTransition { content, phase in
@@ -190,25 +165,59 @@ extension Germ {
 }
 
 /// One germ in the Lab grid: a gray shape to find, in color once studied, on its tint once caught.
+/// The germ of the week shows in color with a tag, and unmasks itself the first time the Lab opens that week.
 private struct GermTile: View {
+    private static let revealKey = "lab.revealedWeek"
+
     let germ: Germ
     let count: Int
     let studied: Bool
+    /// The week number when this is the germ of the week.
+    let week: Int?
     @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var unmasked: Bool
+
+    init(germ: Germ, count: Int, studied: Bool, week: Int?) {
+        self.germ = germ
+        self.count = count
+        self.studied = studied
+        self.week = week
+        let seen = UserDefaults.standard.object(forKey: Self.revealKey) as? Int
+        _unmasked = State(initialValue: week == nil || seen == week)
+    }
 
     private var caught: Bool { count > 0 }
-    private var known: Bool { caught || studied }
+    private var weekly: Bool { week != nil }
+    private var known: Bool { caught || studied || (weekly && unmasked) }
 
     var body: some View {
         VStack(spacing: 2) {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(caught ? germ.tileTint(palette) : palette.surface)
+                .fill(caught || (weekly && unmasked) ? germ.tileTint(palette) : palette.surface)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
                     GeometryReader { proxy in
-                        GermImage(germ: germ, size: proxy.size.width * 0.78, silhouette: !known)
-                            .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
+                        art(side: proxy.size.width)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .offset(y: weekly ? proxy.size.width * 0.07 : 0)
+                    }
+                }
+                .overlay {
+                    if weekly {
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .strokeBorder(palette.accent, lineWidth: 3)
+                    }
+                }
+                .overlay(alignment: .top) {
+                    if weekly {
+                        Label(tr("This week"), systemImage: "sparkles")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(palette.onAccent)
+                            .padding(.horizontal, 8)
+                            .frame(height: 22)
+                            .background(palette.accent, in: Capsule())
+                            .padding(.top, 8)
                     }
                 }
                 .padding(.bottom, 6)
@@ -231,7 +240,38 @@ private struct GermTile: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .combine)
-        .accessibilityValue(caught ? tr("Caught") : (studied ? tr("Studied") : tr("Not caught yet")))
+        .accessibilityValue(weekly ? tr("Germ of the week")
+                            : (caught ? tr("Caught") : (studied ? tr("Studied") : tr("Not caught yet"))))
+        .task {
+            await reveal()
+        }
+    }
+
+    @ViewBuilder
+    private func art(side: CGFloat) -> some View {
+        let image = GermImage(germ: germ, size: side * (weekly ? 0.64 : 0.78), silhouette: !known)
+            .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
+        if weekly {
+            LivelyCharacter(mood: .stalking, pokes: false) {
+                image
+            }
+            .scaleEffect(unmasked ? 1 : 0.8)
+        } else {
+            image
+        }
+    }
+
+    /// The first time this week: a short pause on the gray shape, then the germ pops out in color.
+    private func reveal() async {
+        guard let week, !unmasked else { return }
+        UserDefaults.standard.set(week, forKey: Self.revealKey)
+        if !reduceMotion {
+            try? await Task.sleep(nanoseconds: 700_000_000)
+        }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+            unmasked = true
+        }
+        Haptics.tap()
     }
 }
 

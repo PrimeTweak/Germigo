@@ -24,57 +24,27 @@ struct RowChevron: View {
     }
 }
 
-/// The first row of Settings: the household's characters, and the way to the family page.
-private struct FamilyTile: View {
+/// The gear in the top-right corner of every tab; it opens Settings.
+struct SettingsButton: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.palette) private var palette
-
-    private var title: String {
-        let names = model.data.kids.map { $0.name }
-        switch names.count {
-        case 0: return model.displayName
-        case 1: return names[0]
-        case 2: return names[0] + " & " + names[1]
-        default: return tr("%1$@ and %2$lld more", names[0], names.count - 1)
-        }
-    }
 
     var body: some View {
-        let kids = model.data.kids
-        HStack(spacing: 14) {
-            ZStack(alignment: .bottomTrailing) {
-                BuddyBadge(look: kids.first?.colorIndex ?? model.data.hostLook, size: 62)
-                if !kids.isEmpty {
-                    BuddyBadge(look: model.data.hostLook, size: 30)
-                        .background(palette.surface, in: Circle())
-                        .overlay {
-                            Circle().strokeBorder(palette.surface, lineWidth: 3)
-                        }
-                        .offset(x: 10, y: 4)
-                }
-            }
-            .padding(.trailing, 6)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                    .lineLimit(1)
-                Text(tr("Family and partner"))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-            }
+        Button {
+            model.showSettings = true
+        } label: {
+            Image(systemName: "gearshape")
         }
-        .padding(.vertical, 6)
-        .accessibilityElement(children: .combine)
+        .accessibilityLabel(tr("Settings"))
     }
 }
 
-/// The last tab: the family tile, then pass, look, notifications and the rest.
+/// Settings, opened from any tab: the pass, the look, notifications and the rest.
 struct SettingsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(PurchaseManager.self) private var purchases
     @Environment(\.palette) private var palette
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
     @State private var showPaywall = false
     @State private var showManage = false
     @State private var notificationsDenied = false
@@ -85,7 +55,6 @@ struct SettingsScreen: View {
         NavigationStack {
             List {
                 Group {
-                    familySection
                     passSection
                     lookSection
                     notificationSection
@@ -97,6 +66,16 @@ struct SettingsScreen: View {
             .background(palette.background.ignoresSafeArea())
             .tint(palette.accent)
             .navigationTitle(tr("Settings"))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
+                    .accessibilityLabel(tr("Done"))
+                }
+            }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
@@ -169,16 +148,6 @@ struct SettingsScreen: View {
         HStack(spacing: 8) {
             Text(value)
             RowChevron()
-        }
-    }
-
-    private var familySection: some View {
-        Section {
-            NavigationLink {
-                FamilyScreen()
-            } label: {
-                FamilyTile()
-            }
         }
     }
 
