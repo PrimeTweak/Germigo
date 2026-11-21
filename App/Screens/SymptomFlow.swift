@@ -396,7 +396,7 @@ private struct SymptomPicker: View {
                 proceed()
             } label: {
                 HStack(spacing: 10) {
-                    Text(tr("See the suspects"))
+                    Text(chosen.isEmpty ? tr("Tap a symptom first") : tr("See the suspects"))
                     if !chosen.isEmpty {
                         Text(verbatim: String(chosen.count))
                             .font(.footnote.weight(.bold))
@@ -422,6 +422,7 @@ private struct SymptomPicker: View {
                     .font(.callout.weight(.semibold))
                     .foregroundStyle(palette.accent)
                     .frame(minHeight: 30)
+                    .hitTarget(height: 30)
                 }
                 .buttonStyle(.plain)
                 .disabled(needsName)

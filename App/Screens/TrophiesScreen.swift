@@ -478,9 +478,11 @@ struct TrophiesScreen: View {
 
     private func places(_ entries: [LeagueEntry], you: String) -> [PodiumPlace] {
         entries.map { entry in
-            PodiumPlace(id: placeID(entry.person), look: model.look(of: entry.person),
-                        name: entry.person == .me ? you : model.name(for: entry.person), title: entry.title?.text,
-                        detail: trCount(entry.sickDays, one: "%lld sick day", other: "%lld sick days"))
+            let ahead = entries.filter { ($0.sickDays, $0.germs) < (entry.sickDays, entry.germs) }.count
+            return PodiumPlace(id: placeID(entry.person), look: model.look(of: entry.person),
+                               name: entry.person == .me ? you : model.name(for: entry.person), title: entry.title?.text,
+                               detail: trCount(entry.sickDays, one: "%lld sick day", other: "%lld sick days"),
+                               rank: ahead + 1)
         }
     }
 

@@ -20,9 +20,11 @@ final class PushRegistrar: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {}
 
-    /// Asks for notification permission once, then for the address.
+    /// Asks for notification permission once, then for the address. The address is asked for either way,
+    /// so notices arrive as soon as notifications are turned on.
     static func register() async {
-        guard DaycareStore.shared.isConfigured, await NotificationManager.ensureAuthorization() else { return }
+        guard DaycareStore.shared.isConfigured else { return }
+        _ = await NotificationManager.ensureAuthorization()
         UIApplication.shared.registerForRemoteNotifications()
     }
 }

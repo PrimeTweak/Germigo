@@ -351,6 +351,8 @@ struct PodiumPlace: Identifiable {
     let name: String
     var title: String?
     let detail: String
+    /// The rank shared by tied places; nil ranks by position.
+    var rank: Int?
 }
 
 /// The first three places on steps with the winner in the middle, then the others in rows.
@@ -364,12 +366,12 @@ struct Podium: View {
         VStack(spacing: 0) {
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach([1, 0, 2].filter { $0 < places.count }, id: \.self) { index in
-                    step(places[index], rank: index + 1)
+                    step(places[index], rank: places[index].rank ?? index + 1)
                         .cascadeIn(index)
                 }
             }
             ForEach(Array(places.enumerated()).dropFirst(3), id: \.element.id) { item in
-                row(item.element, rank: item.offset + 1)
+                row(item.element, rank: item.element.rank ?? item.offset + 1)
             }
         }
     }

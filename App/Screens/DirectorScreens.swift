@@ -164,6 +164,8 @@ private struct GroupsEditor: View {
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundStyle(palette.inkTertiary)
+                                .frame(width: 44, height: 44, alignment: .trailing)
+                                .contentShape(Rectangle())
                         }
                         .accessibilityLabel(tr("Remove %@", item.element))
                     }
@@ -181,6 +183,8 @@ private struct GroupsEditor: View {
                         Button(action: add) {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundStyle(palette.ink)
+                                .frame(width: 44, height: 44, alignment: .trailing)
+                                .contentShape(Rectangle())
                         }
                         .disabled(newGroup.trimmingCharacters(in: .whitespaces).count < 2)
                         .accessibilityLabel(tr("Add a group"))
@@ -202,6 +206,7 @@ private struct GroupsEditor: View {
                                 .padding(.horizontal, 12)
                                 .frame(height: 34)
                                 .background(palette.ink.opacity(0.07), in: Capsule())
+                                .hitTarget(height: 34)
                         }
                         .buttonStyle(PressableStyle())
                     }
@@ -535,6 +540,7 @@ struct NoticeComposer: View {
                 .padding(.horizontal, 16)
                 .frame(height: 40)
                 .background(selected ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
+                .hitTarget(height: 40)
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
@@ -733,7 +739,10 @@ struct DaycareGroupsScreen: View {
                                 .onSubmit(add)
                             Button(action: add) {
                                 Image(systemName: "plus.circle.fill")
+                                    .frame(width: 44, height: 44, alignment: .trailing)
+                                    .contentShape(Rectangle())
                             }
+                            .buttonStyle(.borderless)
                             .disabled(newGroup.trimmingCharacters(in: .whitespaces).count < 2)
                             .accessibilityLabel(tr("Add a group"))
                         }

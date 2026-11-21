@@ -455,14 +455,14 @@ struct FamilyLeagueShareCard: View {
                     .padding(.top, 2)
                 HStack(alignment: .bottom, spacing: 8) {
                     ForEach([1, 0, 2].filter { $0 < places.count }, id: \.self) { index in
-                        step(places[index], rank: index + 1)
+                        step(places[index], rank: places[index].rank ?? index + 1)
                     }
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 34)
                 VStack(spacing: 6) {
                     ForEach(Array(places.enumerated()).dropFirst(3).prefix(3), id: \.element.id) { item in
-                        Text(verbatim: line(item.element, rank: item.offset + 1))
+                        Text(verbatim: line(item.element, rank: item.element.rank ?? item.offset + 1))
                             .font(.system(size: 15, weight: .bold))
                             .lineLimit(1)
                     }

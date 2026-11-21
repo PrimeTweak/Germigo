@@ -136,6 +136,7 @@ struct LabScreen: View {
                 .padding(.horizontal, 14)
                 .frame(height: 36)
                 .background(selected ? palette.ink : palette.surface, in: Capsule())
+                .hitTarget(height: 36)
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])

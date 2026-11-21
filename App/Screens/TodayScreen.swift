@@ -371,6 +371,7 @@ private struct ExposureStage: View {
                         .padding(.horizontal, 12)
                         .frame(height: 32)
                         .background(palette.ink.opacity(0.07), in: Capsule())
+                        .hitTarget(height: 32)
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint(tr("Next"))

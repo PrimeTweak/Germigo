@@ -65,8 +65,10 @@ enum DaycareText {
 struct DaycareSection: View {
     @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
+    @Environment(\.scenePhase) private var scenePhase
     @State private var joining = false
     @State private var settingUp = false
+    @State private var alertsOff = false
 
     private var hasAny: Bool { !daycare.memberships.isEmpty || daycare.director != nil }
 
@@ -91,6 +93,8 @@ struct DaycareSection: View {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
                             .foregroundStyle(palette.inkSecondary)
+                            .frame(width: 44, alignment: .trailing)
+                            .hitTarget(height: 24)
                     }
                     .accessibilityLabel(tr("Add a daycare"))
                 }
@@ -112,6 +116,12 @@ struct DaycareSection: View {
             if !hasAny {
                 invitation
             }
+            if alertsOff, daycare.needsPush, let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                Link(destination: url) {
+                    alertsOffCard
+                }
+                .buttonStyle(PressableStyle())
+            }
         }
         .sheet(isPresented: $joining) {
             JoinDaycareSheet()
@@ -119,6 +129,32 @@ struct DaycareSection: View {
         .sheet(isPresented: $settingUp) {
             DaycareSetupSheet()
         }
+        .task(id: scenePhase) {
+            alertsOff = await NotificationManager.isDenied()
+        }
+    }
+
+    /// Shown while iOS notifications are refused: a followed daycare can't alert this phone.
+    private var alertsOffCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            IconTile(symbol: "bell.slash.fill")
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tr("Turn on in iOS Settings"))
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Text(tr("Notifications are off for Germigo, so daycare notices can't alert you."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.inkTertiary)
+                .accessibilityHidden(true)
+        }
+        .germigoCard(padding: 12)
     }
 
     private func directorCard(_ state: DirectorState) -> some View {
@@ -683,6 +719,8 @@ struct JoinDaycareSheet: View {
                     Image(systemName: "qrcode.viewfinder")
                         .font(.title3)
                         .foregroundStyle(palette.ink)
+                        .frame(width: 44, height: 44, alignment: .trailing)
+                        .contentShape(Rectangle())
                 }
                 .accessibilityLabel(tr("Scan the daycare's code"))
             }
@@ -769,6 +807,7 @@ struct JoinDaycareSheet: View {
                 .padding(.horizontal, 16)
                 .frame(height: 40)
                 .background(selected ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
+                .hitTarget(height: 40)
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])

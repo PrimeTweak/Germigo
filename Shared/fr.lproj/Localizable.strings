@@ -608,6 +608,7 @@
 "Notices are for illnesses only. Never a child's name." = "Les avis servent seulement aux maladies. Jamais le nom d'un enfant.";
 "Notices by email aren't set up on this server yet. Send them from the app in the meantime." = "Les avis par courriel ne sont pas encore offerts sur ce serveur. D'ici là, envoie-les depuis l'app.";
 "Notifications" = "Notifications";
+"Notifications are off for Germigo, so daycare notices can't alert you." = "Les notifications sont désactivées pour Germigo : les avis de garderie ne peuvent pas t'alerter.";
 "Notifications are off for Germigo, so no reminder can reach you." = "Les notifications sont désactivées pour Germigo : aucun rappel ne peut te parvenir.";
 "Now" = "En cours";
 "Now it's %@." = "Maintenant, c'est %@.";
@@ -835,6 +836,7 @@
 "Take a photo" = "Prendre une photo";
 "Taken" = "Prise le";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Touche « Je vais mieux » quand le microbe est parti. Le compteur attend.";
+"Tap a symptom first" = "Touche d'abord un symptôme";
 "Tap an unlocked title to wear it." = "Touche un titre obtenu pour le porter.";
 "Tap everything that fits. You can change it later." = "Touche tout ce qui colle. Tu pourras changer plus tard.";
 "Tap the character to see it sick." = "Touche le personnage pour le voir malade.";

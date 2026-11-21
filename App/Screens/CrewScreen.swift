@@ -566,7 +566,8 @@ private struct CrewHome: View {
                 Podium(places: board.map { member in
                     PodiumPlace(id: member.id, look: look(of: member), sick: true,
                                 name: member.id == state.me.id ? tr("You") : member.name,
-                                detail: trCount(member.germs, one: "%lld germ", other: "%lld germs"))
+                                detail: trCount(member.germs, one: "%lld germ", other: "%lld germs"),
+                                rank: board.filter { $0.germs > member.germs }.count + 1)
                 })
                 .padding(.top, 14)
             }
@@ -753,6 +754,7 @@ private struct FeedRow: View {
             .overlay {
                 Capsule().strokeBorder(mine ? palette.ink : Color.clear, lineWidth: 2)
             }
+            .hitTarget(height: 42)
             .animation(.snappy, value: count)
         }
         .buttonStyle(.plain)

@@ -32,6 +32,14 @@ extension View {
     func germigoCard(radius: CGFloat = 24, padding: CGFloat = 16) -> some View {
         modifier(CardBackground(radius: radius, padding: padding))
     }
+
+    /// Gives a control shorter than 44 points a 44-point touch area without moving what surrounds it.
+    func hitTarget(height: CGFloat) -> some View {
+        let reach = max(0, (44 - height) / 2)
+        return padding(.vertical, reach)
+            .contentShape(Rectangle())
+            .padding(.vertical, -reach)
+    }
 }
 
 /// The one health disclaimer, shown wherever health notes appear.
@@ -56,13 +64,23 @@ struct PillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(kind == .ink ? palette.background : palette.ink)
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
-            .background(kind == .ink ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
-            .opacity(isEnabled ? (configuration.isPressed ? 0.85 : 1) : 0.45)
-            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .foregroundStyle(foreground)
+            .frame(maxWidth: .infinity, minHeight: height)
+            .background(fill, in: Capsule())
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+
+    /// A disabled pill keeps a readable label instead of fading as a whole.
+    private var foreground: Color {
+        guard isEnabled else { return palette.ink.opacity(0.6) }
+        return kind == .ink ? palette.background : palette.ink
+    }
+
+    private var fill: Color {
+        guard isEnabled, kind == .ink else { return palette.ink.opacity(isEnabled ? 0.07 : 0.1) }
+        return palette.ink
     }
 }
 

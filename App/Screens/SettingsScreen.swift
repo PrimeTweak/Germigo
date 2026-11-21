@@ -777,6 +777,7 @@ private struct LookCard: View {
             .overlay {
                 Capsule().strokeBorder(inUse ? palette.ink : Color.clear, lineWidth: 2)
             }
+            .hitTarget(height: 40)
         }
         .buttonStyle(PressableStyle())
         .accessibilityLabel(themeTitle(theme))

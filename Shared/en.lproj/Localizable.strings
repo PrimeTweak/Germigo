@@ -608,6 +608,7 @@
 "Notices are for illnesses only. Never a child's name." = "Notices are for illnesses only. Never a child's name.";
 "Notices by email aren't set up on this server yet. Send them from the app in the meantime." = "Notices by email aren't set up on this server yet. Send them from the app in the meantime.";
 "Notifications" = "Notifications";
+"Notifications are off for Germigo, so daycare notices can't alert you." = "Notifications are off for Germigo, so daycare notices can't alert you.";
 "Notifications are off for Germigo, so no reminder can reach you." = "Notifications are off for Germigo, so no reminder can reach you.";
 "Now" = "Now";
 "Now it's %@." = "Now it's %@.";
@@ -835,6 +836,7 @@
 "Take a photo" = "Take a photo";
 "Taken" = "Taken";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Tap \"I'm better\" when the germ is gone. The counter is waiting.";
+"Tap a symptom first" = "Tap a symptom first";
 "Tap an unlocked title to wear it." = "Tap an unlocked title to wear it.";
 "Tap everything that fits. You can change it later." = "Tap everything that fits. You can change it later.";
 "Tap the character to see it sick." = "Tap the character to see it sick.";
