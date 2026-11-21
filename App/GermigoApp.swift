@@ -30,12 +30,16 @@ struct GermigoApp: App {
                 Task {
                     await crew.refresh()
                 }
-            } else if phase == .background, crew.isMember {
+                Task {
+                    await model.refreshLessons()
+                }
+            } else if phase == .background, crew.isMember || AppConfig.lessonsURL != nil {
                 BackgroundRefresh.schedule()
             }
         }
         .backgroundTask(.appRefresh(AppConfig.refreshTaskID)) {
             await CrewStore.shared.backgroundRefresh()
+            await AppModel.shared.refreshLessons()
             BackgroundRefresh.schedule()
         }
     }

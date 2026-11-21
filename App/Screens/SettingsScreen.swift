@@ -119,6 +119,9 @@ struct SettingsScreen: View {
             .onChange(of: model.data.settings.checkInsOn) { _, isOn in
                 if isOn { askForReminders() }
             }
+            .onChange(of: model.data.settings.lessonAlertsOn) { _, isOn in
+                if isOn { askForReminders() }
+            }
             .onChange(of: model.data.settings.crewAlertsOn) { _, isOn in
                 if isOn { askForReminders() }
             }
@@ -208,6 +211,15 @@ struct SettingsScreen: View {
                                  detail: tr("Window and symptom reminders"), trigger: settings.checkInsOn)
             }
             .frame(minHeight: 54)
+            if AppConfig.lessonsURL != nil {
+                Divider()
+                    .padding(.leading, 44)
+                Toggle(isOn: setting(\.lessonAlertsOn)) {
+                    SettingsRowLabel(symbol: "graduationcap.fill", title: tr("New lessons"),
+                                     detail: tr("When a lesson comes out"), trigger: settings.lessonAlertsOn)
+                }
+                .frame(minHeight: 54)
+            }
             if AppConfig.crewEnabled {
                 Divider()
                     .padding(.leading, 44)

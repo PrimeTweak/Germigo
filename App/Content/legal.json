@@ -121,6 +121,16 @@
     },
     {
       "title": {
+        "en": "Lessons",
+        "fr": "Leçons"
+      },
+      "body": {
+        "en": "New lessons come from a file that Germigo downloads from a web host. Like any web page, the host sees your phone's IP address when the file is downloaded. Nothing about you or your journal is sent.",
+        "fr": "Les nouvelles leçons viennent d'un fichier que Germigo télécharge chez un hébergeur web. Comme pour n'importe quelle page web, l'hébergeur voit l'adresse IP de ton téléphone pendant le téléchargement. Rien sur toi ni sur ton journal n'est envoyé."
+      }
+    },
+    {
+      "title": {
         "en": "Purchases",
         "fr": "Achats"
       },
@@ -135,8 +145,8 @@
         "fr": "Notifications"
       },
       "body": {
-        "en": "Check-ins and crew alerts are created on your phone. Germigo does not use a push notification service and does not collect a device token.",
-        "fr": "Les rappels et les alertes de groupe sont créés sur ton téléphone. Germigo n'utilise aucun service de notifications poussées et ne recueille aucun jeton d'appareil."
+        "en": "Check-ins, new lessons and crew alerts are created on your phone. Germigo does not use a push notification service and does not collect a device token.",
+        "fr": "Les rappels, les nouvelles leçons et les alertes de groupe sont créés sur ton téléphone. Germigo n'utilise aucun service de notifications poussées et ne recueille aucun jeton d'appareil."
       }
     },
     {

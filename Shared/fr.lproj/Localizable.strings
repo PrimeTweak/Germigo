@@ -126,6 +126,7 @@
 "All clear" = "Tout va bien";
 "All clear. For now." = "Rien à signaler. Pour l'instant.";
 "All germs" = "Tous les microbes";
+"All lessons" = "Toutes les leçons";
 "Also caught at home:" = "Aussi attrapé à la maison :";
 "Always yours" = "Toujours à toi";
 "An empty shelf. Enjoy it while it lasts." = "Une étagère vide. Profites-en pendant que ça dure.";
@@ -478,6 +479,10 @@
 "New card" = "Nouvelle carte";
 "New icons unlock as the season goes." = "De nouvelles icônes se débloquent au fil de la saison.";
 "New kid" = "Nouvel enfant";
+"New lesson in the Lab" = "Nouvelle leçon au Labo";
+"New lesson, %1$lld of %2$lld" = "Nouvelle leçon, %1$lld sur %2$lld";
+"New lessons" = "Nouvelles leçons";
+"New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz." = "De nouvelles leçons sortent régulièrement. Chacune est ouverte à tous pendant 7 jours, puis s'ouvre avec les bonnes réponses du quiz du jour.";
 "New photo" = "Nouvelle photo";
 "New photos" = "Nouvelles photos";
 "Next" = "Suivant";
@@ -541,6 +546,9 @@
 "Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent." = "Seulement si tu te joins à un groupe : le nom du groupe, le nom que tu choisis et les microbes que tu décides de partager. Les prénoms de tes enfants et ton journal ne sont jamais envoyés.";
 "Open the case file" = "Ouvrir le dossier";
 "Open the web version" = "Ouvrir la version Web";
+"Open to everyone this week." = "Ouverte à tous cette semaine.";
+"Open to everyone · %lld day left" = "Ouverte à tous · encore %lld jour";
+"Open to everyone · %lld days left" = "Ouverte à tous · encore %lld jours";
 "Opens Germigo so you can log the germ you caught." = "Ouvre Germigo pour noter le microbe que tu as attrapé.";
 "Other photos" = "Autres photos";
 "Outbreak Survivor" = "Survivant d'éclosion";
@@ -843,6 +851,7 @@
 "When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged." = "Quand un microbe t'attrape, touche la tuile et choisis-le. Essaie maintenant. Rien n'est noté.";
 "When a germ goes around" = "Quand un microbe circule";
 "When a kid gets sick, add it here. Germigo starts your incubation countdown and remembers who brought what home." = "Quand un enfant tombe malade, ajoute-le ici. Germigo lance ton compte à rebours d'incubation et se souvient de qui a rapporté quoi.";
+"When a lesson comes out" = "Quand une leçon sort";
 "When to call" = "Quand appeler";
 "Who" = "Qui";
 "Who am I?" = "Qui suis-je ?";

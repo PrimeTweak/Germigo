@@ -68,6 +68,8 @@
 	<string>https://REPLACE-ME.invalid</string>
 	<key>GermigoShareURL</key>
 	<string>https://REPLACE-ME.invalid/get</string>
+	<key>GermigoLessonsURL</key>
+	<string>https://REPLACE-ME.invalid/lessons.json</string>
 	<key>GermigoSupportEmail</key>
 	<string>REPLACE-ME@example.invalid</string>
 	<key>GermigoPublisherName</key>

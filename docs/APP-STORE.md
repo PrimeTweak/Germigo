@@ -35,15 +35,16 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 2. **Bundle identifier.** `ca.germigo.app` must be available to the account. If it is not, change it in `project.yml` (both targets), both `.entitlements` files, `Shared/AppGroup.swift`, `App/Services/AppConfig.swift` (refresh task and keychain service), `App/Info.plist` (`BGTaskSchedulerPermittedIdentifiers`) and `PassProduct` and `TipProduct` in `App/Services/PurchaseManager.swift`.
 3. **Crew server.** Deploy `server/` on a host with a persistent disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN`, `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `GermigoServerURL`. To ship without Crew, set `GermigoCrewEnabled` to `false`.
 4. **Support address, publisher and share page.** Put a monitored address in `GermigoSupportEmail`, the publisher's name in `GermigoPublisherName`, and `<server>/get` in `GermigoShareURL` (the page the share cards' QR code opens). The release check fails while any of them holds its placeholder. Once the app is live, set `APP_STORE_URL` on the server so that page links to it.
-5. **Subscriptions.** In App Store Connect create one subscription group with two products, turn on Family Sharing for both, then attach them to the first version:
+5. **Online lessons.** Host the lesson file described in `docs/LESSONS.md` and put its https address in `GermigoLessonsURL`. Until then the app shows only its bundled lessons.
+6. **Subscriptions.** In App Store Connect create one subscription group with two products, turn on Family Sharing for both, then attach them to the first version:
    - `ca.germigo.app.pass.yearly`: 1 year, CA$24.99, with a 14-day free introductory offer
    - `ca.germigo.app.pass.monthly`: 1 month, CA$3.99
-6. **Tip jar.** Create three consumable products: `ca.germigo.app.tip.small` (CA$1.99), `ca.germigo.app.tip.medium` (CA$4.99) and `ca.germigo.app.tip.large` (CA$9.99). Settings lists them cheapest first under "Offer a soup".
-7. **Offer codes.** Codes that give the Season Pass are created on the subscription's Offer Codes page. Settings opens Apple's redemption sheet with "Redeem a code".
-8. **App Store Small Business Program.** Enroll before the first sale to pay a 15% commission instead of 30%.
-9. **Secrets for the Release workflow.** `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store Connect API key with the App Manager role).
-10. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`).
-11. **Name check.** Search the App Store and trademark registers for "Germigo" in the target countries.
+7. **Tip jar.** Create three consumable products: `ca.germigo.app.tip.small` (CA$1.99), `ca.germigo.app.tip.medium` (CA$4.99) and `ca.germigo.app.tip.large` (CA$9.99). Settings lists them cheapest first under "Offer a soup".
+8. **Offer codes.** Codes that give the Season Pass are created on the subscription's Offer Codes page. Settings opens Apple's redemption sheet with "Redeem a code".
+9. **App Store Small Business Program.** Enroll before the first sale to pay a 15% commission instead of 30%.
+10. **Secrets for the Release workflow.** `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store Connect API key with the App Manager role).
+11. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`).
+12. **Name check.** Search the App Store and trademark registers for "Germigo" in the target countries.
 
 ## 3. Answers for App Store Connect
 

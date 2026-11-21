@@ -47,7 +47,7 @@ struct Backup: Codable {
 enum Persistence {
     private static let setAsidePrefix = "journal-unreadable-"
 
-    private static var directory: URL {
+    static var directory: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         return base.appendingPathComponent("Germigo", isDirectory: true)
     }
@@ -117,7 +117,7 @@ enum Persistence {
     }
 }
 
-/// The bundled germ catalog and articles.
+/// The bundled germ catalog and articles, with the lessons of the online file.
 struct GermCatalog {
     /// The germ that the Tissue Box icon counts.
     static let commonColdID = "rhino"
@@ -125,13 +125,25 @@ struct GermCatalog {
     static let mysteryID = "mystery"
 
     let germs: [Germ]
+    /// Lessons already out, in ladder order.
     let articles: [Article]
+    /// Online lessons still waiting for their release day.
+    let upcoming: [Article]
+    private let bundled: [Article]
     private let byID: [String: Germ]
 
-    init(germs: [Germ], articles: [Article]) {
+    init(germs: [Germ], articles: [Article], feed: [FeedLesson] = [], now: Date = Date()) {
         self.germs = germs.sorted { $0.number < $1.number }
-        self.articles = articles.sorted { $0.unlockAtAnswers < $1.unlockAtAnswers }
+        let all = LessonEngine.merge(bundled: articles, feed: feed).sorted { $0.unlockAtAnswers < $1.unlockAtAnswers }
+        self.articles = all.filter { LessonEngine.isReleased($0, now: now) }
+        self.upcoming = all.filter { !LessonEngine.isReleased($0, now: now) }
+        self.bundled = articles
         self.byID = Dictionary(uniqueKeysWithValues: germs.map { ($0.id, $0) })
+    }
+
+    /// The same germs and bundled articles with another copy of the online file, as of a given time.
+    func updated(feed: [FeedLesson], now: Date = Date()) -> GermCatalog {
+        GermCatalog(germs: germs, articles: bundled, feed: feed, now: now)
     }
 
     func germ(_ id: String) -> Germ? {
@@ -142,9 +154,9 @@ struct GermCatalog {
         germs.filter { $0.quickPick }
     }
 
-    static func load() -> GermCatalog {
+    static func load(feed: [FeedLesson] = []) -> GermCatalog {
         GermCatalog(germs: decode("germs", as: [Germ].self) ?? [],
-                    articles: decode("articles", as: [Article].self) ?? [])
+                    articles: decode("articles", as: [Article].self) ?? [], feed: feed)
     }
 
     private static func decode<T: Decodable>(_ name: String, as type: T.Type) -> T? {

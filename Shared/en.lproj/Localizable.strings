@@ -126,6 +126,7 @@
 "All clear" = "All clear";
 "All clear. For now." = "All clear. For now.";
 "All germs" = "All germs";
+"All lessons" = "All lessons";
 "Also caught at home:" = "Also caught at home:";
 "Always yours" = "Always yours";
 "An empty shelf. Enjoy it while it lasts." = "An empty shelf. Enjoy it while it lasts.";
@@ -478,6 +479,10 @@
 "New card" = "New card";
 "New icons unlock as the season goes." = "New icons unlock as the season goes.";
 "New kid" = "New kid";
+"New lesson in the Lab" = "New lesson in the Lab";
+"New lesson, %1$lld of %2$lld" = "New lesson, %1$lld of %2$lld";
+"New lessons" = "New lessons";
+"New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz." = "New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz.";
 "New photo" = "New photo";
 "New photos" = "New photos";
 "Next" = "Next";
@@ -541,6 +546,9 @@
 "Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent." = "Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent.";
 "Open the case file" = "Open the case file";
 "Open the web version" = "Open the web version";
+"Open to everyone this week." = "Open to everyone this week.";
+"Open to everyone · %lld day left" = "Open to everyone · %lld day left";
+"Open to everyone · %lld days left" = "Open to everyone · %lld days left";
 "Opens Germigo so you can log the germ you caught." = "Opens Germigo so you can log the germ you caught.";
 "Other photos" = "Other photos";
 "Outbreak Survivor" = "Outbreak Survivor";
@@ -843,6 +851,7 @@
 "When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged." = "When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged.";
 "When a germ goes around" = "When a germ goes around";
 "When a kid gets sick, add it here. Germigo starts your incubation countdown and remembers who brought what home." = "When a kid gets sick, add it here. Germigo starts your incubation countdown and remembers who brought what home.";
+"When a lesson comes out" = "When a lesson comes out";
 "When to call" = "When to call";
 "Who" = "Who";
 "Who am I?" = "Who am I?";

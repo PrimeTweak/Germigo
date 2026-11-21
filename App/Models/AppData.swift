@@ -145,13 +145,14 @@ struct AppSettings: Codable, Hashable {
     var theme = Theme.agar
     var soundsOn = true
     var checkInsOn = true
+    var lessonAlertsOn = true
     var crewAlertsOn = true
     var sideloadPass = false
     /// The skill tree title shown instead of the level title.
     var wornTitle: String?
 
     enum CodingKeys: String, CodingKey {
-        case appearance, theme, soundsOn, checkInsOn, crewAlertsOn, sideloadPass, wornTitle
+        case appearance, theme, soundsOn, checkInsOn, lessonAlertsOn, crewAlertsOn, sideloadPass, wornTitle
     }
 }
 
@@ -290,6 +291,7 @@ extension AppSettings {
         theme = container.value(.theme, default: Theme.agar)
         soundsOn = container.value(.soundsOn, default: true)
         checkInsOn = container.value(.checkInsOn, default: true)
+        lessonAlertsOn = container.value(.lessonAlertsOn, default: true)
         crewAlertsOn = container.value(.crewAlertsOn, default: true)
         sideloadPass = container.value(.sideloadPass, default: false)
         wornTitle = try? container.decodeIfPresent(String.self, forKey: .wornTitle)

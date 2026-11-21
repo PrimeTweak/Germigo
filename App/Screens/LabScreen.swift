@@ -83,10 +83,12 @@ struct LabScreen: View {
         }
     }
 
-    /// The lessons, drawn like the gear next to it, with a small ring that fills as they open.
+    /// The lessons, drawn like the gear next to it, with a small ring that fills as they open
+    /// and a dot while a new lesson is unread.
     private var lessonsLink: some View {
         let articles = model.catalog.articles
         let open = articles.filter { model.isArticleUnlocked($0) }.count
+        let fresh = model.hasNewLesson
         return NavigationLink {
             LessonsScreen()
         } label: {
@@ -96,9 +98,22 @@ struct LabScreen: View {
                         .frame(width: 10, height: 10)
                         .offset(x: 5, y: 4)
                 }
+                .overlay(alignment: .topTrailing) {
+                    if fresh {
+                        Circle()
+                            .fill(palette.accent)
+                            .frame(width: 8, height: 8)
+                            .padding(1.5)
+                            .background(palette.background, in: Circle())
+                            .offset(x: 6, y: -4)
+                            .transition(.scale)
+                    }
+                }
+                .animation(.spring(duration: 0.3), value: fresh)
         }
         .accessibilityLabel(tr("Lessons"))
-        .accessibilityValue(tr("%1$lld of %2$lld", open, articles.count))
+        .accessibilityValue(fresh ? tr("New lesson, %1$lld of %2$lld", open, articles.count)
+                                  : tr("%1$lld of %2$lld", open, articles.count))
     }
 
     private var chips: some View {
@@ -396,19 +411,19 @@ struct LessonsScreen: View {
     @State private var nudged: [String: Int] = [:]
 
     var body: some View {
+        let fresh = model.lessonsThisWeek()
+        let ladder = model.catalog.articles.filter { !fresh.contains($0) }
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(model.catalog.articles.enumerated()), id: \.element.id) { item in
-                        if item.offset > 0 {
-                            Divider()
-                        }
-                        row(item.element)
-                    }
+                if !fresh.isEmpty {
+                    SectionHeader(title: tr("This week"))
+                    card(fresh)
+                    SectionHeader(title: tr("All lessons"))
                 }
-                .padding(.horizontal, 18)
-                .germigoCard(padding: 0)
-                Text(tr("Lessons open with right answers in the daily quiz."))
+                card(ladder)
+                Text(AppConfig.lessonsURL == nil
+                     ? tr("Lessons open with right answers in the daily quiz.")
+                     : tr("New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
@@ -419,6 +434,19 @@ struct LessonsScreen: View {
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(tr("Lessons"))
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func card(_ articles: [Article]) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(articles.enumerated()), id: \.element.id) { item in
+                if item.offset > 0 {
+                    Divider()
+                }
+                row(item.element)
+            }
+        }
+        .padding(.horizontal, 18)
+        .germigoCard(padding: 0)
     }
 
     @ViewBuilder
@@ -440,7 +468,9 @@ struct LessonsScreen: View {
     }
 
     private func label(_ article: Article, locked: Bool) -> some View {
+        let now = Date()
         let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
+        let openWeek = LessonEngine.isOpenToAll(article, now: now)
         return HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(article.title.value)
@@ -453,6 +483,16 @@ struct LessonsScreen: View {
                     .foregroundStyle(palette.inkSecondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
+                if openWeek {
+                    let left = LessonEngine.daysLeft(article, now: now)
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                        Text(trCount(left, one: "Open to everyone · %lld day left", other: "Open to everyone · %lld days left"))
+                    }
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .padding(.top, 5)
+                }
             }
             Spacer(minLength: 4)
             if locked {

@@ -41,6 +41,7 @@ Set in `App/Info.plist`:
 | `GermigoSupportEmail` | Contact address shown in Settings, the legal screens and Crew. |
 | `GermigoPublisherName` | Person or company that publishes the app, named in the legal screens. |
 | `GermigoShareURL` | Page the QR code on every share card opens, normally `<server>/get`. While it holds the placeholder, cards carry no QR code. |
+| `GermigoLessonsURL` | https address of the online lesson file (see `docs/LESSONS.md`). While it holds the placeholder, the Lab shows only the bundled lessons. |
 | `GermigoCrewEnabled` | `false` removes the Crew tab and its settings. |
 
 The app opens `germigo://log` (log sheet) and `germigo://today`. The streak widget uses them.

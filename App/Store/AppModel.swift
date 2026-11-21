@@ -69,7 +69,7 @@ final class AppModel {
     }
 
     private(set) var data: AppData
-    let catalog: GermCatalog
+    private(set) var catalog: GermCatalog
     let household = HouseholdGuide.load()
     var pendingReward: RewardResult?
     var pendingVictory: Victory?
@@ -86,10 +86,14 @@ final class AppModel {
 
     /// False while the journal file exists but cannot be read; nothing is saved over it then.
     @ObservationIgnored private var journalAvailable = true
+    /// The last copy of the online lesson file.
+    @ObservationIgnored private var lessonFeed: [FeedLesson]
     @ObservationIgnored private var saveFailureReported = false
 
     init() {
-        catalog = GermCatalog.load()
+        let feed = LessonFeedClient.cached()
+        lessonFeed = feed
+        catalog = GermCatalog.load(feed: feed)
         data = AppData()
         loadJournal()
     }
@@ -236,9 +240,20 @@ final class AppModel {
         }
     }
 
-    /// Lessons open with right answers in the daily quiz, for everyone.
-    func isArticleUnlocked(_ article: Article) -> Bool {
-        data.quiz.rightTotal >= article.unlockAtAnswers
+    /// Open with enough right answers, during the lesson's first week, or once read.
+    func isArticleUnlocked(_ article: Article, now: Date = Date()) -> Bool {
+        LessonEngine.isUnlocked(article, data: data, now: now)
+    }
+
+    /// Lessons in their first week, open to everyone, newest first.
+    func lessonsThisWeek(now: Date = Date()) -> [Article] {
+        catalog.articles.filter { LessonEngine.isOpenToAll($0, now: now) }
+            .sorted { ($0.releasedOn ?? now) > ($1.releasedOn ?? now) }
+    }
+
+    /// True while a lesson of the week is still unread.
+    var hasNewLesson: Bool {
+        lessonsThisWeek().contains { !data.readArticles.contains($0.id) }
     }
 
     /// The first day a free journal shows; nil with the Season Pass, which shows every day.
@@ -655,6 +670,7 @@ final class AppModel {
     /// Runs when the app comes to the foreground.
     func refresh(now: Date = Date()) {
         if !journalAvailable { loadJournal() }
+        catalog = catalog.updated(feed: lessonFeed, now: now)
         var changed = false
         for index in data.kidIllnesses.indices where data.kidIllnesses[index].outcome == .open {
             let illness = data.kidIllnesses[index]
@@ -799,6 +815,22 @@ final class AppModel {
         return fresh
     }
 
+    /// Reads the online lesson file, then announces the lessons still to come.
+    func refreshLessons() async {
+        let previous = lessonFeed.map { $0.id }
+        if let feed = await LessonFeedClient.fetch() {
+            lessonFeed = feed
+        }
+        catalog = catalog.updated(feed: lessonFeed)
+        syncLessonReminders(dropping: previous)
+    }
+
+    /// Replaces the lesson announcements; `dropping` also clears lessons no longer in the file.
+    private func syncLessonReminders(dropping previous: [String] = []) {
+        let known = Array(Set(previous + lessonFeed.map { $0.id }))
+        NotificationManager.scheduleLessons(catalog.upcoming, known: known, settings: data.settings)
+    }
+
     private func rescheduleNotifications() {
         for illness in data.kidIllnesses where illness.watching && illness.outcome == .open {
             guard let germ = catalog.germ(illness.germID) else { continue }
@@ -807,6 +839,7 @@ final class AppModel {
         for illness in data.kidIllnesses { syncSymptomCheck(for: illness) }
         if let log = activeLog { syncSymptomCheck(for: log) }
         syncSickCheckIn()
+        syncLessonReminders()
     }
 
     /// The daily check-in exists only while a germ is active; it carries that germ's advice.

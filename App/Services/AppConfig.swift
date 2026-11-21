@@ -23,6 +23,12 @@ enum AppConfig {
         return URL(string: raw)
     }
 
+    /// The online lesson file; nil until a real https address replaces the placeholder.
+    static var lessonsURL: URL? {
+        guard let raw = string("GermigoLessonsURL"), raw.hasPrefix("https://") else { return nil }
+        return URL(string: raw)
+    }
+
     static var supportEmail: String? {
         string("GermigoSupportEmail")
     }

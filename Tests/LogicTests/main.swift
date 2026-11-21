@@ -1,6 +1,6 @@
 import Foundation
 
-// Logic checks for the journal rules, streaks, badges, stats, days and journal decoding.
+// Logic checks for the journal rules, streaks, badges, stats, days, lessons and journal decoding.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -550,6 +550,45 @@ do {
           "nobody gets a title while nobody stands apart")
     check(LeagueEngine.standings(data: calm, catalog: catalog, season: season, now: day(30)).count == 1,
           "the parent alone makes no league")
+}
+
+// MARK: - Lessons
+
+do {
+    let text = LocalizedText(en: "a", fr: "a")
+    let bundled = [0, 5, 25].map { step in
+        Article(id: "b\(step)", icon: "book", unlockAtAnswers: step, title: text, summary: text, paragraphs: [],
+                sources: [], releasedOn: nil)
+    }
+    func lesson(_ id: String, _ released: String) -> FeedLesson {
+        FeedLesson(id: id, icon: nil, released: released, title: text, summary: text, paragraphs: [], sources: [])
+    }
+    let merged = LessonEngine.merge(bundled: bundled, feed: [lesson("late", "2026-10-15"), lesson("early", "2026-10-08"),
+                                                             lesson("b5", "2026-10-01"), lesson("bad", "soon")])
+    check(merged.map { $0.id } == ["b0", "b5", "b25", "early", "late"],
+          "online lessons follow the bundled ones in release order, without duplicates or bad dates")
+    check(merged.suffix(2).map { $0.unlockAtAnswers } == [30, 35], "each online lesson sits one step above the last")
+
+    let shelf = GermCatalog(germs: [], articles: bundled,
+                            feed: [lesson("early", "2026-10-08"), lesson("late", "2026-10-15")], now: day(10))
+    check(shelf.articles.map { $0.id } == ["b0", "b5", "b25", "early"], "a lesson shows from its release day")
+    check(shelf.upcoming.map { $0.id } == ["late"], "a lesson waits for its release day")
+
+    if let early = shelf.articles.last {
+        var data = makeData()
+        check(LessonEngine.isUnlocked(early, data: data, now: day(7)), "a new lesson is open to everyone on its release day")
+        check(LessonEngine.daysLeft(early, now: day(7)) == 7, "the open week counts the release day")
+        check(LessonEngine.daysLeft(early, now: day(13)) == 1, "the last open day shows one day left")
+        check(LessonEngine.isUnlocked(early, data: data, now: day(13)), "a new lesson is still open on its seventh day")
+        check(!LessonEngine.isUnlocked(early, data: data, now: day(14)), "after its week a lesson waits for right answers")
+        data.quiz.rightTotal = 30
+        check(LessonEngine.isUnlocked(early, data: data, now: day(14)), "right answers open a lesson after its week")
+        data.quiz.rightTotal = 0
+        data.readArticles = [early.id]
+        check(LessonEngine.isUnlocked(early, data: data, now: day(40)), "a lesson read once stays open")
+    } else {
+        check(false, "the released online lesson is in the catalog")
+    }
 }
 
 if failures == 0 {

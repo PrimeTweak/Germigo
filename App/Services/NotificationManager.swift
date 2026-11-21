@@ -3,7 +3,7 @@ import BackgroundTasks
 import Foundation
 import UserNotifications
 
-/// Local notifications: incubation check-ins, the daily sick check-in, crew radar alerts.
+/// Local notifications: incubation check-ins, the daily sick check-in, new lessons, crew radar alerts.
 enum NotificationManager {
     private static let sickID = "sick-checkin"
     private static let milestoneID = "streak-milestone"
@@ -12,6 +12,9 @@ enum NotificationManager {
 
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
+
+    /// Lessons announced ahead, soonest first; the rest wait for the next refresh.
+    private static let lessonLimit = 8
 
     /// How long a mystery germ waits before Germigo asks about new symptoms.
     private static let symptomCheckDelay: TimeInterval = 2 * 24 * 3600
@@ -178,6 +181,24 @@ enum NotificationManager {
 
     private static func symptomKey(_ id: UUID) -> String {
         "symptoms-" + id.uuidString
+    }
+
+    /// One announcement at 10 AM on each upcoming lesson's release day.
+    static func scheduleLessons(_ upcoming: [Article], known: [String], settings: AppSettings) {
+        center.removePendingNotificationRequests(withIdentifiers: known.map(lessonKey))
+        guard settings.lessonAlertsOn else { return }
+        let dated = upcoming.compactMap { article in article.releasedOn.map { (article, $0) } }
+            .sorted { $0.1 < $1.1 }
+        for (article, day) in dated.prefix(lessonLimit) {
+            let title = article.title.value
+            let joint = title.hasSuffix("?") || title.hasSuffix("!") || title.hasSuffix(".") ? " " : ". "
+            addMorning(id: lessonKey(article.id), on: day, title: tr("New lesson in the Lab"),
+                       body: title + joint + tr("Open to everyone this week."))
+        }
+    }
+
+    private static func lessonKey(_ id: String) -> String {
+        "lesson-" + id
     }
 
     static func notifyRadar(illness: String, crewName: String, families: Int) {

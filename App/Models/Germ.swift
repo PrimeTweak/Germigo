@@ -200,7 +200,7 @@ struct Germ: Codable, Identifiable, Hashable {
     }
 }
 
-/// A longer read that unlocks with right answers in the daily quiz.
+/// A longer read that opens with right answers in the daily quiz, or during its first week online.
 struct Article: Codable, Identifiable, Hashable {
     let id: String
     let icon: String
@@ -209,6 +209,8 @@ struct Article: Codable, Identifiable, Hashable {
     let summary: LocalizedText
     let paragraphs: [LocalizedText]
     let sources: [GermReference]
+    /// Set on lessons from the online file; bundled ones have none.
+    let releasedOn: Date?
 }
 
 /// One step of the boss fight, told with the case file's own timings.
