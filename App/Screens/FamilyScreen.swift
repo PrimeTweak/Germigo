@@ -31,7 +31,7 @@ private struct PersonStatus {
 
 extension AppModel {
     /// Everyone in the household: the kids, the parent, then the partner when there is one.
-    var household: [Person] {
+    var people: [Person] {
         data.kids.map { Person.kid($0.id) } + [.me] + (data.partnerName == nil ? [] : [.partner])
     }
 }
@@ -44,8 +44,8 @@ struct FamilyScreen: View {
     @State private var showPaywall = false
 
     var body: some View {
-        let household = model.household
-        let people = household.filter { status(of: $0).sick } + household.filter { !status(of: $0).sick }
+        let everyone = model.people
+        let people = everyone.filter { status(of: $0).sick } + everyone.filter { !status(of: $0).sick }
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
@@ -371,7 +371,7 @@ private struct PersonFileScreen: View {
         .sheet(item: $editing) { member in
             PersonEditSheet(member: member)
         }
-        .onChange(of: model.household) { _, people in
+        .onChange(of: model.people) { _, people in
             if !people.contains(person) { dismiss() }
         }
     }
