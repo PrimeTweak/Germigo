@@ -11,11 +11,11 @@ struct PaywallView: View {
     @State private var selectedID = PassProduct.yearlyID
     @State private var legal: LegalKind?
 
-    private let backdrop = Color(hex: Swatch.nightBase)
-    private let panel = Color(hex: Swatch.nightSurface)
-    private let chalk = Color(hex: Swatch.chalk)
-    private let lime = Color(hex: Swatch.lime)
-    private let night = Color(hex: Swatch.night)
+    private let backdrop = Color(hex: Swatch.navy)
+    private let panel = Color(hex: Swatch.navySurface)
+    private let frost = Color(hex: Swatch.frost)
+    private let glow = Color(hex: Swatch.irisSoft)
+    private let night = Color(hex: Swatch.navy)
 
     private var selected: Product? {
         purchases.products.first { $0.id == selectedID }
@@ -33,9 +33,9 @@ struct PaywallView: View {
                 VStack(spacing: 4) {
                     Text(tr("Survive the season."))
                     Text(tr("Together."))
-                        .foregroundStyle(lime)
+                        .foregroundStyle(glow)
                 }
-                .font(.system(.title, design: .rounded).weight(.heavy))
+                .font(.system(.title).weight(.bold))
                 .multilineTextAlignment(.center)
                 benefits
                 if model.hasPass {
@@ -49,7 +49,7 @@ struct PaywallView: View {
                 }
                 footerLinks
             }
-            .foregroundStyle(chalk)
+            .foregroundStyle(frost)
             .padding(.horizontal, 22)
             .padding(.top, 56)
             .padding(.bottom, 24)
@@ -61,7 +61,7 @@ struct PaywallView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.body.weight(.bold))
-                    .foregroundStyle(chalk)
+                    .foregroundStyle(frost)
                     .frame(width: 44, height: 44)
                     .background(Color.white.opacity(0.12), in: Circle())
             }
@@ -70,6 +70,7 @@ struct PaywallView: View {
             .padding(.top, 8)
         }
         .preferredColorScheme(.dark)
+        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
         .sheet(item: $legal) { kind in
             NavigationStack {
                 LegalScreen(kind: kind)
@@ -111,12 +112,11 @@ struct PaywallView: View {
     private var ticket: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2) {
-                Text(tr("Petri · Admit one household").uppercased())
-                    .font(.caption2.weight(.heavy))
-                    .kerning(1.6)
+                Text(tr("Petri · Admit one household"))
+                    .font(.caption2.weight(.bold))
                     .opacity(0.7)
-                Text(tr("Season Pass").uppercased())
-                    .font(.system(size: 42, weight: .black, design: .rounded))
+                Text(tr("Season Pass"))
+                    .font(.system(size: 42, weight: .bold))
                     .kerning(-1)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -141,14 +141,13 @@ struct PaywallView: View {
                 Spacer()
                 Image(systemName: "ticket.fill")
             }
-            .font(.subheadline.weight(.heavy))
+            .font(.subheadline.weight(.bold))
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
         }
         .foregroundStyle(night)
         .frame(maxWidth: .infinity)
-        .background(LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeMid)],
-                                   startPoint: .topLeading, endPoint: .bottomTrailing))
+        .background(frost)
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .rotationEffect(.degrees(-2))
         .padding(.horizontal, 8)
@@ -172,7 +171,7 @@ struct PaywallView: View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
                 .font(.body.weight(.semibold))
-                .foregroundStyle(lime)
+                .foregroundStyle(glow)
                 .frame(width: 40, height: 40)
                 .background(Color.white.opacity(0.08), in: Circle())
                 .accessibilityHidden(true)
@@ -190,7 +189,7 @@ struct PaywallView: View {
     private var plans: some View {
         VStack(spacing: 10) {
             if let yearly = purchases.yearly {
-                planRow(yearly, title: tr("Yearly"), badge: purchases.trialDays.map { tr("%lld days free", $0).uppercased() },
+                planRow(yearly, title: tr("Yearly"), badge: purchases.trialDays.map { tr("%lld days free", $0) },
                         note: tr("%@ a month", (yearly.price / 12).formatted(yearly.priceFormatStyle)))
             }
             if let monthly = purchases.monthly {
@@ -207,18 +206,18 @@ struct PaywallView: View {
             HStack(spacing: 12) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(isSelected ? lime : chalk.opacity(0.4))
+                    .foregroundStyle(isSelected ? glow : frost.opacity(0.4))
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 8) {
                         Text(title)
                             .font(.headline)
                         if let badge {
                             Text(badge)
-                                .font(.caption2.weight(.heavy))
+                                .font(.caption2.weight(.bold))
                                 .foregroundStyle(night)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 3)
-                                .background(lime, in: Capsule())
+                                .background(glow, in: Capsule())
                         }
                     }
                     if let note {
@@ -241,7 +240,7 @@ struct PaywallView: View {
             .background(panel, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .strokeBorder(isSelected ? lime : Color.clear, lineWidth: 2)
+                    .strokeBorder(isSelected ? glow : Color.clear, lineWidth: 2)
             }
         }
         .buttonStyle(.plain)
@@ -278,7 +277,7 @@ struct PaywallView: View {
                 Text(tr("Subscribe"))
             }
         }
-        .buttonStyle(PillButtonStyle(kind: .accent))
+        .buttonStyle(PillButtonStyle(kind: .ink))
         .disabled(selected == nil || purchases.isPurchasing)
     }
 
@@ -312,11 +311,11 @@ struct PaywallView: View {
         VStack(spacing: 12) {
             Label(tr("You have the Season Pass"), systemImage: "checkmark.seal.fill")
                 .font(.headline)
-                .foregroundStyle(lime)
+                .foregroundStyle(glow)
             Button(tr("Done")) {
                 close()
             }
-            .buttonStyle(PillButtonStyle(kind: .accent))
+            .buttonStyle(PillButtonStyle(kind: .ink))
         }
         .padding(16)
         .frame(maxWidth: .infinity)
@@ -327,7 +326,7 @@ struct PaywallView: View {
         VStack(spacing: 12) {
             if purchases.isLoading {
                 ProgressView()
-                    .tint(chalk)
+                    .tint(frost)
             } else {
                 Text(purchases.loadFailed
                      ? tr("The App Store can't be reached right now. Check your connection and try again.")
@@ -340,7 +339,7 @@ struct PaywallView: View {
                         await purchases.loadProducts()
                     }
                 }
-                .buttonStyle(PillButtonStyle(kind: .accent, height: 46))
+                .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
             }
         }
         .padding(16)
@@ -368,7 +367,7 @@ struct PaywallView: View {
             }
         }
         .font(.footnote.weight(.semibold))
-        .foregroundStyle(chalk.opacity(0.75))
+        .foregroundStyle(frost.opacity(0.75))
         .buttonStyle(.plain)
         .frame(minHeight: 44)
     }

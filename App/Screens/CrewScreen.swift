@@ -117,14 +117,14 @@ private struct CrewTeaser: View {
             VStack(spacing: 18) {
                 ZStack {
                     Circle()
-                        .fill(palette.coral.opacity(0.14))
+                        .fill(palette.accent.opacity(0.14))
                         .frame(width: 150, height: 150)
                     Circle()
-                        .fill(palette.coral.opacity(0.2))
+                        .fill(palette.accent.opacity(0.2))
                         .frame(width: 104, height: 104)
                     Image(systemName: "dot.radiowaves.left.and.right")
                         .font(.system(size: 44, weight: .semibold))
-                        .foregroundStyle(palette.coralDeep)
+                        .foregroundStyle(palette.accent)
                 }
                 .padding(.top, 12)
                 .accessibilityHidden(true)
@@ -148,7 +148,7 @@ private struct CrewTeaser: View {
                 Button(tr("See the Season Pass")) {
                     showPaywall = true
                 }
-                .buttonStyle(PillButtonStyle(kind: .accent))
+                .buttonStyle(PillButtonStyle(kind: .ink))
                 if crew.isMember {
                     Button(tr("Leave crew and delete my data")) {
                         confirmLeave = true
@@ -158,7 +158,7 @@ private struct CrewTeaser: View {
                     if let message = crew.errorMessage {
                         Text(message)
                             .font(.footnote.weight(.semibold))
-                            .foregroundStyle(palette.coralInk)
+                            .foregroundStyle(palette.ink)
                             .multilineTextAlignment(.center)
                     }
                 }
@@ -180,7 +180,7 @@ private struct CrewTeaser: View {
 
     private func row(_ symbol: String, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: 13) {
-            IconTile(symbol: symbol, background: palette.surfaceAlt, foreground: palette.ink)
+            IconTile(symbol: symbol)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.callout.weight(.semibold))
@@ -275,7 +275,7 @@ private struct CrewJoinView: View {
                 if let message = crew.errorMessage {
                     Text(message)
                         .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.coralInk)
+                        .foregroundStyle(palette.ink)
                         .padding(.horizontal, 4)
                 }
                 Button {
@@ -514,7 +514,7 @@ private struct CrewHome: View {
                     HStack(spacing: 12) {
                         Text(String(item.offset + 1))
                             .font(.headline.monospacedDigit())
-                            .foregroundStyle(item.offset == 0 ? palette.coralInk : palette.inkTertiary)
+                            .foregroundStyle(item.offset == 0 ? palette.ink : palette.inkTertiary)
                             .frame(width: 22)
                         AvatarView(name: item.element.name, gradient: AvatarColors.gradient(item.element.colorIndex), size: 36)
                         Text(item.element.id == state.me.id ? tr("You") : item.element.name)
@@ -723,7 +723,7 @@ private struct CrewSettingsSheet: View {
                     if let message = crew.errorMessage {
                         Text(message)
                             .font(.footnote)
-                            .foregroundStyle(palette.coralInk)
+                            .foregroundStyle(palette.ink)
                     }
                 }
                 if !crew.blockedIDs.isEmpty {
@@ -763,6 +763,36 @@ private struct CrewSettingsSheet: View {
                 }
                 Button(tr("Cancel"), role: .cancel) {}
             }
+        }
+    }
+}
+
+/// One illness on the crew radar: how many families reported it this week.
+struct RadarRow: View {
+    let entry: RadarEntry
+    let families: Int
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        if let germ = model.catalog.germ(entry.germID) {
+            HStack(spacing: 12) {
+                GermImage(germ: germ, size: 34)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(germ.illness.value)
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                        Spacer()
+                        Text(trCount(entry.families, one: "%lld family", other: "%lld families"))
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                    }
+                    ProgressView(value: Double(entry.families), total: Double(max(families, entry.families, 1)))
+                        .tint(palette.accent)
+                }
+            }
+            .padding(.horizontal, 16)
         }
     }
 }

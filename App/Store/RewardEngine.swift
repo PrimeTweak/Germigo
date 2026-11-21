@@ -37,11 +37,6 @@ enum StreakMath {
     static func record(data: AppData, now: Date) -> Int {
         gaps(data: data, now: now).max() ?? 0
     }
-
-    /// The streak that ended when the current illness started.
-    static func lastRun(data: AppData, now: Date) -> Int {
-        gaps(data: data, now: now).last ?? 0
-    }
 }
 
 /// Points and badges earned by logging germs.

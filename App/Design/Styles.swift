@@ -10,18 +10,16 @@ private struct CardBackground: ViewModifier {
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(palette.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
-            .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.05), radius: 10, x: 0, y: 4)
     }
 }
 
 extension View {
-    /// The rounded white surface used for grouped content.
-    func petriCard(radius: CGFloat = 26, padding: CGFloat = 16) -> some View {
+    /// The rounded quiet surface used for grouped content.
+    func petriCard(radius: CGFloat = 24, padding: CGFloat = 16) -> some View {
         modifier(CardBackground(radius: radius, padding: padding))
     }
 }
 
-/// Full-width capsule buttons in the four roles the app uses.
 /// The one health disclaimer, shown wherever health notes appear.
 enum HealthNotice {
     static var text: String {
@@ -29,11 +27,10 @@ enum HealthNotice {
     }
 }
 
+/// Full-width capsule buttons: filled for the main action, quiet for the other one.
 struct PillButtonStyle: ButtonStyle {
     enum Kind {
         case ink
-        case accent
-        case coral
         case ghost
     }
 
@@ -45,37 +42,13 @@ struct PillButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(foreground)
+            .foregroundStyle(kind == .ink ? palette.background : palette.ink)
             .frame(maxWidth: .infinity)
             .frame(height: height)
-            .background(background, in: Capsule())
+            .background(kind == .ink ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
             .opacity(isEnabled ? (configuration.isPressed ? 0.85 : 1) : 0.45)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
-    }
-
-    private var foreground: Color {
-        switch kind {
-        case .ink: return palette.background
-        case .accent: return palette.night
-        case .coral: return palette.night
-        case .ghost: return palette.ink
-        }
-    }
-
-    private var background: AnyShapeStyle {
-        switch kind {
-        case .ink:
-            return AnyShapeStyle(palette.ink)
-        case .accent:
-            return AnyShapeStyle(LinearGradient(colors: [Color(hex: Swatch.limeLight), Color(hex: Swatch.limeMid)],
-                                                startPoint: .top, endPoint: .bottom))
-        case .coral:
-            return AnyShapeStyle(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
-                                                startPoint: .top, endPoint: .bottom))
-        case .ghost:
-            return AnyShapeStyle(palette.ink.opacity(0.07))
-        }
     }
 }
 
@@ -87,7 +60,7 @@ struct SectionHeader: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.title3.weight(.semibold))
+                .font(.title3.weight(.bold))
                 .foregroundStyle(palette.ink)
             Spacer()
             if let trailing {
@@ -101,21 +74,20 @@ struct SectionHeader: View {
     }
 }
 
-/// A small rounded square holding an SF Symbol, as in Settings rows.
+/// A small quiet square holding an SF Symbol.
 struct IconTile: View {
     let symbol: String
-    let background: Color
-    var foreground = Color.white
     var size: CGFloat = 32
+    @Environment(\.palette) private var palette
 
     var body: some View {
         RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-            .fill(background)
+            .fill(palette.ink.opacity(0.07))
             .frame(width: size, height: size)
             .overlay {
                 Image(systemName: symbol)
                     .font(.system(size: size * 0.5, weight: .semibold))
-                    .foregroundStyle(foreground)
+                    .foregroundStyle(palette.ink)
             }
             .accessibilityHidden(true)
     }
@@ -199,36 +171,34 @@ struct RingsBackground: View {
     }
 }
 
-/// A plain row for settings-like lists inside cards.
+/// A plain row for lists inside cards: a title, an optional value, a chevron.
 struct ValueRow: View {
-    let symbol: String
-    let tint: Color
     let title: String
     var value: String?
     var showsChevron = true
     @Environment(\.palette) private var palette
 
     var body: some View {
-        HStack(spacing: 14) {
-            IconTile(symbol: symbol, background: tint)
+        HStack(spacing: 10) {
             Text(title)
                 .font(.body)
                 .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.leading)
             Spacer(minLength: 8)
             if let value {
                 Text(value)
-                    .font(.body)
-                    .foregroundStyle(palette.inkTertiary)
+                    .font(.callout)
+                    .foregroundStyle(palette.inkSecondary)
                     .lineLimit(1)
             }
             if showsChevron {
                 Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.bold))
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.inkTertiary)
                     .accessibilityHidden(true)
             }
         }
-        .frame(minHeight: 52)
+        .frame(minHeight: 54)
         .contentShape(Rectangle())
     }
 }

@@ -1,133 +1,84 @@
 import SwiftUI
 
-/// The coral "I'm sick" button. Holding it for a moment opens the log sheet.
-struct HoldToLogButton: View {
-    let action: () -> Void
-    @State private var progress: CGFloat = 0
-    @Environment(\.palette) private var palette
-
-    private let holdDuration = 0.9
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(Color.white.opacity(0.95))
-                .frame(width: 46, height: 46)
-                .overlay {
-                    Image(systemName: "thermometer.medium")
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(palette.coralDeep)
-                }
-            VStack(alignment: .leading, spacing: 1) {
-                Text(tr("I'm sick"))
-                    .font(.title3.weight(.bold))
-                Text(tr("Hold to log it"))
-                    .font(.footnote.weight(.medium))
-            }
-            Spacer(minLength: 8)
-            ZStack {
-                Circle()
-                    .stroke(palette.night.opacity(0.25), lineWidth: 2.5)
-                Circle()
-                    .trim(from: 0, to: progress)
-                    .stroke(palette.night, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                Image(systemName: "hand.tap.fill")
-                    .font(.system(size: 18, weight: .semibold))
-            }
-            .frame(width: 44, height: 44)
-        }
-        .foregroundStyle(palette.night)
-        .padding(.horizontal, 10)
-        .frame(height: 66)
-        .background {
-            ZStack(alignment: .leading) {
-                LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)], startPoint: .top, endPoint: .bottom)
-                GeometryReader { proxy in
-                    Color(hex: Swatch.ember, opacity: 0.22)
-                        .frame(width: proxy.size.width * progress)
-                }
-            }
-        }
-        .clipShape(Capsule())
-        .shadow(color: Color(hex: Swatch.coralDeep, opacity: 0.32), radius: 13, x: 0, y: 10)
-        .scaleEffect(progress > 0 ? 0.975 : 1)
-        .contentShape(Capsule())
-        .onLongPressGesture(minimumDuration: holdDuration, maximumDistance: 60) {
-            Haptics.thud()
-            progress = 0
-            action()
-        } onPressingChanged: { pressing in
-            withAnimation(pressing ? .linear(duration: holdDuration) : .easeOut(duration: 0.2)) {
-                progress = pressing ? 1 : 0
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(tr("I'm sick"))
-        .accessibilityHint(tr("Opens the log sheet"))
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAction {
-            action()
-        }
+/// Shrinks a little under the finger.
+struct PressableStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
-/// The exposure timeline: elapsed time, the incubation window, and now.
-struct IncubationBar: View {
-    let exposedAt: Date
-    let opens: Date
-    let closes: Date
-    let now: Date
+/// One of the two answers at the bottom of Today: a face and what it says.
+struct FaceTile<Face: View>: View {
+    let title: String
+    let action: () -> Void
+    let face: Face
+    @Environment(\.palette) private var palette
+
+    init(_ title: String, action: @escaping () -> Void, @ViewBuilder face: () -> Face) {
+        self.title = title
+        self.action = action
+        self.face = face()
+    }
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                face
+                    .frame(width: 62, height: 62)
+                Text(title)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 14)
+            .padding(.bottom, 16)
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
+    }
+}
+
+/// The page background: the top takes the color of the character on screen.
+struct CharacterWash: View {
     let tint: Color
     @Environment(\.palette) private var palette
 
-    private func fraction(_ date: Date) -> CGFloat {
-        let total = max(1, closes.timeIntervalSince(exposedAt))
-        let value = date.timeIntervalSince(exposedAt) / total
-        return CGFloat(min(1, max(0, value)))
-    }
-
     var body: some View {
-        GeometryReader { proxy in
-            let width = proxy.size.width
-            let openX = width * fraction(opens)
-            let nowX = width * fraction(now)
-            ZStack(alignment: .leading) {
-                ZStack(alignment: .leading) {
-                    palette.ink.opacity(0.07)
-                    DangerStripes()
-                        .frame(width: max(0, width - openX))
-                        .offset(x: openX)
-                    tint.frame(width: nowX)
+        palette.background
+            .overlay(alignment: .top) {
+                GeometryReader { proxy in
+                    LinearGradient(colors: [tint.opacity(palette.isDark ? 0.3 : 0.46), tint.opacity(0)],
+                                   startPoint: .top, endPoint: .bottom)
+                        .frame(height: proxy.size.height * 0.62)
                 }
-                .clipShape(Capsule())
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(palette.ink)
-                    .frame(width: 4, height: 22)
-                    .offset(x: max(0, nowX - 2))
             }
-        }
-        .frame(height: 10)
-        .accessibilityHidden(true)
+            .ignoresSafeArea()
+            .accessibilityHidden(true)
     }
 }
 
-private struct DangerStripes: View {
+/// A thin gauge: how much is left, or how far along.
+struct ThinGauge: View {
+    let fraction: Double
+    var fill: Color?
+    @Environment(\.palette) private var palette
+
     var body: some View {
-        Canvas { context, size in
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: Swatch.coral, opacity: 0.12)))
-            var x = -size.height
-            while x < size.width {
-                var path = Path()
-                path.move(to: CGPoint(x: x, y: size.height))
-                path.addLine(to: CGPoint(x: x + size.height, y: 0))
-                path.addLine(to: CGPoint(x: x + size.height + 5, y: 0))
-                path.addLine(to: CGPoint(x: x + 5, y: size.height))
-                path.closeSubpath()
-                context.fill(path, with: .color(Color(hex: Swatch.coral, opacity: 0.3)))
-                x += 10
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(palette.ink.opacity(0.12))
+                Capsule()
+                    .fill(fill ?? palette.ink)
+                    .frame(width: proxy.size.width * min(1, max(0, fraction)))
             }
         }
+        .frame(height: 8)
+        .accessibilityHidden(true)
     }
 }
 
@@ -135,16 +86,12 @@ private struct DangerStripes: View {
 struct SeverityFace: View {
     let level: Int
     let selected: Bool
-
-    private var fillColor: Color {
-        if selected { return Color(hex: Swatch.coral) }
-        let tints: [UInt32] = [Swatch.blushFaint, Swatch.blushLight, Swatch.blush, Swatch.blushDeep, Swatch.linen]
-        return Color(hex: tints[max(0, min(tints.count - 1, level - 1))])
-    }
+    @Environment(\.palette) private var palette
 
     var body: some View {
+        let fillColor = selected ? palette.ink : palette.ink.opacity(0.07)
+        let ink = selected ? palette.background : palette.ink
         Canvas { context, size in
-            let ink = selected ? Color.white : Color(hex: Swatch.night)
             let w = size.width
             let h = size.height
             context.fill(Path(ellipseIn: CGRect(x: 0, y: 0, width: w, height: h)), with: .color(fillColor))
@@ -226,7 +173,7 @@ struct ConfettiView: View {
 
     private static let pieces: [Piece] = {
         var generator = SeededGenerator(state: 7)
-        let colors = [Color(hex: Swatch.lime), Color(hex: Swatch.coral), Color(hex: Swatch.lilac), Color(hex: Swatch.hazard), Color(hex: Swatch.sky)]
+        let colors = [Color(hex: Swatch.irisSoft), Color(hex: Swatch.lilac), Color(hex: Swatch.lilacPale), Color(hex: Swatch.sky), Color(hex: Swatch.skyPale)]
         return (0..<56).map { index in
             let angle = Double.random(in: -2.9 ... -0.25, using: &generator)
             let speed = Double.random(in: 320...760, using: &generator)

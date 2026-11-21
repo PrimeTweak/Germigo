@@ -103,10 +103,10 @@ private struct ThemedRoot: View {
 
 enum AppTab: Hashable {
     case today
-    case album
     case lab
+    case you
     case crew
-    case season
+    case settings
 }
 
 /// The tabs, the sick-mode accessory, and the log and reward presentations.
@@ -120,20 +120,20 @@ struct MainTabs: View {
             TodayScreen()
                 .tabItem { Label(tr("Today"), systemImage: "house.fill") }
                 .tag(AppTab.today)
-            AlbumScreen()
-                .tabItem { Label(tr("Album"), systemImage: "square.stack.fill") }
-                .tag(AppTab.album)
             LabScreen()
                 .tabItem { Label(tr("Lab"), systemImage: "flask.fill") }
                 .tag(AppTab.lab)
+            YouScreen()
+                .tabItem { Label(tr("You"), systemImage: "person.fill") }
+                .tag(AppTab.you)
             if AppConfig.crewEnabled {
                 CrewScreen()
                     .tabItem { Label(tr("Crew"), systemImage: "person.2.fill") }
                     .tag(AppTab.crew)
             }
-            SeasonScreen()
-                .tabItem { Label(tr("Season"), systemImage: "chart.bar.fill") }
-                .tag(AppTab.season)
+            SettingsScreen()
+                .tabItem { Label(tr("Settings"), systemImage: "gearshape.fill") }
+                .tag(AppTab.settings)
         }
         .tabViewBottomAccessory(isEnabled: model.activeLog != nil && model.selectedTab != .today) {
             SickAccessory()
@@ -182,7 +182,7 @@ struct MainTabs: View {
         }
     }
 
-    /// Lets the counter flip on Today before the reward covers the screen.
+    /// Lets Today settle before the reward covers the screen.
     private func presentStagedReward() {
         guard let reward = stagedReward else { return }
         stagedReward = nil
@@ -197,23 +197,25 @@ struct MainTabs: View {
 /// A short confirmation that slides in at the top of the screen.
 private struct ToastView: View {
     let text: String
+    @Environment(\.palette) private var palette
 
     var body: some View {
         Text(text)
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color(hex: Swatch.night))
+            .foregroundStyle(palette.background)
             .padding(.horizontal, 18)
             .frame(minHeight: 42)
-            .background(Color(hex: Swatch.lime), in: Capsule())
+            .background(palette.ink, in: Capsule())
             .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 6)
             .padding(.top, 6)
             .accessibilityAddTraits(.isStaticText)
     }
 }
 
-/// The bar above the tab bar while a germ is active; Today shows the same in its own card.
+/// The bar above the tab bar while a germ is active and another tab is open.
 private struct SickAccessory: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
 
     var body: some View {
         if let log = model.activeLog, let germ = model.activeGerm {
@@ -232,12 +234,12 @@ private struct SickAccessory: View {
                     model.askBetter = true
                 } label: {
                     Text(tr("Better"))
-                        .foregroundStyle(Color(hex: Swatch.night))
+                        .foregroundStyle(palette.background)
                 }
                 .font(.subheadline.weight(.semibold))
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.capsule)
-                .tint(Color(hex: Swatch.coralDeep))
+                .tint(palette.ink)
             }
             .padding(.horizontal, 12)
         }

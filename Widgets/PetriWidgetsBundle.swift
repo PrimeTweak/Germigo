@@ -10,13 +10,11 @@ struct PetriWidgetsBundle: WidgetBundle {
     }
 }
 
-/// Colors shared by the widgets, matching the app's dark sign.
+/// Colors shared by the widgets: the app's dark look and its one accent.
 enum WidgetInk {
-    static let night = Color(hex: Swatch.nightBase)
-    static let chalk = Color(hex: Swatch.chalk)
-    static let lime = Color(hex: Swatch.lime)
-    static let coral = Color(hex: Swatch.coral)
-    static let hazard = Color(hex: Swatch.hazard)
+    static let ground = Color(hex: Swatch.navy)
+    static let ink = Color(hex: Swatch.frost)
+    static let accent = Color(hex: Swatch.irisSoft)
 }
 
 struct SnapshotEntry: TimelineEntry {

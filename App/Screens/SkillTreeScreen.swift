@@ -31,7 +31,7 @@ struct SkillTreeScreen: View {
 
     private var header: some View {
         HStack(spacing: 13) {
-            AvatarView(name: model.displayName, gradient: AvatarColors.you, size: 52)
+            AvatarView(name: model.displayName, gradient: AvatarColors.host, size: 52)
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.displayTitle)
                     .font(.headline)
@@ -49,7 +49,7 @@ struct SkillTreeScreen: View {
         let count = nodes.first?.progress ?? 0
         return VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                IconTile(symbol: branch.symbol, background: Color(hex: branch.tint), foreground: Color(hex: Swatch.night))
+                IconTile(symbol: branch.symbol)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(branch.title)
                         .font(.headline)
@@ -60,7 +60,7 @@ struct SkillTreeScreen: View {
                 }
                 Spacer()
                 Text(verbatim: String(count))
-                    .font(.title3.weight(.heavy).monospacedDigit())
+                    .font(.title3.weight(.bold).monospacedDigit())
                     .foregroundStyle(palette.ink)
             }
             HStack(alignment: .top, spacing: 0) {
@@ -95,7 +95,7 @@ struct SkillTreeScreen: View {
                         .frame(width: 52, height: 52)
                     if node.isUnlocked {
                         Text(verbatim: String(node.rank))
-                            .font(.title3.weight(.black))
+                            .font(.title3.weight(.bold))
                             .foregroundStyle(Color(hex: Swatch.night))
                     } else {
                         Image(systemName: "lock.fill")
@@ -133,9 +133,7 @@ struct SkillTreeScreen: View {
             model.wearTitle(worn ? nil : node.id)
         } label: {
             HStack(spacing: 13) {
-                IconTile(symbol: node.isUnlocked ? "star.circle.fill" : "lock.fill",
-                         background: node.isUnlocked ? Color(hex: Swatch.gold) : palette.surfaceAlt,
-                         foreground: node.isUnlocked ? Color(hex: Swatch.night) : palette.inkTertiary, size: 44)
+                IconTile(symbol: node.isUnlocked ? "star.circle.fill" : "lock.fill", size: 44)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(node.title)
                         .font(.headline)

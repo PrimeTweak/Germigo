@@ -29,13 +29,13 @@ struct VictoryView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.navyRaised), Color(hex: Swatch.navy)], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
             VStack(spacing: 12) {
-                PillLabel(text: tr("Boss defeated").uppercased(), foreground: Color(hex: Swatch.night),
-                          background: Color(hex: Swatch.lime))
+                PillLabel(text: tr("Boss defeated"), foreground: Color(hex: Swatch.navy),
+                          background: Color(hex: Swatch.irisSoft))
                 Text(headline)
-                    .font(.largeTitle.weight(.heavy))
+                    .font(.largeTitle.weight(.bold))
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.7)
                     .lineLimit(2)
@@ -46,8 +46,8 @@ struct VictoryView: View {
                     .padding(.top, 6)
                 Spacer(minLength: 8)
                 Text(verbatim: "+\(victory.points)")
-                    .font(.system(size: 56, weight: .black))
-                    .foregroundStyle(Color(hex: Swatch.lime))
+                    .font(.system(size: 56, weight: .bold))
+                    .foregroundStyle(Color(hex: Swatch.irisSoft))
                     .monospacedDigit()
                 Text(tr("Recovery points"))
                     .font(.subheadline.weight(.semibold))
@@ -75,7 +75,7 @@ struct VictoryView: View {
                     } label: {
                         Text(tr("Done"))
                     }
-                    .buttonStyle(PillButtonStyle(kind: .accent))
+                    .buttonStyle(PillButtonStyle(kind: .ink))
                 }
             }
             .padding(.horizontal, 20)
@@ -86,6 +86,7 @@ struct VictoryView: View {
         }
         .foregroundStyle(Color.white)
         .preferredColorScheme(.dark)
+        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 shown = true
@@ -114,22 +115,22 @@ private struct BossKnockout: View {
                     .padding(.vertical, 8)
                     .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
                 Text(verbatim: "K.O.")
-                    .font(.title3.weight(.black))
+                    .font(.title3.weight(.bold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color(hex: Swatch.irisSoft), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     .rotationEffect(.degrees(8))
                     .padding(12)
             }
             HStack(spacing: 10) {
                 Text(tr("HP"))
-                    .font(.footnote.weight(.heavy))
-                    .foregroundStyle(Color(hex: Swatch.coralPale))
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(Color(hex: Swatch.frost))
                 Capsule()
                     .fill(Color.white.opacity(0.12))
                     .frame(height: 10)
                 Text(verbatim: "0 / \(germ.rarity.bossHealth)")
-                    .font(.footnote.weight(.heavy))
+                    .font(.footnote.weight(.bold))
                     .monospacedDigit()
             }
             .accessibilityElement(children: .combine)
@@ -137,7 +138,7 @@ private struct BossKnockout: View {
                 ForEach(Array(germ.bossPhases.enumerated()), id: \.offset) { item in
                     VStack(alignment: .leading, spacing: 4) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(Color(hex: Swatch.lime))
+                            .foregroundStyle(Color(hex: Swatch.irisSoft))
                         Text(item.element.name)
                             .font(.footnote.weight(.bold))
                             .lineLimit(2)

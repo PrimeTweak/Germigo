@@ -1,64 +1,45 @@
 import SwiftUI
 
 /// Resolved colors for the active theme, color scheme and contrast setting.
+/// The interface stays neutral; the characters bring the color.
 struct Palette {
     let background: Color
     let surface: Color
     let surfaceAlt: Color
-    let sign: Color
     let ink: Color
     let inkSecondary: Color
     let inkTertiary: Color
     let hairline: Color
+    /// The one color of the interface: links, toggles and progress.
     let accent: Color
-    /// Coral for text; the bright corals are for fills and icons.
-    let coralInk: Color
-    /// Text and icons that confirm something went right.
-    let successInk: Color
-    /// Fill of progress gauges.
-    let progress: Color
-    /// The leader's crown.
-    let crown: Color
+    /// Text and icons on an accent fill.
+    let onAccent: Color
     let isDark: Bool
-
-    let lime = Color(hex: Swatch.lime)
-    let limeDeep = Color(hex: Swatch.limeDeep)
-    let coral = Color(hex: Swatch.coral)
-    let coralDeep = Color(hex: Swatch.coralDeep)
-    let lilac = Color(hex: Swatch.lilac)
-    let sky = Color(hex: Swatch.sky)
-    let hazard = Color(hex: Swatch.hazard)
-    let night = Color(hex: Swatch.night)
 
     static func make(theme: Theme, scheme: ColorScheme, contrast: ColorSchemeContrast = .standard) -> Palette {
         let dark = theme == .nightShift || scheme == .dark
         let strong = contrast == .increased
         if dark {
-            let ink = Color(hex: Swatch.chalk)
-            return Palette(background: Color(hex: Swatch.nightBase), surface: Color(hex: Swatch.nightSurface),
-                           surfaceAlt: Color(hex: Swatch.nightRaised), sign: Color(hex: Swatch.nightSurface),
-                           ink: ink, inkSecondary: ink.opacity(strong ? 0.88 : 0.78), inkTertiary: ink.opacity(strong ? 0.78 : 0.62),
-                           hairline: ink.opacity(strong ? 0.24 : 0.12),
-                           accent: theme == .mint ? Color(hex: Swatch.mint) : Color(hex: Swatch.lime),
-                           coralInk: Color(hex: Swatch.coralSoft), successInk: Color(hex: Swatch.green),
-                           progress: Color(hex: Swatch.limeDeep), crown: Color(hex: Swatch.gold), isDark: true)
+            let ink = Color(hex: Swatch.frost)
+            return Palette(background: Color(hex: Swatch.navy), surface: Color(hex: Swatch.navySurface),
+                           surfaceAlt: Color(hex: Swatch.navyRaised), ink: ink,
+                           inkSecondary: ink.opacity(strong ? 0.88 : 0.72), inkTertiary: ink.opacity(strong ? 0.78 : 0.6),
+                           hairline: ink.opacity(strong ? 0.24 : 0.1),
+                           accent: Color(hex: theme == .mint ? Swatch.mint : Swatch.irisSoft),
+                           onAccent: Color(hex: Swatch.navy), isDark: true)
         }
-        let ink = Color(hex: Swatch.night)
+        let ink = Color(hex: Swatch.ink)
         let secondary = ink.opacity(strong ? 0.84 : 0.72)
         let tertiary = ink.opacity(strong ? 0.78 : 0.64)
         let hairline = ink.opacity(strong ? 0.22 : 0.1)
         if theme == .mint {
             return Palette(background: Color(hex: Swatch.mintBase), surface: .white, surfaceAlt: Color(hex: Swatch.mintAlt),
-                           sign: Color(hex: Swatch.mintSign), ink: ink, inkSecondary: secondary, inkTertiary: tertiary,
-                           hairline: hairline, accent: Color(hex: Swatch.mint), coralInk: Color(hex: Swatch.coralInk),
-                           successInk: Color(hex: Swatch.forest), progress: Color(hex: Swatch.limeInk),
-                           crown: Color(hex: Swatch.crown), isDark: false)
+                           ink: ink, inkSecondary: secondary, inkTertiary: tertiary, hairline: hairline,
+                           accent: Color(hex: Swatch.mintInk), onAccent: .white, isDark: false)
         }
-        return Palette(background: Color(hex: Swatch.chalk), surface: .white, surfaceAlt: Color(hex: Swatch.agarAlt),
-                       sign: Color(hex: Swatch.agarSign), ink: ink, inkSecondary: secondary, inkTertiary: tertiary,
-                       hairline: hairline, accent: Color(hex: Swatch.lime), coralInk: Color(hex: Swatch.coralInk),
-                       successInk: Color(hex: Swatch.forest), progress: Color(hex: Swatch.limeInk),
-                       crown: Color(hex: Swatch.crown), isDark: false)
+        return Palette(background: .white, surface: Color(hex: Swatch.mist), surfaceAlt: Color(hex: Swatch.mistDeep),
+                       ink: ink, inkSecondary: secondary, inkTertiary: tertiary, hairline: hairline,
+                       accent: Color(hex: Swatch.iris), onAccent: .white, isDark: false)
     }
 }
 
@@ -131,4 +112,8 @@ enum AvatarColors {
 
     static let you = LinearGradient(colors: [Color(hex: Swatch.limePale), Color(hex: Swatch.limeLeaf)],
                                     startPoint: .topLeading, endPoint: .bottomTrailing)
+
+    /// The parent's own avatar inside the app.
+    static let host = LinearGradient(colors: [Color(hex: Swatch.lilacPale), Color(hex: Swatch.wisteria)],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing)
 }

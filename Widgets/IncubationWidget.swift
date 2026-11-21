@@ -35,9 +35,9 @@ struct IncubationWidgetView: View {
 
     var body: some View {
         content
-            .foregroundStyle(WidgetInk.chalk)
+            .foregroundStyle(WidgetInk.ink)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .containerBackground(for: .widget) { WidgetInk.night }
+            .containerBackground(for: .widget) { WidgetInk.ground }
     }
 
     @ViewBuilder
@@ -55,7 +55,7 @@ struct IncubationWidgetView: View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: symbol)
                 .font(.title3)
-                .foregroundStyle(WidgetInk.lime)
+                .foregroundStyle(WidgetInk.accent)
                 .widgetAccentable()
             Spacer(minLength: 0)
             Text(title)
@@ -93,20 +93,20 @@ struct IncubationWidgetView: View {
                     .font(.system(size: 11, weight: .semibold))
                     .opacity(0.65)
                 Text(exposure.windowOpens, style: .relative)
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(WidgetInk.hazard)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(WidgetInk.ink)
                     .widgetAccentable()
             case .inside:
                 Text(tr("In the window"))
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(WidgetInk.coral)
+                    .foregroundStyle(WidgetInk.accent)
                 Text(exposure.windowCloses, style: .relative)
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
+                    .font(.system(size: 18, weight: .bold))
                     .widgetAccentable()
             case .after:
                 Text(tr("Window passed"))
-                    .font(.system(size: 15, weight: .heavy))
-                    .foregroundStyle(WidgetInk.lime)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(WidgetInk.accent)
                     .widgetAccentable()
                 Text(tr("Did you dodge it?"))
                     .font(.system(size: 11))
@@ -119,7 +119,7 @@ struct IncubationWidgetView: View {
                 } currentValueLabel: {
                     EmptyView()
                 }
-                .tint(phase == .inside ? WidgetInk.coral : WidgetInk.hazard)
+                .tint(WidgetInk.accent)
             }
         }
     }

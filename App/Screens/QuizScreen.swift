@@ -62,7 +62,7 @@ struct QuizScreen: View {
             HStack(spacing: 6) {
                 ForEach(0..<questions.count, id: \.self) { step in
                     Capsule()
-                        .fill(step < index || (step == index && picked != nil) ? palette.progress : palette.ink.opacity(0.1))
+                        .fill(step < index || (step == index && picked != nil) ? palette.accent : palette.ink.opacity(0.1))
                         .frame(height: 7)
                 }
             }
@@ -110,11 +110,11 @@ struct QuizScreen: View {
                     Button(tr("Myth")) {
                         choose(0, question)
                     }
-                    .buttonStyle(PillButtonStyle(kind: .coral, height: 64))
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 64))
                     Button(tr("Fact")) {
                         choose(1, question)
                     }
-                    .buttonStyle(PillButtonStyle(kind: .accent, height: 64))
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 64))
                 }
             } else {
                 reveal(question)
@@ -134,38 +134,19 @@ struct QuizScreen: View {
 
     private func kindChip(_ kind: QuizKind) -> some View {
         let label: String
-        let foreground: Color
-        let background: Color
         switch kind {
-        case .myth:
-            label = tr("Myth or fact?")
-            foreground = Color(hex: Swatch.grape)
-            background = Color(hex: Swatch.lilacMist)
-        case .whoAmI, .telltale, .weakness:
-            label = tr("Who am I?")
-            foreground = Color(hex: Swatch.night)
-            background = Color(hex: Swatch.skyPale)
-        case .showsUp, .lasts:
-            label = tr("Timing")
-            foreground = Color(hex: Swatch.forest)
-            background = Color(hex: Swatch.mintAlt)
-        case .microbe:
-            label = tr("Virus or bacterium?")
-            foreground = Color(hex: Swatch.night)
-            background = Color(hex: Swatch.butter)
-        case .antibiotics:
-            label = tr("Antibiotics?")
-            foreground = Color(hex: Swatch.night)
-            background = Color(hex: Swatch.lilacPale)
+        case .myth: label = tr("Myth or fact?")
+        case .whoAmI, .telltale, .weakness: label = tr("Who am I?")
+        case .showsUp, .lasts: label = tr("Timing")
+        case .microbe: label = tr("Virus or bacterium?")
+        case .antibiotics: label = tr("Antibiotics?")
         }
         return Text(label)
-            .font(.caption.weight(.heavy))
-            .kerning(1.2)
-            .textCase(.uppercase)
-            .foregroundStyle(foreground)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(palette.inkSecondary)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(background, in: Capsule())
+            .background(palette.ink.opacity(0.07), in: Capsule())
             .padding(.top, 8)
     }
 
@@ -185,11 +166,11 @@ struct QuizScreen: View {
         .frame(maxWidth: .infinity, minHeight: 300)
         .background(palette.surface, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
         .overlay(alignment: .topLeading) {
-            stamp(tr("Myth"), color: palette.coralInk)
+            stamp(tr("Myth"), color: palette.ink)
                 .opacity(Double(max(0, -drag) / 100))
         }
         .overlay(alignment: .topTrailing) {
-            stamp(tr("Fact"), color: palette.successInk)
+            stamp(tr("Fact"), color: palette.accent)
                 .opacity(Double(max(0, drag) / 100))
         }
         .shadow(color: Color.black.opacity(palette.isDark ? 0 : 0.1), radius: 16, x: 0, y: 8)
@@ -215,8 +196,7 @@ struct QuizScreen: View {
 
     private func stamp(_ text: String, color: Color) -> some View {
         Text(text)
-            .font(.headline.weight(.heavy))
-            .textCase(.uppercase)
+            .font(.headline.weight(.bold))
             .foregroundStyle(color)
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
@@ -244,7 +224,7 @@ struct QuizScreen: View {
         let answered = picked != nil
         let isRight = offset == question.answer
         let isPicked = offset == picked
-        let border: Color = answered && isRight ? palette.successInk : (answered && isPicked ? palette.coralInk : .clear)
+        let border: Color = answered && isRight ? palette.accent : (answered && isPicked ? palette.ink : .clear)
         return Button {
             choose(offset, question)
         } label: {
@@ -256,10 +236,10 @@ struct QuizScreen: View {
                 Spacer(minLength: 4)
                 if answered && isRight {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(palette.successInk)
+                        .foregroundStyle(palette.accent)
                 } else if answered && isPicked {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(palette.coralInk)
+                        .foregroundStyle(palette.ink)
                 }
             }
             .padding(16)
@@ -289,10 +269,10 @@ struct QuizScreen: View {
             HStack(spacing: 10) {
                 Image(systemName: lastRight ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(lastRight ? palette.successInk : palette.coralInk)
+                    .foregroundStyle(lastRight ? palette.accent : palette.ink)
                 Text(title)
-                    .font(.title2.weight(.heavy))
-                    .foregroundStyle(lastRight ? palette.successInk : palette.coralInk)
+                    .font(.title2.weight(.bold))
+                    .foregroundStyle(lastRight ? palette.accent : palette.ink)
             }
             if question.kind == .myth {
                 Text(question.prompt)
@@ -330,7 +310,7 @@ struct QuizScreen: View {
             }
             Text(lastRight ? tr("+%lld pts", RewardEngine.quizAnswerPoints) : tr("It will come back another day."))
                 .font(.subheadline.weight(.bold))
-                .foregroundStyle(lastRight ? palette.successInk : palette.inkSecondary)
+                .foregroundStyle(lastRight ? palette.accent : palette.inkSecondary)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -397,31 +377,27 @@ struct QuizScreen: View {
         return VStack(spacing: 14) {
             Image(systemName: "flask.fill")
                 .font(.system(size: 44, weight: .semibold))
-                .foregroundStyle(palette.night)
+                .foregroundStyle(palette.onAccent)
                 .frame(width: 92, height: 92)
-                .background(palette.lime, in: Circle())
+                .background(palette.accent, in: Circle())
                 .padding(.top, 24)
             Text(tr("%1$lld of %2$lld", score, questions.count))
-                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .font(.system(size: 44, weight: .bold))
                 .foregroundStyle(palette.ink)
             Text(line)
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(palette.inkSecondary)
             VStack(alignment: .leading, spacing: 0) {
-                ValueRow(symbol: "plus.circle.fill", tint: palette.limeDeep, title: tr("Points"),
-                         value: tr("+%lld pts", score * RewardEngine.quizAnswerPoints), showsChevron: false)
+                ValueRow(title: tr("Points"), value: tr("+%lld pts", score * RewardEngine.quizAnswerPoints), showsChevron: false)
                 Divider()
-                ValueRow(symbol: "flame.fill", tint: palette.coralDeep, title: tr("Lab streak"),
-                         value: trCount(streak, one: "%lld day", other: "%lld days"), showsChevron: false)
+                ValueRow(title: tr("Lab streak"), value: trCount(streak, one: "%lld day", other: "%lld days"), showsChevron: false)
                 if let next = model.nextLesson {
                     Divider()
-                    ValueRow(symbol: "book.fill", tint: palette.lilac, title: next.article.title.value,
-                             value: trCount(next.remaining, one: "%lld to go", other: "%lld to go"), showsChevron: false)
+                    ValueRow(title: next.article.title.value, value: trCount(next.remaining, one: "%lld to go", other: "%lld to go"), showsChevron: false)
                 }
                 ForEach(newBadges) { badge in
                     Divider()
-                    ValueRow(symbol: badge.symbol, tint: Color(hex: badge.tint), title: badge.title,
-                             value: tr("New badge"), showsChevron: false)
+                    ValueRow(title: badge.title, value: tr("New badge"), showsChevron: false)
                 }
             }
             .padding(.horizontal, 16)

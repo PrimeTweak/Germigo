@@ -41,7 +41,7 @@ struct WrappedScreen: View {
                     } label: {
                         Label(tr("Share this card"), systemImage: "square.and.arrow.up")
                     }
-                    .buttonStyle(PillButtonStyle(kind: .accent, height: 52))
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 52))
                     .disabled(page == .guess)
                 }
                 .padding(.horizontal, 24)
@@ -49,8 +49,9 @@ struct WrappedScreen: View {
             }
         }
         .foregroundStyle(Color.white)
-        .background(Color(hex: Swatch.nightBase).ignoresSafeArea())
+        .background(Color(hex: Swatch.navy).ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
         .sheet(item: $sharing) { item in
             SharePreviewSheet(title: tr("Season wrapped")) {
                 card(item, wrap: wrap, stats: stats)
@@ -95,23 +96,22 @@ private struct NemesisGuessCard: View {
     var body: some View {
         let guess = model.data.wrapGuesses[String(season.number)]
         let topID = wrap.topGerm?.germ.id
-        let lime = Color(hex: Swatch.lime)
+        let glow = Color(hex: Swatch.irisSoft)
         ZStack {
-            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.navyRaised), Color(hex: Swatch.navy)], startPoint: .top, endPoint: .bottom)
             VStack(alignment: .leading, spacing: 0) {
-                Text(tr("Before the reveal").uppercased())
-                    .font(.system(size: 14, weight: .heavy))
-                    .kerning(2)
-                    .foregroundStyle(lime)
+                Text(tr("Before the reveal"))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(glow)
                     .padding(.top, 50)
                 Text(tr("Who was your nemesis this season?"))
-                    .font(.system(size: 36, weight: .black))
+                    .font(.system(size: 36, weight: .bold))
                     .kerning(-1)
                     .minimumScaleFactor(0.7)
                     .padding(.top, 10)
                 Text(guessLine(guess))
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(guess == true ? lime : Color.white.opacity(0.75))
+                    .foregroundStyle(guess == true ? glow : Color.white.opacity(0.75))
                     .padding(.top, 8)
                 VStack(spacing: 12) {
                     ForEach(options) { germ in
@@ -125,19 +125,19 @@ private struct NemesisGuessCard: View {
                                     .padding(4)
                                     .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 Text(germ.name)
-                                    .font(.system(size: 21, weight: .heavy))
+                                    .font(.system(size: 21, weight: .bold))
                                 Spacer(minLength: 0)
                                 if isTop {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 24, weight: .bold))
-                                        .foregroundStyle(lime)
+                                        .foregroundStyle(glow)
                                 }
                             }
                             .padding(12)
                             .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .stroke(isTop ? lime : Color.white.opacity(0.12), lineWidth: 2)
+                                    .stroke(isTop ? glow : Color.white.opacity(0.12), lineWidth: 2)
                             }
                             .opacity(guess != nil && !isTop ? 0.55 : 1)
                         }

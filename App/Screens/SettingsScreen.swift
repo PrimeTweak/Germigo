@@ -1,20 +1,14 @@
 import StoreKit
 import SwiftUI
 
-/// A settings row label: a pale tile with a night glyph, one tile color per section.
+/// A settings row label.
 struct SettingsLabel: View {
-    let symbol: String
-    let tint: Color
     let title: String
     @Environment(\.palette) private var palette
 
     var body: some View {
-        Label {
-            Text(title)
-                .foregroundStyle(palette.ink)
-        } icon: {
-            IconTile(symbol: symbol, background: tint, foreground: Color(hex: Swatch.night), size: 30)
-        }
+        Text(title)
+            .foregroundStyle(palette.ink)
     }
 }
 
@@ -30,23 +24,12 @@ struct RowChevron: View {
     }
 }
 
-/// Tile colors of the settings sections.
-enum SettingsTint {
-    static let family = Color(hex: Swatch.skyPale)
-    static let pass = Color(hex: Swatch.limeLight)
-    static let look = Color(hex: Swatch.lilacPale)
-    static let notifications = Color(hex: Swatch.butter)
-    static let help = Color(hex: Swatch.lime)
-    static let data = Color(hex: Swatch.skyPale)
-    static let about = Color(hex: Swatch.agarAlt)
-}
-
+/// The last tab: family, pass, look, notifications and the rest.
 struct SettingsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(PurchaseManager.self) private var purchases
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @State private var showPaywall = false
     @State private var showManage = false
@@ -60,29 +43,19 @@ struct SettingsScreen: View {
     var body: some View {
         NavigationStack {
             List {
-                profileSection
-                familySection
-                passSection
-                lookSection
-                notificationSection
-                moreSection
+                Group {
+                    familySection
+                    passSection
+                    lookSection
+                    notificationSection
+                    moreSection
+                }
+                .listRowBackground(palette.surface)
             }
             .scrollContentBackground(.hidden)
             .background(palette.background.ignoresSafeArea())
-            .tint(.green)
+            .tint(palette.accent)
             .navigationTitle(tr("Settings"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "checkmark")
-                    }
-                    .tint(palette.ink)
-                    .accessibilityLabel(tr("Done"))
-                }
-            }
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
@@ -167,40 +140,6 @@ struct SettingsScreen: View {
 
     // MARK: - Sections
 
-    private var profileSection: some View {
-        Section {
-            Button {
-                nameDraft = model.data.profileName
-                editingName = true
-            } label: {
-                HStack(spacing: 14) {
-                    AvatarView(name: model.displayName, gradient: AvatarColors.you, size: 56)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(model.displayName)
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(palette.ink)
-                        Text(tr("Level %1$lld · %2$@", model.level.number, model.displayTitle))
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                        if model.hasPass {
-                            PillLabel(text: tr("Season Pass").uppercased(), foreground: palette.night, background: palette.lime)
-                                .padding(.top, 2)
-                        }
-                    }
-                    Spacer(minLength: 4)
-                    Text(tr("Edit"))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                        .padding(.horizontal, 14)
-                        .frame(height: 32)
-                        .background(palette.ink.opacity(0.07), in: Capsule())
-                }
-                .padding(.vertical, 4)
-            }
-            .accessibilityHint(tr("Edit your name"))
-        }
-    }
-
     private func valueWithChevron(_ value: String) -> some View {
         HStack(spacing: 8) {
             Text(value)
@@ -210,13 +149,24 @@ struct SettingsScreen: View {
 
     private var familySection: some View {
         Section(tr("Family")) {
+            Button {
+                nameDraft = model.data.profileName
+                editingName = true
+            } label: {
+                LabeledContent {
+                    valueWithChevron(model.displayName)
+                } label: {
+                    SettingsLabel(title: tr("You"))
+                }
+            }
+            .accessibilityHint(tr("Edit your name"))
             NavigationLink {
                 KidsScreen()
             } label: {
                 LabeledContent {
                     Text(model.data.kids.map { $0.name }.joined(separator: ", "))
                 } label: {
-                    SettingsLabel(symbol: "face.smiling.inverse", tint: SettingsTint.family, title: tr("Kids"))
+                    SettingsLabel(title: tr("Kids"))
                 }
             }
             Button {
@@ -226,18 +176,17 @@ struct SettingsScreen: View {
                 LabeledContent {
                     valueWithChevron(model.data.partnerName ?? tr("Add"))
                 } label: {
-                    SettingsLabel(symbol: "person.2.fill", tint: SettingsTint.family, title: tr("Partner"))
+                    SettingsLabel(title: tr("Partner"))
                 }
             }
             if AppConfig.crewEnabled {
                 Button {
-                    dismiss()
                     model.selectedTab = .crew
                 } label: {
                     LabeledContent {
                         valueWithChevron(crew.state?.crew.name ?? tr("None"))
                     } label: {
-                        SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: SettingsTint.family, title: tr("Crew"))
+                        SettingsLabel(title: tr("Crew"))
                     }
                 }
             }
@@ -262,18 +211,18 @@ struct SettingsScreen: View {
                 LabeledContent {
                     valueWithChevron(planLabel)
                 } label: {
-                    SettingsLabel(symbol: "ticket.fill", tint: SettingsTint.pass, title: tr("Plan"))
+                    SettingsLabel(title: tr("Plan"))
                 }
             }
             Button {
                 restore()
             } label: {
-                SettingsLabel(symbol: "arrow.clockwise", tint: SettingsTint.pass, title: tr("Restore Purchases"))
+                SettingsLabel(title: tr("Restore Purchases"))
             }
             .disabled(isRestoring)
             #if PETRI_SIDELOAD
             Toggle(isOn: setting(\.sideloadPass)) {
-                SettingsLabel(symbol: "hammer.fill", tint: SettingsTint.pass, title: tr("Pass (test build)"))
+                SettingsLabel(title: tr("Pass (test build)"))
             }
             #endif
         }
@@ -284,18 +233,18 @@ struct SettingsScreen: View {
             NavigationLink {
                 AppIconScreen()
             } label: {
-                SettingsLabel(symbol: "app.badge.fill", tint: SettingsTint.look, title: tr("Icon and Theme"))
+                SettingsLabel(title: tr("Icon and Theme"))
             }
             Picker(selection: setting(\.appearance)) {
                 Text(tr("Automatic")).tag(AppearanceMode.system)
                 Text(tr("Light")).tag(AppearanceMode.light)
                 Text(tr("Dark")).tag(AppearanceMode.dark)
             } label: {
-                SettingsLabel(symbol: "circle.lefthalf.filled", tint: SettingsTint.look, title: tr("Appearance"))
+                SettingsLabel(title: tr("Appearance"))
             }
             .tint(palette.inkSecondary)
             Toggle(isOn: setting(\.soundsOn)) {
-                SettingsLabel(symbol: "speaker.wave.2.fill", tint: SettingsTint.look, title: tr("Sounds and Haptics"))
+                SettingsLabel(title: tr("Sounds and Haptics"))
             }
         } header: {
             Text(tr("Look"))
@@ -307,11 +256,11 @@ struct SettingsScreen: View {
     private var notificationSection: some View {
         Section {
             Toggle(isOn: setting(\.checkInsOn)) {
-                SettingsLabel(symbol: "bell.fill", tint: SettingsTint.notifications, title: tr("Check-ins"))
+                SettingsLabel(title: tr("Check-ins"))
             }
             if AppConfig.crewEnabled {
                 Toggle(isOn: setting(\.crewAlertsOn)) {
-                    SettingsLabel(symbol: "dot.radiowaves.left.and.right", tint: SettingsTint.notifications, title: tr("Crew Alerts"))
+                    SettingsLabel(title: tr("Crew Alerts"))
                 }
             }
             if notificationsDenied, let url = URL(string: UIApplication.openNotificationSettingsURLString) {
@@ -319,7 +268,7 @@ struct SettingsScreen: View {
                     LabeledContent {
                         RowChevron()
                     } label: {
-                        SettingsLabel(symbol: "bell.slash.fill", tint: SettingsTint.notifications, title: tr("Turn On in iOS Settings"))
+                        SettingsLabel(title: tr("Turn On in iOS Settings"))
                     }
                 }
             }
@@ -337,19 +286,17 @@ struct SettingsScreen: View {
             NavigationLink {
                 HelpLinesScreen()
             } label: {
-                SettingsLabel(symbol: "phone.fill", tint: SettingsTint.help, title: tr("Help Lines"))
+                SettingsLabel(title: tr("Help Lines"))
             }
             NavigationLink {
-                DataScreen {
-                    dismiss()
-                }
+                DataScreen()
             } label: {
-                SettingsLabel(symbol: "hand.raised.fill", tint: SettingsTint.data, title: tr("Data and Privacy"))
+                SettingsLabel(title: tr("Data and Privacy"))
             }
             NavigationLink {
                 AboutScreen()
             } label: {
-                SettingsLabel(symbol: "info.circle.fill", tint: SettingsTint.about, title: tr("About Petri"))
+                SettingsLabel(title: tr("About Petri"))
             }
         } footer: {
             Text(tr("Petri %@ · Made in Montréal", AppConfig.versionLabel))

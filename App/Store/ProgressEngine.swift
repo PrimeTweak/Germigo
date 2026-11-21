@@ -160,11 +160,9 @@ enum Milestones {
 
 // MARK: - Next goal
 
-/// The closest thing to unlock, shown under the level.
+/// The closest thing to unlock, shown first on the You tab.
 struct Goal: Hashable {
     let title: String
-    let detail: String
-    let symbol: String
     let progress: Int
     let target: Int
 
@@ -179,7 +177,7 @@ enum GoalEngine {
             let current = StreakMath.days(from: start, to: now)
             if let target = Milestones.next(after: current) {
                 candidates.append(Goal(title: trCount(target, one: "%lld day without a germ", other: "%lld days without a germ"),
-                                       detail: tr("Current streak"), symbol: "calendar", progress: current, target: target))
+                                       progress: current, target: target))
             }
         }
 
@@ -188,15 +186,13 @@ enum GoalEngine {
             let count = tally[branch] ?? 0
             let rank = SkillTree.rank(of: branch, count: count)
             guard rank < branch.targets.count else { continue }
-            candidates.append(Goal(title: branch.titles[rank], detail: branch.unit, symbol: branch.symbol,
-                                   progress: count, target: branch.targets[rank]))
+            candidates.append(Goal(title: branch.titles[rank], progress: count, target: branch.targets[rank]))
         }
 
         let counts = BadgeProgress.counts(data: data, catalog: catalog, now: now)
         for id in ["collector", "half_album", "full_album", "dodger", BadgeCatalog.ironParent] where data.badges[id] == nil {
             guard let badge = BadgeCatalog.badge(id), let count = counts[id], count.target > 0 else { continue }
-            candidates.append(Goal(title: badge.title, detail: badge.detail, symbol: badge.symbol,
-                                   progress: count.progress, target: count.target))
+            candidates.append(Goal(title: badge.title, progress: count.progress, target: count.target))
         }
 
         let open = candidates.filter { $0.progress < $0.target }

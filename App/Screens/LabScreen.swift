@@ -1,44 +1,62 @@
 import SwiftUI
 
-/// The learning tab: the daily quiz, the germ of the day, the lessons and every germ's case file.
+/// The learning tab: the daily quiz, the lessons, the germ of the day and all the germs with their case files.
 struct LabScreen: View {
+    private enum Filter: Hashable {
+        case all
+        case caught
+        case studied
+    }
+
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var showQuiz = false
-    @State private var showPaywall = false
+    @State private var filter = Filter.all
     @State private var query = ""
+
+    /// Germs studied in the Lab and not caught yet.
+    private var studiedOnly: Set<String> {
+        model.studiedGermIDs.subtracting(model.caughtGermIDs)
+    }
 
     private var germs: [Germ] {
         let needle = query.trimmingCharacters(in: .whitespaces).lowercased()
-        let sorted = model.catalog.germs.sorted { $0.illness.value < $1.illness.value }
-        guard !needle.isEmpty else { return sorted }
-        return sorted.filter {
-            $0.illness.value.lowercased().contains(needle) || $0.scientific.value.lowercased().contains(needle)
+        return model.catalog.germs.filter { germ in
+            switch filter {
+            case .all: break
+            case .caught: if !model.caughtGermIDs.contains(germ.id) { return false }
+            case .studied: if !studiedOnly.contains(germ.id) { return false }
+            }
+            guard !needle.isEmpty else { return true }
+            return germ.name.lowercased().contains(needle) || germ.illness.value.lowercased().contains(needle)
+                || germ.scientific.value.lowercased().contains(needle)
         }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text(tr("Learn it before you catch it."))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .padding(.horizontal, 4)
+                VStack(alignment: .leading, spacing: 12) {
                     QuizCard(showQuiz: $showQuiz)
+                    lessonsRow
                     germOfTheDay
-                    lessons
-                    caseFiles
+                    SectionHeader(title: tr("All %lld", model.catalog.germs.count),
+                                  trailing: tr("%lld caught", model.caughtGermIDs.count))
+                        .padding(.top, 8)
+                    chips
+                    grid
                     Text(HealthNotice.text)
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
                         .padding(.horizontal, 4)
+                        .padding(.top, 8)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 28)
             }
             .background(palette.background.ignoresSafeArea())
             .navigationTitle(tr("Lab"))
+            .searchable(text: $query, prompt: tr("Search an illness"))
             .navigationDestination(for: Germ.self) { germ in
                 GermDetailScreen(germ: germ)
             }
@@ -48,101 +66,287 @@ struct LabScreen: View {
             .fullScreenCover(isPresented: $showQuiz) {
                 QuizScreen()
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
-            }
         }
+    }
+
+    private var lessonsRow: some View {
+        let articles = model.catalog.articles
+        let open = articles.filter { model.isArticleUnlocked($0) }.count
+        return NavigationLink {
+            LessonsScreen()
+        } label: {
+            ValueRow(title: tr("Lessons"), value: tr("%1$lld of %2$lld", open, articles.count))
+                .padding(.horizontal, 18)
+                .petriCard(padding: 0)
+        }
+        .buttonStyle(.plain)
     }
 
     @ViewBuilder
     private var germOfTheDay: some View {
         if let germ = QuizEngine.germOfTheDay(model.catalog.germs, now: Date()) {
-            let locked = model.count(of: germ.id) == 0
-            SectionHeader(title: tr("Germ of the day"))
             NavigationLink(value: germ) {
-                HStack(spacing: 14) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(germ.lightTint)
-                        GermImage(germ: germ, size: 66, silhouette: locked)
-                            .foregroundStyle(germ.deepTint)
-                        if locked {
-                            Text(verbatim: "?")
-                                .font(.system(size: 26, weight: .black, design: .rounded))
-                                .foregroundStyle(Color(hex: Swatch.night, opacity: 0.6))
-                        }
-                    }
-                    .frame(width: 84, height: 84)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(germ.illness.value)
-                            .font(.headline)
+                HStack(spacing: 10) {
+                    GermImage(germ: germ, size: 96)
+                        .shadow(color: Color.black.opacity(0.14), radius: 5, x: 0, y: 5)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tr("Today's germ"))
+                            .font(.footnote)
+                            .foregroundStyle(palette.ink.opacity(0.8))
+                        Text(germ.name)
+                            .font(.title3.weight(.bold))
                             .foregroundStyle(palette.ink)
-                        if let fact = germ.facts.first {
-                            Text(tr("%1$@: %2$@", fact.label.value, fact.value.value))
-                                .font(.subheadline)
-                                .foregroundStyle(palette.inkSecondary)
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Text(tr("Open the case file"))
-                            .font(.subheadline.weight(.semibold))
-                            .underline()
-                            .foregroundStyle(palette.ink)
+                        Text(germ.about.map { germ.illness.value + ". " + $0.value } ?? germ.illness.value)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.ink.opacity(0.8))
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
                     }
-                    Spacer(minLength: 0)
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.ink.opacity(0.6))
+                        .accessibilityHidden(true)
                 }
-                .petriCard(padding: 12)
+                .padding(.vertical, 8)
+                .padding(.leading, 6)
+                .padding(.trailing, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             }
             .buttonStyle(.plain)
         }
     }
 
-    private var lessons: some View {
-        let articles = model.catalog.articles
-        let open = articles.filter { model.isArticleUnlocked($0) }.count
-        return VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: tr("Lessons"), trailing: tr("%1$lld of %2$lld", open, articles.count))
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(articles.enumerated()), id: \.element.id) { item in
-                    if item.offset > 0 {
-                        Divider()
-                    }
-                    lessonRow(item.element)
-                }
-            }
-            .padding(.horizontal, 16)
-            .petriCard(padding: 0)
-            Text(tr("Lessons open with right answers in the daily quiz. The Season Pass opens them all."))
-                .font(.footnote)
+    private var chips: some View {
+        HStack(spacing: 8) {
+            chip(tr("All %lld", model.catalog.germs.count), .all)
+            chip(tr("Caught %lld", model.caughtGermIDs.count), .caught)
+            chip(tr("Studied %lld", studiedOnly.count), .studied)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func chip(_ title: String, _ value: Filter) -> some View {
+        let selected = filter == value
+        return Button {
+            filter = value
+        } label: {
+            Text(title)
+                .font(.subheadline.weight(selected ? .semibold : .regular))
+                .foregroundStyle(selected ? palette.background : palette.inkSecondary)
+                .padding(.horizontal, 14)
+                .frame(height: 36)
+                .background(selected ? palette.ink : palette.surface, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    @ViewBuilder
+    private var grid: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+        let shown = germs
+        if shown.isEmpty {
+            Text(query.isEmpty ? tr("Nothing here yet. It won't last.") : tr("No illness matches your search."))
+                .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.horizontal, 4)
+                .padding(.vertical, 12)
+        }
+        LazyVGrid(columns: columns, spacing: 18) {
+            ForEach(shown) { germ in
+                NavigationLink(value: germ) {
+                    GermTile(germ: germ, count: model.count(of: germ.id), studied: studiedOnly.contains(germ.id))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+extension Germ {
+    /// The quiet tint behind a caught germ: its pale tint by day, a deep wash of it by night.
+    func tileTint(_ palette: Palette) -> Color {
+        palette.isDark ? deepTint.opacity(0.3) : lightTint
+    }
+}
+
+/// One germ in the Lab grid: a gray shape to find, in color once studied, on its tint once caught.
+private struct GermTile: View {
+    let germ: Germ
+    let count: Int
+    let studied: Bool
+    @Environment(\.palette) private var palette
+
+    private var caught: Bool { count > 0 }
+    private var known: Bool { caught || studied }
+
+    var body: some View {
+        VStack(spacing: 2) {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(caught ? germ.tileTint(palette) : palette.surface)
+                .aspectRatio(1, contentMode: .fit)
+                .overlay {
+                    GeometryReader { proxy in
+                        GermImage(germ: germ, size: proxy.size.width * 0.78, silhouette: !known)
+                            .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .padding(.bottom, 6)
+            HStack(spacing: 4) {
+                Text(germ.name)
+                    .font(.subheadline.weight(known ? .semibold : .regular))
+                    .foregroundStyle(known ? palette.ink : palette.inkSecondary)
+                if count > 1 {
+                    Text(verbatim: "×\(count)")
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+            }
+            .lineLimit(1)
+            Text(germ.illness.value)
+                .font(.caption)
+                .foregroundStyle(palette.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(caught ? tr("Caught") : (studied ? tr("Studied") : tr("Not caught yet")))
+    }
+}
+
+/// The daily quiz: where it stands, what it pays, the Lab streak and the way in.
+private struct QuizCard: View {
+    @Binding var showQuiz: Bool
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let plan = model.quizPlan()
+        let answers = model.quizAnswers()
+        let done = model.quizDone()
+        let rightToday = zip(plan, answers).filter { $0.0.answer == $0.1 }.count
+        let points = (done ? rightToday : plan.count) * RewardEngine.quizAnswerPoints
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(tr("Daily quiz"))
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                    Text(done ? tr("Done for today") : trCount(plan.count, one: "%lld question · about a minute",
+                                                              other: "%lld questions · about a minute"))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 8)
+                if !done {
+                    Button {
+                        showQuiz = true
+                    } label: {
+                        Text(answers.isEmpty ? tr("Start") : tr("Keep going"))
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(palette.background)
+                            .padding(.horizontal, 20)
+                            .frame(height: 44)
+                            .background(palette.ink, in: Capsule())
+                    }
+                    .buttonStyle(PressableStyle())
+                }
+            }
+            HStack(spacing: 6) {
+                ForEach(Array(plan.enumerated()), id: \.offset) { item in
+                    Capsule()
+                        .fill(dotColor(index: item.offset, question: item.element, answers: answers))
+                        .frame(width: 28, height: 6)
+                }
+                Spacer(minLength: 8)
+                Text(tr("+%lld pts", points))
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            .accessibilityHidden(true)
+            Text(trCount(model.labStreak(), one: "Lab streak: %lld day", other: "Lab streak: %lld days"))
+                .font(.subheadline)
+                .foregroundStyle(palette.inkSecondary)
+            if model.onSickLeave && !done {
+                Text(tr("Sick leave: your streak waits for you."))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            if done {
+                Text(tr("A new quiz tomorrow."))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+            }
+        }
+        .petriCard(radius: 26, padding: 18)
+    }
+
+    private func dotColor(index: Int, question: QuizQuestion, answers: [Int]) -> Color {
+        guard index < answers.count else { return palette.ink.opacity(0.12) }
+        return answers[index] == question.answer ? palette.accent : palette.ink.opacity(0.45)
+    }
+}
+
+/// Every lesson: open ones to read, locked ones with what opens them.
+struct LessonsScreen: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var showPaywall = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(model.catalog.articles.enumerated()), id: \.element.id) { item in
+                        if item.offset > 0 {
+                            Divider()
+                        }
+                        row(item.element)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .petriCard(padding: 0)
+                Text(tr("Lessons open with right answers in the daily quiz. The Season Pass opens them all."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.horizontal, 4)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 28)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("Lessons"))
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 
     @ViewBuilder
-    private func lessonRow(_ article: Article) -> some View {
+    private func row(_ article: Article) -> some View {
         if model.isArticleUnlocked(article) {
             NavigationLink(value: article) {
-                lessonLabel(article, locked: false)
+                label(article, locked: false)
             }
             .buttonStyle(.plain)
         } else {
             Button {
                 showPaywall = true
             } label: {
-                lessonLabel(article, locked: true)
+                label(article, locked: true)
             }
             .buttonStyle(.plain)
         }
     }
 
-    private func lessonLabel(_ article: Article, locked: Bool) -> some View {
+    private func label(_ article: Article, locked: Bool) -> some View {
         let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
         return HStack(spacing: 12) {
-            IconTile(symbol: locked ? "lock.fill" : article.icon,
-                     background: locked ? palette.surfaceAlt : palette.lilac,
-                     foreground: locked ? palette.inkSecondary : .white, size: 34)
-            VStack(alignment: .leading, spacing: 1) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(article.title.value)
                     .font(.body)
                     .foregroundStyle(locked ? palette.inkSecondary : palette.ink)
@@ -155,157 +359,20 @@ struct LabScreen: View {
                     .multilineTextAlignment(.leading)
             }
             Spacer(minLength: 4)
-            if !locked && !model.data.readArticles.contains(article.id) {
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkTertiary)
+                    .accessibilityHidden(true)
+            } else if !model.data.readArticles.contains(article.id) {
                 Circle()
-                    .fill(palette.coral)
+                    .fill(palette.accent)
                     .frame(width: 8, height: 8)
                     .accessibilityLabel(tr("New"))
             }
         }
-        .padding(.vertical, 11)
+        .padding(.vertical, 12)
         .contentShape(Rectangle())
-    }
-
-    private var caseFiles: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: tr("Case files"), trailing: String(model.catalog.germs.count))
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(palette.inkSecondary)
-                    .accessibilityHidden(true)
-                TextField(tr("Search an illness"), text: $query)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .foregroundStyle(palette.ink)
-                if !query.isEmpty {
-                    Button {
-                        query = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(palette.inkTertiary)
-                    }
-                    .accessibilityLabel(tr("Clear"))
-                }
-            }
-            .padding(.horizontal, 12)
-            .frame(height: 44)
-            .background(palette.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            VStack(alignment: .leading, spacing: 0) {
-                if germs.isEmpty {
-                    Text(tr("No illness matches your search."))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .padding(.vertical, 14)
-                }
-                ForEach(Array(germs.enumerated()), id: \.element.id) { item in
-                    if item.offset > 0 {
-                        Divider()
-                    }
-                    NavigationLink(value: item.element) {
-                        caseFileRow(item.element)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 16)
-            .petriCard(padding: 0)
-        }
-    }
-
-    private func caseFileRow(_ germ: Germ) -> some View {
-        HStack(spacing: 12) {
-            GermImage(germ: germ, size: 34, silhouette: model.count(of: germ.id) == 0)
-                .foregroundStyle(germ.deepTint)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(germ.illness.value)
-                    .font(.body)
-                    .foregroundStyle(palette.ink)
-                Text(germ.scientific.value)
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 4)
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.bold))
-                .foregroundStyle(palette.inkTertiary)
-                .accessibilityHidden(true)
-        }
-        .padding(.vertical, 10)
-        .contentShape(Rectangle())
-    }
-}
-
-/// The dark daily-quiz card: progress, points, the Lab streak, and the way in.
-private struct QuizCard: View {
-    @Binding var showQuiz: Bool
-    @Environment(AppModel.self) private var model
-
-    private let chalk = Color(hex: Swatch.chalk)
-    private let lime = Color(hex: Swatch.lime)
-
-    var body: some View {
-        let plan = model.quizPlan()
-        let answers = model.quizAnswers()
-        let done = model.quizDone()
-        let rightToday = zip(plan, answers).filter { $0.0.answer == $0.1 }.count
-        let points = (done ? rightToday : plan.count) * RewardEngine.quizAnswerPoints
-        VStack(alignment: .leading, spacing: 0) {
-            HazardStripes()
-                .frame(height: 13)
-            VStack(alignment: .leading, spacing: 12) {
-                Text(tr("Daily quiz"))
-                    .font(.caption.weight(.heavy))
-                    .kerning(1.4)
-                    .textCase(.uppercase)
-                    .foregroundStyle(lime)
-                Text(done ? tr("Done for today") : trCount(plan.count, one: "%lld question · about a minute",
-                                                          other: "%lld questions · about a minute"))
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(chalk)
-                HStack(spacing: 6) {
-                    ForEach(Array(plan.enumerated()), id: \.offset) { item in
-                        Capsule()
-                            .fill(dotColor(index: item.offset, question: item.element, answers: answers))
-                            .frame(width: 28, height: 7)
-                    }
-                    Spacer(minLength: 8)
-                    Text(tr("+%lld pts", points))
-                        .font(.footnote.weight(.heavy))
-                        .foregroundStyle(lime)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(lime.opacity(0.16), in: Capsule())
-                }
-                Label(trCount(model.labStreak(), one: "Lab streak: %lld day", other: "Lab streak: %lld days"),
-                      systemImage: "flame.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(chalk.opacity(0.78))
-                if model.onSickLeave && !done {
-                    Label(tr("Sick leave: your streak waits for you."), systemImage: "bed.double.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(chalk.opacity(0.78))
-                }
-                if done {
-                    Text(tr("A new quiz tomorrow."))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(chalk)
-                } else {
-                    Button(answers.isEmpty ? tr("Start") : tr("Keep going")) {
-                        showQuiz = true
-                    }
-                    .buttonStyle(PillButtonStyle(kind: .accent, height: 50))
-                }
-            }
-            .padding(16)
-        }
-        .background(Color(hex: Swatch.nightSurface))
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-    }
-
-    private func dotColor(index: Int, question: QuizQuestion, answers: [Int]) -> Color {
-        guard index < answers.count else { return chalk.opacity(0.25) }
-        return answers[index] == question.answer ? lime : Color(hex: Swatch.coral)
     }
 }
 
@@ -317,7 +384,6 @@ struct ArticleScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                IconTile(symbol: article.icon, background: palette.lilac, size: 52)
                 Text(article.title.value)
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(palette.ink)

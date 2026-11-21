@@ -69,7 +69,7 @@ Germ and article text is bilingual inside the JSON files. A germ's `about`, `sym
 
 ## Colors
 
-Every color value lives in `Shared/Swatch.swift`, shared by the app and the widgets. Roles that follow the theme, Dark Mode and Increase Contrast (text levels, success, progress, crown) are resolved in `App/Design/Palette.swift`. A color value written anywhere else, or a swatch no longer used, fails `check_swift.py`.
+Every color value lives in `Shared/Swatch.swift`, shared by the app and the widgets. The interface stays neutral with one accent: the roles that follow the theme, Dark Mode and Increase Contrast (surfaces, text levels, accent) are resolved in `App/Design/Palette.swift`. A color value written anywhere else, or a swatch no longer used, fails `check_swift.py`.
 
 ## Crew server
 

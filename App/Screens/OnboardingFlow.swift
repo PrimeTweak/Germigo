@@ -91,9 +91,9 @@ struct OnboardingFlow: View {
                 VStack(spacing: 0) {
                     Text(tr("Daycare germs are"))
                     Text(tr("coming home."))
-                        .foregroundStyle(palette.coralDeep)
+                        .foregroundStyle(palette.accent)
                 }
-                .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                .font(.system(.largeTitle).weight(.bold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.center)
                 Text(tr("In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Petri turns each one into a card, points and a good laugh."))
@@ -143,7 +143,7 @@ struct OnboardingFlow: View {
                 VStack(spacing: 18) {
                     VStack(spacing: 6) {
                         Text(tr("Who's patient zero?"))
-                            .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                            .font(.system(.largeTitle).weight(.bold))
                             .foregroundStyle(palette.ink)
                         Text(tr("The little one who brings it all home."))
                             .font(.body)
@@ -154,7 +154,7 @@ struct OnboardingFlow: View {
                     ZStack(alignment: .bottom) {
                         AvatarView(name: kidName, gradient: AvatarColors.gradient(0), size: 108)
                             .padding(.bottom, 12)
-                        PillLabel(text: tr("Patient zero").uppercased(), foreground: palette.background, background: palette.ink)
+                        PillLabel(text: tr("Patient zero"), foreground: palette.background, background: palette.ink)
                     }
                     TextField(tr("First name"), text: $kidName)
                         .textInputAutocapitalization(.words)
@@ -186,10 +186,10 @@ struct OnboardingFlow: View {
     private var practicePage: some View {
         VStack(spacing: 0) {
             VStack(spacing: 10) {
-                Text(tr("Sick? Hold this."))
-                    .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                Text(tr("Sick? Tap this."))
+                    .font(.system(.largeTitle).weight(.bold))
                     .foregroundStyle(palette.ink)
-                Text(tr("When a germ gets you, hold the button for one second. Try it now. Nothing gets logged."))
+                Text(tr("When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged."))
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
             }
@@ -198,13 +198,17 @@ struct OnboardingFlow: View {
             .padding(.top, 8)
             Spacer()
             VStack(spacing: 16) {
-                HoldToLogButton {
+                FaceTile(tr("I'm sick")) {
+                    Haptics.thud()
                     practiced = true
+                } face: {
+                    Image("mascot-awake").resizable().scaledToFit()
                 }
-                Label(practiced ? tr("That's it. Nothing was logged.") : tr("Keep holding until the ring closes."),
+                .frame(maxWidth: 190)
+                Label(practiced ? tr("That's it. Nothing was logged.") : tr("Tap the tile to try."),
                       systemImage: practiced ? "checkmark.circle.fill" : "hand.tap")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(practiced ? palette.successInk : palette.inkSecondary)
+                    .foregroundStyle(practiced ? palette.accent : palette.inkSecondary)
             }
             .padding(.horizontal, 24)
             Spacer()
@@ -334,7 +338,7 @@ struct Wordmark: View {
                         .offset(y: size * 0.1)
                 }
         }
-        .font(.system(size: size, weight: .black, design: .rounded))
+        .font(.system(size: size, weight: .bold))
         .kerning(-size * 0.03)
         .foregroundStyle(palette.ink)
         .accessibilityElement(children: .ignore)
@@ -344,7 +348,7 @@ struct Wordmark: View {
     private var dot: some View {
         let diameter = size * 0.3
         return Circle()
-            .fill(RadialGradient(colors: [Color(hex: Swatch.limeGlow), Color(hex: Swatch.grass), Color(hex: Swatch.moss)],
+            .fill(RadialGradient(colors: [Color(hex: Swatch.lilacPale), Color(hex: Swatch.lilac), Color(hex: Swatch.violetSoft)],
                                  center: UnitPoint(x: 0.35, y: 0.3), startRadius: 0, endRadius: diameter * 0.7))
             .frame(width: diameter, height: diameter)
             .overlay {

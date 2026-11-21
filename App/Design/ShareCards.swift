@@ -35,7 +35,7 @@ struct SharePreviewSheet<Card: View>: View {
                         } label: {
                             Label(tr("Instagram Stories"), systemImage: "camera.circle.fill")
                         }
-                        .buttonStyle(PillButtonStyle(kind: .accent))
+                        .buttonStyle(PillButtonStyle(kind: .ink))
                     }
                 } else {
                     ProgressView()

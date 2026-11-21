@@ -8,8 +8,8 @@ struct ExposureLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ExposureActivityAttributes.self) { context in
             ExposureLockScreenView(attributes: context.attributes, isClosed: context.isStale)
-                .activityBackgroundTint(WidgetInk.night)
-                .activitySystemActionForegroundColor(WidgetInk.chalk)
+                .activityBackgroundTint(WidgetInk.ground)
+                .activitySystemActionForegroundColor(WidgetInk.ink)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -20,7 +20,7 @@ struct ExposureLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text(context.attributes.windowCloses, style: .relative)
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
+                        .font(.system(size: 15, weight: .bold))
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 96)
                 }
@@ -44,14 +44,14 @@ struct ExposureLiveActivity: Widget {
                     .frame(width: 22, height: 22)
             } compactTrailing: {
                 Image(systemName: "hourglass")
-                    .foregroundStyle(WidgetInk.hazard)
+                    .foregroundStyle(WidgetInk.ink)
             } minimal: {
                 Image("germ-" + context.attributes.germID)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 20, height: 20)
             }
-            .keylineTint(WidgetInk.lime)
+            .keylineTint(WidgetInk.accent)
         }
     }
 }
@@ -86,12 +86,12 @@ private struct ExposureLockScreenView: View {
                 Spacer(minLength: 8)
                 if isClosed {
                     Text(tr("Window passed"))
-                        .font(.system(size: 14, weight: .heavy))
-                        .foregroundStyle(WidgetInk.lime)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(WidgetInk.accent)
                 } else {
                     VStack(alignment: .trailing, spacing: 0) {
                         Text(attributes.windowCloses, style: .relative)
-                            .font(.system(size: 17, weight: .heavy, design: .rounded))
+                            .font(.system(size: 17, weight: .bold))
                             .multilineTextAlignment(.trailing)
                         Text(tr("left in window"))
                             .font(.system(size: 11))
@@ -107,7 +107,7 @@ private struct ExposureLockScreenView: View {
                 } currentValueLabel: {
                     EmptyView()
                 }
-                .tint(WidgetInk.coral)
+                .tint(WidgetInk.accent)
             }
             Text(isClosed ? tr("The usual window has passed. Did you dodge it?")
                           : tr("Symptoms usually show %1$lld to %2$lld h after exposure.", lowHours, highHours))
@@ -115,7 +115,7 @@ private struct ExposureLockScreenView: View {
                 .opacity(0.7)
             ExposureButtons(exposureID: attributes.exposureID)
         }
-        .foregroundStyle(WidgetInk.chalk)
+        .foregroundStyle(WidgetInk.ink)
         .padding(16)
     }
 }
@@ -130,13 +130,13 @@ private struct ExposureButtons: View {
                     .font(.system(size: 14, weight: .bold))
                     .frame(maxWidth: .infinity)
             }
-            .tint(WidgetInk.coral)
+            .tint(WidgetInk.accent)
             Button(intent: StillFineIntent(exposureID: exposureID)) {
                 Label(tr("Still fine"), systemImage: "checkmark")
                     .font(.system(size: 14, weight: .bold))
                     .frame(maxWidth: .infinity)
             }
-            .tint(WidgetInk.chalk.opacity(0.25))
+            .tint(WidgetInk.ink.opacity(0.25))
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)

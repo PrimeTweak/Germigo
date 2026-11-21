@@ -59,7 +59,6 @@ do {
     let sick = makeData(logs: [makeLog("rhino", from: day(5), to: day(8)), makeLog("noro", from: day(12), to: nil)])
     check(StreakMath.current(data: sick, now: day(13)) == 0, "streak is zero while sick")
     check(StreakMath.currentStart(data: sick) == nil, "no streak start while sick")
-    check(StreakMath.lastRun(data: sick, now: day(13)) == 4, "last run ends when the active germ starts")
 }
 
 // MARK: - Journal rules

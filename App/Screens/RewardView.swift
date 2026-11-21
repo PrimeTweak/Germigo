@@ -57,6 +57,7 @@ struct RewardView: View {
         }
         .foregroundStyle(Color.white)
         .preferredColorScheme(.dark)
+        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
         .onAppear(perform: play)
         .sheet(isPresented: $showShare) {
             SharePreviewSheet(title: tr("Share card")) {
@@ -67,7 +68,7 @@ struct RewardView: View {
 
     private var background: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(hex: Swatch.navyRaised), Color(hex: Swatch.navy)], startPoint: .top, endPoint: .bottom)
             RadialGradient(colors: [germ.deepTint.opacity(0.55), Color.clear], center: UnitPoint(x: 0.5, y: 0.4),
                            startRadius: 0, endRadius: 300)
             RingsBackground(color: Color.white.opacity(0.05), spacing: 36)
@@ -78,10 +79,10 @@ struct RewardView: View {
     private var heading: some View {
         VStack(spacing: 8) {
             PillLabel(text: reward.isNewCard ? tr("NEW CARD") : tr("REPEAT CATCH"),
-                      foreground: Color(hex: Swatch.night), background: Color(hex: Swatch.lime))
+                      foreground: Color(hex: Swatch.navy), background: Color(hex: Swatch.irisSoft))
             Text(reward.log.sufferer == .partner ? tr("%1$@ caught %2$@!", model.partnerDisplayName, germ.name)
                                                  : tr("You caught %@!", germ.name))
-                .font(.largeTitle.weight(.heavy))
+                .font(.largeTitle.weight(.bold))
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.7)
                 .lineLimit(2)
@@ -92,7 +93,7 @@ struct RewardView: View {
             if gentle {
                 Text(tr("Rough one. The points are banked, now go lie down."))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(hex: Swatch.lime))
+                    .foregroundStyle(Color(hex: Swatch.irisSoft))
                     .multilineTextAlignment(.center)
             }
         }
@@ -101,8 +102,8 @@ struct RewardView: View {
     private var points: some View {
         VStack(spacing: 6) {
             Text(verbatim: "+\(shownPoints)")
-                .font(.system(size: 56, weight: .black))
-                .foregroundStyle(Color(hex: Swatch.lime))
+                .font(.system(size: 56, weight: .bold))
+                .foregroundStyle(Color(hex: Swatch.irisSoft))
                 .contentTransition(.numericText())
                 .monospacedDigit()
             Text(tr("Sick Points"))
@@ -137,7 +138,7 @@ struct RewardView: View {
                           title: tr("Badge unlocked: %@", badge.title), detail: badge.detail)
             }
             ForEach(reward.unlockedIcons) { icon in
-                unlockRow(symbol: "app.badge.fill", tint: Color(hex: Swatch.lime),
+                unlockRow(symbol: "app.badge.fill", tint: Color(hex: Swatch.irisSoft),
                           title: tr("App icon unlocked: %@", icon.title), detail: tr("Find it in Settings."))
             }
             VStack(spacing: 7) {
@@ -150,7 +151,7 @@ struct RewardView: View {
                         .foregroundStyle(Color.white.opacity(0.6))
                 }
                 ProgressView(value: levelFraction)
-                    .tint(Color(hex: Swatch.lime))
+                    .tint(Color(hex: Swatch.irisSoft))
             }
             .padding(.horizontal, 4)
             .padding(.top, 4)
@@ -199,7 +200,7 @@ struct RewardView: View {
             } label: {
                 Text(tr("Done"))
             }
-            .buttonStyle(PillButtonStyle(kind: .accent))
+            .buttonStyle(PillButtonStyle(kind: .ink))
         }
         .padding(.top, 18)
     }

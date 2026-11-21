@@ -42,7 +42,7 @@ struct StreakWidgetView: View {
         case .accessoryCircular:
             VStack(spacing: -2) {
                 Text(String(days))
-                    .font(.system(size: 24, weight: .heavy, design: .rounded))
+                    .font(.system(size: 24, weight: .bold))
                     .minimumScaleFactor(0.6)
                     .widgetAccentable()
                 Text(trCount(days, one: "day", other: "days"))
@@ -52,7 +52,7 @@ struct StreakWidgetView: View {
         case .accessoryRectangular:
             HStack(spacing: 8) {
                 Text(String(days))
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .font(.system(size: 34, weight: .bold))
                     .minimumScaleFactor(0.6)
                     .widgetAccentable()
                 VStack(alignment: .leading, spacing: 0) {
@@ -70,7 +70,7 @@ struct StreakWidgetView: View {
             .containerBackground(for: .widget) { Color.clear }
         default:
             small
-                .containerBackground(for: .widget) { WidgetInk.night }
+                .containerBackground(for: .widget) { WidgetInk.ground }
         }
     }
 
@@ -78,20 +78,19 @@ struct StreakWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 5) {
                 Capsule()
-                    .fill(isSick ? WidgetInk.coral : WidgetInk.hazard)
+                    .fill(WidgetInk.accent)
                     .frame(width: 18, height: 6)
-                Text(verbatim: "PETRI")
-                    .font(.system(size: 10, weight: .heavy))
-                    .kerning(1.4)
+                Text(verbatim: "Petri")
+                    .font(.system(size: 10, weight: .bold))
                     .opacity(0.6)
             }
             Spacer(minLength: 0)
             HStack(alignment: .lastTextBaseline, spacing: 6) {
                 Text(String(days))
-                    .font(.system(size: 56, weight: .black, design: .rounded))
+                    .font(.system(size: 56, weight: .bold))
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                    .foregroundStyle(isSick ? WidgetInk.coral : WidgetInk.lime)
+                    .foregroundStyle(WidgetInk.accent)
                     .widgetAccentable()
                 if isSick, let id = entry.snapshot.sickGermID {
                     Image("germ-" + id)
@@ -111,7 +110,7 @@ struct StreakWidgetView: View {
                 .lineLimit(1)
                 .padding(.top, 2)
         }
-        .foregroundStyle(WidgetInk.chalk)
+        .foregroundStyle(WidgetInk.ink)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
     }

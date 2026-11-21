@@ -162,10 +162,6 @@ final class AppModel {
         StreakMath.record(data: data, now: now)
     }
 
-    func lastRunDays(now: Date = Date()) -> Int {
-        StreakMath.lastRun(data: data, now: now)
-    }
-
     func count(of germID: String) -> Int {
         data.logs.filter { $0.germID == germID }.count
     }

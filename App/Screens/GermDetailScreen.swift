@@ -103,15 +103,13 @@ struct GermDetailScreen: View {
         }
     }
 
-    private var tileInk: Color { Color(hex: Swatch.night) }
-
     @ViewBuilder
     private var aboutSection: some View {
         if let about = germ.about {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(title: tr("What it is"))
                 HStack(alignment: .top, spacing: 13) {
-                    IconTile(symbol: "microbe.fill", background: germ.lightTint, foreground: tileInk, size: 36)
+                    IconTile(symbol: "microbe.fill", size: 36)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(about.value)
                             .font(.body)
@@ -165,7 +163,7 @@ struct GermDetailScreen: View {
 
     private func symptomChip(_ symptom: GermSymptom) -> some View {
         HStack(spacing: 9) {
-            IconTile(symbol: symptom.icon, background: germ.lightTint, foreground: tileInk, size: 32)
+            IconTile(symbol: symptom.icon, size: 32)
             Text(symptom.text.value)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(palette.ink)
@@ -201,7 +199,7 @@ struct GermDetailScreen: View {
                     }
                     HStack(spacing: 6) {
                         Capsule()
-                            .fill(Color(hex: Swatch.coralLight))
+                            .fill(palette.accent)
                             .frame(width: 18, height: 8)
                         Text(tr("Sick"))
                     }
@@ -238,7 +236,7 @@ struct GermDetailScreen: View {
                             Divider()
                         }
                         HStack(alignment: .top, spacing: 13) {
-                            IconTile(symbol: item.element.icon, background: germ.lightTint, foreground: tileInk)
+                            IconTile(symbol: item.element.icon)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.element.title.value)
                                     .font(.callout.weight(.semibold))
@@ -278,7 +276,7 @@ struct GermDetailScreen: View {
                         Divider()
                     }
                     HStack(alignment: .top, spacing: 13) {
-                        IconTile(symbol: item.element.icon, background: palette.surfaceAlt, foreground: palette.ink)
+                        IconTile(symbol: item.element.icon)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.element.title.value)
                                 .font(.callout.weight(.semibold))
@@ -306,7 +304,7 @@ struct GermDetailScreen: View {
                         Divider()
                     }
                     HStack(alignment: .top, spacing: 13) {
-                        IconTile(symbol: item.element.icon, background: germ.lightTint, foreground: tileInk)
+                        IconTile(symbol: item.element.icon)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(item.element.label.value)
                                 .font(.footnote)
@@ -329,7 +327,7 @@ struct GermDetailScreen: View {
     private var doctorBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 13) {
-                IconTile(symbol: "cross.case.fill", background: palette.coralDeep, size: 36)
+                IconTile(symbol: "cross.case.fill", size: 36)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(tr("When to call"))
                         .font(.headline)
@@ -354,7 +352,7 @@ struct GermDetailScreen: View {
                         HStack(alignment: .top, spacing: 12) {
                             Image(systemName: checked ? "checkmark.circle.fill" : "circle")
                                 .font(.title3)
-                                .foregroundStyle(checked ? palette.coralDeep : palette.inkTertiary)
+                                .foregroundStyle(checked ? palette.accent : palette.inkTertiary)
                             Text(item.element.value)
                                 .font(.subheadline)
                                 .foregroundStyle(palette.ink)
@@ -377,7 +375,7 @@ struct GermDetailScreen: View {
             }
             Text(tr("In an emergency, call your local emergency number."))
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(palette.coralInk)
+                .foregroundStyle(palette.ink)
             if let kid = germ.kidReference, let url = URL(string: kid.url) {
                 Divider()
                 Link(destination: url) {
@@ -404,7 +402,7 @@ struct GermDetailScreen: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(palette.coral.opacity(palette.isDark ? 0.2 : 0.12),
+        .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.12),
                     in: RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
@@ -415,20 +413,20 @@ struct GermDetailScreen: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
                     Text(tr("HP"))
-                        .font(.footnote.weight(.heavy))
+                        .font(.footnote.weight(.bold))
                         .foregroundStyle(palette.ink)
                     ProgressView(value: Double(germ.rarity.bossHealth), total: 100)
                         .tint(palette.isDark ? germ.rarity.color : germ.rarity.inkColor)
                     Text(verbatim: String(germ.rarity.bossHealth))
-                        .font(.footnote.weight(.heavy).monospacedDigit())
+                        .font(.footnote.weight(.bold).monospacedDigit())
                         .foregroundStyle(palette.ink)
                 }
                 .accessibilityElement(children: .combine)
                 ForEach(Array(germ.bossPhases.enumerated()), id: \.offset) { item in
                     phaseRow(number: item.offset + 1, phase: item.element)
                 }
-                bossRow(symbol: "shield.lefthalf.filled", tint: palette.sky, label: tr("Weakness"), text: germ.boss.weakness.value)
-                bossRow(symbol: "gift.fill", tint: palette.limeDeep, label: tr("Loot"),
+                bossRow(symbol: "shield.lefthalf.filled", label: tr("Weakness"), text: germ.boss.weakness.value)
+                bossRow(symbol: "gift.fill", label: tr("Loot"),
                         text: tr("+%lld Sick Points", germ.rarity.basePoints))
                 if caught > 0 {
                     Button {
@@ -446,10 +444,10 @@ struct GermDetailScreen: View {
     private func phaseRow(number: Int, phase: BossPhase) -> some View {
         HStack(alignment: .top, spacing: 13) {
             Text(verbatim: String(number))
-                .font(.subheadline.weight(.heavy))
-                .foregroundStyle(Color(hex: Swatch.night))
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(palette.onAccent)
                 .frame(width: 32, height: 32)
-                .background(palette.coral, in: Circle())
+                .background(palette.accent, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
                 Text(phase.name)
                     .font(.callout.weight(.semibold))
@@ -464,9 +462,9 @@ struct GermDetailScreen: View {
         .accessibilityLabel(tr("Phase %1$lld: %2$@. %3$@", number, phase.name, phase.detail))
     }
 
-    private func bossRow(symbol: String, tint: Color, label: String, text: String) -> some View {
+    private func bossRow(symbol: String, label: String, text: String) -> some View {
         HStack(alignment: .top, spacing: 13) {
-            IconTile(symbol: symbol, background: tint, foreground: Color(hex: Swatch.night))
+            IconTile(symbol: symbol)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.footnote)
@@ -496,7 +494,7 @@ struct GermDetailScreen: View {
                             .foregroundStyle(palette.ink)
                     } icon: {
                         Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(right ? palette.successInk : palette.coralDeep)
+                            .foregroundStyle(right ? palette.accent : palette.accent)
                     }
                     .font(.subheadline.weight(.bold))
                     Text((germ.myth.isTrue ? tr("Fact.") : tr("Myth.")) + " " + germ.myth.explanation.value)
@@ -545,7 +543,7 @@ struct GermDetailScreen: View {
                 } else {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 12) {
-                            IconTile(symbol: "lock.fill", background: palette.surfaceAlt, foreground: palette.ink, size: 36)
+                            IconTile(symbol: "lock.fill", size: 36)
                             Text(tr("The fun science unlocks when you catch this germ, or right away with the Season Pass."))
                                 .font(.subheadline)
                                 .foregroundStyle(palette.inkSecondary)
@@ -554,7 +552,7 @@ struct GermDetailScreen: View {
                         Button(tr("See the Season Pass")) {
                             showPaywall = true
                         }
-                        .buttonStyle(PillButtonStyle(kind: .accent, height: 46))
+                        .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
                     }
                     .petriCard()
                 }
@@ -652,7 +650,7 @@ private struct TimelineTrack: View {
             HStack(spacing: 0) {
                 IncubationStripes()
                     .frame(width: split)
-                LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.blush)],
+                LinearGradient(colors: [palette.accent, palette.accent.opacity(0.35)],
                                startPoint: .leading, endPoint: .trailing)
             }
             .frame(height: 12)
@@ -662,9 +660,9 @@ private struct TimelineTrack: View {
                 dot(palette.ink)
                 Color.clear
                     .frame(width: max(0, split - 22))
-                dot(Color(hex: Swatch.coralDeep))
+                dot(palette.accent)
                 Spacer(minLength: 0)
-                dot(Color(hex: Swatch.limeDeep))
+                dot(palette.inkTertiary)
             }
         }
         .frame(height: 22)

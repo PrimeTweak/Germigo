@@ -216,15 +216,14 @@ struct LogSheet: View {
                                       @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(title.uppercased())
+                Text(title)
                     .font(.footnote.weight(.semibold))
-                    .kerning(0.6)
                     .foregroundStyle(palette.inkSecondary)
                 Spacer()
                 if let trailing {
                     Text(trailing)
                         .font(.subheadline.weight(.bold))
-                        .foregroundStyle(palette.coralInk)
+                        .foregroundStyle(palette.ink)
                 }
             }
             .padding(.horizontal, 4)
@@ -355,7 +354,7 @@ struct LogSheet: View {
     private var detailsCard: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                IconTile(symbol: "moon.fill", background: palette.night, foreground: palette.lime)
+                IconTile(symbol: "moon.fill")
                 DatePicker(tr("Started"), selection: $startedAt, in: AppModel.earliestNewEntry...Date(),
                            displayedComponents: [.date, .hourAndMinute])
                     .font(.body)
@@ -372,7 +371,7 @@ struct LogSheet: View {
             if let partner = model.data.partnerName {
                 Divider()
                 HStack(spacing: 12) {
-                    IconTile(symbol: "person.2.fill", background: Color(hex: Swatch.pink))
+                    IconTile(symbol: "person.2.fill")
                     Picker(tr("Who's sick?"), selection: $sufferer) {
                         Text(tr("Me")).tag(Sufferer.me)
                         Text(verbatim: partner).tag(Sufferer.partner)
@@ -394,7 +393,7 @@ struct LogSheet: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     } icon: {
-                        IconTile(symbol: "dot.radiowaves.left.and.right", background: Color(hex: Swatch.coral))
+                        IconTile(symbol: "dot.radiowaves.left.and.right")
                     }
                 }
                 .frame(minHeight: 60)
@@ -421,7 +420,7 @@ struct LogSheet: View {
                 }
             }
         }
-        .buttonStyle(PillButtonStyle(kind: .coral, height: 58))
+        .buttonStyle(PillButtonStyle(kind: .ink, height: 58))
         .disabled(germID == nil)
         .padding(.horizontal, 20)
         .padding(.top, 10)

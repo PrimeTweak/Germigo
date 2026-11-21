@@ -77,8 +77,7 @@ struct ProtectHomeView: View {
                     SectionHeader(title: tr("Back to daycare?"))
                     Link(destination: url) {
                         HStack(spacing: 12) {
-                            IconTile(symbol: "building.columns.fill", background: Color(hex: Swatch.skyPale),
-                                     foreground: Color(hex: Swatch.night), size: 36)
+                            IconTile(symbol: "building.columns.fill", size: 36)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(tr("Québec's official criteria"))
                                     .font(.callout.weight(.semibold))
@@ -118,7 +117,7 @@ struct ProtectHomeView: View {
     private func row(_ step: HouseholdStep) -> some View {
         let checked = done.contains(step.id)
         return HStack(alignment: .top, spacing: 12) {
-            IconTile(symbol: step.icon, background: palette.surfaceAlt, foreground: palette.ink, size: 34)
+            IconTile(symbol: step.icon, size: 34)
             VStack(alignment: .leading, spacing: 2) {
                 Text(step.title.value)
                     .font(.callout.weight(.semibold))
@@ -131,7 +130,7 @@ struct ProtectHomeView: View {
             Spacer(minLength: 0)
             Image(systemName: checked ? "checkmark.circle.fill" : "circle")
                 .font(.title3)
-                .foregroundStyle(checked ? palette.successInk : palette.inkTertiary)
+                .foregroundStyle(checked ? palette.accent : palette.inkTertiary)
         }
         .padding(.vertical, 8)
         .contentShape(Rectangle())

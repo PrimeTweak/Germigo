@@ -85,7 +85,7 @@ struct LegalScreen: View {
                     .font(.subheadline.weight(.semibold))
                 }
             }
-            .tint(palette.isDark ? palette.lime : palette.ink)
+            .tint(palette.isDark ? palette.accent : palette.ink)
             .padding(.horizontal, 22)
             .padding(.vertical, 16)
         }

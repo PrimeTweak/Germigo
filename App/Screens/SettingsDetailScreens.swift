@@ -11,40 +11,43 @@ struct KidsScreen: View {
 
     var body: some View {
         List {
-            Section {
-                ForEach(model.data.kids) { kid in
-                    Button {
-                        editing = kid
-                    } label: {
-                        HStack(spacing: 12) {
-                            AvatarView(name: kid.name, gradient: AvatarColors.gradient(kid.colorIndex), size: 40)
-                            Text(kid.name)
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(palette.ink)
-                        }
-                    }
-                    .swipeActions(edge: .trailing) {
+            Group {
+                Section {
+                    ForEach(model.data.kids) { kid in
                         Button {
-                            pendingDelete = kid
+                            editing = kid
                         } label: {
-                            Label(tr("Delete"), systemImage: "trash")
+                            HStack(spacing: 12) {
+                                AvatarView(name: kid.name, gradient: AvatarColors.gradient(kid.colorIndex), size: 40)
+                                Text(kid.name)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(palette.ink)
+                            }
                         }
-                        .tint(Color.red)
+                        .swipeActions(edge: .trailing) {
+                            Button {
+                                pendingDelete = kid
+                            } label: {
+                                Label(tr("Delete"), systemImage: "trash")
+                            }
+                            .tint(palette.ink)
+                        }
                     }
-                }
-                Button {
-                    if model.canAddKid {
-                        editing = Kid(name: "", colorIndex: model.data.kids.count)
-                    } else {
-                        showPaywall = true
+                    Button {
+                        if model.canAddKid {
+                            editing = Kid(name: "", colorIndex: model.data.kids.count)
+                        } else {
+                            showPaywall = true
+                        }
+                    } label: {
+                        Label(tr("Add a kid"), systemImage: model.canAddKid ? "plus" : "lock.fill")
+                            .foregroundStyle(palette.ink)
                     }
-                } label: {
-                    Label(tr("Add a kid"), systemImage: model.canAddKid ? "plus" : "lock.fill")
-                        .foregroundStyle(palette.ink)
+                } footer: {
+                    Text(tr("Only first names, and they never leave this phone. One kid is free; the Season Pass covers the whole household."))
                 }
-            } footer: {
-                Text(tr("Only first names, and they never leave this phone. One kid is free; the Season Pass covers the whole household."))
             }
+            .listRowBackground(palette.surface)
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
@@ -213,9 +216,9 @@ struct AppIconScreen: View {
                     if !unlocked {
                         Image(systemName: "lock.fill")
                             .font(.caption.weight(.bold))
-                            .foregroundStyle(Color.white)
+                            .foregroundStyle(palette.background)
                             .frame(width: 24, height: 24)
-                            .background(palette.night, in: Circle())
+                            .background(palette.ink, in: Circle())
                             .offset(x: 6, y: 6)
                     }
                 }
@@ -238,7 +241,7 @@ struct AppIconScreen: View {
 
     private func themeTitle(_ theme: Theme) -> String {
         switch theme {
-        case .agar: return tr("Agar")
+        case .agar: return tr("Standard")
         case .nightShift: return tr("Night Shift")
         case .mint: return tr("Mint")
         }
@@ -317,35 +320,38 @@ struct HelpLinesScreen: View {
 
     var body: some View {
         List {
-            Section {
-                if lines.isEmpty {
-                    Text(tr("In an emergency, call your local emergency number. For advice, call your doctor or your local health line."))
-                        .foregroundStyle(palette.ink)
-                }
-                ForEach(lines) { line in
-                    if let url = URL(string: "tel:" + line.id) {
-                        Link(destination: url) {
-                            HStack(spacing: 12) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(line.title)
-                                        .font(.body.weight(.semibold))
+            Group {
+                Section {
+                    if lines.isEmpty {
+                        Text(tr("In an emergency, call your local emergency number. For advice, call your doctor or your local health line."))
+                            .foregroundStyle(palette.ink)
+                    }
+                    ForEach(lines) { line in
+                        if let url = URL(string: "tel:" + line.id) {
+                            Link(destination: url) {
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(line.title)
+                                            .font(.body.weight(.semibold))
+                                            .foregroundStyle(palette.ink)
+                                        Text(line.detail)
+                                            .font(.footnote)
+                                            .foregroundStyle(palette.inkSecondary)
+                                            .multilineTextAlignment(.leading)
+                                    }
+                                    Spacer(minLength: 8)
+                                    Text(line.display)
+                                        .font(.callout.weight(.bold).monospacedDigit())
                                         .foregroundStyle(palette.ink)
-                                    Text(line.detail)
-                                        .font(.footnote)
-                                        .foregroundStyle(palette.inkSecondary)
-                                        .multilineTextAlignment(.leading)
                                 }
-                                Spacer(minLength: 8)
-                                Text(line.display)
-                                    .font(.callout.weight(.bold).monospacedDigit())
-                                    .foregroundStyle(palette.ink)
                             }
                         }
                     }
+                } footer: {
+                    Text(HealthNotice.text)
                 }
-            } footer: {
-                Text(HealthNotice.text)
             }
+            .listRowBackground(palette.surface)
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
@@ -362,8 +368,6 @@ struct DataScreen: View {
         let detail: String
     }
 
-    /// Closes Settings once everything is erased.
-    let onErased: () -> Void
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
@@ -395,24 +399,26 @@ struct DataScreen: View {
 
     var body: some View {
         List {
-            infoSection
-            journalSection
-            Section {
-                Button(role: .destructive) {
-                    confirmErase = true
-                } label: {
-                    Label {
-                        Text(tr("Delete Everything"))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(palette.coralInk)
-                    } icon: {
-                        IconTile(symbol: "trash.fill", background: Color(hex: Swatch.blushLight),
-                                 foreground: Color(hex: Swatch.ember), size: 30)
+            Group {
+                infoSection
+                journalSection
+                Section {
+                    Button(role: .destructive) {
+                        confirmErase = true
+                    } label: {
+                        Label {
+                            Text(tr("Delete Everything"))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(palette.ink)
+                        } icon: {
+                            IconTile(symbol: "trash.fill", size: 30)
+                        }
                     }
+                } footer: {
+                    Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server."))
                 }
-            } footer: {
-                Text(tr("Erases your journal, kids, badges and settings from this phone, and your crew data from the server."))
             }
+            .listRowBackground(palette.surface)
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
@@ -465,8 +471,7 @@ struct DataScreen: View {
         Section {
             ForEach(Array(items.prefix(showAll ? items.count : shortList).enumerated()), id: \.offset) { item in
                 HStack(alignment: .top, spacing: 13) {
-                    IconTile(symbol: item.element.symbol, background: SettingsTint.about,
-                             foreground: Color(hex: Swatch.night), size: 30)
+                    IconTile(symbol: item.element.symbol, size: 30)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(item.element.title)
                             .font(.body.weight(.semibold))
@@ -492,14 +497,13 @@ struct DataScreen: View {
             }
             if let kept = Persistence.setAsideFiles.first {
                 ShareLink(item: kept) {
-                    SettingsLabel(symbol: "exclamationmark.triangle.fill", tint: SettingsTint.notifications,
-                                  title: tr("Export the journal that couldn't be read"))
+                    SettingsLabel(title: tr("Export the journal that couldn't be read"))
                 }
             }
             NavigationLink {
                 LegalScreen(kind: .privacy)
             } label: {
-                SettingsLabel(symbol: "lock.fill", tint: SettingsTint.data, title: tr("Privacy Policy"))
+                SettingsLabel(title: tr("Privacy Policy"))
             }
         }
     }
@@ -511,7 +515,7 @@ struct DataScreen: View {
                     LabeledContent {
                         Text(verbatim: "CSV")
                     } label: {
-                        SettingsLabel(symbol: "square.and.arrow.up", tint: SettingsTint.data, title: tr("Export"))
+                        SettingsLabel(title: tr("Export"))
                     }
                 }
             }
@@ -519,13 +523,13 @@ struct DataScreen: View {
                 LabeledContent {
                     Text(verbatim: "JSON")
                 } label: {
-                    SettingsLabel(symbol: "externaldrive.fill", tint: SettingsTint.data, title: tr("Back Up"))
+                    SettingsLabel(title: tr("Back Up"))
                 }
             }
             Button {
                 importingBackup = true
             } label: {
-                SettingsLabel(symbol: "arrow.down.doc.fill", tint: SettingsTint.data, title: tr("Restore a Backup"))
+                SettingsLabel(title: tr("Restore a Backup"))
             }
         } header: {
             Text(tr("Your journal"))
@@ -581,7 +585,6 @@ struct DataScreen: View {
             if AppIconManager.current != .petri {
                 _ = await AppIconManager.apply(.petri)
             }
-            onErased()
         }
     }
 }
@@ -592,34 +595,37 @@ struct AboutScreen: View {
 
     var body: some View {
         List {
-            Section {
-                NavigationLink {
-                    SourcesScreen()
-                } label: {
-                    SettingsLabel(symbol: "book.closed.fill", tint: SettingsTint.about, title: tr("Sources"))
-                }
-                NavigationLink {
-                    LegalScreen(kind: .terms)
-                } label: {
-                    SettingsLabel(symbol: "doc.text.fill", tint: SettingsTint.about, title: tr("Terms of Use"))
-                }
-                NavigationLink {
-                    LegalScreen(kind: .privacy)
-                } label: {
-                    SettingsLabel(symbol: "lock.fill", tint: SettingsTint.about, title: tr("Privacy Policy"))
-                }
-                if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
-                    Link(destination: url) {
-                        LabeledContent {
-                            RowChevron()
-                        } label: {
-                            SettingsLabel(symbol: "envelope.fill", tint: SettingsTint.about, title: tr("Contact Support"))
+            Group {
+                Section {
+                    NavigationLink {
+                        SourcesScreen()
+                    } label: {
+                        SettingsLabel(title: tr("Sources"))
+                    }
+                    NavigationLink {
+                        LegalScreen(kind: .terms)
+                    } label: {
+                        SettingsLabel(title: tr("Terms of Use"))
+                    }
+                    NavigationLink {
+                        LegalScreen(kind: .privacy)
+                    } label: {
+                        SettingsLabel(title: tr("Privacy Policy"))
+                    }
+                    if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
+                        Link(destination: url) {
+                            LabeledContent {
+                                RowChevron()
+                            } label: {
+                                SettingsLabel(title: tr("Contact Support"))
+                            }
                         }
                     }
+                } footer: {
+                    Text(HealthNotice.text)
                 }
-            } footer: {
-                Text(HealthNotice.text)
             }
+            .listRowBackground(palette.surface)
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
