@@ -14,3 +14,13 @@ ExportOptions.plist
 # Crew server runtime data
 server/data/
 node_modules/
+
+# Secrets
+.env
+.env.*
+*.p8
+*.p12
+*.pem
+
+# Claude Code settings of one machine
+.claude/settings.local.json

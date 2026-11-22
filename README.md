@@ -30,6 +30,7 @@ The workflow, in order:
 | `Tests/LogicTests/` | Logic checks that run without a simulator |
 | `tools/` | Repository, source, bundle and link checks |
 | `project.yml` | XcodeGen project definition |
+| `CLAUDE.md`, `.claude/` | Instructions, path rules, skills and guards for Claude Code |
 
 ## Configuration
 
