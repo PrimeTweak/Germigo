@@ -35,6 +35,7 @@
 "%@ a month" = "%@ par mois";
 "%@ at the daycare" = "%@ à la garderie";
 "%@ badge" = "Badge %@";
+"%@ brought it home." = "%@ l'a ramené à la maison.";
 "%@ has you" = "%@ te tient";
 "%@ is after you" = "%@ en a après toi";
 "%@ is better" = "%@ va mieux";
@@ -333,6 +334,8 @@
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe et de garderie du serveur.";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe et de garderie du serveur. Impossible à annuler.";
 "Every germ caught" = "Tous les microbes attrapés";
+"Every germ fills your collection: badges, streaks and the story of your season, to share." = "Chaque microbe remplit ta collection : badges, séries et l'histoire de ta saison, à partager.";
+"Every germ has its file: how it spreads, how long it lasts and when to call. A daily quiz unlocks the lessons." = "Chaque microbe a sa fiche : comment il se transmet, combien de temps il dure et quand appeler. Un quiz quotidien débloque les leçons.";
 "Every germ you catch becomes one, with points. This one is a sample: nothing was logged." = "Chaque microbe attrapé en devient une, avec des points. Celle-ci est un exemple : rien n'a été noté.";
 "Every kid and your partner" = "Tous les enfants et ton partenaire";
 "Every kid, every week, every photo." = "Tous les enfants, toutes les semaines, toutes les photos.";
@@ -510,6 +513,7 @@
 "Kid's name" = "Prénom de l'enfant";
 "Kids" = "Enfants";
 "Kids brought it home. You stepped aside." = "Les enfants l'ont rapporté. Tu t'es tassé.";
+"Know the enemy." = "Connais l'ennemi.";
 "Know what's going around" = "Sache ce qui court";
 "Know what's going around." = "Sache ce qui court.";
 "Lab Rat" = "Rat de labo";
@@ -531,6 +535,7 @@
 "Level %1$lld · %2$@" = "Niveau %1$lld · %2$@";
 "Lice Comb Ninja" = "Ninja du peigne fin";
 "Light" = "Clair";
+"Little Peas Daycare" = "CPE Les Petits Pois";
 "Locked" = "Verrouillé";
 "Log a germ" = "Noter un microbe";
 "Log it" = "Noter";
@@ -548,6 +553,7 @@
 "Lucky Dodger" = "Esquiveur chanceux";
 "Lv %lld" = "Niv. %lld";
 "Make Germily yours." = "Mets Germily à ta main.";
+"Make it a game." = "Fais-en un jeu.";
 "Manage" = "Gérer";
 "Marathon" = "Marathon";
 "Master of the Nasal Aspirator" = "Maître du mouche-bébé";
@@ -692,6 +698,7 @@
 "Patient Infinity" = "Patient infini";
 "Patient One" = "Patient numéro un";
 "Patient zero" = "Patient zéro";
+"Patient zero brought it home." = "Le patient zéro l'a ramené à la maison.";
 "per day" = "par jour";
 "per month" = "par mois";
 "per week" = "par semaine";
@@ -940,6 +947,7 @@
 "The damage" = "Les dégâts";
 "The daycare never sees who joined, only how many families each group has. Report a notice from its menu." = "La garderie ne voit jamais qui s'est abonné, seulement combien de familles compte chaque groupe. Signale un avis depuis son menu.";
 "The Dodger" = "L'esquiveur";
+"The family league and the couple duel" = "La ligue familiale et le duel de couple";
 "The family league, your top supplier and the season in numbers." = "La ligue familiale, ton fournisseur numéro un et la saison en chiffres.";
 "The free journal shows the last 7 days. The Pass keeps the whole season." = "Le journal gratuit montre les 7 derniers jours. La Passe garde toute la saison.";
 "The germs are furious. Germily is warm and fed." = "Les microbes sont furieux. Germily est au chaud et bien nourri.";
@@ -957,6 +965,7 @@
 "The outbreak radar" = "Le radar des éclosions";
 "The Pass starts: %@. Cancel before and pay nothing." = "La Passe commence : %@. Annule avant et tu ne paies rien.";
 "The photo couldn't be saved." = "La photo n'a pas pu être enregistrée.";
+"The radar of your crew of friends" = "Le radar de ton groupe d'amis";
 "The Season Pass and tips are handled by Apple. Germily never sees your payment details." = "La Passe de saison et les pourboires sont gérés par Apple. Germily ne voit jamais tes renseignements de paiement.";
 "The Season Pass isn't available right now. Try again later." = "La Passe de saison n'est pas offerte pour l'instant. Réessaie plus tard.";
 "The Season Pass opens Germily for the whole household, all season." = "La Passe de saison ouvre Germily à toute la maisonnée, toute la saison.";
@@ -996,6 +1005,7 @@
 "To send notices by email from this address. You can add it later." = "Pour envoyer des avis par courriel depuis cette adresse. Tu peux l'ajouter plus tard.";
 "Today" = "Aujourd'hui";
 "Today, %@" = "Aujourd'hui, %@";
+"Toddlers" = "Trottineurs";
 "Tonight, %@" = "Ce soir, %@";
 "Too many tries. Wait a minute." = "Trop d'essais. Attends une minute.";
 "Top supplier, germs by month and the longest chain" = "Fournisseur numéro un, microbes par mois et plus longue chaîne";
@@ -1056,6 +1066,7 @@
 "When to call" = "Quand appeler";
 "Who" = "Qui";
 "Who am I?" = "Qui suis-je ?";
+"Who brought it home?" = "Qui l'a ramené ?";
 "Who gave it to you?" = "Qui te l'a donné ?";
 "Who gets it" = "Qui le reçoit";
 "Who was sick?" = "Qui était malade ?";
@@ -1104,6 +1115,7 @@
 "Your best run yet. Next stop: %lld days" = "Ta meilleure série à vie. Prochaine étape : %lld jours";
 "Your call" = "C'est toi qui décides";
 "Your crew is waiting" = "Ton groupe t'attend";
+"Your daycare can warn you when an illness hits your kid's group. Free." = "Ta garderie peut te prévenir quand une maladie touche le groupe de ton enfant. Gratuit.";
 "Your daycare tells you when an illness is going around in your child's group. Free for families and daycares." = "Ta garderie te prévient quand une maladie circule dans le groupe de ton enfant. Gratuit pour les familles et les garderies.";
 "Your daycare year, in germs." = "Ton année de garderie, en microbes.";
 "Your free trial ends in %lld day" = "Ton essai gratuit finit dans %lld jour";
@@ -1116,11 +1128,13 @@
 "Your journal wasn't saved" = "Ton journal n'a pas été enregistré";
 "Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one." = "Ton journal, tes photos, les prénoms de tes enfants, tes badges et tes réglages sont dans des fichiers protégés sur ce téléphone. Ils font partie de la sauvegarde de ton appareil si tu en utilises une.";
 "Your kid" = "Ton enfant";
+"Your kid, then the whole household: who caught what, from whom, and for how long." = "Ton enfant, puis toute la maisonnée : qui a attrapé quoi, de qui, et pour combien de temps.";
 "Your month recap is ready in Season." = "Ton récap du mois t'attend dans Saison.";
 "Your mystery bug is 2 days old. A new sign could name it." = "Ton microbe mystère a 2 jours. Un nouveau signe pourrait le nommer.";
 "Your name in the crew" = "Ton nom dans le groupe";
 "Your nemesis" = "Ton ennemi juré";
 "Your parent type" = "Ton genre de parent";
+"Your partner and every kid" = "Ton partenaire et tous les enfants";
 "Your partner, every kid, the whole history and photos for the doctor." = "Ton partenaire, tous les enfants, tout l'historique et les photos pour le médecin.";
 "Your partner, the couple duel and every kid" = "Ton partenaire, le duel de couple et tous les enfants";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Ton achat doit être approuvé. La Passe de saison s'active toute seule une fois l'approbation donnée.";

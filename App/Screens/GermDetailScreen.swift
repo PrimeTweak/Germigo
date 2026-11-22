@@ -17,7 +17,7 @@ struct GermDetailScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                hero
+                GermHero(germ: germ, finish: finish, caught: caught)
                 doctorBanner
                 aboutSection
                 symptomsSection
@@ -62,43 +62,6 @@ struct GermDetailScreen: View {
             SharePreviewSheet(title: tr("Boss card")) {
                 BossShareCard(germ: germ, survived: caught)
             }
-        }
-    }
-
-    private var hero: some View {
-        HStack(spacing: 16) {
-            LivelyCharacter(mood: germ.restMood) {
-                GermCardView(germ: germ, width: 104, finish: finish, count: caught)
-            }
-            VStack(alignment: .leading, spacing: 6) {
-                Text(germ.illness.value)
-                    .font(.title.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(germ.scientific.value)
-                    .font(.subheadline.italic())
-                    .foregroundStyle(palette.inkSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 6) {
-                    PillLabel(text: germ.rarity.label, foreground: germ.rarity.pillForeground, background: germ.rarity.pillBackground)
-                    PillLabel(text: tr("Card %@", germ.numberLabel), foreground: palette.ink,
-                              background: palette.ink.opacity(0.08))
-                }
-                Text(caught > 0 ? tr("%1$@ · caught %2$@", germ.name, trCount(caught, one: "%lld time", other: "%lld times"))
-                                : tr("Not caught yet"))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(14)
-        .background {
-            ZStack {
-                LinearGradient(colors: [germ.lightTint.opacity(0.55), germ.lightTint.opacity(0.15)],
-                               startPoint: .top, endPoint: .bottom)
-                RingsBackground(color: Color.white.opacity(palette.isDark ? 0.06 : 0.5), spacing: 26)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
     }
 
@@ -706,5 +669,50 @@ private struct IncubationStripes: View {
             }
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// The head of a case file: the card, the illness, its rarity and how often it was caught.
+struct GermHero: View {
+    let germ: Germ
+    var finish = GermCardView.Finish.standard
+    let caught: Int
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        HStack(spacing: 16) {
+            LivelyCharacter(mood: germ.restMood) {
+                GermCardView(germ: germ, width: 104, finish: finish, count: caught)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                Text(germ.illness.value)
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(germ.scientific.value)
+                    .font(.subheadline.italic())
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 6) {
+                    PillLabel(text: germ.rarity.label, foreground: germ.rarity.pillForeground, background: germ.rarity.pillBackground)
+                    PillLabel(text: tr("Card %@", germ.numberLabel), foreground: palette.ink,
+                              background: palette.ink.opacity(0.08))
+                }
+                Text(caught > 0 ? tr("%1$@ · caught %2$@", germ.name, trCount(caught, one: "%lld time", other: "%lld times"))
+                                : tr("Not caught yet"))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background {
+            ZStack {
+                LinearGradient(colors: [germ.lightTint.opacity(0.55), germ.lightTint.opacity(0.15)],
+                               startPoint: .top, endPoint: .bottom)
+                RingsBackground(color: Color.white.opacity(palette.isDark ? 0.06 : 0.5), spacing: 26)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        }
     }
 }

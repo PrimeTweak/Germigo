@@ -35,6 +35,7 @@
 "%@ a month" = "%@ a month";
 "%@ at the daycare" = "%@ at the daycare";
 "%@ badge" = "%@ badge";
+"%@ brought it home." = "%@ brought it home.";
 "%@ has you" = "%@ has you";
 "%@ is after you" = "%@ is after you";
 "%@ is better" = "%@ is better";
@@ -333,6 +334,8 @@
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server." = "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server.";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone." = "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone.";
 "Every germ caught" = "Every germ caught";
+"Every germ fills your collection: badges, streaks and the story of your season, to share." = "Every germ fills your collection: badges, streaks and the story of your season, to share.";
+"Every germ has its file: how it spreads, how long it lasts and when to call. A daily quiz unlocks the lessons." = "Every germ has its file: how it spreads, how long it lasts and when to call. A daily quiz unlocks the lessons.";
 "Every germ you catch becomes one, with points. This one is a sample: nothing was logged." = "Every germ you catch becomes one, with points. This one is a sample: nothing was logged.";
 "Every kid and your partner" = "Every kid and your partner";
 "Every kid, every week, every photo." = "Every kid, every week, every photo.";
@@ -510,6 +513,7 @@
 "Kid's name" = "Kid's name";
 "Kids" = "Kids";
 "Kids brought it home. You stepped aside." = "Kids brought it home. You stepped aside.";
+"Know the enemy." = "Know the enemy.";
 "Know what's going around" = "Know what's going around";
 "Know what's going around." = "Know what's going around.";
 "Lab Rat" = "Lab Rat";
@@ -531,6 +535,7 @@
 "Level %1$lld · %2$@" = "Level %1$lld · %2$@";
 "Lice Comb Ninja" = "Lice Comb Ninja";
 "Light" = "Light";
+"Little Peas Daycare" = "Little Peas Daycare";
 "Locked" = "Locked";
 "Log a germ" = "Log a germ";
 "Log it" = "Log it";
@@ -548,6 +553,7 @@
 "Lucky Dodger" = "Lucky Dodger";
 "Lv %lld" = "Lv %lld";
 "Make Germily yours." = "Make Germily yours.";
+"Make it a game." = "Make it a game.";
 "Manage" = "Manage";
 "Marathon" = "Marathon";
 "Master of the Nasal Aspirator" = "Master of the Nasal Aspirator";
@@ -692,6 +698,7 @@
 "Patient Infinity" = "Patient Infinity";
 "Patient One" = "Patient One";
 "Patient zero" = "Patient zero";
+"Patient zero brought it home." = "Patient zero brought it home.";
 "per day" = "per day";
 "per month" = "per month";
 "per week" = "per week";
@@ -940,6 +947,7 @@
 "The damage" = "The damage";
 "The daycare never sees who joined, only how many families each group has. Report a notice from its menu." = "The daycare never sees who joined, only how many families each group has. Report a notice from its menu.";
 "The Dodger" = "The Dodger";
+"The family league and the couple duel" = "The family league and the couple duel";
 "The family league, your top supplier and the season in numbers." = "The family league, your top supplier and the season in numbers.";
 "The free journal shows the last 7 days. The Pass keeps the whole season." = "The free journal shows the last 7 days. The Pass keeps the whole season.";
 "The germs are furious. Germily is warm and fed." = "The germs are furious. Germily is warm and fed.";
@@ -957,6 +965,7 @@
 "The outbreak radar" = "The outbreak radar";
 "The Pass starts: %@. Cancel before and pay nothing." = "The Pass starts: %@. Cancel before and pay nothing.";
 "The photo couldn't be saved." = "The photo couldn't be saved.";
+"The radar of your crew of friends" = "The radar of your crew of friends";
 "The Season Pass and tips are handled by Apple. Germily never sees your payment details." = "The Season Pass and tips are handled by Apple. Germily never sees your payment details.";
 "The Season Pass isn't available right now. Try again later." = "The Season Pass isn't available right now. Try again later.";
 "The Season Pass opens Germily for the whole household, all season." = "The Season Pass opens Germily for the whole household, all season.";
@@ -996,6 +1005,7 @@
 "To send notices by email from this address. You can add it later." = "To send notices by email from this address. You can add it later.";
 "Today" = "Today";
 "Today, %@" = "Today, %@";
+"Toddlers" = "Toddlers";
 "Tonight, %@" = "Tonight, %@";
 "Too many tries. Wait a minute." = "Too many tries. Wait a minute.";
 "Top supplier, germs by month and the longest chain" = "Top supplier, germs by month and the longest chain";
@@ -1056,6 +1066,7 @@
 "When to call" = "When to call";
 "Who" = "Who";
 "Who am I?" = "Who am I?";
+"Who brought it home?" = "Who brought it home?";
 "Who gave it to you?" = "Who gave it to you?";
 "Who gets it" = "Who gets it";
 "Who was sick?" = "Who was sick?";
@@ -1104,6 +1115,7 @@
 "Your best run yet. Next stop: %lld days" = "Your best run yet. Next stop: %lld days";
 "Your call" = "Your call";
 "Your crew is waiting" = "Your crew is waiting";
+"Your daycare can warn you when an illness hits your kid's group. Free." = "Your daycare can warn you when an illness hits your kid's group. Free.";
 "Your daycare tells you when an illness is going around in your child's group. Free for families and daycares." = "Your daycare tells you when an illness is going around in your child's group. Free for families and daycares.";
 "Your daycare year, in germs." = "Your daycare year, in germs.";
 "Your free trial ends in %lld day" = "Your free trial ends in %lld day";
@@ -1116,11 +1128,13 @@
 "Your journal wasn't saved" = "Your journal wasn't saved";
 "Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one." = "Your journal, your photos, your kids' first names, your badges and your settings live in protected files on this phone. They are part of your device backup if you use one.";
 "Your kid" = "Your kid";
+"Your kid, then the whole household: who caught what, from whom, and for how long." = "Your kid, then the whole household: who caught what, from whom, and for how long.";
 "Your month recap is ready in Season." = "Your month recap is ready in Season.";
 "Your mystery bug is 2 days old. A new sign could name it." = "Your mystery bug is 2 days old. A new sign could name it.";
 "Your name in the crew" = "Your name in the crew";
 "Your nemesis" = "Your nemesis";
 "Your parent type" = "Your parent type";
+"Your partner and every kid" = "Your partner and every kid";
 "Your partner, every kid, the whole history and photos for the doctor." = "Your partner, every kid, the whole history and photos for the doctor.";
 "Your partner, the couple duel and every kid" = "Your partner, the couple duel and every kid";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Your purchase needs an approval. The Season Pass turns on by itself once it's approved.";

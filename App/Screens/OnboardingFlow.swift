@@ -1,12 +1,14 @@
 import SwiftUI
 
-/// First launch: splash, welcome, the first kid, a practice hold, then the Season Pass offer.
+/// First launch: splash, welcome, the first kid, a practice tap, the tour of the app, then the Season Pass offer.
+/// Skip leads to the tour, never past it.
 struct OnboardingFlow: View {
     private enum Step: Int {
         case splash
         case welcome
         case kid
         case practice
+        case tour
     }
 
     @Environment(AppModel.self) private var model
@@ -15,6 +17,7 @@ struct OnboardingFlow: View {
     @State private var kidName = ""
     @State private var practiced = false
     @State private var showPaywall = false
+    @State private var tourPage = TourPage.family
 
     var body: some View {
         ZStack {
@@ -29,12 +32,16 @@ struct OnboardingFlow: View {
                     welcome
                 }
             case .kid:
-                page(back: .welcome) {
+                page(back: { step = .welcome }) {
                     kidPage
                 }
             case .practice:
-                page(back: .kid) {
+                page(back: { step = .kid }) {
                     practicePage
+                }
+            case .tour:
+                page(back: tourBack, skips: false) {
+                    tour
                 }
             }
         }
@@ -52,13 +59,27 @@ struct OnboardingFlow: View {
         model.completeOnboarding(kid: kid)
     }
 
-    private func page<Content: View>(back: Step?, @ViewBuilder content: () -> Content) -> some View {
+    private func startTour() {
+        tourPage = .family
+        step = .tour
+    }
+
+    private func tourBack() {
+        if let previous = tourPage.previous {
+            withAnimation(Tempo.scene) {
+                tourPage = previous
+            }
+        } else {
+            step = .practice
+        }
+    }
+
+    private func page<Content: View>(back: (() -> Void)?, skips: Bool = true,
+                                     @ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 0) {
             HStack {
                 if let back {
-                    Button {
-                        step = back
-                    } label: {
+                    Button(action: back) {
                         Image(systemName: "chevron.left")
                             .font(.body.weight(.bold))
                             .frame(width: 44, height: 44)
@@ -67,12 +88,15 @@ struct OnboardingFlow: View {
                     .accessibilityLabel(tr("Back"))
                 }
                 Spacer()
-                Button(tr("Skip")) {
-                    finish()
+                if skips {
+                    Button(tr("Skip")) {
+                        startTour()
+                    }
+                    .font(.callout.weight(.semibold))
+                    .frame(minHeight: 44)
                 }
-                .font(.callout.weight(.semibold))
-                .frame(minHeight: 44)
             }
+            .frame(minHeight: 44)
             .foregroundStyle(palette.ink)
             .padding(.horizontal, Spacing.page)
             content()
@@ -224,7 +248,35 @@ struct OnboardingFlow: View {
             .padding(.horizontal, Spacing.page)
             Spacer()
             Button(tr("Continue")) {
-                showPaywall = true
+                startTour()
+            }
+            .buttonStyle(PillButtonStyle(kind: .ink))
+            .padding(.horizontal, Spacing.page)
+            .padding(.bottom, 16)
+        }
+    }
+
+    // MARK: - Tour
+
+    private var tour: some View {
+        VStack(spacing: 0) {
+            TabView(selection: $tourPage) {
+                ForEach(TourPage.allCases, id: \.self) { item in
+                    TourPageView(page: item, kidName: kidName)
+                        .tag(item)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            TourDots(current: tourPage)
+                .padding(.bottom, 18)
+            Button(tr("Continue")) {
+                if let next = tourPage.next {
+                    withAnimation(Tempo.scene) {
+                        tourPage = next
+                    }
+                } else {
+                    showPaywall = true
+                }
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
             .padding(.horizontal, Spacing.page)
@@ -350,7 +402,7 @@ struct Wordmark: View {
                     dot
                         .offset(y: size * 0.1)
                 }
-            Text(verbatim: "go")
+            Text(verbatim: "ly")
         }
         .font(.system(size: size, weight: .bold))
         .kerning(-size * 0.03)

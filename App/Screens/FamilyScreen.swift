@@ -298,7 +298,7 @@ private struct AlbumCover: View {
 }
 
 /// Where each person sits on the couch: heads shrink and close up as the household grows.
-private struct CouchSeats {
+struct CouchSeats {
     let count: Int
     /// The couch art is laid out for this width.
     static let width: CGFloat = 320
@@ -321,6 +321,27 @@ private struct CouchSeats {
     }
 }
 
+/// The couch and the mascot leaning on it, in the space laid out by CouchSeats.
+struct CouchBackdrop: View {
+    var body: some View {
+        ZStack {
+            Image("mascot-awake")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 87, height: 87)
+                .rotationEffect(.degrees(-11))
+                .position(x: 21, y: 40)
+            Image("family-couch")
+                .resizable()
+                .scaledToFit()
+                .frame(width: CouchSeats.width)
+                .position(x: CouchSeats.width / 2, y: 32 + CouchSeats.width / 4.8)
+        }
+        .frame(width: CouchSeats.width, height: CouchSeats.height)
+        .accessibilityHidden(true)
+    }
+}
+
 /// The household on the couch, a line that follows who is sick, and a free seat while the partner is missing.
 private struct FamilyCouch: View {
     let addPartner: () -> Void
@@ -333,19 +354,7 @@ private struct FamilyCouch: View {
         let seats = CouchSeats(count: people.count + (missingPartner ? 1 : 0))
         VStack(spacing: 3) {
             ZStack {
-                Image("mascot-awake")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 87, height: 87)
-                    .rotationEffect(.degrees(-11))
-                    .position(x: 21, y: 40)
-                    .accessibilityHidden(true)
-                Image("family-couch")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: CouchSeats.width)
-                    .position(x: CouchSeats.width / 2, y: 32 + CouchSeats.width / 4.8)
-                    .accessibilityHidden(true)
+                CouchBackdrop()
                 ForEach(Array(people.enumerated()), id: \.element) { item in
                     BuddyView(look: model.look(of: item.element),
                               sick: FamilyStatus.status(of: item.element, model: model).sick,

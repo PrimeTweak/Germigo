@@ -899,7 +899,7 @@ private struct CrewSettingsSheet: View {
 }
 
 /// One germ going around: its face, how many families reported it this week, out of the whole crew.
-private struct RadarRow: View {
+struct RadarRow: View {
     let entry: RadarEntry
     let families: Int
     @Environment(AppModel.self) private var model

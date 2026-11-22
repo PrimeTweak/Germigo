@@ -23,8 +23,6 @@ struct TrophiesScreen: View {
     @State private var appeared = false
     @State private var showWrapped = false
     @State private var showLeagueShare = false
-    /// The big numbers of the cards, following the text size set in iOS.
-    @ScaledMetric(relativeTo: .title) private var figureSize: CGFloat = 28
 
     var body: some View {
         NavigationStack {
@@ -189,14 +187,14 @@ struct TrophiesScreen: View {
                 }
             }
             HStack(alignment: .top, spacing: 8) {
-                figure(stats.germsCaught, tr("germs caught"))
-                figure(stats.daysSick, tr("days sick"))
-                figure(stats.dodged, tr("germs dodged"))
+                SeasonFigure(value: stats.germsCaught, label: tr("germs caught"))
+                SeasonFigure(value: stats.daysSick, label: tr("days sick"))
+                SeasonFigure(value: stats.dodged, label: tr("germs dodged"))
             }
             .padding(.top, 10)
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
                 ForEach(Array(weeks.enumerated()), id: \.offset) { item in
-                    weekCell(item.element, isNow: item.offset == weeks.count - 1)
+                    SeasonWeekCell(germ: item.element.flatMap { model.catalog.germ($0) }, isNow: item.offset == weeks.count - 1)
                         .cascadeIn(item.offset / 4)
                 }
             }
@@ -209,43 +207,6 @@ struct TrophiesScreen: View {
                 .padding(.top, 10)
         }
         .germilyCard()
-    }
-
-    private func figure(_ value: Int, _ label: String) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            RollingNumber(value: value)
-                .font(.system(size: figureSize, weight: .bold))
-                .foregroundStyle(palette.ink)
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .accessibilityElement(children: .combine)
-    }
-
-    /// A week of the season: its germ's face when one was going on, the current week outlined.
-    private func weekCell(_ germID: String?, isNow: Bool) -> some View {
-        let germ = germID.flatMap { model.catalog.germ($0) }
-        return RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
-            .fill(germ.map { $0.tileTint(palette) } ?? palette.ink.opacity(0.1))
-            .aspectRatio(1, contentMode: .fit)
-            .overlay {
-                if let germ {
-                    GeometryReader { proxy in
-                        GermImage(germ: germ, size: proxy.size.width * 0.8)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-            }
-            .overlay {
-                if isNow {
-                    RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
-                        .strokeBorder(palette.accent, lineWidth: 2)
-                }
-            }
     }
 
     private func seasonLine(_ weeks: [String?], season: Season) -> String {
@@ -312,8 +273,9 @@ struct TrophiesScreen: View {
                     SectionHeader(title: tr("Badges"), trailing: tr("%1$lld of %2$lld", earned.count, all.count))
                     HStack(spacing: 8) {
                         ForEach(Array(medals.enumerated()), id: \.element.id) { item in
-                            medal(item.element, won: model.hasBadge(item.element.id),
-                                  progress: item.element.id == next?.badge.id ? next?.count.fraction : nil)
+                            BadgeMedal(badge: item.element, won: model.hasBadge(item.element.id),
+                                       progress: item.element.id == next?.badge.id ? next?.count.fraction : nil,
+                                       bounce: appeared)
                                 .cascadeIn(item.offset)
                         }
                     }
@@ -332,61 +294,13 @@ struct TrophiesScreen: View {
     }
 
     private func slot(_ item: ShelfItem, index: Int) -> some View {
-        let caught = item.count > 0
-        return NavigationLink(value: item.germ) {
-            RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
-                .fill(caught ? item.germ.tileTint(palette) : palette.background)
-                .aspectRatio(1, contentMode: .fit)
-                .overlay {
-                    GeometryReader { proxy in
-                        Group {
-                            if caught {
-                                LivelyCharacter(mood: .stalking, phase: Double(index) * 0.8, touch: nil) {
-                                    GermImage(germ: item.germ, size: proxy.size.width * 0.76)
-                                }
-                            } else {
-                                GermImage(germ: item.germ, size: proxy.size.width * 0.76, silhouette: true)
-                                    .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                .overlay(alignment: .topTrailing) {
-                    if item.count > 1 {
-                        Text(verbatim: "×\(item.count)")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(palette.background)
-                            .padding(.horizontal, 7)
-                            .frame(height: 22)
-                            .background(palette.ink, in: Capsule())
-                            .offset(x: 4, y: -5)
-                    }
-                }
+        NavigationLink(value: item.germ) {
+            ShelfTile(germ: item.germ, count: item.count, phase: Double(index) * 0.8)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(item.germ.name)
-        .accessibilityValue(caught ? tr("Caught") : tr("Not caught yet"))
+        .accessibilityValue(item.count > 0 ? tr("Caught") : tr("Not caught yet"))
         .cascadeIn(index)
-    }
-
-    /// A badge: filled once earned, ringed by its progress when it is the next one, faint otherwise.
-    private func medal(_ badge: Badge, won: Bool, progress: Double?) -> some View {
-        Circle()
-            .fill(won ? palette.accent : palette.background)
-            .aspectRatio(1, contentMode: .fit)
-            .overlay {
-                if let progress {
-                    ProgressRing(fraction: progress, lineWidth: 4)
-                }
-            }
-            .overlay {
-                Image(systemName: badge.symbol)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(won ? palette.onAccent : (progress != nil ? palette.accent : palette.ink.opacity(0.5)))
-                    .symbolEffect(.bounce, value: won && appeared)
-            }
-            .accessibilityLabel(badge.title)
     }
 
     // MARK: - Family league
@@ -523,5 +437,123 @@ struct TrophiesScreen: View {
                 .frame(width: 26)
             ValueRow(title: title, value: value)
         }
+    }
+}
+
+/// A big season number over its label, following the text size set in iOS.
+struct SeasonFigure: View {
+    let value: Int
+    let label: String
+    @Environment(\.palette) private var palette
+    @ScaledMetric(relativeTo: .title) private var size: CGFloat = 28
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            RollingNumber(value: value)
+                .font(.system(size: size, weight: .bold))
+                .foregroundStyle(palette.ink)
+            Text(label)
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A week of the season: its germ's face when one was going on, the current week outlined.
+struct SeasonWeekCell: View {
+    let germ: Germ?
+    let isNow: Bool
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
+            .fill(germ.map { $0.tileTint(palette) } ?? palette.ink.opacity(0.1))
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                if let germ {
+                    GeometryReader { proxy in
+                        GermImage(germ: germ, size: proxy.size.width * 0.8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+            }
+            .overlay {
+                if isNow {
+                    RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
+                        .strokeBorder(palette.accent, lineWidth: 2)
+                }
+            }
+    }
+}
+
+/// A germ on the shelf: its face on its tint once caught, a silhouette before, the count past one.
+struct ShelfTile: View {
+    let germ: Germ
+    let count: Int
+    var phase: Double = 0
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
+            .fill(count > 0 ? germ.tileTint(palette) : palette.background)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                GeometryReader { proxy in
+                    Group {
+                        if count > 0 {
+                            LivelyCharacter(mood: .stalking, phase: phase, touch: nil) {
+                                GermImage(germ: germ, size: proxy.size.width * 0.76)
+                            }
+                        } else {
+                            GermImage(germ: germ, size: proxy.size.width * 0.76, silhouette: true)
+                                .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                if count > 1 {
+                    Text(verbatim: "×\(count)")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(palette.background)
+                        .padding(.horizontal, 7)
+                        .frame(height: 22)
+                        .background(palette.ink, in: Capsule())
+                        .offset(x: 4, y: -5)
+                }
+            }
+    }
+}
+
+/// A badge: filled once earned, ringed by its progress when it is the next one, faint otherwise.
+struct BadgeMedal: View {
+    let badge: Badge
+    let won: Bool
+    var progress: Double?
+    /// Bounces an earned badge when it turns true.
+    var bounce = false
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Circle()
+            .fill(won ? palette.accent : palette.background)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                if let progress {
+                    ProgressRing(fraction: progress, lineWidth: 4)
+                }
+            }
+            .overlay {
+                Image(systemName: badge.symbol)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(won ? palette.onAccent : (progress != nil ? palette.accent : palette.ink.opacity(0.5)))
+                    .symbolEffect(.bounce, value: won && bounce)
+            }
+            .accessibilityLabel(badge.title)
     }
 }
