@@ -229,10 +229,12 @@ struct AppData: Codable {
     var hostLook = Looks.host
     var partnerLook = Looks.partner
     var photos: [PatientPhoto] = []
+    /// The Today mascot's tricks found so far, by raw value.
+    var mascotTricks: [String] = []
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
-        case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook, photos
+        case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook, photos, mascotTricks
     }
 }
 
@@ -355,6 +357,7 @@ extension AppData {
         hostLook = container.value(.hostLook, default: Looks.host)
         partnerLook = container.value(.partnerLook, default: Looks.partner)
         photos = try container.decodeIfPresent([PatientPhoto].self, forKey: .photos) ?? []
+        mascotTricks = container.value(.mascotTricks, default: [String]())
     }
 }
 

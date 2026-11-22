@@ -244,7 +244,7 @@ private struct StageActions: View {
     }
 }
 
-/// Nobody is sick: the mascot sleeps on the counter, and the streak runs toward its flag.
+/// Nobody is sick: the mascot sleeps on the counter, ready to play, and the streak runs toward its flag.
 private struct CalmStage: View {
     let side: CGFloat
     @Binding var flow: SymptomFlow?
@@ -255,7 +255,8 @@ private struct CalmStage: View {
         let days = model.streakDays()
         VStack(spacing: 0) {
             Spacer(minLength: 8)
-            NappingMascot(side: model.sickKidIllnesses.isEmpty ? side * 0.92 : side * 0.76)
+            PlayfulMascot(side: model.sickKidIllnesses.isEmpty ? side * 0.92 : side * 0.76)
+                .zIndex(1)
             Text(verbatim: String(days))
                 .font(.system(size: side >= 190 ? 112 : 84, weight: .bold))
                 .monospacedDigit()

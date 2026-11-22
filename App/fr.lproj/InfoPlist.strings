@@ -1,3 +1,4 @@
 "NSCameraUsageDescription" = "Germily utilise l'appareil photo seulement quand tu prends une photo pour l'historique de la famille ou que tu scannes le code d'une garderie.";
 "NSPhotoLibraryAddUsageDescription" = "Germily enregistre dans ta photothèque les cartes à partager que tu choisis de garder.";
 "NSFaceIDUsageDescription" = "Germily utilise Face ID pour ouvrir ton journal quand le verrou de l'app est activé.";
+"NSMotionUsageDescription" = "Germily utilise l'inclinaison du téléphone pour faire pencher le microbe d'Aujourd'hui. Rien n'est gardé ni envoyé.";

@@ -80,7 +80,8 @@ def check_plists():
     app = read_plist("App/Info.plist")
     widgets = read_plist("Widgets/Info.plist")
     for key in ("CFBundleDisplayName", "UILaunchScreen", "NSSupportsLiveActivities", "ITSAppUsesNonExemptEncryption",
-                "NSPhotoLibraryAddUsageDescription", "NSFaceIDUsageDescription", "BGTaskSchedulerPermittedIdentifiers",
+                "NSPhotoLibraryAddUsageDescription", "NSFaceIDUsageDescription", "NSMotionUsageDescription",
+                "BGTaskSchedulerPermittedIdentifiers",
                 "CFBundleLocalizations"):
         if key not in app:
             fail(f"App/Info.plist: missing {key}")
@@ -284,12 +285,27 @@ def imageset_ok(catalog, name):
     return any("filename" in image and (folder / image["filename"]).is_file() for image in images)
 
 
+def mascot_faces():
+    """The raw values of MascotFace, read from its enum: each one needs its mascot image."""
+    code = (ROOT / "App/Design/MascotMind.swift").read_text()
+    body = code.split("enum MascotFace", 1)[1].split("}", 1)[0]
+    faces = []
+    for line in body.splitlines():
+        line = line.strip()
+        if line.startswith("case "):
+            for item in line[5:].split(","):
+                name, _, raw = item.partition("=")
+                faces.append(raw.strip().strip('"') if raw else name.strip())
+    return faces
+
+
 def check_assets(germs):
     for germ in germs:
         for catalog in ("App/Assets.xcassets", "Widgets/Assets.xcassets"):
             if not imageset_ok(catalog, f"germ-{germ.get('id')}"):
                 fail(f"{catalog}: missing image germ-{germ.get('id')}")
-    for name in ("dish", "sticker-soup", "sticker-tissue", "sticker-tea", "sticker-heart"):
+    mascot = tuple(f"mascot-{face}" for face in mascot_faces() + ["pacifier"])
+    for name in ("dish", "sticker-soup", "sticker-tissue", "sticker-tea", "sticker-heart") + mascot:
         if not imageset_ok("App/Assets.xcassets", name):
             fail(f"App/Assets.xcassets: missing image {name}")
     for catalog, colors in (("App/Assets.xcassets", ("AccentColor", "LaunchBackground")),

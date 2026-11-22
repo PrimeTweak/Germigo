@@ -24,7 +24,7 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 | 3.1.2 Manage subscription | Settings opens the system subscription sheet | `SettingsScreen.swift` |
 | 4.6 Alternate icons | Changed only by the user, from Settings | `SettingsDetailScreens.swift` |
 | 5.1.1(i) Privacy policy | In the app (offline) and on the server at `/privacy`; the consumer health data policy at `/health-data`, linked from the home page as Washington's My Health My Data Act requires | `LegalScreen.swift`, `server/server.js` |
-| Purpose strings | Camera (photos for the sick history, scanning a daycare's code), and photo library (add only), in English and French. Picking photos uses the system picker, which needs no permission. | `App/*/InfoPlist.strings` |
+| Purpose strings | Camera (photos for the sick history, scanning a daycare's code), photo library (add only), Face ID (app lock) and motion (the tilt that makes the Today mascot lean), in English and French. Picking photos uses the system picker, which needs no permission. | `App/*/InfoPlist.strings` |
 | 5.1.1(v) Accounts | No account or sign-in. Leaving a crew or a daycare, or closing a daycare, deletes the server data. Delete everything erases the device data and what this phone put on the server. | `CrewStore.leave`, `DaycareStore`, `AppModel.eraseEverything` |
 | 5.1.2 Data use | No ads, trackers or third-party SDKs | whole app |
 | 5.1.3(ii) Health data and iCloud | The journal is a local file. iCloud and HealthKit are not used. A backup is a file the user saves where they choose. | `Persistence.swift`, `SettingsScreen.swift` |
@@ -81,7 +81,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 >
 > Daycare notices (free): in the Crew tab, tap "Join a daycare", enter [DEMO DAYCARE CODE] and pick a group to see its notices. To send one, tap "I run a daycare", create a daycare, open Invite families for its code, join it from the same phone with "Join a daycare", then send a notice from Daycare mode: it arrives as a push. A short video of both flows: [VIDEO LINK].
 >
-> Permissions: the camera is used only to take a photo for a family member's sick history or to scan a daycare's code. Photo library access is add-only, to save share cards. Face ID is used only by the optional app lock, through iOS: the app never sees the face data. Notifications are optional: reminders are created on the device; only daycare notices are pushed.
+> Permissions: the camera is used only to take a photo for a family member's sick history or to scan a daycare's code. Photo library access is add-only, to save share cards. Face ID is used only by the optional app lock, through iOS: the app never sees the face data. The tilt of the phone makes the mascot on Today lean while it is awake; it is read on the device and never stored or sent. Notifications are optional: reminders are created on the device; only daycare notices are pushed.
 >
 > Data: leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases the journal on the phone and the crew and daycare data on the server.
 
@@ -103,6 +103,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 | Season Pass on the server | Crew is reserved to the Season Pass in the app only: the server does not check a purchase. Verifying the App Store transaction needs the developer account. |
 | Shared addresses | Limits count an IPv4 address alone and an IPv6 address by its /64 network. People behind one shared address, such as a school network or a carrier, share its limits. |
 | App lock | Settings > App lock asks for Face ID, Touch ID or the passcode when Germily opens or comes back from the background. Off by default. Widgets, the Live Activity and notifications still show on the Lock Screen and the Home Screen. |
+| Motion permission | The Today mascot reads the tilt with `CMMotionManager` only while it is awake and the app is in front. Whether iOS asks a permission for it is to be checked on a device; the purpose string is there in case it does. |
 | Public repository | While the repository is public, anyone signed in to GitHub can download the workflow artifacts, and the sideload build carries a Season Pass switch. It becomes private on approval day (section 2, step 16), budget first: private builds use the account's included macOS minutes. |
 | Host terms for health data | Railway encrypts stored data, volumes included, with AES-256, but its data processing addendum lists no special-category data, so it has no terms for health data such as shared germs. A question for the lawyer, with the privacy assessment. |
 | Copied text | The doctor's summary and a daycare's private address leave the clipboard after five minutes, but Universal Clipboard still carries them to the user's other devices in the meantime. |

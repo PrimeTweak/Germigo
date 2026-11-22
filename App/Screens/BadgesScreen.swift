@@ -21,8 +21,8 @@ struct BadgesScreen: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(Array(BadgeCatalog.all.enumerated()), id: \.element.id) { item in
-                    let badge = item.element
-                    let earned = model.hasBadge(badge.id)
+                    let earned = model.hasBadge(item.element.id)
+                    let badge = item.element.shown(earned: earned)
                     let count = earned ? nil : counts[badge.id].flatMap { $0.target > 0 ? $0 : nil }
                     VStack(alignment: .leading, spacing: 8) {
                         Image(systemName: earned ? badge.symbol : "lock.fill")

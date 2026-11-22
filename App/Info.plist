@@ -90,5 +90,7 @@
 	<string>Germily saves the share cards you choose to keep to your photo library.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Germily uses Face ID to open your journal when the app lock is on.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Germily uses the phone's tilt to make the germ on Today lean. Nothing is stored or sent.</string>
 </dict>
 </plist>

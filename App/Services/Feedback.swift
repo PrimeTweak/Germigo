@@ -47,6 +47,12 @@ enum Haptics {
         AppModel.shared.data.settings.soundsOn
     }
 
+    /// The lightest tap: a popped letter, a tickle, a pacifier.
+    static func tick() {
+        guard enabled else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
     static func tap() {
         guard enabled else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()

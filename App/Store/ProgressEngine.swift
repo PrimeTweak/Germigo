@@ -242,6 +242,7 @@ enum BadgeProgress {
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
         let germIDs = Set(catalog.germs.map { $0.id })
         let articleIDs = Set(catalog.articles.map { $0.id })
+        let tricks = Set(MascotTrick.allCases.map { $0.rawValue })
         let calendar = Calendar.current
         var perMonth: [String: Int] = [:]
         for log in data.logs {
@@ -258,7 +259,8 @@ enum BadgeProgress {
             BadgeCatalog.mythBuster: BadgeCount(progress: Set(data.quiz.mythsRight).intersection(germIDs).count,
                                                 target: germIDs.count),
             BadgeCatalog.professor: BadgeCount(progress: Set(data.readArticles).intersection(articleIDs).count,
-                                               target: articleIDs.count)
+                                               target: articleIDs.count),
+            BadgeCatalog.ticklish: BadgeCount(progress: Set(data.mascotTricks).intersection(tricks).count, target: tricks.count)
         ]
     }
 }

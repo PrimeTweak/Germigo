@@ -120,6 +120,9 @@ enum RewardEngine {
         if !catalog.articles.isEmpty && Set(data.readArticles).isSuperset(of: catalog.articles.map { $0.id }) {
             earned.insert(BadgeCatalog.professor)
         }
+        if Set(data.mascotTricks).isSuperset(of: MascotTrick.allCases.map { $0.rawValue }) {
+            earned.insert(BadgeCatalog.ticklish)
+        }
         return earned
     }
 }

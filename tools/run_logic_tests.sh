@@ -10,5 +10,6 @@ xcrun swiftc -swift-version 5 -o "$OUT" \
   App/Models/AppData.swift App/Models/Germ.swift App/Models/Progress.swift \
   App/Store/JournalRules.swift App/Store/RewardEngine.swift App/Store/StatsEngine.swift App/Store/Persistence.swift \
   App/Store/ProgressEngine.swift App/Store/QuizEngine.swift App/Store/SymptomEngine.swift \
-  App/Store/DayEngine.swift App/Store/LessonEngine.swift App/Store/PassRules.swift App/Design/CharacterPose.swift
+  App/Store/DayEngine.swift App/Store/LessonEngine.swift App/Store/PassRules.swift App/Design/CharacterPose.swift \
+  App/Design/MascotMind.swift
 "$OUT"

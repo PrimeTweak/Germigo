@@ -502,6 +502,18 @@ final class AppModel {
         MonthRecapEngine.recap(data: data, catalog: catalog, month: MonthRecapEngine.previousMonth(now), now: now)
     }
 
+    /// Records a trick of the Today mascot the first time it is found; the last one earns the Ticklish badge.
+    func discoverTrick(_ trick: MascotTrick, now: Date = Date()) {
+        guard !data.mascotTricks.contains(trick.rawValue) else { return }
+        data.mascotTricks.append(trick.rawValue)
+        let fresh = awardBadges(now: now)
+        commit()
+        guard let badge = fresh.first else { return }
+        Haptics.success()
+        SoundPlayer.shared.play(.badge)
+        toast = tr("New badge: %@", badge.title)
+    }
+
     /// Records the season's nemesis guess once; a right guess adds points.
     func guessNemesis(_ germID: String, season: Season, now: Date = Date()) {
         let key = String(season.number)

@@ -1,7 +1,7 @@
 import Foundation
 
-// Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding, character motion
-// and the Season Pass offer.
+// Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding, character motion,
+// the Today mascot and the Season Pass offer.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -654,6 +654,93 @@ do {
     check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.1).stretchY < 0.9, "a squish flattens the germ")
     check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.7) == CharacterPose.at(0, mood: .resting),
           "a reaction ends after its duration")
+}
+
+
+// The Today mascot: its faces over time, the night shush, the tickle and its pacifier, the rub and the pull.
+do {
+    func near(_ value: Double?, _ target: Double) -> Bool {
+        value.map { abs($0 - target) < 0.000_001 } ?? false
+    }
+    check(CharacterPose.at(0, mood: .resting, reaction: .sneeze, elapsed: 0.5).stretchY > 1.04, "a sneeze breathes in first")
+    check(CharacterPose.at(0, mood: .resting, reaction: .sneeze, elapsed: 0.62).stretchY < 0.9, "then it sneezes forward")
+    check(CharacterPose.at(0, mood: .resting, reaction: .sneeze, elapsed: 1.1) == CharacterPose.at(0, mood: .resting),
+          "a sneeze ends after its duration")
+
+    var mind = MascotMind()
+    check(mind.face(at: 0, lean: 0) == .asleep, "the mascot starts asleep")
+    check(mind.touch(at: 10, night: false) == .woke, "a touch in the day wakes it")
+    check(mind.face(at: 10.2, lean: 0) == .grumpy, "it wakes up grumpy")
+    check(mind.face(at: 11, lean: 0) == .awake, "then it is awake")
+    check(mind.face(at: 11, lean: 0.5) == .lookRight && mind.face(at: 11, lean: -0.5) == .lookLeft,
+          "it looks toward the side the phone leans")
+    check(mind.face(at: 16.5, lean: 0) == .drowsy, "it gets drowsy before it dozes off")
+    check(mind.face(at: 16.9, lean: 0) == .asleep, "and it falls asleep about 7 seconds after the last touch")
+
+    var night = MascotMind()
+    check(night.touch(at: 0, night: true) == .shushed, "at night the first touch only gets a shush")
+    check(night.face(at: 1, lean: 0) == .grumpy && !night.isAwake(at: 1), "the shush opens one eye without waking it")
+    check(night.touch(at: 1.5, night: true) == .woke, "a second touch during the shush wakes it")
+    check(night.face(at: 3, lean: 0) == .awake, "once woken at night, it plays as in the day")
+
+    var tickled = MascotMind()
+    _ = tickled.touch(at: 0, night: false)
+    tickled.startTickle(at: 0)
+    check(tickled.face(at: 1, lean: 0) == .giggle, "a tickle giggles")
+    check(!tickled.popsPacifier(at: 1.9) && tickled.popsPacifier(at: 2.0), "the pacifier flies after two seconds")
+    tickled.popPacifier(at: 2.0)
+    check(!tickled.popsPacifier(at: 2.5), "only once per tickle")
+    check(tickled.face(at: 2.5, lean: 0) == .laugh, "it laughs while the tickle goes on")
+    check(tickled.isAwake(at: 30), "it stays awake during a long tickle")
+    tickled.endTickle(at: 3)
+    check(tickled.face(at: 4, lean: 0) == .gasp, "without its pacifier it gasps")
+    check(near(tickled.pacifierFlight(at: 2.4), 0.5) && tickled.pacifierFlight(at: 3) == nil, "the pacifier lands after 0.8 s")
+    tickled.returnPacifier(at: 5)
+    check(!tickled.pacifierIsOut(at: 5) && near(tickled.pacifierReturn(at: 5.15), 0.5), "a touch sends it back in 0.3 s")
+    check(tickled.face(at: 5.4, lean: 0) == .giggle, "it giggles with its pacifier back")
+    var forgot = MascotMind()
+    _ = forgot.touch(at: 0, night: false)
+    forgot.popPacifier(at: 0)
+    check(forgot.pacifierIsOut(at: 19.9) && !forgot.pacifierIsOut(at: 20), "the pacifier comes back by itself after 20 s")
+    check(forgot.isAwake(at: 25), "it stays awake a while after the pacifier is back")
+
+    var sneezy = MascotMind()
+    _ = sneezy.touch(at: 0, night: false)
+    sneezy.sneeze(at: 2)
+    check(sneezy.face(at: 2.3, lean: 0) == .drowsy && sneezy.face(at: 2.7, lean: 0) == .sneeze, "a.. a.. then the sneeze")
+
+    var rub = RubDetector()
+    var rubbed = false
+    for (index, x) in [0.0, 20, 40, 20, 0, 20, 40, 20, 0].enumerated() {
+        rubbed = rub.track(x: x, at: Double(index) * 0.1) || rubbed
+    }
+    check(rubbed, "three quick turns back and forth make a rub")
+    var slow = RubDetector()
+    var slowRub = false
+    for (index, x) in [0.0, 20, 40, 20, 0, 20, 40, 20, 0].enumerated() {
+        slowRub = slow.track(x: x, at: Double(index) * 0.5) || slowRub
+    }
+    check(!slowRub, "slow turns are not a rub")
+    var drag = RubDetector()
+    check(![0.0, 30, 60, 90, 120].map { drag.track(x: $0, at: 0) }.contains(true), "a drag one way is not a rub")
+
+    let up = MascotMind.stretch(dx: 0, dy: -200, side: 200)
+    check(up.scaleY > 1.3 && up.scaleX < 0.9 && up.tilt == 0, "a pull up stretches it tall")
+    check(MascotMind.stretch(dx: 300, dy: -10, side: 200).tilt == 30, "a pull to the side leans it 30 degrees at most")
+    check(MascotMind.stretch(dx: 0, dy: 100, side: 200).scaleY < 1, "a pull down squashes it")
+
+    var found = makeData()
+    found.mascotTricks = MascotTrick.allCases.dropLast().map { $0.rawValue }
+    check(!RewardEngine.earnedBadges(data: found, catalog: catalog, now: day(1)).contains(BadgeCatalog.ticklish),
+          "nine tricks are not enough for Ticklish")
+    check(BadgeProgress.counts(data: found, catalog: catalog, now: day(1))[BadgeCatalog.ticklish]
+          == BadgeCount(progress: 9, target: 10), "Ticklish counts the tricks found")
+    found.mascotTricks.append(MascotTrick.shush.rawValue)
+    check(RewardEngine.earnedBadges(data: found, catalog: catalog, now: day(1)).contains(BadgeCatalog.ticklish),
+          "all ten tricks earn Ticklish")
+    let ticklish = BadgeCatalog.badge(BadgeCatalog.ticklish)
+    check(ticklish?.shown(earned: false).title != ticklish?.title && ticklish?.shown(earned: true).title == ticklish?.title,
+          "Ticklish keeps its name secret until it is earned")
 }
 
 // The Season Pass offer: each door has its own words, and the trial reminder goes out two days before the payment.

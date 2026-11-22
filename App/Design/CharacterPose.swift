@@ -67,6 +67,8 @@ enum Reaction: Equatable {
     case shake
     /// The person just got better.
     case joy
+    /// The Today mascot after a rub: breathes in, then sneezes forward.
+    case sneeze
 
     var duration: Double {
         switch self {
@@ -76,6 +78,7 @@ enum Reaction: Equatable {
         case .dizzy: 1.6
         case .shake: 0.4
         case .joy: 0.6
+        case .sneeze: 1.0
         }
     }
 }
@@ -253,6 +256,14 @@ struct CharacterPose: Equatable {
             shiftX += 3 * sin(2 * .pi * elapsed / 0.1) * (1 - p)
         case .joy:
             hop(progress: p, height: 16)
+        case .sneeze:
+            let inhale = Self.keyframes(p, [(0, 0), (0.55, 1), (0.6, 0), (1, 0)])
+            stretchY += 0.06 * inhale
+            tilt -= 4 * inhale
+            let burst = Self.keyframes(p, [(0, 0), (0.55, 0), (0.62, 1), (0.8, -0.25), (1, 0)])
+            stretchY -= 0.14 * burst
+            stretchX += 0.1 * burst
+            tilt += 7 * burst
         }
     }
 

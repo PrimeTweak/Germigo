@@ -71,7 +71,23 @@ Germs also have four moods for particular places:
 
 ### The mascot
 
-Asleep, it snores and a tap wakes it for 2.4 s. Awake, it stalks. It never hops.
+Asleep, it snores. Elsewhere, a tap wakes it for 2.4 s. Awake, it stalks. It never hops.
+
+On a calm Today it has tricks to find. Each face is an image, `mascot-<face>`, from `MascotFace`; the timings live in `App/Design/MascotMind.swift`.
+
+| Trick | Touch | What it does | Haptic |
+|---|---|---|---|
+| Pop a z | Tap a letter of the snore | The letter bursts and stays away until its next rise; the mascot sleeps on | Tick |
+| Grumpy wake-up | Tap it asleep | One eye, then both, 0.7 s; awake about 6 s after the last touch, drowsy for 0.8 s, then asleep | Tap |
+| Squish | Tap it awake | Squish with a giggle face, 0.5 s; the fourth tap within 3 s makes it dizzy, spiral eyes, 1.6 s | Tap, thud |
+| Tickle | Keep a finger still on it for 0.35 s | Giggles, beat after beat; after 2 s it laughs and the pacifier flies out in an arc and lands on the counter | Ticks, thud |
+| Pacifier | Tap the pacifier on the counter | Back in the mouth in 0.3 s, with a giggle; it comes back by itself after 20 s | Tick |
+| Pull | Drag it | Up to 40 % taller and 30° toward the finger, squashed by a finger below; springs back with Pop | Tap |
+| Sneeze | Rub back and forth: three turns of 14 pt within 1.2 s | Breathes in 0.55 s, sneezes forward; puffs and three small germs fly off and fade in 1.2 s | Thud |
+| Tilt | Lean the phone, mascot awake | Leans up to 14° the same way and looks there | None |
+| Night | From 10 PM to 7 AM, touch it asleep | Opens one eye and says "Shh… it's late." for 2.5 s, still asleep; a second touch then wakes it | Tick |
+
+Finding all ten tricks, dizzy counted on its own, earns the secret Ticklish badge: a toast, the success haptic and the badge sound, without the reward screen. With Reduce Motion the faces still change and the haptics stay; the mascot does not move, the pacifier lies on the counter at once, and the tilt is not read. VoiceOver offers Wake up, Tickle, Make it sneeze and Give back the pacifier.
 
 ### Props
 
@@ -87,9 +103,9 @@ Asleep, it snores and a tap wakes it for 2.4 s. Awake, it stalks. It never hops.
 | Household, sick | Ouch: a small shiver, 0.3 s | Dizzy for 1.6 s |
 | Germ | Squish: drops to 80 % height and 115 % width, rebounds past its shape, 0.6 s | Dizzy for 1.6 s |
 | Mascot asleep | Wakes up | Wakes up |
-| Mascot awake | Squish, like any germ | Dizzy for 1.6 s |
+| Mascot awake, on Today | Squish, like any germ | Dizzy for 1.6 s |
 
-Each tap gives the tap haptic and dizzy gives the thud. Touch never plays a sound. A character inside a button or a link does not react to touch.
+Each tap gives the tap haptic and dizzy gives the thud; the mascot's other tricks have their own, above. Touch never plays a sound. A character inside a button or a link does not react to touch.
 
 ### Groups take turns
 

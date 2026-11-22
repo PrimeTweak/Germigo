@@ -13,6 +13,7 @@ Working draft of the privacy impact assessment that Québec's private-sector pri
 | Groups chosen, app language, hashed session key, Apple push address | No | Crew server; the push address also at Apple | Until the parent leaves; 400 days without opening |
 | IP address | No | Server memory for rate limits; host logs | One day at most in memory; host logs: To complete from Railway's log retention for the plan |
 | Journal, symptoms, photos, kids' and partner's first names | Yes, health | The phone only | Not communicated |
+| The phone's tilt, while the Today mascot is awake | No | Read on the phone, never stored | Not communicated |
 
 ## Communications outside Québec
 

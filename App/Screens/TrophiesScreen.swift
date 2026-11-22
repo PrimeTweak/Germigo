@@ -237,7 +237,7 @@ struct TrophiesScreen: View {
     private var nextBadge: NextBadge? {
         let counts = BadgeProgress.counts(data: model.data, catalog: model.catalog, now: Date())
         return BadgeCatalog.all.compactMap { badge -> NextBadge? in
-            guard !model.hasBadge(badge.id), let count = counts[badge.id], count.target > 0,
+            guard !badge.secret, !model.hasBadge(badge.id), let count = counts[badge.id], count.target > 0,
                   count.progress < count.target else { return nil }
             return NextBadge(badge: badge, count: count)
         }
@@ -273,7 +273,8 @@ struct TrophiesScreen: View {
                     SectionHeader(title: tr("Badges"), trailing: tr("%1$lld of %2$lld", earned.count, all.count))
                     HStack(spacing: 8) {
                         ForEach(Array(medals.enumerated()), id: \.element.id) { item in
-                            BadgeMedal(badge: item.element, won: model.hasBadge(item.element.id),
+                            BadgeMedal(badge: item.element.shown(earned: model.hasBadge(item.element.id)),
+                                       won: model.hasBadge(item.element.id),
                                        progress: item.element.id == next?.badge.id ? next?.count.fraction : nil,
                                        bounce: appeared)
                                 .cascadeIn(item.offset)

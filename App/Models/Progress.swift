@@ -6,6 +6,15 @@ struct Badge: Identifiable, Hashable {
     let detail: String
     let symbol: String
     let tint: UInt32
+    /// A secret badge shows neither its name nor its symbol until it is earned.
+    var secret = false
+
+    /// What a locked secret badge shows: only where to look.
+    func shown(earned: Bool) -> Badge {
+        guard secret, !earned else { return self }
+        return Badge(id: id, title: tr("Secret badge"), detail: tr("Hidden somewhere on Today."), symbol: "questionmark",
+                     tint: tint, secret: true)
+    }
 }
 
 enum BadgeCatalog {
@@ -17,6 +26,7 @@ enum BadgeCatalog {
     static let labRat = "lab_rat"
     static let mythBuster = "myth_buster"
     static let professor = "daycare_professor"
+    static let ticklish = "ticklish"
 
     static var all: [Badge] {
         [
@@ -34,7 +44,9 @@ enum BadgeCatalog {
             Badge(id: ironParent, title: tr("Iron Parent"), detail: tr("Thirty days without a germ"), symbol: "shield.fill", tint: Swatch.green),
             Badge(id: labRat, title: tr("Lab Rat"), detail: tr("Finished your first daily quiz"), symbol: "flask.fill", tint: Swatch.limeInk),
             Badge(id: mythBuster, title: tr("Myth Buster"), detail: tr("Got every myth right"), symbol: "checkmark.bubble.fill", tint: Swatch.grape),
-            Badge(id: professor, title: tr("Daycare Professor"), detail: tr("Read every lesson"), symbol: "graduationcap.fill", tint: Swatch.gold)
+            Badge(id: professor, title: tr("Daycare Professor"), detail: tr("Read every lesson"), symbol: "graduationcap.fill", tint: Swatch.gold),
+            Badge(id: ticklish, title: tr("Ticklish"), detail: tr("Found every trick of the napping germ"), symbol: "hand.tap.fill",
+                  tint: Swatch.iris, secret: true)
         ]
     }
 

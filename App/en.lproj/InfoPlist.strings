@@ -1,3 +1,4 @@
 "NSCameraUsageDescription" = "Germily uses the camera only when you take a photo for your household's sick history or scan a daycare's code.";
 "NSPhotoLibraryAddUsageDescription" = "Germily saves the share cards you choose to keep to your photo library.";
 "NSFaceIDUsageDescription" = "Germily uses Face ID to open your journal when the app lock is on.";
+"NSMotionUsageDescription" = "Germily uses the phone's tilt to make the germ on Today lean. Nothing is stored or sent.";

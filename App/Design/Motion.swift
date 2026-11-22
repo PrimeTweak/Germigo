@@ -93,35 +93,63 @@ private struct TouchReaction: ViewModifier {
 }
 
 /// The sleeping mascot's snore: three letters that rise and fade in turn.
+/// A popped letter bursts and stays away until its next rise.
 struct SnoreView: View {
+    /// When each letter was popped, in seconds since the reference date, by letter.
+    var popped: [Int: Double] = [:]
     @Environment(\.palette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+    static let side: CGFloat = 60
+
     var body: some View {
-        Group {
-            if reduceMotion {
-                letters(time: 1.2)
-            } else {
-                TimelineView(.animation(minimumInterval: 1.0 / 30)) { timeline in
-                    letters(time: timeline.date.timeIntervalSinceReferenceDate)
-                }
-            }
+        TimelineView(.animation(minimumInterval: reduceMotion ? 0.5 : 1.0 / 30)) { timeline in
+            let now = timeline.date.timeIntervalSinceReferenceDate
+            letters(time: reduceMotion ? 1.2 : now, now: now)
         }
         .accessibilityHidden(true)
     }
 
-    private func letters(time: TimeInterval) -> some View {
+    /// Where a letter is, from the center of the view, and how visible it is.
+    static func spot(_ index: Int, time: Double) -> (offset: CGSize, fade: Double) {
+        let phase = (time / 3 + Double(index) / 3).truncatingRemainder(dividingBy: 1)
+        let fade = min(1, min(phase, 1 - phase) * 4)
+        return (CGSize(width: Double(index) * 13 + 3 * phase, height: 14 - Double(index) * 10 - 30 * phase), fade)
+    }
+
+    /// Which rise of a letter a moment belongs to.
+    static func rise(_ index: Int, time: Double) -> Int {
+        Int((time / 3 + Double(index) / 3).rounded(.down))
+    }
+
+    private func letters(time: Double, now: Double) -> some View {
         ZStack {
             ForEach(0..<3, id: \.self) { index in
-                let phase = (time / 3 + Double(index) / 3).truncatingRemainder(dividingBy: 1)
-                let fade = min(1, min(phase, 1 - phase) * 4)
+                let spot = Self.spot(index, time: time)
+                let gone = popped[index].map { Self.rise(index, time: now) == Self.rise(index, time: $0) } ?? false
                 Text(verbatim: "z")
                     .font(.system(size: 15 + 6 * Double(index), weight: .semibold))
-                    .foregroundStyle(palette.ink.opacity(0.68 * fade))
-                    .offset(x: Double(index) * 13 + 3 * phase, y: 14 - Double(index) * 10 - 30 * phase)
+                    .foregroundStyle(palette.ink.opacity(gone ? 0 : 0.68 * spot.fade))
+                    .offset(spot.offset)
+                if let at = popped[index], !reduceMotion, now - at >= 0, now - at < 0.3 {
+                    burst(progress: (now - at) / 0.3)
+                        .offset(Self.spot(index, time: at).offset)
+                }
             }
         }
-        .frame(width: 60, height: 60)
+        .frame(width: Self.side, height: Self.side)
+    }
+
+    private func burst(progress: Double) -> some View {
+        ZStack {
+            ForEach(0..<8, id: \.self) { ray in
+                Capsule()
+                    .fill(palette.ink.opacity(0.55 * (1 - progress)))
+                    .frame(width: 3, height: 8)
+                    .offset(y: -8 - 10 * progress)
+                    .rotationEffect(.degrees(Double(ray) * 45))
+            }
+        }
     }
 }
 
