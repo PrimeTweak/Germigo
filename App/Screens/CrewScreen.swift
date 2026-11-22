@@ -162,7 +162,7 @@ private struct CrewTeaser: View {
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
                 VStack(alignment: .leading, spacing: 0) {
-                    row("dot.radiowaves.left.and.right", tr("Going around"), tr("A germ shows up once 2 families report it. No names."))
+                    row("dot.radiowaves.left.and.right", tr("Going around"), tr("A germ shows up once 3 families report it. No names."))
                     Divider()
                     row("hand.thumbsup.fill", tr("Soup, tissues, tea"), tr("Send a little support when someone goes down."))
                     Divider()
@@ -554,7 +554,7 @@ private struct CrewHome: View {
                 RadarRow(entry: item.element, families: state.crew.families)
                     .cascadeIn(item.offset)
             }
-            Label(tr("A germ shows up once 2 families report it. No names."), systemImage: "shield.lefthalf.filled")
+            Label(tr("A germ shows up once 3 families report it. No names."), systemImage: "shield.lefthalf.filled")
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
         }

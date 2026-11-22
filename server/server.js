@@ -65,6 +65,8 @@ const LIMITS = {
 };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const RADAR_WINDOW = 7 * DAY;
+// Fewer families than this could point to who is sick in a small crew.
+const RADAR_MIN_FAMILIES = 3;
 const FEED_WINDOW = 30 * DAY;
 const EVENT_LIFETIME = 400 * DAY;
 const MEMBER_LIFETIME = 400 * DAY;
@@ -586,7 +588,7 @@ function createApp(options = {}) {
       families.get(event.germID).add(event.memberID);
     }
     const radar = [...families.entries()]
-      .filter(([, who]) => who.size >= 2)
+      .filter(([, who]) => who.size >= RADAR_MIN_FAMILIES)
       .map(([germID, who]) => ({ germID, families: who.size }))
       .sort((a, b) => b.families - a.families || a.germID.localeCompare(b.germID));
 

@@ -195,9 +195,9 @@ struct TourPageView: View {
             daycareCard
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(title: tr("Going around"), trailing: tr("This week"))
-                RadarRow(entry: RadarEntry(germID: "noro", families: 3), families: 5)
-                RadarRow(entry: RadarEntry(germID: "rhino", families: 2), families: 5)
-                Label(tr("A germ shows up once 2 families report it. No names."), systemImage: "shield.lefthalf.filled")
+                RadarRow(entry: RadarEntry(germID: "noro", families: 4), families: 5)
+                RadarRow(entry: RadarEntry(germID: "rhino", families: 3), families: 5)
+                Label(tr("A germ shows up once 3 families report it. No names."), systemImage: "shield.lefthalf.filled")
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.leading)

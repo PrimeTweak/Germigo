@@ -415,7 +415,7 @@ extension CrewStore {
             FeedEvent(id: "demo-event-3", memberID: "demo-3", name: "Jo", colorIndex: 3, germID: "coxy",
                       at: now - 50 * hour, reactions: [:], mine: [])
         ]
-        let radar = [RadarEntry(germID: "noro", families: 3), RadarEntry(germID: "rhino", families: 2)]
+        let radar = [RadarEntry(germID: "noro", families: 4), RadarEntry(germID: "rhino", families: 3)]
         let info = CrewInfo(id: "demo", name: crewName, emblem: emblem, code: "TEST4242", families: others.count + 1)
         return CrewState(crew: info, me: me, members: [me] + others, radar: radar, feed: feed)
     }
@@ -436,7 +436,7 @@ extension CrewStore {
         if let index = radar.firstIndex(where: { $0.germID == germID }) {
             radar[index] = RadarEntry(germID: germID, families: radar[index].families + 1)
         } else {
-            radar.append(RadarEntry(germID: germID, families: 2))
+            radar.append(RadarEntry(germID: germID, families: 3))
         }
         var feed = current.feed
         if sharesName {

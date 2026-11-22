@@ -130,16 +130,18 @@ async function main() {
   assert.equal((await call('GET', '/v1/crew', { token: 'nope' })).data.error, 'unauthorized');
   assert.equal((await call('GET', '/v1/crew')).status, 401);
 
-  // Radar needs two families; anonymous events stay out of the feed
+  // Radar needs three families; anonymous events stay out of the feed
   assert.equal((await call('POST', '/v1/crew/events', { token: alex, body: { germID: 'not-a-germ', named: false } })).data.error, 'invalid');
   let state = (await call('POST', '/v1/crew/events', { token: alex, body: { germID: 'noro', named: false } })).data;
   assert.deepEqual(state.radar, []);
   assert.deepEqual(state.feed, []);
   state = (await call('POST', '/v1/crew/events', { token: marie, body: { germID: 'noro', named: true } })).data;
-  assert.deepEqual(state.radar, [{ germID: 'noro', families: 2 }]);
+  assert.deepEqual(state.radar, []);
+  state = (await call('POST', '/v1/crew/events', { token: jon, body: { germID: 'noro', named: false } })).data;
+  assert.deepEqual(state.radar, [{ germID: 'noro', families: 3 }]);
   assert.equal(state.feed.length, 1);
   assert.equal(state.feed[0].name, 'Marie');
-  assert.equal(state.me.germs, 1);
+  assert.equal(state.me.germs, 0);
   const eventID = state.feed[0].id;
   state = (await call('GET', '/v1/crew', { token: alex })).data;
   assert.equal(state.me.germs, 0);
@@ -232,7 +234,9 @@ async function main() {
   const second = (await call('POST', '/v1/crews', { body: { name: 'Bumblebees', displayName: 'Sam', emblem: 9 } })).data;
   assert.equal(second.state.crew.emblem, 0);
   const pat = (await call('POST', '/v1/crews/join', { body: { code: second.state.crew.code, displayName: 'Pat' } })).data.token;
+  const lou = (await call('POST', '/v1/crews/join', { body: { code: second.state.crew.code, displayName: 'Lou' } })).data.token;
   await call('POST', '/v1/crew/events', { token: second.token, body: { germID: 'flu', named: true } });
+  await call('POST', '/v1/crew/events', { token: lou, body: { germID: 'flu', named: false } });
   state = (await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'flu', named: true } })).data;
   assert.equal(state.radar.length, 1);
   now += 8 * DAY;
@@ -260,6 +264,8 @@ async function main() {
   now += 61000;
   const hornets = (await call('POST', '/v1/crews', { body: { name: 'Hornets', displayName: 'Kim', emblem: 2 } })).data;
   const lee = (await call('POST', '/v1/crews/join', { body: { code: hornets.state.crew.code, displayName: 'Lee' } })).data.token;
+  const ray = (await call('POST', '/v1/crews/join', { body: { code: hornets.state.crew.code, displayName: 'Ray' } })).data.token;
+  await call('POST', '/v1/crew/events', { token: ray, body: { germID: 'flu', named: false } });
   const win = (body) => call('POST', '/v1/crew/events', { token: hornets.token, body: { germID: 'flu', ...body } });
   assert.equal((await win({ kind: 'beat', named: false })).data.error, 'invalid');
   assert.equal((await win({ kind: 'won', named: true })).data.error, 'invalid');
