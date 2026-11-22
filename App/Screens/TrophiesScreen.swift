@@ -73,7 +73,7 @@ struct TrophiesScreen: View {
             HStack(spacing: 14) {
                 ZStack {
                     ProgressRing(fraction: level.fraction, lineWidth: 6)
-                    BuddyView(look: model.data.hostLook, sick: model.onSickLeave, size: 58, lively: true, pokes: true)
+                    BuddyView(look: model.data.hostLook, sick: model.onSickLeave, size: 58, leads: true, pokes: true)
                 }
                 .frame(width: 92, height: 92)
                 .overlay(alignment: .bottomTrailing) {
@@ -344,7 +344,7 @@ struct TrophiesScreen: View {
                     GeometryReader { proxy in
                         Group {
                             if caught {
-                                LivelyCharacter(mood: .stalking, phase: Double(index) * 0.8, pokes: false) {
+                                LivelyCharacter(mood: .stalking, phase: Double(index) * 0.8, touch: nil) {
                                     GermImage(germ: item.germ, size: proxy.size.width * 0.76)
                                 }
                             } else {

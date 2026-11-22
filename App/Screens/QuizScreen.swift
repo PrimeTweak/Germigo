@@ -191,7 +191,7 @@ struct QuizScreen: View {
                     } else if value.translation.width < -100 {
                         choose(0, question)
                     }
-                    withAnimation(.spring(duration: 0.3)) {
+                    withAnimation(Tempo.settle) {
                         drag = 0
                     }
                 }
@@ -344,7 +344,7 @@ struct QuizScreen: View {
             } else {
                 Haptics.thud()
             }
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(Tempo.quick) {
                 picked = choice
             }
         } else {
@@ -354,7 +354,7 @@ struct QuizScreen: View {
     }
 
     private func advance() {
-        withAnimation(.easeInOut(duration: 0.25)) {
+        withAnimation(Tempo.scene) {
             picked = nil
             drag = 0
             index += 1

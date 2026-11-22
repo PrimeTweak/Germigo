@@ -38,7 +38,7 @@ struct OnboardingFlow: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.35), value: step)
+        .animation(Tempo.scene, value: step)
         .fullScreenCover(isPresented: $showPaywall, onDismiss: finish) {
             PaywallView(onFinish: {
                 showPaywall = false
@@ -299,20 +299,20 @@ private struct SplashView: View {
             if !Task.isCancelled { onDone() }
             return
         }
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+        withAnimation(Tempo.settle) {
             dishIn = true
         }
         await pause(0.28)
         for index in residents.indices {
             if Task.isCancelled { return }
-            withAnimation(.spring(response: 0.38, dampingFraction: 0.55)) {
+            withAnimation(Tempo.pop) {
                 landed = index + 1
             }
             Haptics.tap()
             await pause(0.13)
         }
         if Task.isCancelled { return }
-        withAnimation(.easeOut(duration: 0.4)) {
+        withAnimation(Tempo.settle) {
             wordIn = true
         }
         await pause(1.3)

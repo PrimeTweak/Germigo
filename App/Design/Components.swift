@@ -5,7 +5,7 @@ struct PressableStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .animation(Tempo.press, value: configuration.isPressed)
     }
 }
 
@@ -378,7 +378,7 @@ struct Podium: View {
 
     private func step(_ place: PodiumPlace, rank: Int) -> some View {
         VStack(spacing: 0) {
-            BuddyView(look: place.look, sick: place.sick, size: rank == 1 ? 62 : 52, lively: rank == 1)
+            BuddyView(look: place.look, sick: place.sick, size: rank == 1 ? 62 : 52, leads: rank == 1)
                 .padding(.bottom, 4)
             Text(verbatim: String(rank))
                 .font(.title3.weight(.bold))
@@ -438,5 +438,55 @@ struct Podium: View {
         }
         .padding(.top, rank == 4 ? 12 : 0)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// A person to pick: their character, as healthy or sick as they are today, and their name.
+struct PersonChip: View {
+    let look: Int
+    let sick: Bool
+    let name: String
+    let selected: Bool
+    let action: () -> Void
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                BuddyView(look: look, sick: sick, size: 28)
+                Text(name)
+                    .font(.callout.weight(.semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(selected ? palette.background : palette.ink)
+            .padding(.leading, 6)
+            .padding(.trailing, 14)
+            .frame(height: 44)
+            .background(selected ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// A choice without a character, such as the illness a photo belongs to.
+struct ChoiceChip: View {
+    let title: String
+    let selected: Bool
+    let action: () -> Void
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.callout.weight(.semibold))
+                .lineLimit(1)
+                .foregroundStyle(selected ? palette.background : palette.ink)
+                .padding(.horizontal, 14)
+                .frame(height: 40)
+                .background(selected ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }

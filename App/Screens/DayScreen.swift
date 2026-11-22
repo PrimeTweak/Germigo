@@ -9,7 +9,7 @@ extension AppModel {
     /// Marks a kid better, then opens their victory: how long it took and their score against the germ.
     func cheerKidBetter(_ ids: [UUID], on day: Date) {
         guard let first = data.kidIllnesses.first(where: { ids.contains($0.id) }) else { return }
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) {
+        withAnimation(Tempo.settle) {
             for id in ids { markKidBetter(id, on: day) }
         }
         Haptics.success()
@@ -90,7 +90,7 @@ struct DayScreen: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 28)
             .id(day)
-            .transition(.asymmetric(insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+            .motionTransition(.asymmetric(insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
                                     removal: .opacity))
         }
         .background(CharacterWash(tint: washTint(locked ? [] : entries), reach: 0.45))
@@ -133,7 +133,7 @@ struct DayScreen: View {
     private func step(_ offset: Int) {
         guard let next = Calendar.current.date(byAdding: .day, value: offset, to: day) else { return }
         forward = offset > 0
-        withAnimation(.snappy) {
+        withAnimation(Tempo.quick) {
             day = Calendar.current.startOfDay(for: next)
         }
     }
@@ -196,7 +196,7 @@ private struct DayCard: View {
                 HStack(spacing: 14) {
                     BuddyView(look: model.look(of: entry.person), sick: !entry.isLastDay, size: 56, lively: true, pokes: true)
                         .id(entry.isLastDay)
-                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                        .motionTransition(.scale(scale: 0.3).combined(with: .opacity))
                     VStack(alignment: .leading, spacing: 2) {
                         Text(name)
                             .font(.title3.weight(.bold))
@@ -277,7 +277,7 @@ private struct DayCard: View {
                         .foregroundStyle(palette.accent)
                     Spacer(minLength: 8)
                     Button(tr("Still sick")) {
-                        withAnimation(.snappy) {
+                        withAnimation(Tempo.quick) {
                             model.reopenKidIllness(illnessID)
                         }
                     }

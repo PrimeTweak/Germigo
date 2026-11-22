@@ -757,7 +757,7 @@ private struct FeedRow: View {
                 Capsule().strokeBorder(mine ? palette.ink : Color.clear, lineWidth: 2)
             }
             .hitTarget(height: 42)
-            .animation(.snappy, value: count)
+            .animation(Tempo.quick, value: count)
         }
         .buttonStyle(.plain)
         .overlay(alignment: .top) {

@@ -85,7 +85,7 @@ private struct ThemedRoot: View {
         }
         .environment(\.palette, palette)
         .tint(palette.ink)
-        .animation(.easeInOut(duration: 0.35), value: model.data.onboardingDone)
+        .animation(Tempo.scene, value: model.data.onboardingDone)
         .alert(noticeTitle, isPresented: noticeBinding) {
             Button(tr("OK"), role: .cancel) {}
         } message: {
@@ -177,14 +177,14 @@ struct MainTabs: View {
             ZStack {
                 if let toast = model.toast {
                     ToastView(text: toast)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .motionTransition(.move(edge: .top).combined(with: .opacity))
                         .task(id: toast) {
                             try? await Task.sleep(nanoseconds: 2_200_000_000)
                             model.toast = nil
                         }
                 }
             }
-            .animation(.snappy, value: model.toast)
+            .animation(Tempo.settle, value: model.toast)
         }
         .confirmationDialog(tr("Feeling better?"), isPresented: $model.askBetter, titleVisibility: .visible) {
             Button(tr("Yes, I'm better")) {

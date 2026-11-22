@@ -67,7 +67,7 @@ struct GermDetailScreen: View {
 
     private var hero: some View {
         HStack(spacing: 16) {
-            LivelyCharacter(mood: .idle) {
+            LivelyCharacter(mood: germ.restMood) {
                 GermCardView(germ: germ, width: 104, finish: finish, count: caught)
             }
             VStack(alignment: .leading, spacing: 6) {
@@ -327,7 +327,7 @@ struct GermDetailScreen: View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
                 Haptics.tap()
-                withAnimation(.snappy) {
+                withAnimation(Tempo.quick) {
                     showsSigns.toggle()
                 }
             } label: {
@@ -542,7 +542,7 @@ struct GermDetailScreen: View {
 
     private func answer(_ value: Bool) {
         if value == germ.myth.isTrue { Haptics.success() } else { Haptics.tap() }
-        withAnimation(.snappy) {
+        withAnimation(Tempo.quick) {
             mythAnswer = value
         }
     }

@@ -216,7 +216,7 @@ struct RewardView: View {
             levelFraction = reward.levelAfter.fraction
             return
         }
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.72)) {
+        withAnimation(Tempo.settle) {
             cardIn = true
         }
         Task { @MainActor in
@@ -226,17 +226,17 @@ struct RewardView: View {
             }
             SoundPlayer.shared.play(.reveal)
             Haptics.success()
-            withAnimation(.easeOut(duration: 0.4)) {
+            withAnimation(Tempo.settle) {
                 detailsIn = true
             }
-            withAnimation(.easeOut(duration: 0.8)) {
+            withAnimation(Tempo.reveal) {
                 shownPoints = reward.log.points
             }
             try? await Task.sleep(nanoseconds: 750_000_000)
             if !reward.newBadges.isEmpty {
                 SoundPlayer.shared.play(.badge)
             }
-            withAnimation(.easeInOut(duration: 0.7)) {
+            withAnimation(Tempo.reveal) {
                 levelFraction = reward.levelAfter.fraction
             }
         }

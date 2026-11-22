@@ -812,7 +812,7 @@ struct JoinDaycareSheet: View {
 
     private func chip(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 action()
             }
         } label: {

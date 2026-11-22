@@ -7,11 +7,6 @@ enum Buddy {
         Swatch.peach, Swatch.lavender, Swatch.periwinkle, Swatch.limePale
     ]
 
-    /// How each look moves while sick, in the order of the looks.
-    private static let sickMoods: [Liveliness] = [
-        .feverish, .wobbly, .sniffly, .dizzy, .sneezy, .weary, .weary, .shivering
-    ]
-
     static func index(_ look: Int) -> Int {
         abs(look) % Looks.count
     }
@@ -20,8 +15,8 @@ enum Buddy {
         Color(hex: tints[index(look)])
     }
 
-    static func mood(_ look: Int, sick: Bool) -> Liveliness {
-        sick ? sickMoods[index(look)] : .idle
+    static func mood(_ look: Int, sick: Bool, leads: Bool) -> Liveliness {
+        .household(index(look), sick: sick, leads: leads)
     }
 }
 
@@ -30,16 +25,34 @@ struct BuddyView: View {
     let look: Int
     var sick = false
     var size: CGFloat = 62
-    /// Breathing, and the look's own routine while sick. Leave it off in long lists.
+    /// Breathing, and the look's own routine while sick. Leave it off in lists.
     var lively = false
-    /// A tap makes it hop. Leave it off inside a button or a link.
+    /// The look's accent while healthy, for the one character that leads a screen or a group.
+    var leads = false
+    /// A tap makes it react. Leave it off inside a button or a link.
     var pokes = false
+    /// When its accent comes in the seven-second cycle; by default each look has its own turn.
+    var phase: Double?
+    @State private var change: TimedReaction?
+    @State private var joys = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
-            if lively {
-                LivelyCharacter(mood: Buddy.mood(look, sick: sick), phase: Double(Buddy.index(look)) * 0.7, pokes: pokes) {
+            if lively || leads {
+                LivelyCharacter(mood: Buddy.mood(look, sick: sick, leads: leads),
+                                phase: phase ?? Double(Buddy.index(look)) * CharacterPose.accentCycle / 8,
+                                touch: pokes ? (sick ? Reaction.ouch : Reaction.giggle) : nil, event: change) {
                     art
+                }
+                .overlay(alignment: .top) {
+                    if !reduceMotion {
+                        JoySparkles(trigger: joys, size: size)
+                    }
+                }
+                .onChange(of: sick) { _, nowSick in
+                    change = TimedReaction(reaction: nowSick ? .shake : .joy, start: Date())
+                    if !nowSick { joys += 1 }
                 }
             } else {
                 art
@@ -58,16 +71,54 @@ struct BuddyView: View {
     }
 }
 
+/// The sparkles over a character who just got better: they pop, rise and fade.
+private struct JoySparkles: View {
+    let trigger: Int
+    let size: CGFloat
+
+    private struct Frame {
+        var opacity = 0.0
+        var scale = 0.4
+        var rise = 0.0
+    }
+
+    var body: some View {
+        Image(systemName: "sparkles")
+            .font(.system(size: size * 0.32, weight: .semibold))
+            .foregroundStyle(Color(hex: Swatch.gold))
+            .keyframeAnimator(initialValue: Frame(), trigger: trigger) { content, frame in
+                content
+                    .opacity(frame.opacity)
+                    .scaleEffect(frame.scale)
+                    .offset(y: frame.rise - size * 0.12)
+            } keyframes: { _ in
+                KeyframeTrack(\.opacity) {
+                    LinearKeyframe(1, duration: 0.15)
+                    LinearKeyframe(1, duration: 0.45)
+                    LinearKeyframe(0, duration: 0.3)
+                }
+                KeyframeTrack(\.scale) {
+                    CubicKeyframe(1.15, duration: 0.2)
+                    CubicKeyframe(1, duration: 0.15)
+                    LinearKeyframe(0.8, duration: 0.55)
+                }
+                KeyframeTrack(\.rise) {
+                    LinearKeyframe(-size * 0.25, duration: 0.9)
+                }
+            }
+            .allowsHitTesting(false)
+    }
+}
+
 /// A character on a soft disc of its own color, for rows and small avatars.
 struct BuddyBadge: View {
     let look: Int
     var sick = false
     var size: CGFloat = 40
-    var lively = false
     @Environment(\.palette) private var palette
 
     var body: some View {
-        BuddyView(look: look, sick: sick, size: size * 0.74, lively: lively)
+        BuddyView(look: look, sick: sick, size: size * 0.74)
             .frame(width: size, height: size)
             .background(Buddy.tint(look).opacity(palette.isDark ? 0.3 : 0.45), in: Circle())
     }

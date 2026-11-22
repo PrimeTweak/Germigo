@@ -202,7 +202,7 @@ struct DataScreen: View {
             }
             if !showAll {
                 Button {
-                    withAnimation(.snappy) {
+                    withAnimation(Tempo.quick) {
                         showAll = true
                     }
                 } label: {

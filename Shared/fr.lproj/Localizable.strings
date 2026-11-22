@@ -21,7 +21,6 @@
 "%1$@, day %2$lld" = "%1$@, jour %2$lld";
 "%1$@, day %2$lld of %3$lld" = "%1$@, jour %2$lld sur %3$lld";
 "%1$@, level %2$lld" = "%1$@, niveau %2$lld";
-"%1$@, since %2$@" = "%1$@, depuis le %2$@";
 "%1$@: %2$@, %3$@" = "%1$@ : %2$@, %3$@";
 "%1$@: %2$lld families this week." = "%1$@ : %2$lld familles cette semaine.";
 "%1$@: %2$lld. Rough." = "%1$@ : %2$lld. Ouch.";
@@ -39,6 +38,7 @@
 "%@ has you" = "%@ te tient";
 "%@ is after you" = "%@ en a après toi";
 "%@ is better" = "%@ va mieux";
+"%@ is down. Hold the line." = "%@ est au tapis. On tient bon.";
 "%@ is sick" = "%@ est malade";
 "%@ leads" = "%@ mène";
 "%@ suffered the most." = "%@ a le plus souffert.";
@@ -60,6 +60,7 @@
 "%lld days without a germ" = "%lld jours sans microbe";
 "%lld days without a germ are on the line." = "%lld jours sans microbe sont en jeu.";
 "%lld days without a germ." = "%lld jours sans microbe.";
+"%lld down. Hold the line." = "%lld au tapis. On tient bon.";
 "%lld entries" = "%lld entrées";
 "%lld entry" = "%lld entrée";
 "%lld families" = "%lld familles";
@@ -133,6 +134,8 @@
 "Add a photo" = "Ajouter une photo";
 "Add a photo on a sick day, from someone's file, or with the button at the top." = "Ajoute une photo depuis un jour de maladie, la fiche de quelqu'un ou le bouton en haut.";
 "Add them in one step" = "En une seule étape";
+"Add to %@'s album" = "Ajouter à l'album de %@";
+"Add to your album" = "Ajouter à ton album";
 "Add your partner" = "Ajoute ton ou ta partenaire";
 "Add your partner to start the couple duel." = "Ajoute ton partenaire pour lancer le duel de couple.";
 "Added to %@'s history." = "Ajouté à l'historique de %@.";
@@ -233,6 +236,7 @@
 "Contact support" = "Contacter le soutien";
 "Contact: %@" = "Contact : %@";
 "Continue" = "Continuer";
+"Copy as text" = "Copier en texte";
 "Copy the address" = "Copier l'adresse";
 "Coral" = "Corail";
 "Couch Captain" = "Capitaine du divan";
@@ -314,7 +318,6 @@
 "Emblem %lld" = "Emblème %lld";
 "Emergency" = "Urgence";
 "Emergency and health lines" = "Urgences et lignes santé";
-"Empty" = "Vide";
 "Ended" = "Fin";
 "Enough for every runny nose" = "Assez pour tous les nez qui coulent";
 "Epic" = "Épique";
@@ -323,6 +326,8 @@
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe et de garderie du serveur. Impossible à annuler.";
 "Every germ caught" = "Tous les microbes attrapés";
 "Everyone" = "Tout le monde";
+"Everyone's down. Send soup." = "Tout le monde est au tapis. Envoyez de la soupe.";
+"Everyone's fine. Suspicious." = "Tout le monde va bien. Louche.";
 "Everywhere in Canada except Québec and Nunavut." = "Partout au Canada, sauf au Québec et au Nunavut.";
 "Example" = "Exemple";
 "Expanded" = "Ouverte";
@@ -351,6 +356,7 @@
 "Finish the album" = "Termine l'album";
 "Finished your first daily quiz" = "Premier quiz du jour terminé";
 "First name" = "Prénom";
+"First names only. They never leave this phone." = "Seulement des prénoms. Ils ne quittent jamais ce téléphone.";
 "First stop: %lld days" = "Première étape : %lld jours";
 "Five different germs caught" = "Cinq microbes différents attrapés";
 "For" = "Pour";
@@ -385,6 +391,7 @@
 "Germigo replies to confirm how many families got it. If the illness or the group is unclear, it asks instead of sending. Leave the group out to reach the whole daycare." = "Germigo répond pour confirmer combien de familles l'ont reçu. Si la maladie ou le groupe n'est pas clair, il demande au lieu d'envoyer. Sans groupe, l'avis va à toute la garderie.";
 "Germigo shares general information from public health sources. It is not medical advice and does not replace a health professional." = "Germigo partage de l'information générale tirée de sources de santé publique. Ce n'est pas un avis médical, et ça ne remplace pas un professionnel de la santé.";
 "Germigo · Admit one household" = "Germigo · Valide pour une maisonnée";
+"Germigo · For the doctor" = "Germigo · Pour le médecin";
 "Germigo. Daycare germs, collected." = "Germigo. Les microbes de garderie, en collection.";
 "Germs" = "Microbes";
 "Germs by month" = "Microbes par mois";
@@ -414,6 +421,7 @@
 "Health line" = "Ligne santé";
 "Help" = "Aide";
 "Help lines" = "Lignes d'aide";
+"Hides the calendar" = "Cache le calendrier";
 "Hides the signs" = "Masque les signes";
 "History" = "Historique";
 "Hoarse voice" = "Voix enrouée";
@@ -456,7 +464,6 @@
 "It disappears from your phone, and the report is reviewed within 24 hours." = "Il disparaît de ton téléphone, et le signalement est examiné dans les 24 heures.";
 "It fits everything you ticked." = "Il colle à tout ce que tu as coché.";
 "It got me" = "Il m'a eu";
-"It opens the couple duel." = "Ça ouvre le duel de couple.";
 "It will come back another day." = "Elle reviendra un autre jour.";
 "It's %@" = "C'est %@";
 "Itch Witness" = "Témoin de la gratte";
@@ -571,6 +578,7 @@
 "No countdown for this one. The case file explains what to watch for." = "Pas de compte à rebours pour celui-là. Le dossier explique quoi surveiller.";
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
 "No daycare matches that code." = "Aucune garderie ne correspond à ce code.";
+"No germ logged for %1$@ since %2$@. The page fills itself as you log." = "Aucun microbe noté pour %1$@ depuis le %2$@. La page se remplit à mesure que tu notes.";
 "No germs logged yet. It won't last." = "Aucun microbe noté pour l'instant. Ça ne durera pas.";
 "No kid is sick right now. Enjoy it." = "Aucun enfant malade en ce moment. Profites-en.";
 "No notices lately. Good news." = "Aucun avis ces temps-ci. Bonne nouvelle.";
@@ -584,11 +592,13 @@
 "Nobody is sick today. Knock on wood." = "Personne n'est malade aujourd'hui. Touchons du bois.";
 "Nobody stands out yet this season." = "Personne ne se démarque encore cette saison.";
 "Nobody was sick. Suspiciously quiet." = "Personne n'était malade. Calme suspect.";
+"Nobody's sick. Don't say it out loud." = "Personne n'est malade. Ne le dis pas trop fort.";
 "Nose and throat germs" = "Microbes du nez et de la gorge";
 "Nose, throat and lungs" = "Nez, gorge et poumons";
 "Not at this daycare" = "Pas à cette garderie";
 "Not bad at all." = "Pas mal du tout.";
 "Not caught yet" = "Pas encore attrapé";
+"Not linked" = "Sans lien";
 "Not met yet" = "Pas encore rencontré";
 "Not one sick week so far." = "Aucune semaine malade jusqu'ici.";
 "Not quite." = "Pas tout à fait.";
@@ -597,13 +607,14 @@
 "Not yet" = "Pas encore";
 "Note (optional)" = "Note (facultative)";
 "Nothing brought home yet" = "Encore rien ramené";
-"Nothing in particular" = "Rien en particulier";
 "Nothing in the guide fits these signs yet." = "Rien dans le guide ne colle à ces signes pour l'instant.";
 "Nothing logged in the last 6 months." = "Rien de noté dans les 6 derniers mois.";
 "Nothing logged yet." = "Rien de noté pour l'instant.";
 "Nothing matches your search." = "Rien ne correspond à ta recherche.";
 "Nothing to report" = "Rien à signaler";
+"Nothing to report." = "Rien à signaler.";
 "Nothing was deleted" = "Rien n'a été supprimé";
+"Nothing yet" = "Rien encore";
 "Nothing yet. Enjoy it while it lasts." = "Rien encore. Profites-en pendant que ça dure.";
 "Notice" = "Avis";
 "Notices" = "Avis";
@@ -623,10 +634,10 @@
 "On this phone" = "Sur ce téléphone";
 "One full night of sleep" = "Une nuit complète de sommeil";
 "One germ, ten days or more" = "Un microbe, dix jours ou plus";
+"One seat saved for your partner." = "Une place gardée pour ton ou ta partenaire.";
 "One suspect" = "Un suspect";
 "Only a first name, and it never leaves this phone. More kids? Add them later in Family." = "Seulement un prénom, et il ne quitte jamais ce téléphone. D'autres enfants ? Ajoute-les plus tard dans Famille.";
 "Only emails from this address become notices." = "Seuls les courriels venant de cette adresse deviennent des avis.";
-"Only first names, and they never leave this phone. You and one kid are free; the Season Pass covers the whole household." = "Seulement des prénoms, et ils ne quittent jamais ce téléphone. Toi et un enfant, c'est gratuit; la Passe de saison couvre toute la maisonnée.";
 "Only if you follow a daycare: the groups you pick and the address Apple gives this phone for notifications. Which kid is in which group stays here." = "Seulement si tu suis une garderie : les groupes choisis et l'adresse qu'Apple donne à ce téléphone pour les notifications. Quel enfant est dans quel groupe reste ici.";
 "Only if you join one: the crew name, the name you pick, and the germs you choose to share. Your kids' names and your journal are never sent." = "Seulement si tu te joins à un groupe : le nom du groupe, le nom que tu choisis et les microbes que tu décides de partager. Les prénoms de tes enfants et ton journal ne sont jamais envoyés.";
 "Open Crew, then tap Join a daycare." = "Ouvre Groupe, puis touche Rejoindre une garderie.";
@@ -758,6 +769,7 @@
 "Send love" = "Envoyer de l'amour";
 "Send soup" = "Envoyez de la soupe";
 "Send tea" = "Envoyer du thé";
+"Send the PDF" = "Envoyer le PDF";
 "Send tissues" = "Envoyer des mouchoirs";
 "Send to %lld families" = "Envoyer à %lld familles";
 "Send to %lld family" = "Envoyer à %lld famille";
@@ -778,6 +790,7 @@
 "Share this card" = "Partager cette carte";
 "Show %lld more" = "Afficher %lld de plus";
 "Show photos" = "Voir les photos";
+"Shows the calendar" = "Affiche le calendrier";
 "Shows the signs" = "Affiche les signes";
 "Shows up" = "Apparaît";
 "Sick" = "Malade";
@@ -850,7 +863,6 @@
 "Symptoms usually show %1$lld to %2$lld h after exposure." = "Les symptômes apparaissent en général de %1$lld à %2$lld h après l'exposition.";
 "Tag Team" = "Relais";
 "Take a photo" = "Prendre une photo";
-"Taken" = "Prise le";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Touche « Je vais mieux » quand le microbe est parti. Le compteur attend.";
 "Tap a symptom first" = "Touche d'abord un symptôme";
 "Tap an unlocked title to wear it." = "Touche un titre obtenu pour le porter.";
@@ -871,6 +883,7 @@
 "Terms" = "Conditions";
 "Terms of Use" = "Conditions d'utilisation";
 "Test build" = "Version de test";
+"Text copied." = "Texte copié.";
 "Thanks, daycare." = "Merci, la garderie.";
 "Thanks. Every report is reviewed within 24 hours." = "Merci. Chaque signalement est examiné dans les 24 heures.";
 "Thanks. This member is now hidden on your phone, and the report is reviewed within 24 hours." = "Merci. Ce membre est maintenant masqué sur ton téléphone, et le signalement sera examiné dans les 24 heures.";
@@ -883,6 +896,7 @@
 "The case files summarize guidance published by public health agencies and pediatric societies. They are general information, not medical advice, and they are not a substitute for a health professional who knows you." = "Les dossiers résument les conseils publiés par des agences de santé publique et des sociétés de pédiatrie. C'est de l'information générale, pas un avis médical, et ça ne remplace pas un professionnel de la santé qui te connaît.";
 "The closest ones fit %1$lld of your %2$lld signs." = "Les plus proches collent à %1$lld de tes %2$lld signes.";
 "The Collector" = "Le collectionneur";
+"The couch is quiet. Too quiet." = "Le divan est calme. Trop calme.";
 "The crew server can't be reached right now." = "Le serveur des groupes est inaccessible pour l'instant.";
 "The crew server isn't set up for this build yet." = "Le serveur des groupes n'est pas encore configuré pour cette version.";
 "The damage" = "Les dégâts";
@@ -940,6 +954,7 @@
 "Today" = "Aujourd'hui";
 "Today, %@" = "Aujourd'hui, %@";
 "Together." = "Ensemble.";
+"Tonight, %@" = "Ce soir, %@";
 "Too many tries. Wait a minute." = "Trop d'essais. Attends une minute.";
 "Top supplier, germs by month and the longest chain" = "Fournisseur numéro un, microbes par mois et plus longue chaîne";
 "Top supplier: %@" = "Fournisseur numéro un : %@";
@@ -989,6 +1004,7 @@
 "What to watch for" = "Quoi surveiller";
 "What you'll feel" = "Ce que tu vas ressentir";
 "What's wrong with %@? Every report is reviewed within 24 hours." = "Quel est le problème avec %@ ? Chaque signalement est examiné dans les 24 heures.";
+"When" = "Quand";
 "When a child stays home from daycare, and when they can go back. A health ministry guide, in French." = "Quand un enfant reste à la maison, et quand il peut retourner à la garderie. Le guide du ministère de la Santé et des Services sociaux.";
 "When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged." = "Quand un microbe t'attrape, touche la tuile et choisis-le. Essaie maintenant. Rien n'est noté.";
 "When a germ goes around" = "Quand un microbe circule";
@@ -1022,6 +1038,7 @@
 "Yes, I'm better" = "Oui, ça va mieux";
 "Yesterday, %@" = "Hier, %@";
 "You" = "Toi";
+"You and one kid are free. The Season Pass covers the whole household." = "Toi et un enfant, c'est gratuit. La Passe de saison couvre toute la maisonnée.";
 "You beat %@" = "Tu as battu %@";
 "You beat %@!" = "Tu as battu %@ !";
 "You both beat %@!" = "Vous avez battu %@ tous les deux !";
@@ -1034,6 +1051,7 @@
 "You dodged it" = "Tu l'as esquivé";
 "You get the daycare's notices for these groups and for the whole daycare. Nothing about your family is sent: no names, no photos, no journal." = "Tu reçois les avis de la garderie pour ces groupes et pour toute la garderie. Rien sur ta famille n'est envoyé : aucun nom, aucune photo, aucun journal.";
 "You have the Season Pass" = "Tu as la Passe de saison";
+"You're down. Hold the line." = "Tu es au tapis. On tient bon.";
 "You're in the window until %@." = "Tu es dans la fenêtre jusqu'à %@.";
 "You're no longer in this crew." = "Tu ne fais plus partie de ce groupe.";
 "You're still clear" = "Rien pour l'instant";

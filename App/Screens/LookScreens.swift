@@ -169,11 +169,11 @@ struct AppIconScreen: View {
             current = option
             Haptics.success()
             guard !reduceMotion else { return }
-            withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) {
+            withAnimation(Tempo.pop) {
                 popped = option
             }
             try? await Task.sleep(for: .milliseconds(240))
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
+            withAnimation(Tempo.pop) {
                 popped = nil
             }
         }
@@ -259,7 +259,7 @@ struct ThemeScreen: View {
             nudges[theme, default: 0] += 1
             return
         }
-        withAnimation(.snappy) {
+        withAnimation(Tempo.quick) {
             model.updateSettings { $0.theme = theme }
         }
     }

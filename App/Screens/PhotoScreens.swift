@@ -102,7 +102,7 @@ struct PhotoRow: View {
                         PhotoThumb(id: photo.id, side: side, radius: side * 0.24)
                     }
                     .buttonStyle(PressableStyle())
-                    .transition(.scale(scale: 0.3).combined(with: .opacity))
+                    .motionTransition(.scale(scale: 0.3).combined(with: .opacity))
                 }
                 if let onAdd {
                     Button(action: onAdd) {
@@ -147,6 +147,7 @@ struct AddPhotoSheet: View {
     @State private var link: PhotoLink
     @State private var showCamera = false
     @State private var saving = false
+    @State private var editingWhen = false
 
     init(seed: PhotoSeed) {
         _person = State(initialValue: seed.person)
@@ -167,33 +168,44 @@ struct AddPhotoSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 8) {
                     preview
+                        .padding(.bottom, 6)
+                    label(tr("Who"))
                     people
-                    VStack(spacing: 0) {
-                        row(tr("For")) {
-                            Picker(tr("For"), selection: $link) {
-                                ForEach(options, id: \.self) { option in
-                                    Text(option.title).tag(option.link)
+                    let choices = options
+                    if !choices.isEmpty {
+                        label(tr("For"))
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 8) {
+                                ForEach(choices, id: \.self) { option in
+                                    ChoiceChip(title: option.title, selected: link == option.link) {
+                                        link = option.link
+                                    }
                                 }
-                                Text(tr("Nothing in particular")).tag(PhotoLink.unlinked)
+                                ChoiceChip(title: tr("Not linked"), selected: link == .unlinked) {
+                                    link = .unlinked
+                                }
                             }
-                            .labelsHidden()
-                            .pickerStyle(.menu)
-                            .tint(palette.inkSecondary)
                         }
-                        Divider()
-                            .padding(.leading, 16)
-                        row(tr("Taken")) {
-                            DatePicker(tr("Taken"), selection: $takenAt, in: ...Date())
-                                .labelsHidden()
-                        }
+                        .scrollIndicators(.hidden)
                     }
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    Text(tr("Photos stay on this phone and in your backups. Germigo never uploads them."))
+                    label(tr("When"))
+                    when
+                    Label(tr("Photos stay on this phone and in your backups. Germigo never uploads them."), systemImage: "lock.fill")
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
+                        .padding(.top, 4)
+                    Button {
+                        save()
+                    } label: {
+                        Label(person == .me ? tr("Add to your album") : tr("Add to %@'s album", model.name(for: person)),
+                              systemImage: "photo.on.rectangle")
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ink))
+                    .disabled(images.isEmpty || saving)
+                    .padding(.top, 10)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 24)
@@ -211,16 +223,6 @@ struct AddPhotoSheet: View {
                     .accessibilityLabel(tr("Cancel"))
                     .tint(palette.ink)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        save()
-                    } label: {
-                        Image(systemName: "checkmark")
-                    }
-                    .accessibilityLabel(tr("Save"))
-                    .tint(palette.ink)
-                    .disabled(images.isEmpty || saving)
-                }
             }
             .onChange(of: picked) { _, items in
                 load(items)
@@ -233,7 +235,7 @@ struct AddPhotoSheet: View {
             }
             .fullScreenCover(isPresented: $showCamera) {
                 CameraPicker { image in
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(Tempo.settle) {
                         images = [image]
                     }
                 } onClose: {
@@ -285,7 +287,7 @@ struct AddPhotoSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     Button {
-                        withAnimation(.snappy) {
+                        withAnimation(Tempo.quick) {
                             images = []
                             picked = []
                         }
@@ -300,7 +302,7 @@ struct AddPhotoSheet: View {
                     .padding(12)
                     .accessibilityLabel(tr("Start over"))
                 }
-                .transition(.scale(scale: 0.85).combined(with: .opacity))
+                .motionTransition(.scale(scale: 0.85).combined(with: .opacity))
             }
         }
         .frame(height: 300)
@@ -310,45 +312,80 @@ struct AddPhotoSheet: View {
         ScrollView(.horizontal) {
             HStack(spacing: 8) {
                 ForEach(members, id: \.self) { member in
-                    let selected = member == person
-                    Button {
-                        withAnimation(.snappy) {
+                    PersonChip(look: model.look(of: member), sick: model.isSick(member), name: model.name(for: member),
+                               selected: member == person) {
+                        withAnimation(Tempo.quick) {
                             person = member
                         }
-                    } label: {
-                        HStack(spacing: 6) {
-                            BuddyView(look: model.look(of: member), sick: true, size: 28)
-                            Text(model.name(for: member))
-                                .font(.callout.weight(.semibold))
-                        }
-                        .foregroundStyle(selected ? palette.background : palette.ink)
-                        .padding(.leading, 6)
-                        .padding(.trailing, 14)
-                        .frame(height: 44)
-                        .background(selected ? palette.ink : palette.ink.opacity(0.07), in: Capsule())
                     }
-                    .buttonStyle(PressableStyle())
                 }
             }
         }
         .scrollIndicators(.hidden)
     }
 
-    private func row<Value: View>(_ title: String, @ViewBuilder value: () -> Value) -> some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(palette.ink)
-            Spacer(minLength: 8)
-            value()
+    private func label(_ text: String) -> some View {
+        Text(text)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.inkSecondary)
+            .padding(.horizontal, 4)
+            .padding(.top, 6)
+    }
+
+    /// When the photo was taken, in words; a tap opens the calendar and the clock.
+    private var when: some View {
+        VStack(spacing: 8) {
+            Button {
+                withAnimation(Tempo.quick) {
+                    editingWhen.toggle()
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "clock")
+                        .foregroundStyle(palette.inkSecondary)
+                    Text(whenTitle)
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Spacer(minLength: 8)
+                    Image(systemName: "chevron.down")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.inkSecondary)
+                        .rotationEffect(.degrees(editingWhen ? 180 : 0))
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 48)
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(PressableStyle())
+            .accessibilityHint(editingWhen ? tr("Hides the calendar") : tr("Shows the calendar"))
+            if editingWhen {
+                DatePicker(tr("When"), selection: $takenAt, in: ...Date())
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .tint(palette.accent)
+                    .padding(8)
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .motionTransition(.opacity)
+            }
         }
-        .padding(.horizontal, 16)
-        .frame(minHeight: 52)
+    }
+
+    private var whenTitle: String {
+        let calendar = Calendar.current
+        let time = takenAt.formatted(date: .omitted, time: .shortened)
+        if calendar.isDateInToday(takenAt) {
+            return calendar.component(.hour, from: takenAt) >= 18 ? tr("Tonight, %@", time) : tr("Today, %@", time)
+        }
+        if calendar.isDateInYesterday(takenAt) {
+            return tr("Yesterday, %@", time)
+        }
+        return takenAt.formatted(.dateTime.month(.abbreviated).day().hour().minute())
     }
 
     private func title(of entry: DayEntry) -> String {
         let illness = model.catalog.germ(entry.germID)?.illness.value ?? entry.germID
-        let start = Calendar.current.date(byAdding: .day, value: 1 - entry.dayNumber, to: takenAt) ?? takenAt
-        return tr("%1$@, since %2$@", illness, start.formatted(.dateTime.month(.abbreviated).day()))
+        return tr("%1$@, day %2$lld", illness, entry.dayNumber)
     }
 
     /// Keeps the illness only if the chosen person still had it on the chosen day.
@@ -366,7 +403,7 @@ struct AddPhotoSheet: View {
                     loaded.append(image)
                 }
             }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+            withAnimation(Tempo.settle) {
                 images = loaded
             }
         }
@@ -392,7 +429,7 @@ struct AddPhotoSheet: View {
                 case .illness(let id): illnessID = id
                 case .unlinked: break
                 }
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.6)) {
+                withAnimation(Tempo.pop) {
                     model.addPhotos(ids, person: who, takenAt: when, logID: logID, illnessID: illnessID)
                 }
                 Haptics.success()
@@ -584,7 +621,7 @@ private struct ZoomablePhoto: View {
                 dragged = offset
             }, including: scale > 1 ? .all : .none)
         .onTapGesture(count: 2) {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 if scale > 1 {
                     reset()
                 } else {

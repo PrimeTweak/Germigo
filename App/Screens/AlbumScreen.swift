@@ -65,7 +65,7 @@ struct AlbumScreen: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 28)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
-            .animation(.snappy, value: person)
+            .animation(Tempo.quick, value: person)
         }
         .background(CharacterWash(tint: TabWash.family))
         .navigationTitle(tr("Album"))
@@ -106,7 +106,7 @@ struct AlbumScreen: View {
     private func chip(_ member: Person?) -> some View {
         let selected = member == person
         return Button {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 person = member
             }
         } label: {

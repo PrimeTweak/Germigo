@@ -73,7 +73,7 @@ struct GermPicker: View {
                 .strokeBorder(selected ? germ.deepTint : Color.clear, lineWidth: 2)
         }
         .scaleEffect(selected ? 1.04 : 1)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: selected)
+        .animation(Tempo.pop, value: selected)
     }
 }
 
@@ -382,7 +382,7 @@ struct LogSheet: View {
         .frame(height: 76)
         .padding(.horizontal, 10)
         .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .animation(.snappy(duration: 0.2), value: severity)
+        .animation(Tempo.quick, value: severity)
     }
 
     private var detailsCard: some View {

@@ -1,6 +1,6 @@
 import Foundation
 
-// Logic checks for the journal rules, streaks, badges, stats, days, lessons and journal decoding.
+// Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding and character motion.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -620,6 +620,39 @@ do {
     } else {
         check(false, "the released online lesson is in the catalog")
     }
+}
+
+// Motion: each look has its own accent and sick routine, only the cap hops at rest, germs move by shelf,
+// and the fourth tap in three seconds makes a character dizzy.
+do {
+    let accents = (0..<8).map { Liveliness.household($0, sick: false, leads: true) }
+    let routines = (0..<8).map { Liveliness.household($0, sick: true, leads: true) }
+    check(Set(accents).count == 8, "each healthy look has its own accent")
+    check(Set(routines).count == 8, "each sick look has its own routine")
+    check(Liveliness.household(3, sick: false, leads: false) == .resting, "a healthy character that does not lead only breathes")
+    for (index, accent) in accents.enumerated() {
+        let highest = stride(from: 0.0, to: CharacterPose.accentCycle, by: 0.01).map { CharacterPose.at($0, mood: accent).lift }.min() ?? 0
+        if index == 7 {
+            check(highest < -5, "the cap hops at rest")
+        } else {
+            check(highest > -0.01, "look \(index) stays on the ground at rest")
+        }
+    }
+    let rest = stride(from: 0.0, to: 7.0, by: 0.05).map { CharacterPose.at($0, mood: .resting) }
+    check(rest.allSatisfy { $0.lift == 0 && $0.tilt == 0 && $0.shiftX == 0 }, "resting is breath only")
+    check(Liveliness.germ(.airways) == .floating && Liveliness.germ(.skin) == .creeping
+          && Liveliness.germ(.gut) == .jiggling && Liveliness.germ(.other) == .jiggling, "germs move by shelf")
+    let start = day(0)
+    var streak = TapStreak()
+    let firstThree = (0..<3).map { streak.tap(at: start.addingTimeInterval(Double($0) * 0.4), usual: .giggle) }
+    check(firstThree == [.giggle, .giggle, .giggle], "the first three taps giggle")
+    check(streak.tap(at: start.addingTimeInterval(1.2), usual: .giggle) == .dizzy, "the fourth tap within three seconds makes it dizzy")
+    var slow = TapStreak()
+    let spread = (0..<4).map { slow.tap(at: start.addingTimeInterval(Double($0) * 1.5), usual: .squish) }
+    check(!spread.contains(.dizzy), "taps spread over more than three seconds never make it dizzy")
+    check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.1).stretchY < 0.9, "a squish flattens the germ")
+    check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.7) == CharacterPose.at(0, mood: .resting),
+          "a reaction ends after its duration")
 }
 
 if failures == 0 {

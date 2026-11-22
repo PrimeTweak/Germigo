@@ -35,4 +35,4 @@ No Swift compiler runs outside the Build IPA workflow. When Swift changed, say t
 
 ## More
 
-Rules for one part of the tree live in `.claude/rules/`. Procedures live in `.claude/skills/`: `/qa`, `/investigate`, `/review-pr`, `/land-and-deploy` and `/canary`.
+Animations follow `docs/MOTION.md`: read it before adding or changing one. Rules for one part of the tree live in `.claude/rules/`. Procedures live in `.claude/skills/`: `/qa`, `/investigate`, `/review-pr`, `/land-and-deploy` and `/canary`.

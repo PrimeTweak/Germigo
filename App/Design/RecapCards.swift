@@ -136,11 +136,11 @@ struct KidKnockout: View {
     let look: Int
     let germ: Germ
     var size: CGFloat = 150
-    var lively = false
+    var leads = false
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 4) {
-            BuddyView(look: look, size: size, lively: lively)
+            BuddyView(look: look, size: size, leads: leads)
             GermImage(germ: germ, size: size * 0.66)
                 .saturation(0.35)
                 .rotationEffect(.degrees(-14))

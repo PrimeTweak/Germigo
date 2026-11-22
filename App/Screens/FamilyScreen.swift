@@ -62,21 +62,18 @@ struct FamilyScreen: View {
                         }
                         .cascadeIn(item.offset)
                     }
-                    if model.data.partnerName == nil {
-                        partnerCard
-                            .cascadeIn(people.count)
-                    }
-                    records
+                    RecordTiles(showPaywall: $showPaywall)
                         .padding(.top, 4)
-                    Text(tr("Only first names, and they never leave this phone. You and one kid are free; the Season Pass covers the whole household."))
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 4)
+                        .cascadeIn(people.count)
+                    FamilyCouch {
+                        editing = .partner
+                    }
+                    .cascadeIn(people.count + 1)
+                    footnote
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 28)
-                .animation(.snappy, value: people)
+                .animation(Tempo.settle, value: people)
             }
             .background(CharacterWash(tint: TabWash.family))
             .navigationTitle(tr("Family"))
@@ -113,87 +110,299 @@ struct FamilyScreen: View {
         FamilyStatus.status(of: person, model: model)
     }
 
-    /// The household's shared records: the album, the doctor summary and the logbook.
-    private var records: some View {
+    /// What the tab keeps private, and what the Season Pass adds for those without it.
+    private var footnote: some View {
+        VStack(spacing: 4) {
+            Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
+            if !model.hasPass {
+                Text(tr("You and one kid are free. The Season Pass covers the whole household."))
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(palette.inkSecondary)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 6)
+    }
+}
+
+/// The household's shared records as three tiles: the album, the doctor's file and the logbook.
+private struct RecordTiles: View {
+    @Binding var showPaywall: Bool
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
         let entries = model.data.logs.count + model.data.kidIllnesses.count
         let photos = model.data.photos.count
-        return VStack(spacing: 0) {
+        HStack(alignment: .top, spacing: 10) {
             NavigationLink {
                 AlbumScreen()
             } label: {
-                recordRow("photo.on.rectangle.angled", tr("Album"),
-                          photos == 0 ? tr("Empty") : trCount(photos, one: "%lld photo", other: "%lld photos"))
+                RecordTile(title: tr("Album"),
+                           value: photos == 0 ? tr("No photos yet") : trCount(photos, one: "%lld photo", other: "%lld photos"),
+                           count: photos,
+                           tint: Color(hex: Swatch.skyLight)) {
+                    AlbumCover()
+                }
             }
-            .buttonStyle(.plain)
-            Divider()
-                .padding(.leading, 36)
+            .buttonStyle(PressableStyle())
             if model.hasPass {
                 NavigationLink {
                     DoctorSummaryScreen()
                 } label: {
-                    recordRow("stethoscope", tr("For the doctor"), tr("Share a file"))
+                    doctorTile(locked: false)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableStyle())
             } else {
                 Button {
                     showPaywall = true
                 } label: {
-                    recordRow("stethoscope", tr("For the doctor"), tr("Season Pass"), locked: true)
+                    doctorTile(locked: true)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableStyle())
             }
-            Divider()
-                .padding(.leading, 36)
             NavigationLink {
                 LogbookScreen()
             } label: {
-                recordRow("list.bullet", tr("Logbook"),
-                          entries == 0 ? tr("Empty") : trCount(entries, one: "%lld entry", other: "%lld entries"))
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 16)
-        .germigoCard(padding: 0)
-    }
-
-    private func recordRow(_ symbol: String, _ title: String, _ value: String, locked: Bool = false) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: symbol)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(palette.inkSecondary)
-                .frame(width: 26)
-            ValueRow(title: title, value: value, locked: locked)
-        }
-    }
-
-    private var partnerCard: some View {
-        Button {
-            editing = .partner
-        } label: {
-            HStack(spacing: 14) {
-                Image(systemName: "plus")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                    .frame(width: 48, height: 48)
-                    .background(palette.surface, in: Circle())
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("Add your partner"))
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                    Text(tr("It opens the couple duel."))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
+                RecordTile(title: tr("Logbook"),
+                           value: entries == 0 ? tr("Nothing yet") : trCount(entries, one: "%lld entry", other: "%lld entries"),
+                           count: entries,
+                           tint: Color(hex: Swatch.lilac)) {
+                    Image("record-logbook")
+                        .resizable()
+                        .scaledToFit()
                 }
-                Spacer(minLength: 0)
             }
-            .padding(16)
-            .overlay {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .strokeBorder(palette.ink.opacity(0.22), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
-            }
-            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .buttonStyle(PressableStyle())
         }
-        .buttonStyle(PressableStyle())
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func doctorTile(locked: Bool) -> some View {
+        RecordTile(title: tr("For the doctor"), value: locked ? tr("Season Pass") : tr("Share a file"),
+                   tint: Color(hex: Swatch.mint), locked: locked) {
+            Image("record-doctor")
+                .resizable()
+                .scaledToFit()
+        }
+    }
+}
+
+/// One record tile: its character, its name and what it holds. The character wiggles once when something new lands in it.
+private struct RecordTile<Art: View>: View {
+    let title: String
+    let value: String
+    var count = 0
+    let tint: Color
+    var locked = false
+    @ViewBuilder let art: Art
+    @State private var seen: Int?
+    @State private var wiggles = 0
+    @State private var onScreen = false
+    @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        VStack(spacing: 2) {
+            art
+                .frame(width: 72, height: 72)
+                .keyframeAnimator(initialValue: 0.0, trigger: wiggles) { content, angle in
+                    content.rotationEffect(.degrees(angle), anchor: .bottom)
+                } keyframes: { _ in
+                    KeyframeTrack {
+                        CubicKeyframe(-8, duration: 0.12)
+                        CubicKeyframe(7, duration: 0.14)
+                        CubicKeyframe(-5, duration: 0.14)
+                        CubicKeyframe(3, duration: 0.12)
+                        CubicKeyframe(0, duration: 0.12)
+                    }
+                }
+                .shadow(color: .black.opacity(0.14), radius: 4, y: 4)
+                .padding(.bottom, 6)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+            Text(value)
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background {
+            shape
+                .fill(palette.background)
+                .overlay(shape.fill(tint.opacity(palette.isDark ? 0.22 : 0.16)))
+        }
+        .overlay(alignment: .topTrailing) {
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .padding(12)
+                    .accessibilityLabel(tr("Needs the Season Pass"))
+            }
+        }
+        .contentShape(shape)
+        .accessibilityElement(children: .combine)
+        .onAppear {
+            onScreen = true
+            notice()
+        }
+        .onDisappear { onScreen = false }
+        .onChange(of: count) { _, _ in
+            if onScreen { notice() }
+        }
+    }
+
+    private func notice() {
+        if let seen, count > seen, !reduceMotion {
+            wiggles += 1
+        }
+        seen = count
+    }
+}
+
+/// The album's tile: its own character, or the two newest photos once there are some.
+private struct AlbumCover: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        let newest = model.data.photos.sorted { $0.takenAt > $1.takenAt }.prefix(2)
+        if newest.isEmpty {
+            Image("record-album")
+                .resizable()
+                .scaledToFit()
+        } else {
+            ZStack {
+                ForEach(Array(newest.enumerated()).reversed(), id: \.element.id) { item in
+                    PhotoThumb(id: item.element.id, side: 50, radius: 11)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                .strokeBorder(.white, lineWidth: 3)
+                        }
+                        .rotationEffect(.degrees(newest.count == 1 ? -4 : (item.offset == 0 ? 7 : -11)))
+                        .offset(x: newest.count == 1 ? 0 : (item.offset == 0 ? 9 : -9),
+                                y: newest.count == 1 ? 0 : (item.offset == 0 ? 6 : -4))
+                }
+            }
+        }
+    }
+}
+
+/// Where each person sits on the couch: heads shrink and close up as the household grows.
+private struct CouchSeats {
+    let count: Int
+    /// The couch art is laid out for this width.
+    static let width: CGFloat = 320
+    static let height: CGFloat = 166
+    /// The span of the seat cushions, in the couch's own points.
+    private static let seat: ClosedRange<CGFloat> = 52...268
+    /// Where heads rest on the seat.
+    private static let rest: CGFloat = 104
+
+    var head: CGFloat {
+        let span = Self.seat.upperBound - Self.seat.lowerBound
+        return min(70, span / CGFloat(max(1, count)) * 1.05)
+    }
+
+    func center(of index: Int) -> CGPoint {
+        let span = Self.seat.upperBound - Self.seat.lowerBound
+        let step = count > 1 ? min(71.5, (span - head) / CGFloat(count - 1)) : 0
+        let middle = (Self.seat.lowerBound + Self.seat.upperBound) / 2
+        return CGPoint(x: middle + (CGFloat(index) - CGFloat(count - 1) / 2) * step, y: Self.rest - head / 2)
+    }
+}
+
+/// The household on the couch, a line that follows who is sick, and a free seat while the partner is missing.
+private struct FamilyCouch: View {
+    let addPartner: () -> Void
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let people = model.people
+        let missingPartner = model.data.partnerName == nil
+        let seats = CouchSeats(count: people.count + (missingPartner ? 1 : 0))
+        VStack(spacing: 3) {
+            ZStack {
+                Image("mascot-awake")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 87, height: 87)
+                    .rotationEffect(.degrees(-11))
+                    .position(x: 21, y: 40)
+                    .accessibilityHidden(true)
+                Image("family-couch")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: CouchSeats.width)
+                    .position(x: CouchSeats.width / 2, y: 32 + CouchSeats.width / 4.8)
+                    .accessibilityHidden(true)
+                ForEach(Array(people.enumerated()), id: \.element) { item in
+                    BuddyView(look: model.look(of: item.element),
+                              sick: FamilyStatus.status(of: item.element, model: model).sick,
+                              size: seats.head, leads: true, pokes: true,
+                              phase: Double(item.offset) * CharacterPose.accentCycle / Double(max(1, people.count)))
+                        .position(seats.center(of: item.offset))
+                }
+                if missingPartner {
+                    Button(action: addPartner) {
+                        Image(systemName: "plus")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(palette.ink.opacity(0.62))
+                            .frame(width: seats.head * 0.79, height: seats.head * 0.79)
+                            .background(.white.opacity(0.3), in: Circle())
+                            .overlay {
+                                Circle()
+                                    .strokeBorder(palette.ink.opacity(0.45), style: StrokeStyle(lineWidth: 2.5, dash: [5, 5]))
+                            }
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(PressableStyle())
+                    .accessibilityLabel(tr("Add your partner"))
+                    .position(seats.center(of: people.count))
+                }
+            }
+            .frame(width: CouchSeats.width, height: CouchSeats.height)
+            .accessibilityElement(children: .contain)
+            Text(line)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.center)
+                .padding(.top, 6)
+            if missingPartner {
+                Text(tr("One seat saved for your partner."))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 18)
+    }
+
+    /// Calm lines take turns by the day; a sick household gets its own.
+    private var line: String {
+        let people = model.people
+        let sick = people.filter { FamilyStatus.status(of: $0, model: model).sick }
+        if sick.isEmpty {
+            let calm = [tr("Everyone's fine. Suspicious."), tr("Nobody's sick. Don't say it out loud."),
+                        tr("The couch is quiet. Too quiet.")]
+            let day = Calendar.current.ordinality(of: .day, in: .era, for: Date()) ?? 0
+            return calm[day % calm.count]
+        }
+        if sick.count > 1 {
+            return sick.count == people.count ? tr("Everyone's down. Send soup.") : tr("%lld down. Hold the line.", sick.count)
+        }
+        return sick[0] == .me ? tr("You're down. Hold the line.") : tr("%@ is down. Hold the line.", model.name(for: sick[0]))
     }
 }
 
@@ -244,9 +453,9 @@ private struct FamilyCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 16) {
-                BuddyView(look: model.look(of: person), sick: status.sick, size: 60, lively: true)
+                BuddyView(look: model.look(of: person), sick: status.sick, size: 60)
                     .id(status.sick)
-                    .transition(.scale(scale: 0.4).combined(with: .opacity))
+                    .motionTransition(.scale(scale: 0.4).combined(with: .opacity))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(model.name(for: person))
                         .font(.title2.weight(.bold))
@@ -360,7 +569,7 @@ private struct PersonFileScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(spacing: 8) {
-                    BuddyView(look: model.look(of: person), sick: status.sick, size: 96, lively: true, pokes: true)
+                    BuddyView(look: model.look(of: person), sick: status.sick, size: 96, leads: true, pokes: true)
                         .frame(width: 140, height: 140)
                         .background(Buddy.tint(model.look(of: person)).opacity(palette.isDark ? 0.24 : 0.34), in: Circle())
                     Text(status.line)
@@ -370,7 +579,7 @@ private struct PersonFileScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
                 numbers
-                HealthHistory(person: person, since: nil, showsDays: true)
+                HealthHistory(person: person, since: nil)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 28)
@@ -555,7 +764,7 @@ private struct PersonEditSheet: View {
                 Haptics.tap()
                 showsSick.toggle()
             } label: {
-                BuddyView(look: look, sick: showsSick, size: 104, lively: true)
+                BuddyView(look: look, sick: showsSick, size: 104, leads: true)
                     .frame(width: 156, height: 156)
                     .background(Buddy.tint(look).opacity(palette.isDark ? 0.24 : 0.34), in: Circle())
             }
@@ -567,7 +776,7 @@ private struct PersonEditSheet: View {
                 .accessibilityHidden(true)
         }
         .padding(.top, 12)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: look)
+        .animation(Tempo.pop, value: look)
     }
 
     private func label(_ text: String) -> some View {

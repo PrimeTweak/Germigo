@@ -347,6 +347,8 @@ private struct GuideTile: View {
 
     /// Set once any tile hears from its scroll view, which tells an unseen tile from a silent scroll view.
     private static var visibilityReported = false
+    /// One chime for germs revealed together.
+    private static var lastChime = Date.distantPast
 
     private var caught: Bool { count > 0 }
     private var revealed: Bool { revealedList.split(separator: ",").contains { $0 == germ.id } }
@@ -371,7 +373,7 @@ private struct GuideTile: View {
                     if tinted {
                         badge
                             .offset(x: 8, y: -8)
-                            .transition(.scale)
+                            .motionTransition(.scale)
                     }
                 }
             Text(germ.illness.value)
@@ -437,10 +439,14 @@ private struct GuideTile: View {
         try? await Task.sleep(nanoseconds: 600_000_000)
         guard !Task.isCancelled else { return }
         markRevealed()
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+        withAnimation(Tempo.pop) {
             masked = false
         }
         Haptics.tap()
+        if Date().timeIntervalSince(Self.lastChime) > 1 {
+            Self.lastChime = Date()
+            SoundPlayer.shared.play(.reveal)
+        }
     }
 
     /// A caught germ never stays gray: left unseen for a few seconds, it takes its colors back and keeps
@@ -450,7 +456,7 @@ private struct GuideTile: View {
         try? await Task.sleep(nanoseconds: 3_000_000_000)
         guard !Task.isCancelled, masked else { return }
         if !Self.visibilityReported { markRevealed() }
-        withAnimation(.snappy) {
+        withAnimation(Tempo.quick) {
             masked = false
         }
     }
@@ -525,7 +531,7 @@ private struct QuizBanner: View {
         .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
         .background(ground, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay(alignment: .topLeading) {
-            LivelyCharacter(mood: done ? .asleep : .idle, phase: 1.3) {
+            LivelyCharacter(mood: done ? .resting : .stalking, phase: 1.3) {
                 Image(done ? "mascot-asleep" : "mascot-awake")
                     .resizable()
                     .scaledToFit()
@@ -537,7 +543,7 @@ private struct QuizBanner: View {
             .accessibilityHidden(true)
         }
         .padding(.top, 12)
-        .animation(.snappy, value: answers.count)
+        .animation(Tempo.quick, value: answers.count)
     }
 
     private func note(_ text: String) -> some View {
@@ -588,7 +594,7 @@ private struct WeekShelf: View {
             .scrollIndicators(.hidden)
             .padding(.horizontal, -20)
             .onChange(of: answeredWeek) {
-                withAnimation(.snappy) {
+                withAnimation(Tempo.quick) {
                     proxy.scrollTo(Self.mythAnchor, anchor: .center)
                 }
             }
@@ -634,7 +640,7 @@ private struct WeekGermCard: View {
         }
         .modifier(WeekCardFrame())
         .background(alignment: .bottomTrailing) {
-            LivelyCharacter(mood: .stalking, pokes: false) {
+            LivelyCharacter(mood: germ.restMood, touch: nil) {
                 GermImage(germ: germ, size: 72, silhouette: !unmasked)
                     .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
             }
@@ -657,7 +663,7 @@ private struct WeekGermCard: View {
             try? await Task.sleep(nanoseconds: 700_000_000)
         }
         guard !Task.isCancelled else { return }
-        withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
+        withAnimation(Tempo.pop) {
             revealedWeek = week
         }
         Haptics.tap()
@@ -726,7 +732,7 @@ private struct WeekMythCard: View {
     private func choice(_ title: String, value: Bool) -> some View {
         Button {
             if value == germ.myth.isTrue { Haptics.success() } else { Haptics.tap() }
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 answeredFact = value
                 answeredWeek = week
             }

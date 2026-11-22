@@ -190,7 +190,7 @@ private struct StageActions: View {
                 }
             }
             .padding(.top, 12)
-            .transition(.scale(scale: 0.6).combined(with: .opacity))
+            .motionTransition(.scale(scale: 0.6).combined(with: .opacity))
         }
     }
 
@@ -227,7 +227,7 @@ private struct StageActions: View {
     private func better(look: Int, title: String) -> some View {
         capsule {
             HStack(spacing: 8) {
-                BuddyView(look: look, sick: true, size: 30, lively: true)
+                BuddyView(look: look, sick: true, size: 30)
                 Text(title)
                 Image(systemName: "sparkles")
             }
@@ -266,7 +266,7 @@ private struct CalmStage: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .contentTransition(.numericText())
-                .animation(.snappy, value: days)
+                .animation(Tempo.quick, value: days)
             Text(trCount(days, one: "day without a germ", other: "days without a germ"))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(palette.ink)
@@ -359,7 +359,7 @@ private struct ExposureStage: View {
             }
             if pages > 1 {
                 Button {
-                    withAnimation(.snappy) {
+                    withAnimation(Tempo.quick) {
                         page = (page + 1) % pages
                     }
                 } label: {
@@ -386,7 +386,7 @@ private struct ExposureStage: View {
                         askStillFine = true
                     }
                 } face: {
-                    BuddyView(look: model.data.hostLook, lively: true)
+                    BuddyView(look: model.data.hostLook, leads: true)
                 }
                 FaceTile(tr("It got me")) {
                     model.logRequest = LogRequest(kidIllnessID: illness.id)
@@ -516,7 +516,7 @@ private struct SickStage: View {
                 FaceTile(tr("I'm better")) {
                     model.askBetter = true
                 } face: {
-                    BuddyView(look: model.data.hostLook, lively: true)
+                    BuddyView(look: model.data.hostLook, leads: true)
                 }
             }
         }
@@ -665,7 +665,7 @@ private struct WeekStrip: View {
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                 Button(tr("This week")) {
-                    withAnimation(.snappy) {
+                    withAnimation(Tempo.quick) {
                         shownWeek = current
                     }
                 }
@@ -720,16 +720,8 @@ private struct DayDot: View {
             if let germ {
                 Circle()
                     .fill(germ.tileTint(palette))
-                Group {
-                    if isToday {
-                        LivelyCharacter(mood: .stalking, pokes: false) {
-                            GermImage(germ: germ, size: 28)
-                        }
-                    } else {
-                        GermImage(germ: germ, size: 28)
-                    }
-                }
-                .transition(.scale(scale: 0.3).combined(with: .opacity))
+                GermImage(germ: germ, size: 28)
+                    .motionTransition(.scale(scale: 0.3).combined(with: .opacity))
             } else {
                 Circle()
                     .fill(isToday ? palette.ink : (quiet ? Color.clear : palette.ink.opacity(0.08)))
@@ -746,7 +738,7 @@ private struct DayDot: View {
                     .strokeBorder(palette.ink, lineWidth: 2.5)
             }
         }
-        .animation(.spring(response: 0.4, dampingFraction: 0.6), value: germ?.id)
+        .animation(Tempo.pop, value: germ?.id)
     }
 }
 
@@ -827,7 +819,7 @@ private struct RunTrack: View {
                 .offset(x: reach - 23, y: -5 - hop)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: goal.days)
+        .animation(Tempo.settle, value: goal.days)
     }
 
     /// The flag at the end of the track, with the number of days it stands for.

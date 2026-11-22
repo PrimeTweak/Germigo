@@ -1,132 +1,93 @@
 import SwiftUI
 
-/// How a character moves while it is on screen. The germs use the first four; the household's
-/// characters each have their own way of being sick.
-enum Liveliness {
-    case asleep
-    case idle
-    case stalking
-    case sick
-    case feverish
-    case wobbly
-    case sniffly
-    case dizzy
-    case sneezy
-    case weary
-    case shivering
+/// The six curves of the interface. Each one has its use in docs/MOTION.md.
+enum Tempo {
+    /// The press of a button.
+    static let press = Animation.easeOut(duration: 0.15)
+    /// Toggles, chips, a selection, small layout changes.
+    static let quick = Animation.snappy
+    /// Cards moving, lists reordering, entrances.
+    static let settle = Animation.spring(response: 0.42, dampingFraction: 0.74)
+    /// Something arriving: a chip, a photo, a badge.
+    static let pop = Animation.spring(response: 0.38, dampingFraction: 0.55)
+    /// Rings, bars and numbers that count up.
+    static let reveal = Animation.easeOut(duration: 0.8)
+    /// Content that swaps in place.
+    static let scene = Animation.spring(response: 0.6, dampingFraction: 0.85)
 }
 
-/// Where a character is at one instant: its squash, its tilt and its offset.
-struct CharacterPose {
-    var stretchX = 1.0
-    var stretchY = 1.0
-    var tilt = 0.0
-    var shiftX = 0.0
-    var lift = 0.0
-
-    /// Breathing for everyone, then the mood's own routine, and a hop when poked.
-    /// The phase shifts the routine in time so neighbors do not move together.
-    static func at(_ now: Date, mood: Liveliness, pokedAt: Date, phase: Double = 0) -> CharacterPose {
-        let time = now.timeIntervalSinceReferenceDate + phase
-        var pose = CharacterPose()
-        let breath = sin(time * 2 * .pi / 3.2)
-        pose.stretchX += 0.03 * breath
-        pose.stretchY -= 0.03 * breath
-        switch mood {
-        case .asleep:
-            break
-        case .idle:
-            pose.hop(progress: beat(time, every: 5.2) / 0.09, height: 7)
-        case .stalking:
-            pose.tilt = 3 * sin(time * 2 * .pi / 2.4)
-        case .sick:
-            pose.shiftX = 1.5 * sin(time * 2 * .pi / 0.5)
-            pose.hop(progress: (beat(time, every: 3.4) - 0.6) / 0.25, height: 20)
-        case .feverish:
-            pose.tilt = 2.5 * sin(time * 2 * .pi / 3.6)
-            pose.stretchY -= 0.02 * breath
-        case .wobbly:
-            pose.tilt = 4 * sin(time * 2 * .pi / 1.8)
-        case .sniffly:
-            let sniff = beat(time, every: 2.8)
-            pose.hop(progress: (sniff - 0.5) / 0.1, height: 5)
-            pose.hop(progress: (sniff - 0.64) / 0.1, height: 5)
-        case .dizzy:
-            pose.tilt = 7 * sin(time * 2 * .pi / 2.8)
-            pose.shiftX = 3 * cos(time * 2 * .pi / 2.8)
-        case .sneezy:
-            let sneeze = beat(time, every: 3.2)
-            if sneeze >= 0.5, sneeze < 0.72 {
-                pose.tilt = -9 * (sneeze - 0.5) / 0.22
-            } else if sneeze >= 0.72, sneeze < 0.8 {
-                pose.tilt = -9 + 19 * (sneeze - 0.72) / 0.08
-            } else if sneeze >= 0.8, sneeze < 0.95 {
-                pose.tilt = 10 * (1 - (sneeze - 0.8) / 0.15)
-            }
-            pose.hop(progress: (sneeze - 0.72) / 0.16, height: 10)
-        case .weary:
-            pose.stretchY -= 0.035 * (1 + sin(time * 2 * .pi / 5)) / 2
-            pose.tilt = 1.5 * sin(time * 2 * .pi / 5)
-        case .shivering:
-            pose.shiftX = 1.6 * sin(time * 2 * .pi / 0.11)
-        }
-        pose.hop(progress: now.timeIntervalSince(pokedAt) / 0.7, height: 26)
-        return pose
-    }
-
-    /// Where the time stands in a routine that repeats, from 0 to 1.
-    private static func beat(_ time: Double, every period: Double) -> Double {
-        time.truncatingRemainder(dividingBy: period) / period
-    }
-
-    /// One jump, from take-off at 0 to landing at 1; nothing outside that range.
-    private mutating func hop(progress: Double, height: Double) {
-        guard progress > 0, progress < 1 else { return }
-        let arc = sin(progress * .pi)
-        lift -= height * arc
-        stretchX -= 0.06 * arc
-        stretchY += 0.08 * arc
-    }
-}
-
-/// A character that breathes and hops when touched. It stays still when Reduce Motion is on.
+/// A character that breathes, moves as its mood says and reacts to touch.
+/// It stands still with Reduce Motion, under 40 points, and stops drawing off screen.
 struct LivelyCharacter<Art: View>: View {
     let mood: Liveliness
     let phase: Double
-    /// False inside a button or a link, where a tap belongs to the control.
-    let pokes: Bool
+    /// What a tap does; nil inside a button or a link, where a tap belongs to the control.
+    let touch: Reaction?
+    /// A reaction started from outside, such as getting sick or better.
+    let event: TimedReaction?
     let art: Art
-    @State private var pokedAt = Date.distantPast
+    @State private var touched: TimedReaction?
+    @State private var streak = TapStreak()
+    @State private var height: CGFloat = 70
+    @State private var appeared = false
+    @State private var scrolledIn = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(mood: Liveliness, phase: Double = 0, pokes: Bool = true, @ViewBuilder art: () -> Art) {
+    init(mood: Liveliness, phase: Double = 0, touch: Reaction? = .squish, event: TimedReaction? = nil,
+         @ViewBuilder art: () -> Art) {
         self.mood = mood
         self.phase = phase
-        self.pokes = pokes
+        self.touch = touch
+        self.event = event
         self.art = art()
     }
 
     var body: some View {
-        if reduceMotion {
-            art
-        } else if pokes {
-            moving
-                .onTapGesture {
-                    pokedAt = Date()
-                    Haptics.tap()
-                }
-        } else {
-            moving
+        Group {
+            if reduceMotion || height < 40 {
+                art
+            } else {
+                moving
+            }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+        .onAppear { appeared = true }
+        .onDisappear { appeared = false }
+        .onScrollVisibilityChange(threshold: 0.05) { scrolledIn = $0 }
+        .modifier(TouchReaction(touch: touch) { reaction in
+            let now = Date()
+            let earned = streak.tap(at: now, usual: reaction)
+            touched = TimedReaction(reaction: earned, start: now)
+            if earned == .dizzy { Haptics.thud() } else { Haptics.tap() }
+        })
     }
 
     private var moving: some View {
-        TimelineView(.animation) { timeline in
-            let pose = CharacterPose.at(timeline.date, mood: mood, pokedAt: pokedAt, phase: phase)
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !(appeared && scrolledIn))) { timeline in
+            let latest = [touched, event].compactMap { $0 }.max { $0.start < $1.start }
+            let pose = CharacterPose.at(timeline.date.timeIntervalSinceReferenceDate, mood: mood, phase: phase,
+                                        reaction: latest?.reaction,
+                                        elapsed: latest.map { timeline.date.timeIntervalSince($0.start) } ?? .infinity)
+            let unit = min(1.5, height / 70)
             art
                 .scaleEffect(x: pose.stretchX, y: pose.stretchY, anchor: .bottom)
                 .rotationEffect(.degrees(pose.tilt), anchor: .bottom)
-                .offset(x: pose.shiftX, y: pose.lift)
+                .offset(x: pose.shiftX * unit, y: pose.lift * unit)
+        }
+    }
+}
+
+/// The tap of a character, left out when it has no reaction so the tap reaches the control around it.
+private struct TouchReaction: ViewModifier {
+    let touch: Reaction?
+    let action: (Reaction) -> Void
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let touch {
+            content.onTapGesture { action(touch) }
+        } else {
+            content
         }
     }
 }
@@ -141,7 +102,7 @@ struct SnoreView: View {
             if reduceMotion {
                 letters(time: 1.2)
             } else {
-                TimelineView(.animation) { timeline in
+                TimelineView(.animation(minimumInterval: 1.0 / 30)) { timeline in
                     letters(time: timeline.date.timeIntervalSinceReferenceDate)
                 }
             }
@@ -171,7 +132,7 @@ struct NappingMascot: View {
     @State private var awakeUntil = Date.distantPast
 
     var body: some View {
-        LivelyCharacter(mood: .asleep) {
+        LivelyCharacter(mood: .resting, touch: nil) {
             TimelineView(.periodic(from: Date(), by: 0.5)) { timeline in
                 Image(timeline.date < awakeUntil ? "mascot-awake" : "mascot-asleep")
                     .resizable()
@@ -193,7 +154,7 @@ struct NappingMascot: View {
     }
 }
 
-/// Slides and fades a row in, a beat after the one before it. Instant when Reduce Motion is on.
+/// Slides and fades a row in, a beat after the one before it, eight beats at most. Instant when Reduce Motion is on.
 private struct CascadeIn: ViewModifier {
     let index: Int
     @State private var shown = false
@@ -206,10 +167,20 @@ private struct CascadeIn: ViewModifier {
             .offset(y: visible ? 0 : 16)
             .scaleEffect(visible ? 1 : 0.96)
             .onAppear {
-                withAnimation(.spring(response: 0.42, dampingFraction: 0.74).delay(Double(index) * 0.06)) {
+                withAnimation(Tempo.settle.delay(Double(min(index, 7)) * 0.06)) {
                     shown = true
                 }
             }
+    }
+}
+
+/// A transition that becomes a fade when Reduce Motion is on.
+private struct ReducibleTransition: ViewModifier {
+    let transition: AnyTransition
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content.transition(reduceMotion ? .opacity : transition)
     }
 }
 
@@ -217,6 +188,11 @@ extension View {
     /// The entrance of the rows of a list: each one a beat after the one before.
     func cascadeIn(_ index: Int) -> some View {
         modifier(CascadeIn(index: index))
+    }
+
+    /// The transition of a view that comes and goes, a plain fade with Reduce Motion.
+    func motionTransition(_ transition: AnyTransition) -> some View {
+        modifier(ReducibleTransition(transition: transition))
     }
 }
 
@@ -238,7 +214,7 @@ struct ProgressRing: View {
                 .rotationEffect(.degrees(-90))
         }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.9).delay(0.15)) {
+            withAnimation(Tempo.reveal.delay(0.15)) {
                 shown = true
             }
         }
@@ -265,7 +241,7 @@ struct RollingNumber: View {
     }
 
     private func roll() {
-        withAnimation(.easeOut(duration: 0.7)) {
+        withAnimation(Tempo.reveal) {
             shown = value
         }
     }

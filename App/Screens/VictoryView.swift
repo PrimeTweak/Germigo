@@ -91,7 +91,7 @@ struct VictoryView: View {
         .preferredColorScheme(.dark)
         .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            withAnimation(Tempo.scene) {
                 shown = true
             }
             SoundPlayer.shared.play(.badge)
@@ -115,7 +115,7 @@ private struct BossKnockout: View {
     var body: some View {
         VStack(spacing: 12) {
             ZStack(alignment: .topTrailing) {
-                LivelyCharacter(mood: .dizzy, pokes: false) {
+                LivelyCharacter(mood: .dizzy, touch: nil) {
                     GermImage(germ: germ, size: 140)
                         .saturation(0.6)
                 }
@@ -197,7 +197,7 @@ struct KidVictoryView: View {
                     .font(.subheadline)
                     .foregroundStyle(Color.white.opacity(0.65))
                 Spacer(minLength: 8)
-                KidKnockout(look: victory.kid.colorIndex, germ: victory.germ, size: 150, lively: true)
+                KidKnockout(look: victory.kid.colorIndex, germ: victory.germ, size: 150, leads: true)
                 KidScore(name: victory.kid.name, wins: victory.wins, germ: victory.germ.name)
                     .padding(.top, 18)
                 Text(tr("Back to full volume."))
@@ -232,7 +232,7 @@ struct KidVictoryView: View {
         .preferredColorScheme(.dark)
         .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .onAppear {
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            withAnimation(Tempo.scene) {
                 shown = true
             }
             confettiStart = Date()

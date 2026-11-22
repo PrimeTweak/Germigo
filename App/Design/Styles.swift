@@ -72,7 +72,7 @@ struct PillButtonStyle: ButtonStyle {
             .background(fill, in: Capsule())
             .opacity(configuration.isPressed ? 0.85 : 1)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+            .animation(Tempo.press, value: configuration.isPressed)
     }
 
     /// A disabled pill keeps a readable label instead of fading as a whole.

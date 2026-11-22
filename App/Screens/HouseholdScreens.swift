@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// After a kid's germ is added: habits that keep it from going around the house, and the daycare rules.
 struct ProtectHomeView: View {
@@ -159,20 +160,27 @@ struct DoctorSummaryScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 if people.count > 1 {
-                    Picker(tr("Who"), selection: Binding(get: { current }, set: { person = $0 })) {
-                        ForEach(people, id: \.self) { member in
-                            Text(model.name(for: member)).tag(member)
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 8) {
+                            ForEach(people, id: \.self) { member in
+                                PersonChip(look: model.look(of: member), sick: model.isSick(member),
+                                           name: model.name(for: member), selected: member == current) {
+                                    person = member
+                                }
+                            }
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .scrollIndicators(.hidden)
+                    .accessibilityLabel(tr("Who"))
                 }
-                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()))
+                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()),
+                              asPaper: true)
                     .id(current)
                     .transition(.opacity)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            .animation(.snappy, value: current)
+            .animation(Tempo.quick, value: current)
         }
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(tr("For the doctor"))
@@ -199,8 +207,9 @@ struct HealthHistory: View {
     let person: Person
     /// The oldest illness shown; nil shows everything.
     let since: Date?
-    /// Lists each day of an illness with a way to add its photos; the newest illness starts open.
-    var showsDays = false
+    /// The page the doctor receives, with the ways to send it. Otherwise each illness lists its days,
+    /// with a way to add their photos, and the newest illness starts open.
+    var asPaper = false
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var showPaywall = false
@@ -338,94 +347,96 @@ struct HealthHistory: View {
         let shown = (found.flatMap { $0.photos } + others).sorted { $0.takenAt < $1.takenAt }
         let opening = found.first(where: { $0.ongoing })?.id ?? found.first?.id
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(heading)
-                    .font(.headline)
-                    .foregroundStyle(palette.ink)
-                Text(counts(found, photos: photoCount))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .padding(.bottom, 6)
-                if found.isEmpty {
-                    Text(emptyLine)
+            if asPaper {
+                paper(found, others: others)
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(heading)
+                        .font(.headline)
+                        .foregroundStyle(palette.ink)
+                    Text(counts(found, photos: photoCount))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
-                        .padding(.vertical, 8)
-                }
-                ForEach(Array(found.enumerated()), id: \.element.id) { item in
-                    Group {
-                        if showsDays {
-                            dayLineView(item.element, open: (item.element.id == opening) != toggled.contains(item.element.id))
-                        } else {
-                            lineView(item.element)
+                        .padding(.bottom, 6)
+                    if found.isEmpty {
+                        Text(emptyLine)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .padding(.vertical, 8)
+                    }
+                    ForEach(Array(found.enumerated()), id: \.element.id) { item in
+                        dayLineView(item.element, open: (item.element.id == opening) != toggled.contains(item.element.id))
+                            .cascadeIn(item.offset)
+                    }
+                    if !others.isEmpty {
+                        Divider()
+                        Text(tr("Other photos"))
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                            .padding(.top, 12)
+                        PhotoRow(photos: others, side: 56)
+                            .padding(.top, 8)
+                            .padding(.bottom, 12)
+                    }
+                    if !caughtAtHome.isEmpty {
+                        Text(tr("Also caught at home:"))
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                            .padding(.top, 8)
+                        ForEach(caughtAtHome, id: \.self) { item in
+                            Text(item)
+                                .font(.footnote)
+                                .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    .cascadeIn(item.offset)
                 }
-                if !others.isEmpty {
-                    Divider()
-                    Text(tr("Other photos"))
-                        .font(.callout.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                        .padding(.top, 12)
-                    PhotoRow(photos: others, side: 56)
-                        .padding(.top, 8)
-                        .padding(.bottom, 12)
-                }
-                if !caughtAtHome.isEmpty {
-                    Text(tr("Also caught at home:"))
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                        .padding(.top, 8)
-                    ForEach(caughtAtHome, id: \.self) { item in
-                        Text(item)
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                    }
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .germigoCard()
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .germigoCard()
             if all.count > found.count {
                 LockedHistoryRow(count: all.count - found.count)
             }
-            Text(tr("Dates and germs as you logged them. Germigo adds no diagnosis."))
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .padding(.horizontal, 4)
-            if !shown.isEmpty || model.hasPass {
-                HStack(spacing: 10) {
-                    if let first = shown.first {
-                        Button {
-                            focus = PhotoFocus(ids: shown.map { $0.id }, start: first.id)
-                        } label: {
-                            Label(tr("Show photos"), systemImage: "photo.stack")
-                        }
-                        .buttonStyle(PillButtonStyle(kind: .ink))
-                    }
-                    if model.hasPass {
-                        ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
-                            Label(tr("Share"), systemImage: "square.and.arrow.up")
-                        }
-                        .buttonStyle(PillButtonStyle(kind: shown.isEmpty ? .ink : .ghost))
-                    }
-                }
-            }
-            if model.hasPass {
-                ShareLink(item: summaryRows(found).joined(separator: "\n")) {
-                    Text(tr("Share as text"))
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(palette.inkSecondary)
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 44)
-                }
+            if asPaper {
+                paperActions(found, others: others)
             } else {
-                Button {
-                    showPaywall = true
-                } label: {
-                    Label(tr("Share for the doctor"), systemImage: "lock.fill")
+                Text(tr("Dates and germs as you logged them. Germigo adds no diagnosis."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.horizontal, 4)
+                if !shown.isEmpty || model.hasPass {
+                    HStack(spacing: 10) {
+                        if let first = shown.first {
+                            Button {
+                                focus = PhotoFocus(ids: shown.map { $0.id }, start: first.id)
+                            } label: {
+                                Label(tr("Show photos"), systemImage: "photo.stack")
+                            }
+                            .buttonStyle(PillButtonStyle(kind: .ink))
+                        }
+                        if model.hasPass {
+                            ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
+                                Label(tr("Share"), systemImage: "square.and.arrow.up")
+                            }
+                            .buttonStyle(PillButtonStyle(kind: shown.isEmpty ? .ink : .ghost))
+                        }
+                    }
                 }
-                .buttonStyle(PillButtonStyle(kind: .ghost))
+                if model.hasPass {
+                    ShareLink(item: summaryRows(found).joined(separator: "\n")) {
+                        Text(tr("Share as text"))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(palette.inkSecondary)
+                            .frame(maxWidth: .infinity)
+                            .frame(minHeight: 44)
+                    }
+                } else {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        Label(tr("Share for the doctor"), systemImage: "lock.fill")
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost))
+                }
             }
         }
         .sheet(isPresented: $showPaywall) {
@@ -448,7 +459,7 @@ struct HealthHistory: View {
             Divider()
                 .padding(.bottom, 10)
             Button {
-                withAnimation(.snappy) {
+                withAnimation(Tempo.quick) {
                     if toggled.contains(line.id) {
                         toggled.remove(line.id)
                     } else {
@@ -535,6 +546,149 @@ struct HealthHistory: View {
         .accessibilityElement(children: .contain)
     }
 
+    /// The page the doctor receives, drawn as a sheet of paper: who, which months, each illness and its photos.
+    private func paper(_ found: [Line], others: [PatientPhoto]) -> some View {
+        let ink = Color(hex: Swatch.ink)
+        let soft = ink.opacity(0.72)
+        let from = since ?? found.last?.start ?? Date()
+        let period = tr("%1$@ to %2$@", day(from), Date().formatted(.dateTime.month(.abbreviated).day().year()))
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 10) {
+                Image("record-doctor")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 46, height: 46)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(tr("Germigo · For the doctor"))
+                        .font(.caption2)
+                        .foregroundStyle(soft)
+                    Text(model.name(for: person))
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(ink)
+                    Text(period)
+                        .font(.footnote)
+                        .foregroundStyle(soft)
+                }
+            }
+            .padding(.bottom, 10)
+            .padding(.trailing, 20)
+            if found.isEmpty && others.isEmpty {
+                PaperRule()
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(tr("Nothing to report."))
+                        .font(.headline)
+                        .foregroundStyle(ink)
+                    Text(tr("No germ logged for %1$@ since %2$@. The page fills itself as you log.",
+                            model.name(for: person), day(from)))
+                        .font(.subheadline)
+                        .foregroundStyle(soft)
+                }
+                .padding(.vertical, 14)
+            }
+            ForEach(Array(found.enumerated()), id: \.element.id) { item in
+                PaperRule()
+                paperRow(item.element, ink: ink, soft: soft)
+                    .cascadeIn(item.offset)
+            }
+            if !others.isEmpty {
+                PaperRule()
+                Text(tr("Other photos"))
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(ink)
+                    .padding(.top, 10)
+                PhotoRow(photos: others, side: 44)
+                    .padding(.vertical, 8)
+            }
+            if !caughtAtHome.isEmpty {
+                PaperRule()
+                Text(tr("Also caught at home:"))
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(ink)
+                    .padding(.top, 10)
+                ForEach(caughtAtHome, id: \.self) { item in
+                    Text(item)
+                        .font(.footnote)
+                        .foregroundStyle(soft)
+                }
+            }
+            PaperRule()
+            Text(tr("Dates and germs as logged in Germigo, with no diagnosis."))
+                .font(.caption2)
+                .foregroundStyle(soft)
+                .padding(.top, 10)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            DogEaredPaper()
+                .fill(Color.white)
+                .shadow(color: ink.opacity(0.12), radius: 12, y: 8)
+        }
+        .overlay(alignment: .topTrailing) {
+            PaperFold()
+                .fill(Color(hex: Swatch.mistDeep))
+                .frame(width: DogEaredPaper.fold, height: DogEaredPaper.fold)
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private func paperRow(_ line: Line, ink: Color, soft: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(line.title)
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(ink)
+                Spacer(minLength: 8)
+                Text(([line.dates] + [line.length].compactMap { $0 }).joined(separator: " · "))
+                    .font(.caption)
+                    .foregroundStyle(soft)
+                    .multilineTextAlignment(.trailing)
+            }
+            if let signs = line.signs {
+                Text(signs)
+                    .font(.footnote)
+                    .foregroundStyle(soft)
+            }
+            if !line.photos.isEmpty {
+                PhotoRow(photos: line.photos, side: 44)
+                    .padding(.top, 6)
+            }
+        }
+        .padding(.vertical, 10)
+    }
+
+    /// Under the page: send it as a PDF or copy it as text, once there is something on it.
+    @ViewBuilder
+    private func paperActions(_ found: [Line], others: [PatientPhoto]) -> some View {
+        if !found.isEmpty || !others.isEmpty {
+            if model.hasPass {
+                ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
+                    Label(tr("Send the PDF"), systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink))
+                Button {
+                    UIPasteboard.general.string = summaryRows(found).joined(separator: "\n")
+                    Haptics.tap()
+                    model.toast = tr("Text copied.")
+                } label: {
+                    Text(tr("Copy as text"))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.inkSecondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: 44)
+                }
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Label(tr("Send the PDF"), systemImage: "lock.fill")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost))
+            }
+        }
+    }
+
     /// A new photo for this person on that day of the illness: now for today, midday for a past day.
     private func addPhoto(_ line: Line, on day: Date, today: Bool) {
         guard model.hasPass else {
@@ -544,32 +698,41 @@ struct HealthHistory: View {
         let moment = today ? Date() : Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
         seed = PhotoSeed(person: person, takenAt: moment, link: line.link)
     }
+}
 
-    private func lineView(_ line: Line) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Divider()
-                .padding(.bottom, 10)
-            HStack(alignment: .firstTextBaseline) {
-                Text(line.title)
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                Spacer(minLength: 8)
-                Text(([line.dates] + [line.length].compactMap { $0 }).joined(separator: " · "))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .multilineTextAlignment(.trailing)
-            }
-            if let signs = line.signs {
-                Text(signs)
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-            }
-            if !line.photos.isEmpty {
-                PhotoRow(photos: line.photos, side: 56)
-                    .padding(.top, 8)
-            }
-        }
-        .padding(.bottom, 12)
-        .accessibilityElement(children: .contain)
+/// A sheet of paper with its top right corner folded down.
+private struct DogEaredPaper: Shape {
+    static let fold: CGFloat = 24
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX - Self.fold, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY + Self.fold))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// The folded corner of the paper.
+private struct PaperFold: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// A thin line between the parts of the paper.
+private struct PaperRule: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color(hex: Swatch.mistDeep))
+            .frame(height: 1)
     }
 }

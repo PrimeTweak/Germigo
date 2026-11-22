@@ -422,7 +422,7 @@ struct NoticeComposer: View {
                         }
                     }
                     Button(showAll ? tr("Fewer illnesses") : tr("All illnesses")) {
-                        withAnimation(.snappy) {
+                        withAnimation(Tempo.quick) {
                             showAll.toggle()
                         }
                     }
@@ -504,7 +504,7 @@ struct NoticeComposer: View {
     private func tile(_ germ: Germ) -> some View {
         let selected = germID == germ.id
         return Button {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 germID = germ.id
             }
         } label: {
@@ -534,7 +534,7 @@ struct NoticeComposer: View {
     private func chip(_ title: String, id: String) -> some View {
         let selected = scope == id
         return Button {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 scope = id
             }
         } label: {

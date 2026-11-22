@@ -255,7 +255,7 @@ struct SeasonScreen: View {
     private func supplierCard(_ supplier: SupplierStat) -> some View {
         HStack(spacing: 13) {
             ZStack(alignment: .bottomTrailing) {
-                BuddyBadge(look: supplier.kid.colorIndex, size: 52, lively: true)
+                BuddyBadge(look: supplier.kid.colorIndex, size: 52)
                 Image(systemName: "trophy.fill")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(palette.onAccent)

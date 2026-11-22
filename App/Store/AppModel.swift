@@ -152,6 +152,15 @@ final class AppModel {
         return data.kidIllnesses.filter { DayEngine.isGoingOn($0, catalog: catalog, now: now) }
     }
 
+    /// Whether this person has an illness going on today.
+    func isSick(_ person: Person) -> Bool {
+        switch person {
+        case .kid(let id): sickKidIllnesses.contains { $0.kidID == id }
+        case .me: data.logs.contains { $0.isActive && $0.sufferer.includesMe }
+        case .partner: data.logs.contains { $0.isActive && $0.sufferer.includesPartner }
+        }
+    }
+
     var displayName: String {
         data.profileName.isEmpty ? tr("You") : data.profileName
     }

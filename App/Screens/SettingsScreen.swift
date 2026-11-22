@@ -412,7 +412,7 @@ private struct SettingsRow<Trailing: View>: View {
 /// A small mascot asleep beside the quiet hours note.
 private struct DozingMascot: View {
     var body: some View {
-        LivelyCharacter(mood: .asleep, pokes: false) {
+        LivelyCharacter(mood: .resting, touch: nil) {
             Image("mascot-asleep")
                 .resizable()
                 .scaledToFit()
@@ -508,7 +508,7 @@ private struct PassTicket: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .animation(.snappy, value: active)
+        .animation(Tempo.quick, value: active)
     }
 
     private var backdrop: LinearGradient {
@@ -595,17 +595,21 @@ private struct PassTicket: View {
     }
 }
 
-/// A band of light that crosses the ticket every few seconds.
+/// A band of light that crosses the ticket once when it appears.
 private struct Shine: View {
+    @State private var crossed = false
+
     var body: some View {
-        TimelineView(.animation) { timeline in
-            let beat = timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 6) / 6
-            let progress = min(1, max(0, (beat - 0.3) / 0.25))
-            GeometryReader { proxy in
-                LinearGradient(colors: [.clear, Color.white.opacity(0.2), .clear], startPoint: .leading, endPoint: .trailing)
-                    .frame(width: proxy.size.width * 0.45)
-                    .rotationEffect(.degrees(18))
-                    .offset(x: -proxy.size.width * 0.6 + progress * proxy.size.width * 1.7)
+        GeometryReader { proxy in
+            LinearGradient(colors: [.clear, Color.white.opacity(0.2), .clear], startPoint: .leading, endPoint: .trailing)
+                .frame(width: proxy.size.width * 0.45)
+                .rotationEffect(.degrees(18))
+                .offset(x: crossed ? proxy.size.width * 1.1 : -proxy.size.width * 0.6)
+        }
+        .onAppear {
+            crossed = false
+            withAnimation(Tempo.reveal.delay(0.4)) {
+                crossed = true
             }
         }
         .accessibilityHidden(true)
@@ -1006,7 +1010,7 @@ struct TipSheet: View {
         Task {
             guard await purchases.tip(product) else { return }
             Haptics.success()
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) {
+            withAnimation(Tempo.pop) {
                 thankedAt = Date()
             }
         }
@@ -1022,11 +1026,11 @@ private struct SteamingSoup: View {
     var body: some View {
         ZStack(alignment: .top) {
             if !reduceMotion {
-                TimelineView(.animation) { timeline in
+                TimelineView(.animation(minimumInterval: 1.0 / 30)) { timeline in
                     steam(timeline.date.timeIntervalSinceReferenceDate)
                 }
             }
-            LivelyCharacter(mood: .idle) {
+            LivelyCharacter(mood: .resting) {
                 Image("sticker-soup")
                     .resizable()
                     .scaledToFit()
@@ -1039,7 +1043,7 @@ private struct SteamingSoup: View {
                     .scaledToFit()
                     .frame(width: 54, height: 54)
                     .offset(x: 52, y: 6)
-                    .transition(.scale(scale: 0.2).combined(with: .opacity))
+                    .motionTransition(.scale(scale: 0.2).combined(with: .opacity))
             }
         }
         .frame(width: 180, height: 170)

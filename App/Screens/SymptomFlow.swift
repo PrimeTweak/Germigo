@@ -432,7 +432,7 @@ private struct SymptomPicker: View {
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
-        .animation(.snappy, value: chosen.count)
+        .animation(Tempo.quick, value: chosen.count)
     }
 
     private func toggle(_ id: String) {
@@ -519,7 +519,7 @@ private struct SymptomTile: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.body)
                             .foregroundStyle(palette.accent)
-                            .transition(.scale.combined(with: .opacity))
+                            .motionTransition(.scale.combined(with: .opacity))
                     }
                 }
                 Spacer(minLength: 6)
@@ -542,7 +542,7 @@ private struct SymptomTile: View {
             .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         }
         .buttonStyle(PressableStyle())
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isOn)
+        .animation(Tempo.pop, value: isOn)
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }
@@ -811,7 +811,7 @@ private struct SuspectsPage: View {
 
     private func moreRow(_ title: String) -> some View {
         Button {
-            withAnimation(.snappy) {
+            withAnimation(Tempo.quick) {
                 showAll.toggle()
             }
         } label: {
@@ -873,7 +873,7 @@ private struct SuspectsPage: View {
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
-        .animation(.snappy, value: selected)
+        .animation(Tempo.quick, value: selected)
     }
 
     /// No germ picked: a new entry becomes a mystery, an existing one keeps its germ.
