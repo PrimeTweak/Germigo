@@ -172,9 +172,11 @@ struct AppSettings: Codable, Hashable {
     var sideloadPass = false
     /// The skill tree title shown instead of the level title.
     var wornTitle: String?
+    /// Face ID, Touch ID or the passcode before the app opens.
+    var appLockOn = false
 
     enum CodingKeys: String, CodingKey {
-        case appearance, theme, soundsOn, checkInsOn, lessonAlertsOn, crewAlertsOn, sideloadPass, wornTitle
+        case appearance, theme, soundsOn, checkInsOn, lessonAlertsOn, crewAlertsOn, sideloadPass, wornTitle, appLockOn
     }
 }
 
@@ -317,6 +319,7 @@ extension AppSettings {
         crewAlertsOn = container.value(.crewAlertsOn, default: true)
         sideloadPass = container.value(.sideloadPass, default: false)
         wornTitle = try? container.decodeIfPresent(String.self, forKey: .wornTitle)
+        appLockOn = container.value(.appLockOn, default: false)
     }
 }
 

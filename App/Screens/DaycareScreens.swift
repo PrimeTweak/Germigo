@@ -521,7 +521,7 @@ struct NoticeScreen: View {
             .sorted { $0.name < $1.name }
         let names = kids.map { $0.name }.formatted(.list(type: .and))
         let watching = !kids.isEmpty && kids.allSatisfy { daycare.isWatching(notice, kidID: $0.id) }
-        let reference = germ.kidReference ?? germ.sources.first
+        let reference = germ.parentReference ?? germ.sources.first
         return ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ZStack {

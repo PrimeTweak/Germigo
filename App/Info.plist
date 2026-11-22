@@ -88,5 +88,7 @@
 	<string>Germily uses the camera only when you take a photo for your household's sick history or scan a daycare's code.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Germily saves the share cards you choose to keep to your photo library.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Germily uses Face ID to open your journal when the app lock is on.</string>
 </dict>
 </plist>

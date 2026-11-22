@@ -62,6 +62,14 @@ struct GermReference: Codable, Hashable {
     }
 }
 
+/// A page published in English and French; the app opens the one in its language.
+struct BilingualReference: Codable, Hashable {
+    let name: LocalizedText
+    let url: LocalizedText
+
+    var reference: GermReference { GermReference(name: name.value, url: url.value) }
+}
+
 /// The skill tree branch a germ feeds.
 enum GermFamily: String, Codable, CaseIterable {
     case airways
@@ -181,11 +189,19 @@ struct Germ: Codable, Identifiable, Hashable {
     var spreads: [GermSpread] = []
     var spreadNote: LocalizedText?
     var microbe: Microbe?
+    /// The Canadian Paediatric Society's page for parents, in English and French.
+    var canadaSource: BilingualReference?
 
     var assetName: String { "germ-" + id }
 
     var kidReference: GermReference? {
         sources.first { $0.url == kidSource }
+    }
+
+    /// The page for parents that fits the phone's region: the Canadian one in Canada, otherwise the kid source.
+    var parentReference: GermReference? {
+        if Locale.current.region?.identifier == "CA", let canada = canadaSource { return canada.reference }
+        return kidReference
     }
     var numberLabel: String { String(format: "%02ld", number) }
 

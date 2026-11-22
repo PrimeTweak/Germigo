@@ -165,8 +165,10 @@
 "Any new symptoms?" = "Any new symptoms?";
 "App icon" = "App icon";
 "App icon unlocked: %@" = "App icon unlocked: %@";
+"App lock" = "App lock";
 "Appearance" = "Appearance";
 "Apple's standard license agreement (EULA)" = "Apple's standard license agreement (EULA)";
+"Asks for %@ when Germily opens" = "Asks for %@ when Germily opens";
 "Automatic" = "Automatic";
 "Back" = "Back";
 "Back on my feet." = "Back on my feet.";
@@ -409,6 +411,7 @@
 "Germily backup" = "Germily backup";
 "Germily couldn't write to this phone. Free up some storage, then make your change again." = "Germily couldn't write to this phone. Free up some storage, then make your change again.";
 "Germily doesn't guess on this one. Call a health line now, or the emergency number if it looks serious." = "Germily doesn't guess on this one. Call a health line now, or the emergency number if it looks serious.";
+"Germily is locked." = "Germily is locked.";
 "Germily is published by %@." = "Germily is published by %@.";
 "Germily journal" = "Germily journal";
 "Germily kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy." = "Germily kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy.";
@@ -828,6 +831,7 @@
 "Sent" = "Sent";
 "Sent to %lld families." = "Sent to %lld families.";
 "Sent to %lld family." = "Sent to %lld family.";
+"Set a passcode in iOS Settings first." = "Set a passcode in iOS Settings first.";
 "Set up" = "Set up";
 "Settings" = "Settings";
 "Share" = "Share";
@@ -1031,10 +1035,13 @@
 "Try later" = "Try later";
 "Tummy and others" = "Tummy and others";
 "Turn on in iOS Settings" = "Turn on in iOS Settings";
+"Turn on the app lock." = "Turn on the app lock.";
 "Turn your cards holo." = "Turn your cards holo.";
 "Twelve different germs caught" = "Twelve different germs caught";
 "Unblock everyone (%lld)" = "Unblock everyone (%lld)";
 "Uncommon" = "Uncommon";
+"Unlock" = "Unlock";
+"Unlock your journal." = "Unlock your journal.";
 "Unlocked" = "Unlocked";
 "Until the germ leaves" = "Until the germ leaves";
 "Useless against a virus" = "Useless against a virus";
@@ -1150,6 +1157,7 @@
 "Your partner and every kid" = "Your partner and every kid";
 "Your partner, every kid, the whole history and photos for the doctor." = "Your partner, every kid, the whole history and photos for the doctor.";
 "Your partner, the couple duel and every kid" = "Your partner, the couple duel and every kid";
+"your passcode" = "your passcode";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Your purchase needs an approval. The Season Pass turns on by itself once it's approved.";
 "Your season in numbers" = "Your season in numbers";
 "Your season in story cards, ready to share." = "Your season in story cards, ready to share.";

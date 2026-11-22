@@ -74,6 +74,8 @@ private struct ThemedRoot: View {
     @Environment(AppModel.self) private var model
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var contrast
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var lock = AppLock.shared
 
     var body: some View {
         let palette = Palette.make(theme: model.data.settings.theme, scheme: colorScheme, contrast: contrast)
@@ -83,6 +85,14 @@ private struct ThemedRoot: View {
             } else {
                 OnboardingFlow()
             }
+        }
+        .overlay {
+            if lock.isLocked {
+                LockScreen()
+            }
+        }
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            lock.sceneChanged(phase, enabled: model.data.settings.appLockOn, palette: palette)
         }
         .environment(\.palette, palette)
         .tint(palette.ink)

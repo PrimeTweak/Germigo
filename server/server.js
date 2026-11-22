@@ -69,6 +69,8 @@ const RADAR_WINDOW = 7 * DAY;
 const RADAR_MIN_FAMILIES = 3;
 const FEED_WINDOW = 30 * DAY;
 const EVENT_LIFETIME = 400 * DAY;
+const NOTICE_LIFETIME = 90 * DAY;
+const SWEEP_INTERVAL = 60 * MINUTE;
 const MEMBER_LIFETIME = 400 * DAY;
 const MASK_AFTER_REPORTERS = 2;
 const MASKED_NAME = 'Parent';
@@ -272,7 +274,7 @@ function createApp(options = {}) {
     db.reports = db.reports.filter((report) => !ids.has(report.memberID) && !ids.has(report.reporterID));
   }
 
-  // Removes old events, members who have not connected for a long time, and emptied crews.
+  // Removes old events and notices, members and daycares nobody opened for a long time, and emptied crews.
   function purge() {
     const now = clock();
     const idle = db.members.filter((member) => now - (member.seenAt || member.joinedAt) > MEMBER_LIFETIME);
@@ -287,7 +289,7 @@ function createApp(options = {}) {
     const daycareIDs = new Set(db.daycares.map((daycare) => daycare.id));
     db.subscriptions = db.subscriptions.filter((subscription) => daycareIDs.has(subscription.daycareID)
       && now - (subscription.seenAt || subscription.createdAt) <= MEMBER_LIFETIME);
-    db.notices = db.notices.filter((notice) => daycareIDs.has(notice.daycareID) && now - notice.at < EVENT_LIFETIME);
+    db.notices = db.notices.filter((notice) => daycareIDs.has(notice.daycareID) && now - notice.at < NOTICE_LIFETIME);
   }
 
   function newCode() {
@@ -456,6 +458,7 @@ function createApp(options = {}) {
   // The alert carries the illness, the group and the status, never the note.
   async function publish(daycare, { germID, groupID, status, messages, note }, source) {
     limit(daycare.id, 'noticesPerDay');
+    purge();
     const recipients = db.subscriptions.filter((subscription) => subscription.daycareID === daycare.id
       && (groupID === null || subscription.groupIDs.includes(groupID)));
     const notice = {
@@ -1194,7 +1197,15 @@ document.getElementById('form').addEventListener('submit', (event) => {
   server.requestTimeout = REQUEST_TIMEOUT;
   server.maxConnections = MAX_CONNECTIONS;
   server.flush = flush;
+  // Expired data also leaves while nobody uses the server.
+  purge();
+  const sweeper = setInterval(() => {
+    purge();
+    save();
+  }, SWEEP_INTERVAL);
+  sweeper.unref();
   server.on('close', () => {
+    clearInterval(sweeper);
     if (writeTimer) flush();
   });
   return server;

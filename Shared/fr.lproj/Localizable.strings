@@ -165,8 +165,10 @@
 "Any new symptoms?" = "De nouveaux symptômes ?";
 "App icon" = "Icône de l'app";
 "App icon unlocked: %@" = "Icône débloquée : %@";
+"App lock" = "Verrou de l'app";
 "Appearance" = "Apparence";
 "Apple's standard license agreement (EULA)" = "Contrat de licence standard d'Apple (CLUF)";
+"Asks for %@ when Germily opens" = "Demande %@ à l'ouverture de Germily";
 "Automatic" = "Automatique";
 "Back" = "Retour";
 "Back on my feet." = "Remis sur pied.";
@@ -409,6 +411,7 @@
 "Germily backup" = "Sauvegarde Germily";
 "Germily couldn't write to this phone. Free up some storage, then make your change again." = "Germily n'a pas pu écrire sur ce téléphone. Libère de l'espace, puis refais ta modification.";
 "Germily doesn't guess on this one. Call a health line now, or the emergency number if it looks serious." = "Ici, Germily ne devine pas. Appelle une ligne santé maintenant, ou les urgences si ça semble grave.";
+"Germily is locked." = "Germily est verrouillé.";
 "Germily is published by %@." = "Germily est publié par %@.";
 "Germily journal" = "Journal Germily";
 "Germily kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy." = "Germily a conservé le fichier et commencé un nouveau journal. Tu peux exporter le fichier conservé depuis Réglages, sous Données et confidentialité.";
@@ -828,6 +831,7 @@
 "Sent" = "Envoyés";
 "Sent to %lld families." = "Envoyé à %lld familles.";
 "Sent to %lld family." = "Envoyé à %lld famille.";
+"Set a passcode in iOS Settings first." = "Configure d'abord un code dans les Réglages d'iOS.";
 "Set up" = "Configurer";
 "Settings" = "Réglages";
 "Share" = "Partager";
@@ -1031,10 +1035,13 @@
 "Try later" = "Réessayer plus tard";
 "Tummy and others" = "Ventre et autres";
 "Turn on in iOS Settings" = "Activer dans Réglages iOS";
+"Turn on the app lock." = "Active le verrou de l'app.";
 "Turn your cards holo." = "Passe tes cartes en holo.";
 "Twelve different germs caught" = "Douze microbes différents attrapés";
 "Unblock everyone (%lld)" = "Débloquer tout le monde (%lld)";
 "Uncommon" = "Peu commun";
+"Unlock" = "Déverrouiller";
+"Unlock your journal." = "Déverrouille ton journal.";
 "Unlocked" = "Débloquée";
 "Until the germ leaves" = "Jusqu'au départ du microbe";
 "Useless against a virus" = "Inutiles contre un virus";
@@ -1150,6 +1157,7 @@
 "Your partner and every kid" = "Ton partenaire et tous les enfants";
 "Your partner, every kid, the whole history and photos for the doctor." = "Ton partenaire, tous les enfants, tout l'historique et les photos pour le médecin.";
 "Your partner, the couple duel and every kid" = "Ton partenaire, le duel de couple et tous les enfants";
+"your passcode" = "ton code";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Ton achat doit être approuvé. La Passe de saison s'active toute seule une fois l'approbation donnée.";
 "Your season in numbers" = "Ta saison en chiffres";
 "Your season in story cards, ready to share." = "Ta saison en cartes à partager.";

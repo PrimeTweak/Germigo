@@ -652,6 +652,16 @@ async function main() {
   storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8'));
   assert.equal(storedDaycares.daycares.length + storedDaycares.subscriptions.length + storedDaycares.notices.length, 0);
 
+  // A notice leaves the server after 90 days
+  now += DAY;
+  const keeper = (await call('POST', '/v1/daycares', { body: { name: 'CPE Mémoire', groups: [] } })).data;
+  const post = () => call('POST', '/v1/daycare/notices', { token: keeper.token, body: { status: 'symptoms', germID: 'flu' } });
+  await post();
+  now += 89 * DAY;
+  assert.equal((await post()).data.notices.length, 2);
+  now += 2 * DAY;
+  assert.equal((await post()).data.notices.length, 2);
+
   // A daycare nobody opens for that long is removed
   now += DAY;
   const idle = (await call('POST', '/v1/daycares', { body: { name: 'CPE Dormant', groups: [] } })).data;

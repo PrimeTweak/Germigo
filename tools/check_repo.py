@@ -80,7 +80,8 @@ def check_plists():
     app = read_plist("App/Info.plist")
     widgets = read_plist("Widgets/Info.plist")
     for key in ("CFBundleDisplayName", "UILaunchScreen", "NSSupportsLiveActivities", "ITSAppUsesNonExemptEncryption",
-                "NSPhotoLibraryAddUsageDescription", "BGTaskSchedulerPermittedIdentifiers", "CFBundleLocalizations"):
+                "NSPhotoLibraryAddUsageDescription", "NSFaceIDUsageDescription", "BGTaskSchedulerPermittedIdentifiers",
+                "CFBundleLocalizations"):
         if key not in app:
             fail(f"App/Info.plist: missing {key}")
     if widgets.get("NSExtension", {}).get("NSExtensionPointIdentifier") != "com.apple.widgetkit-extension":
@@ -148,6 +149,12 @@ def check_content():
         kid = germ.get("kidSource")
         if kid is not None and kid not in [source.get("url") for source in germ.get("sources", [])]:
             fail(f"germs.json {gid}: kidSource must be one of the germ's sources")
+        canada = germ.get("canadaSource")
+        if canada is not None:
+            localized(canada.get("name"), f"germs.json {gid}.canadaSource.name")
+            localized(canada.get("url"), f"germs.json {gid}.canadaSource.url")
+            if not all(str(url).startswith("https://") for url in (canada.get("url") or {}).values()):
+                fail(f"germs.json {gid}: canadaSource urls must be https")
         for key in ("showsUp", "lasts"):
             for language, text in (germ.get(key) or {}).items():
                 if len(str(text)) > TILE_TEXT_LIMIT:
@@ -345,7 +352,7 @@ def check_strings():
             fail(f"en Localizable.strings: format specifiers differ for {key!r}")
     for language in ("en", "fr"):
         info = parse_strings(f"App/{language}.lproj/InfoPlist.strings")
-        for key in ("NSCameraUsageDescription", "NSPhotoLibraryAddUsageDescription"):
+        for key in ("NSCameraUsageDescription", "NSPhotoLibraryAddUsageDescription", "NSFaceIDUsageDescription"):
             if key not in info:
                 fail(f"App/{language}.lproj/InfoPlist.strings: missing {key}")
 

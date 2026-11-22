@@ -20,6 +20,8 @@ def collect():
         for entry in json.loads((ROOT / "App" / "Content" / name).read_text(encoding="utf-8")):
             for source in entry.get("sources", []):
                 links.setdefault(source["url"], f"{name}: {entry['id']}")
+            for url in (entry.get("canadaSource") or {}).get("url", {}).values():
+                links.setdefault(url, f"{name}: {entry['id']} (Canada)")
     for url in EXTRA:
         links.setdefault(url, "legal screen")
     return links

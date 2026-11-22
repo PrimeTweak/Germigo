@@ -369,7 +369,7 @@ struct GermDetailScreen: View {
         Text(tr("In an emergency, call your local emergency number."))
             .font(.footnote.weight(.semibold))
             .foregroundStyle(palette.ink)
-        if let kid = germ.kidReference, let url = kid.link {
+        if let kid = germ.parentReference, let url = kid.link {
             Divider()
             Link(destination: url) {
                 HStack(spacing: 12) {

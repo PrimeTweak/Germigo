@@ -81,7 +81,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 >
 > Daycare notices (free): in the Crew tab, tap "Join a daycare", enter [DEMO DAYCARE CODE] and pick a group to see its notices. To send one, tap "I run a daycare", create a daycare, open Invite families for its code, join it from the same phone with "Join a daycare", then send a notice from Daycare mode: it arrives as a push. A short video of both flows: [VIDEO LINK].
 >
-> Permissions: the camera is used only to take a photo for a family member's sick history or to scan a daycare's code. Photo library access is add-only, to save share cards. Notifications are optional: reminders are created on the device; only daycare notices are pushed.
+> Permissions: the camera is used only to take a photo for a family member's sick history or to scan a daycare's code. Photo library access is add-only, to save share cards. Face ID is used only by the optional app lock, through iOS: the app never sees the face data. Notifications are optional: reminders are created on the device; only daycare notices are pushed.
 >
 > Data: leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases the journal on the phone and the crew and daycare data on the server.
 
@@ -102,7 +102,7 @@ If Crew is disabled, the answer is "Data Not Collected".
 | Daycare list | A daycare's list stops at 600 families. A director can replace the code (Daycare settings > New code, 5 a day), which stops new families with the old code, but cannot remove a family already in. |
 | Season Pass on the server | Crew is reserved to the Season Pass in the app only: the server does not check a purchase. Verifying the App Store transaction needs the developer account. |
 | Shared addresses | Limits count an IPv4 address alone and an IPv6 address by its /64 network. People behind one shared address, such as a school network or a carrier, share its limits. |
-| App lock | The journal and its photos open for whoever holds the unlocked phone. An optional Face ID lock is to be decided. |
+| App lock | Settings > App lock asks for Face ID, Touch ID or the passcode when Germily opens or comes back from the background. Off by default. Widgets, the Live Activity and notifications still show on the Lock Screen and the Home Screen. |
 | Public repository | While the repository is public, anyone signed in to GitHub can download the workflow artifacts, and the sideload build carries a Season Pass switch. It becomes private on approval day (section 2, step 16), budget first: private builds use the account's included macOS minutes. |
 | Host terms for health data | Railway encrypts stored data, volumes included, with AES-256, but its data processing addendum lists no special-category data, so it has no terms for health data such as shared germs. A question for the lawyer, with the privacy assessment. |
 | Copied text | The doctor's summary and a daycare's private address leave the clipboard after five minutes, but Universal Clipboard still carries them to the user's other devices in the meantime. |

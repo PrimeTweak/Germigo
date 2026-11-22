@@ -368,7 +368,8 @@ struct SourcesScreen: View {
     private var references: [GermReference] {
         var seen = Set<String>()
         var result: [GermReference] = []
-        let all = model.catalog.germs.flatMap { $0.sources } + model.catalog.articles.flatMap { $0.sources }
+        let all = model.catalog.germs.flatMap { $0.sources + [$0.canadaSource?.reference].compactMap { $0 } }
+            + model.catalog.articles.flatMap { $0.sources }
         for reference in all where seen.insert(reference.url).inserted {
             result.append(reference)
         }

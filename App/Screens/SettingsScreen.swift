@@ -175,6 +175,21 @@ struct SettingsScreen: View {
                 set: { value in model.updateSettings { $0[keyPath: keyPath] = value } })
     }
 
+    /// Turning the lock on asks for Face ID first, so it never locks out someone it cannot recognize.
+    private var appLock: Binding<Bool> {
+        Binding(get: { model.data.settings.appLockOn }, set: { on in
+            guard on else {
+                model.updateSettings { $0.appLockOn = false }
+                return
+            }
+            Task {
+                if await AppLock.confirm() {
+                    model.updateSettings { $0.appLockOn = true }
+                }
+            }
+        })
+    }
+
     // MARK: - Cards
 
     private var passLinks: some View {
@@ -285,6 +300,15 @@ struct SettingsScreen: View {
                 }
             }
             .buttonStyle(.plain)
+            Divider()
+                .padding(.leading, 44)
+            Toggle(isOn: appLock) {
+                SettingsRowLabel(symbol: AppLock.symbol, title: tr("App lock"),
+                                 detail: AppLock.isAvailable ? tr("Asks for %@ when Germily opens", AppLock.methodName)
+                                                             : tr("Set a passcode in iOS Settings first."))
+            }
+            .disabled(!AppLock.isAvailable && !model.data.settings.appLockOn)
+            .frame(minHeight: 54)
             Divider()
                 .padding(.leading, 44)
             NavigationLink {

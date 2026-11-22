@@ -258,7 +258,17 @@
           "fr": "Puis on se touche les yeux, le nez ou la bouche"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Colds in children",
+        "fr": "Société canadienne de pédiatrie : Le rhume chez les enfants"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/colds_in_children",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/colds_in_children"
+      }
+    }
   },
   {
     "id": "mystery",
@@ -433,7 +443,17 @@
       "fr": "Plus de 200 virus peuvent causer un rhume : la plupart des infections du quotidien n'ont jamais de nom."
     },
     "symptoms": [],
-    "spreads": []
+    "spreads": [],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Common infections and your child",
+        "fr": "Société canadienne de pédiatrie : Les infections courantes et votre enfant"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/common_infections_and_your_child",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/common_infections_and_your_child"
+      }
+    }
   },
   {
     "id": "lingerer",
@@ -1512,6 +1532,16 @@
     "spreadNote": {
       "en": "You can still spread it for days after you feel better.",
       "fr": "On peut encore le transmettre des jours après s'être senti mieux."
+    },
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Dehydration and diarrhea in children",
+        "fr": "Société canadienne de pédiatrie : La diarrhée et la déshydratation chez les enfants"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/dehydration_and_diarrhea",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/dehydration_and_diarrhea"
+      }
     }
   },
   {
@@ -1746,7 +1776,17 @@
           "fr": "Gouttes, lunettes ou maquillage partagés"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Pinkeye (Conjunctivitis)",
+        "fr": "Société canadienne de pédiatrie : La conjonctivite"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/pinkeye",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/pinkeye"
+      }
+    }
   },
   {
     "id": "rona",
@@ -2027,7 +2067,17 @@
           "fr": "Même par des gens sans symptômes"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: COVID-19 and your child",
+        "fr": "Société canadienne de pédiatrie : La COVID-19 et votre enfant"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/the-2019-novel-coronavirus-covid-19",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/the-2019-novel-coronavirus-covid-19"
+      }
+    }
   },
   {
     "id": "arsy",
@@ -2288,6 +2338,16 @@
     "spreadNote": {
       "en": "Usually contagious for 3 to 8 days, starting a day or two before symptoms.",
       "fr": "En général contagieux de 3 à 8 jours, à partir d'un jour ou deux avant les symptômes."
+    },
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: RSV (Respiratory syncytial virus)",
+        "fr": "Société canadienne de pédiatrie : Le virus respiratoire syncytial (VRS)"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/respiratory_syncytial_virus",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/respiratory_syncytial_virus"
+      }
     }
   },
   {
@@ -2526,7 +2586,17 @@
           "fr": "Lieux achalandés comme la garderie"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Strep throat",
+        "fr": "Société canadienne de pédiatrie : L'angine streptococcique"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/strep_throat",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/strep_throat"
+      }
+    }
   },
   {
     "id": "flu",
@@ -2800,7 +2870,17 @@
           "fr": "Plus rarement : surfaces, puis la bouche ou le nez"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Influenza in children",
+        "fr": "Société canadienne de pédiatrie : La grippe chez les enfants"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/influenza_in_children",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/influenza_in_children"
+      }
+    }
   },
   {
     "id": "addy",
@@ -3551,7 +3631,17 @@
           "fr": "Objets et surfaces, puis le visage"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Croup",
+        "fr": "Société canadienne de pédiatrie : Le faux croup"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/croup",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/croup"
+      }
+    }
   },
   {
     "id": "rota",
@@ -3792,7 +3882,17 @@
           "fr": "Aliments contaminés"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Dehydration and diarrhea in children",
+        "fr": "Société canadienne de pédiatrie : La diarrhée et la déshydratation chez les enfants"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/dehydration_and_diarrhea",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/dehydration_and_diarrhea"
+      }
+    }
   },
   {
     "id": "coxy",
@@ -4048,7 +4148,17 @@
           "fr": "Objets et surfaces, puis le visage"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Hand, foot and mouth disease",
+        "fr": "Société canadienne de pédiatrie : La maladie main-pied-bouche"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/hand_foot_and_mouth_disease",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/hand_foot_and_mouth_disease"
+      }
+    }
   },
   {
     "id": "slappy",
@@ -4312,6 +4422,16 @@
     "spreadNote": {
       "en": "Most contagious early on. Once the rash shows, the risk is low.",
       "fr": "Plus contagieux au début. Quand l'éruption apparaît, le risque est faible."
+    },
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Fifth disease",
+        "fr": "Société canadienne de pédiatrie : La cinquième maladie"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/fifth_disease",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/fifth_disease"
+      }
     }
   },
   {
@@ -4543,6 +4663,16 @@
     "spreadNote": {
       "en": "They can't hop or fly, and pets don't spread them.",
       "fr": "Ils ne sautent pas, ne volent pas, et les animaux ne les transmettent pas."
+    },
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Head lice",
+        "fr": "Société canadienne de pédiatrie : Les poux de tête"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/head_lice",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/head_lice"
+      }
     }
   },
   {
@@ -4747,7 +4877,17 @@
           "fr": "Les œufs peuvent survivre 2 à 3 semaines"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Pinworms",
+        "fr": "Société canadienne de pédiatrie : Les vers intestinaux"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/pinworms",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/pinworms"
+      }
+    }
   },
   {
     "id": "crusty",
@@ -4979,7 +5119,17 @@
           "fr": "Les coupures et éraflures augmentent le risque"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Impetigo",
+        "fr": "Société canadienne de pédiatrie : L'impétigo"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/impetigo",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/impetigo"
+      }
+    }
   },
   {
     "id": "ringo",
@@ -5216,7 +5366,17 @@
           "fr": "Planchers de vestiaires"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Ringworm",
+        "fr": "Société canadienne de pédiatrie : Les dermatophytoses"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/ringworm",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/ringworm"
+      }
+    }
   },
   {
     "id": "whoopy",
@@ -5479,7 +5639,17 @@
           "fr": "Contact rapproché prolongé, dans le même air"
         }
       }
-    ]
+    ],
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Pertussis (Whooping cough)",
+        "fr": "Société canadienne de pédiatrie : La coqueluche"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/pertussis_whooping_cough",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/pertussis_whooping_cough"
+      }
+    }
   },
   {
     "id": "poxy",
@@ -5711,6 +5881,16 @@
     "spreadNote": {
       "en": "Contagious 1 to 2 days before the rash, until every blister has scabbed.",
       "fr": "Contagieux 1 à 2 jours avant l'éruption, jusqu'à ce que toutes les cloques soient en croûtes."
+    },
+    "canadaSource": {
+      "name": {
+        "en": "Canadian Paediatric Society: Chickenpox",
+        "fr": "Société canadienne de pédiatrie : La varicelle"
+      },
+      "url": {
+        "en": "https://caringforkids.cps.ca/handouts/health-conditions-and-treatments/chickenpox",
+        "fr": "https://soinsdenosenfants.cps.ca/handouts/health-conditions-and-treatments/chickenpox"
+      }
     }
   }
 ]
