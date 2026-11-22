@@ -59,7 +59,7 @@ struct RewardView: View {
         }
         .foregroundStyle(Color.white)
         .preferredColorScheme(.dark)
-        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
+        .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .onAppear(perform: play)
         .sheet(isPresented: $showShare) {
             SharePreviewSheet(title: tr("Share card")) {

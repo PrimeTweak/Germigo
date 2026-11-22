@@ -56,7 +56,6 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
 
     private var scheme: ColorScheme? {
-        if model.data.settings.theme == .nightShift { return .dark }
         switch model.data.settings.appearance {
         case .system: return nil
         case .light: return .light

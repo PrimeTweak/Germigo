@@ -38,7 +38,7 @@ struct SettingsButton: View {
     }
 }
 
-/// Settings, opened from any tab: the pass, the look, notifications, help, data and the rest.
+/// Settings, opened from any tab: the pass, the look, sound, notifications, help, data and the rest.
 struct SettingsScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(PurchaseManager.self) private var purchases
@@ -62,24 +62,25 @@ struct SettingsScreen: View {
                     if !model.hasPass {
                         passLinks
                     }
-                    #if GERMIGO_SIDELOAD
-                    testPassCard
-                    #endif
                     SectionHeader(title: tr("Look"))
-                    LookCard(showPaywall: $showPaywall)
+                    LookCard()
                         .cascadeIn(1)
+                    SectionHeader(title: tr("Sound"))
+                    soundCard
+                        .cascadeIn(2)
                     SectionHeader(title: tr("Notifications"))
                     notificationCard
-                        .cascadeIn(2)
+                        .cascadeIn(3)
+                    quietNote
                     SectionHeader(title: tr("Help"))
                     helpCard
-                        .cascadeIn(3)
+                        .cascadeIn(4)
                     SectionHeader(title: tr("Data"))
                     dataCard
-                        .cascadeIn(4)
+                        .cascadeIn(5)
                     SectionHeader(title: tr("About"))
                     aboutCard
-                        .cascadeIn(5)
+                        .cascadeIn(6)
                     SneezyFooter()
                         .padding(.top, 22)
                 }
@@ -192,16 +193,31 @@ struct SettingsScreen: View {
         .frame(minHeight: 44)
     }
 
-    #if GERMIGO_SIDELOAD
-    private var testPassCard: some View {
-        Toggle(isOn: setting(\.sideloadPass)) {
-            SettingsRowLabel(symbol: "hammer.fill", title: tr("Pass (test build)"))
+    private var soundCard: some View {
+        let settings = model.data.settings
+        return Toggle(isOn: setting(\.soundsOn)) {
+            SettingsRowLabel(symbol: settings.soundsOn ? "speaker.wave.2.fill" : "speaker.slash.fill",
+                             title: tr("Sounds and haptics"), detail: tr("Sounds stay off from 10 PM to 7 AM"),
+                             trigger: settings.soundsOn)
         }
         .frame(minHeight: 54)
         .padding(.horizontal, 14)
         .germigoCard(padding: 0)
     }
-    #endif
+
+    /// Under the notifications: the hours when reminders wait, told by the mascot asleep. It is not a setting.
+    private var quietNote: some View {
+        HStack(spacing: 14) {
+            DozingMascot()
+            Text(tr("From 10 PM to 7 AM, reminders wait for the morning."))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 8)
+        .accessibilityElement(children: .combine)
+    }
 
     private var notificationCard: some View {
         let settings = model.data.settings
@@ -240,12 +256,6 @@ struct SettingsScreen: View {
                 }
                 .buttonStyle(.plain)
             }
-            Divider()
-                .padding(.leading, 44)
-            SettingsRow(symbol: "moon.fill", title: tr("Quiet hours"),
-                        detail: tr("From 10 PM, reminders wait until 7 AM and sounds stay off.")) {
-                DozingMascot()
-            }
         }
         .padding(.horizontal, 14)
         .germigoCard(padding: 0)
@@ -268,7 +278,10 @@ struct SettingsScreen: View {
         VStack(spacing: 0) {
             ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germigo backup"))) {
                 SettingsRow(symbol: "archivebox.fill", title: tr("Back up now"), detail: tr("Journal and photos, where you choose")) {
-                    RowChevron()
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.inkTertiary)
+                        .accessibilityHidden(true)
                 }
             }
             .buttonStyle(.plain)
@@ -312,6 +325,14 @@ struct SettingsScreen: View {
                 }
             }
             .buttonStyle(.plain)
+            #if GERMIGO_SIDELOAD
+            Divider()
+                .padding(.leading, 44)
+            Toggle(isOn: setting(\.sideloadPass)) {
+                SettingsRowLabel(symbol: "hammer.fill", title: tr("Pass (test build)"))
+            }
+            .frame(minHeight: 54)
+            #endif
         }
         .padding(.horizontal, 14)
         .germigoCard(padding: 0)
@@ -388,7 +409,7 @@ private struct SettingsRow<Trailing: View>: View {
     }
 }
 
-/// A small mascot asleep at the end of the quiet hours row.
+/// A small mascot asleep beside the quiet hours note.
 private struct DozingMascot: View {
     var body: some View {
         LivelyCharacter(mood: .asleep, pokes: false) {
@@ -593,196 +614,87 @@ private struct Shine: View {
 
 // MARK: - Look
 
-/// Icon, theme, appearance and sounds, all picked in place.
+/// The look in three choices: the app icon and the theme each open their page, light or dark is picked in place.
 private struct LookCard: View {
-    @Binding var showPaywall: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var current = AppIconOption.germigo
-    @State private var popped: AppIconOption?
-    @State private var hint: String?
-    @State private var nudges: [String: Int] = [:]
+    @State private var icon = AppIconOption.germigo
 
     var body: some View {
-        let settings = model.data.settings
-        VStack(alignment: .leading, spacing: 12) {
-            ScrollView(.horizontal) {
-                HStack(spacing: 12) {
-                    ForEach(AppIconOption.allCases) { option in
-                        iconCell(option)
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            NavigationLink {
+                AppIconScreen()
+            } label: {
+                row(tr("App icon"), value: icon.title) {
+                    Image(icon.previewAsset)
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
-                .padding(.vertical, 6)
-                .padding(.horizontal, 2)
             }
-            .scrollIndicators(.hidden)
-            Text(hint ?? tr("New icons unlock as the season goes."))
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .id(hint ?? "")
-                .transition(.opacity)
-            ScrollView(.horizontal) {
-                HStack(spacing: 8) {
-                    ForEach(Theme.allCases, id: \.self) { theme in
-                        themeChip(theme)
-                    }
-                }
-                .padding(.horizontal, 2)
-            }
-            .scrollIndicators(.hidden)
-            Picker(tr("Appearance"), selection: setting(\.appearance)) {
-                Text(tr("Automatic")).tag(AppearanceMode.system)
-                Text(tr("Light")).tag(AppearanceMode.light)
-                Text(tr("Dark")).tag(AppearanceMode.dark)
-            }
-            .pickerStyle(.segmented)
+            .buttonStyle(.plain)
             Divider()
-            Toggle(isOn: setting(\.soundsOn)) {
-                SettingsRowLabel(symbol: settings.soundsOn ? "speaker.wave.2.fill" : "speaker.slash.fill",
-                                 title: tr("Sounds and haptics"), trigger: settings.soundsOn)
+                .padding(.leading, 44)
+            NavigationLink {
+                ThemeScreen()
+            } label: {
+                row(tr("Theme"), value: model.data.settings.theme.title) {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(palette.ink.opacity(0.07))
+                        .overlay {
+                            Circle()
+                                .fill(palette.accent)
+                                .frame(width: 16, height: 16)
+                        }
+                }
             }
+            .buttonStyle(.plain)
+            Divider()
+                .padding(.leading, 44)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(tr("Appearance"))
+                    .font(.body)
+                    .foregroundStyle(palette.ink)
+                Picker(tr("Appearance"), selection: appearance) {
+                    Text(tr("Automatic")).tag(AppearanceMode.system)
+                    Text(tr("Light")).tag(AppearanceMode.light)
+                    Text(tr("Dark")).tag(AppearanceMode.dark)
+                }
+                .pickerStyle(.segmented)
+            }
+            .padding(.top, 12)
+            .padding(.bottom, 14)
         }
-        .padding(.top, 4)
-        .germigoCard(padding: 14)
-        .animation(.snappy, value: hint)
+        .padding(.horizontal, 14)
+        .germigoCard(padding: 0)
         .onAppear {
-            current = AppIconManager.current
+            icon = AppIconManager.current
         }
     }
 
-    private func setting<Value>(_ keyPath: WritableKeyPath<AppSettings, Value>) -> Binding<Value> {
-        Binding(get: { model.data.settings[keyPath: keyPath] },
-                set: { value in model.updateSettings { $0[keyPath: keyPath] = value } })
+    private var appearance: Binding<AppearanceMode> {
+        Binding(get: { model.data.settings.appearance },
+                set: { value in model.updateSettings { $0.appearance = value } })
     }
 
-    private func iconCell(_ option: AppIconOption) -> some View {
-        let unlocked = model.isIconUnlocked(option)
-        let inUse = current == option
-        return Button {
-            pick(option, unlocked: unlocked)
-        } label: {
-            Image(option.previewAsset)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .saturation(unlocked ? 1 : 0.15)
-                .opacity(unlocked ? 1 : 0.55)
-                .padding(4)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(inUse ? palette.accent : Color.clear, lineWidth: 2.5)
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    if !unlocked {
-                        Image(systemName: "lock.fill")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(palette.background)
-                            .frame(width: 22, height: 22)
-                            .background(palette.ink, in: Circle())
-                            .symbolEffect(.wiggle, value: nudges["icon-" + option.rawValue, default: 0])
-                    }
-                }
-                .scaleEffect(popped == option ? 1.15 : 1)
+    /// A row that opens a page: a small picture of the current choice, the title, its name and a chevron.
+    private func row<Picture: View>(_ title: String, value: String, @ViewBuilder picture: () -> Picture) -> some View {
+        HStack(spacing: 12) {
+            picture()
+                .frame(width: 32, height: 32)
+                .accessibilityHidden(true)
+            Text(title)
+                .font(.body)
+                .foregroundStyle(palette.ink)
+            Spacer(minLength: 8)
+            Text(value)
+                .font(.callout)
+                .foregroundStyle(palette.inkSecondary)
+                .lineLimit(1)
+            RowChevron()
         }
-        .buttonStyle(PressableStyle())
-        .accessibilityLabel(option.title)
-        .accessibilityValue(inUse ? tr("In use") : (unlocked ? tr("Unlocked") : option.requirement))
-        .accessibilityAddTraits(inUse ? .isSelected : [])
-    }
-
-    private func pick(_ option: AppIconOption, unlocked: Bool) {
-        Haptics.tap()
-        guard unlocked else {
-            nudges["icon-" + option.rawValue, default: 0] += 1
-            if option == .soupBowl {
-                showPaywall = true
-            } else {
-                hint = tr("%1$@: %2$@", option.title, option.requirement)
-            }
-            return
-        }
-        hint = nil
-        guard option != current else { return }
-        Task {
-            guard await AppIconManager.apply(option) else { return }
-            current = option
-            Haptics.success()
-            guard !reduceMotion else { return }
-            withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) {
-                popped = option
-            }
-            try? await Task.sleep(for: .milliseconds(240))
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
-                popped = nil
-            }
-        }
-    }
-
-    private func themeTitle(_ theme: Theme) -> String {
-        switch theme {
-        case .agar: return tr("Standard")
-        case .nightShift: return tr("Night Shift")
-        case .mint: return tr("Mint")
-        }
-    }
-
-    private func themeRequirement(_ theme: Theme) -> String? {
-        switch theme {
-        case .agar: return nil
-        case .nightShift: return tr("Night Shift opens with its badge, or with the Season Pass.")
-        case .mint: return tr("Mint opens after 30 days without a germ, or with the Season Pass.")
-        }
-    }
-
-    /// The theme's own color: its accent, or its night background for Night Shift.
-    private func swatch(_ theme: Theme) -> Color {
-        theme == .nightShift ? Color(hex: Swatch.navySurface) : Palette.make(theme: theme, scheme: .light).accent
-    }
-
-    private func themeChip(_ theme: Theme) -> some View {
-        let unlocked = model.isThemeUnlocked(theme)
-        let inUse = model.data.settings.theme == theme
-        return Button {
-            Haptics.tap()
-            if unlocked {
-                hint = nil
-                withAnimation(.snappy) {
-                    model.updateSettings { $0.theme = theme }
-                }
-            } else {
-                nudges["theme-" + theme.rawValue, default: 0] += 1
-                hint = themeRequirement(theme)
-            }
-        } label: {
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(swatch(theme))
-                    .frame(width: 16, height: 16)
-                Text(themeTitle(theme))
-                    .font(.subheadline.weight(.semibold))
-                if !unlocked {
-                    Image(systemName: "lock.fill")
-                        .font(.caption2.weight(.bold))
-                        .symbolEffect(.wiggle, value: nudges["theme-" + theme.rawValue, default: 0])
-                }
-            }
-            .foregroundStyle(unlocked ? palette.ink : palette.inkSecondary)
-            .padding(.leading, 10)
-            .padding(.trailing, 14)
-            .frame(height: 40)
-            .background(palette.background, in: Capsule())
-            .overlay {
-                Capsule().strokeBorder(inUse ? palette.ink : Color.clear, lineWidth: 2)
-            }
-            .hitTarget(height: 40)
-        }
-        .buttonStyle(PressableStyle())
-        .accessibilityLabel(themeTitle(theme))
-        .accessibilityValue(unlocked ? (inUse ? tr("In use") : tr("Unlocked")) : tr("Locked"))
-        .accessibilityAddTraits(inUse ? .isSelected : [])
+        .frame(minHeight: 54)
+        .contentShape(Rectangle())
     }
 }
 
@@ -843,7 +755,7 @@ private struct SneezyFooter: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(tr("Wake the germ"))
-            Text(tr("Germigo %@ · Made in Montréal", AppConfig.versionLabel))
+            Text(verbatim: "Germigo " + AppConfig.versionLabel)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.top, 6)

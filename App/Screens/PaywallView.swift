@@ -72,7 +72,7 @@ struct PaywallView: View {
             .padding(.top, 8)
         }
         .preferredColorScheme(.dark)
-        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
+        .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .sheet(item: $legal) { kind in
             NavigationStack {
                 LegalScreen(kind: kind)

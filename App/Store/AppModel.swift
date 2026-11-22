@@ -222,22 +222,19 @@ final class AppModel {
 
     func isIconUnlocked(_ icon: AppIconOption) -> Bool {
         switch icon {
-        case .germigo, .classic: return true
+        case .germigo, .daylight: return true
         case .nightShift: return hasBadge(BadgeCatalog.nightShift)
-        case .tissueBox: return count(of: GermCatalog.commonColdID) >= 3
-        case .goldenDish: return data.logs.count >= 20
+        case .snowDay: return count(of: GermCatalog.commonColdID) >= 3
+        case .golden: return data.logs.count >= 20
         case .soupBowl: return hasPass
         case .holo: return !catalog.germs.isEmpty && caughtGermIDs.count >= catalog.germs.count
         }
     }
 
-    /// Themes are earned with badges, or all open with the Season Pass.
+    /// Each theme opens with the badge it takes its color from, or all open with the Season Pass.
     func isThemeUnlocked(_ theme: Theme) -> Bool {
-        switch theme {
-        case .agar: return true
-        case .nightShift: return hasPass || hasBadge(BadgeCatalog.nightShift)
-        case .mint: return hasPass || hasBadge(BadgeCatalog.ironParent)
-        }
+        guard let badge = theme.badgeID else { return true }
+        return hasPass || hasBadge(badge)
     }
 
     /// Open with enough right answers, during the lesson's first week, or once read.

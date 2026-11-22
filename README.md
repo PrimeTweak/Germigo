@@ -77,6 +77,8 @@ Germ and article text is bilingual inside the JSON files. A germ's `about`, `sym
 
 Every color value lives in `Shared/Swatch.swift`, shared by the app and the widgets. The interface stays neutral with one accent: the roles that follow the theme, Dark Mode and Increase Contrast (surfaces, text levels, accent) are resolved in `App/Design/Palette.swift`. A color value written anywhere else, or a swatch no longer used, fails `check_swift.py`.
 
+The themes are the cases of `Theme` (`App/Models/AppData.swift`). Each one sets an accent and its daytime grounds in `Palette.swift`, and opens with the badge named by `Theme.badgeID` or with the Season Pass; light or dark stays a separate choice. The app icons are the cases of `AppIconOption`, whose asset names must match `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `project.yml`.
+
 ## Crew server
 
 ```

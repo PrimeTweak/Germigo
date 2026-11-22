@@ -247,7 +247,7 @@ private struct StageActions: View {
     }
 }
 
-/// Nobody is sick: the mascot sleeps on the counter.
+/// Nobody is sick: the mascot sleeps on the counter, and the streak runs toward its flag.
 private struct CalmStage: View {
     let side: CGFloat
     @Binding var flow: SymptomFlow?
@@ -258,11 +258,7 @@ private struct CalmStage: View {
         let days = model.streakDays()
         VStack(spacing: 0) {
             Spacer(minLength: 8)
-            NappingMascot(side: model.sickKidIllnesses.isEmpty ? side : side * 0.8)
-            Text(tr("This household has gone"))
-                .font(.callout)
-                .foregroundStyle(palette.inkSecondary)
-                .padding(.top, 12)
+            NappingMascot(side: model.sickKidIllnesses.isEmpty ? side * 0.92 : side * 0.76)
             Text(verbatim: String(days))
                 .font(.system(size: side >= 190 ? 112 : 84, weight: .bold))
                 .monospacedDigit()
@@ -274,9 +270,11 @@ private struct CalmStage: View {
             Text(trCount(days, one: "day without a germ", other: "days without a germ"))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(palette.ink)
+            RunTrack(goal: RunGoal(days: days, record: model.recordDays()))
+                .padding(.top, 10)
             StageActions()
-            WeekStrip(showsRecord: true)
-                .padding(.top, 16)
+            WeekStrip()
+                .padding(.top, 12)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 FaceTile(tr("I'm sick")) {
@@ -377,7 +375,7 @@ private struct ExposureStage: View {
                 .accessibilityHint(tr("Next"))
                 .padding(.top, 12)
             }
-            WeekStrip(showsRecord: false)
+            WeekStrip()
                 .padding(.top, 14)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
@@ -506,7 +504,7 @@ private struct SickStage: View {
             StageActions(signs: showsSymptoms ? log.symptoms : nil) {
                 flow = .log(log.id)
             }
-            WeekStrip(showsRecord: false)
+            WeekStrip()
                 .padding(.top, 14)
             Spacer(minLength: 8)
             HStack(spacing: 10) {
@@ -570,7 +568,6 @@ private struct SickStage: View {
 
 /// The weeks under the counter: a germ marks each sick day, and each day opens its page.
 private struct WeekStrip: View {
-    let showsRecord: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var shownWeek: Date?
@@ -675,8 +672,6 @@ private struct WeekStrip: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(palette.accent)
             }
-        } else if showsRecord {
-            RecordLine()
         }
     }
 
@@ -755,30 +750,116 @@ private struct DayDot: View {
     }
 }
 
-/// The best run under the week, or a cheer while the current run is the best one.
-private struct RecordLine: View {
-    @Environment(AppModel.self) private var model
+/// The streak as a run: a track that fills up to a flag, a runner on it and a germ on its heels.
+/// The flag is the best run to beat; once beaten, it turns gold and marks the next milestone.
+private struct RunTrack: View {
+    let goal: RunGoal
     @Environment(\.palette) private var palette
-    @State private var cheer = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let stride = 0.22
+    private static let flagRoom: CGFloat = 30
+
+    private var caption: String {
+        if goal.isBest {
+            return goal.target > goal.days ? tr("Your best run yet. Next stop: %lld days", goal.target) : tr("Your best run yet")
+        }
+        if goal.days == 0, goal.target == Milestones.days.first {
+            return tr("First stop: %lld days", goal.target)
+        }
+        return trCount(goal.target - goal.days, one: "%lld more day to beat your best run", other: "%lld more days to beat your best run")
+    }
+
+    private var gold: Color {
+        Color(hex: palette.isDark ? Swatch.goldFoil : Swatch.goldInk)
+    }
 
     var body: some View {
-        let record = model.recordDays()
-        let days = model.streakDays()
-        Group {
-            if days > 0, days >= record {
-                Label(tr("Your best run yet"), systemImage: "sparkles")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.accent)
-                    .symbolEffect(.bounce, value: cheer)
-            } else if record > 0 {
-                Text(trCount(record, one: "Best run: %lld day", other: "Best run: %lld days"))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
+        VStack(spacing: 8) {
+            GeometryReader { proxy in
+                let span = max(0, proxy.size.width - Self.flagRoom)
+                TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { timeline in
+                    course(span: span, time: reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate)
+                }
+            }
+            .frame(height: 52)
+            .frame(maxWidth: 308)
+            Text(caption)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(goal.isBest ? gold : palette.accent)
+                .multilineTextAlignment(.center)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(caption)
+    }
+
+    /// The track, the flag and the two runners at a given moment of their stride.
+    private func course(span: CGFloat, time: Double) -> some View {
+        let reach = span * CGFloat(goal.share)
+        let beat = time / Self.stride
+        let frame = Int(beat) % 2 == 0 ? "1" : "2"
+        let hop: CGFloat = reduceMotion ? 0 : CGFloat(abs(sin(beat * Double.pi))) * 4
+        let puff = CGFloat((beat / 2).truncatingRemainder(dividingBy: 1))
+        return ZStack(alignment: .bottomLeading) {
+            Capsule()
+                .fill(palette.ink.opacity(0.09))
+                .frame(width: span, height: 10)
+            Capsule()
+                .fill(LinearGradient(colors: [palette.accent.opacity(0.5), palette.accent], startPoint: .leading, endPoint: .trailing))
+                .frame(width: reach, height: 10)
+            flag
+                .offset(x: span + 4)
+            if !reduceMotion {
+                Circle()
+                    .fill(palette.ink.opacity(0.22 * Double(1 - puff)))
+                    .frame(width: 6, height: 6)
+                    .offset(x: reach - 30 - puff * 10, y: -10 - puff * 5)
+            }
+            Image("run-chaser-" + frame)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 34, height: 34)
+                .offset(x: reach - 66, y: -6 - (4 - hop))
+            Image("run-runner-" + frame)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 46, height: 46)
+                .offset(x: reach - 23, y: -5 - hop)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: goal.days)
+    }
+
+    /// The flag at the end of the track, with the number of days it stands for.
+    private var flag: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Capsule()
+                .fill(palette.ink)
+                .frame(width: 2.5, height: 28)
+            VStack(alignment: .leading, spacing: 1) {
+                Pennant()
+                    .fill(goal.isBest ? Color(hex: Swatch.gold) : palette.accent)
+                    .frame(width: 14, height: 10)
+                    .padding(.top, 2)
+                Text(verbatim: String(goal.target))
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                    .fixedSize()
+                    .padding(.leading, 3)
             }
         }
-        .onAppear {
-            cheer.toggle()
-        }
+    }
+}
+
+/// The small triangle of the flag.
+private struct Pennant: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 

@@ -43,6 +43,8 @@ enum Swatch {
     static let skyMid: UInt32 = 0x6FB5F2
     static let azure: UInt32 = 0x3D7BFA
     static let azureInk: UInt32 = 0x2C62E0
+    static let skyWash: UInt32 = 0xEEF5FF
+    static let skyMist: UInt32 = 0xDCEBFF
     static let holoBlue: UInt32 = 0x78DCFF
     static let periwinkle: UInt32 = 0xA9B6FF
 
@@ -63,6 +65,9 @@ enum Swatch {
     static let pinkLight: UInt32 = 0xFFB3D2
     static let pinkPale: UInt32 = 0xFFC9DF
     static let holoPink: UInt32 = 0xFF78C8
+    static let pinkInk: UInt32 = 0xC22E78
+    static let pinkWash: UInt32 = 0xFFF0F7
+    static let pinkMist: UInt32 = 0xFFE0EE
 
     // Corals and reds
     static let coral: UInt32 = 0xFF5B4D
@@ -71,6 +76,9 @@ enum Swatch {
     static let coralSoft: UInt32 = 0xFF8A78
     static let coralPale: UInt32 = 0xFF9C86
     static let coralHot: UInt32 = 0xFF6A5A
+    static let coralInk: UInt32 = 0xCC3A2A
+    static let coralWash: UInt32 = 0xFFF3EF
+    static let coralMist: UInt32 = 0xFFE4DC
     static let peach: UInt32 = 0xFFC2A8
 
     // Yellows and oranges

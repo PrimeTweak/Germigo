@@ -89,7 +89,7 @@ struct VictoryView: View {
         }
         .foregroundStyle(Color.white)
         .preferredColorScheme(.dark)
-        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
+        .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 shown = true
@@ -230,7 +230,7 @@ struct KidVictoryView: View {
         }
         .foregroundStyle(Color.white)
         .preferredColorScheme(.dark)
-        .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
+        .environment(\.palette, Palette.make(theme: .agar, scheme: .dark))
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                 shown = true

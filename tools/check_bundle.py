@@ -8,7 +8,7 @@ import pathlib
 import plistlib
 import sys
 
-ALTERNATES = ["AppIconClassic", "AppIconNightShift", "AppIconTissueBox", "AppIconSoupBowl", "AppIconGoldenDish", "AppIconHolo"]
+ALTERNATES = ["AppIconDaylight", "AppIconNightShift", "AppIconSnowDay", "AppIconSoupBowl", "AppIconGolden", "AppIconHolo"]
 ESSENTIAL = [
     "Germigo", "Info.plist", "Assets.car", "germs.json", "articles.json", "legal.json",
     "en.lproj/Localizable.strings", "fr.lproj/Localizable.strings",

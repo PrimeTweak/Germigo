@@ -134,10 +134,30 @@ enum AppearanceMode: String, Codable, CaseIterable {
     case dark
 }
 
+/// The color of the interface. Light or dark is a separate choice, `AppearanceMode`.
 enum Theme: String, Codable, CaseIterable {
     case agar
-    case nightShift
+    case coral
+    case sky
     case mint
+    case bubblegum
+
+    /// A theme this version no longer has reads as the standard one, so the settings still load.
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        self = Theme(rawValue: raw) ?? .agar
+    }
+
+    /// The badge that opens the theme; the standard one is always open.
+    var badgeID: String? {
+        switch self {
+        case .agar: return nil
+        case .coral: return BadgeCatalog.patientOne
+        case .sky: return BadgeCatalog.dodger
+        case .mint: return BadgeCatalog.ironParent
+        case .bubblegum: return BadgeCatalog.tagTeam
+        }
+    }
 }
 
 struct AppSettings: Codable, Hashable {

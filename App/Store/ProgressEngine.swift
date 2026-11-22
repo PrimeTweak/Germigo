@@ -138,6 +138,32 @@ enum SkillTree {
     }
 }
 
+// MARK: - The run
+
+/// Where the streak is running to on Today: the best run while it stands, then the next milestone.
+struct RunGoal: Hashable {
+    let days: Int
+    let target: Int
+    /// True once the current run is the best one.
+    let isBest: Bool
+
+    init(days: Int, record: Int) {
+        self.days = days
+        if days > 0, days >= record {
+            isBest = true
+            target = Milestones.next(after: days) ?? days
+        } else {
+            isBest = false
+            target = record > 0 ? record : (Milestones.days.first ?? 7)
+        }
+    }
+
+    /// How far along the track the runner stands, from 0 to 1.
+    var share: Double {
+        target > 0 ? min(1, Double(days) / Double(target)) : 0
+    }
+}
+
 // MARK: - Streak milestones
 
 enum Milestones {
@@ -190,7 +216,7 @@ enum GoalEngine {
         }
 
         let counts = BadgeProgress.counts(data: data, catalog: catalog, now: now)
-        for id in ["collector", "half_album", "full_album", "dodger", BadgeCatalog.ironParent] where data.badges[id] == nil {
+        for id in ["collector", "half_album", "full_album", BadgeCatalog.dodger, BadgeCatalog.ironParent] where data.badges[id] == nil {
             guard let badge = BadgeCatalog.badge(id), let count = counts[id], count.target > 0 else { continue }
             candidates.append(Goal(title: badge.title, progress: count.progress, target: count.target))
         }
@@ -226,7 +252,7 @@ enum BadgeProgress {
             "collector": BadgeCount(progress: distinct, target: 5),
             "half_album": BadgeCount(progress: distinct, target: 12),
             "full_album": BadgeCount(progress: distinct, target: catalog.germs.count),
-            "dodger": BadgeCount(progress: dodged, target: 3),
+            BadgeCatalog.dodger: BadgeCount(progress: dodged, target: 3),
             "rough_month": BadgeCount(progress: perMonth.values.max() ?? 0, target: 3),
             BadgeCatalog.ironParent: BadgeCount(progress: StreakMath.record(data: data, now: now), target: 30),
             BadgeCatalog.mythBuster: BadgeCount(progress: Set(data.quiz.mythsRight).intersection(germIDs).count,

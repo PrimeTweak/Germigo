@@ -79,11 +79,11 @@ enum RewardEngine {
         let logs = data.logs.sorted { $0.startedAt < $1.startedAt }
         let calendar = Calendar.current
 
-        if !logs.isEmpty { earned.insert("patient_one") }
+        if !logs.isEmpty { earned.insert(BadgeCatalog.patientOne) }
         if logs.contains(where: { log in log.bonuses.contains { $0.kind == .nightShift } }) {
             earned.insert(BadgeCatalog.nightShift)
         }
-        if logs.contains(where: { $0.sufferer == .both }) { earned.insert("tag_team") }
+        if logs.contains(where: { $0.sufferer == .both }) { earned.insert(BadgeCatalog.tagTeam) }
         if logs.contains(where: { $0.dayCount(now: now) >= 10 }) { earned.insert("marathon") }
         if logs.contains(where: { log in
             guard let end = log.endedAt else { return false }
@@ -111,7 +111,7 @@ enum RewardEngine {
         if distinct >= 12 { earned.insert("half_album") }
         if !catalog.germs.isEmpty && distinct >= catalog.germs.count { earned.insert("full_album") }
 
-        if data.kidIllnesses.filter({ $0.outcome == .dodged }).count >= 3 { earned.insert("dodger") }
+        if data.kidIllnesses.filter({ $0.outcome == .dodged }).count >= 3 { earned.insert(BadgeCatalog.dodger) }
         if StreakMath.record(data: data, now: now) >= 30 { earned.insert(BadgeCatalog.ironParent) }
         if !data.quiz.doneDays.isEmpty { earned.insert(BadgeCatalog.labRat) }
         if !catalog.germs.isEmpty && Set(data.quiz.mythsRight).isSuperset(of: catalog.germs.map { $0.id }) {

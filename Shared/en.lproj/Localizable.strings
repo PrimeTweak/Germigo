@@ -22,7 +22,6 @@
 "%1$@, day %2$lld of %3$lld" = "%1$@, day %2$lld of %3$lld";
 "%1$@, level %2$lld" = "%1$@, level %2$lld";
 "%1$@, since %2$@" = "%1$@, since %2$@";
-"%1$@: %2$@" = "%1$@: %2$@";
 "%1$@: %2$@, %3$@" = "%1$@: %2$@, %3$@";
 "%1$@: %2$lld families this week." = "%1$@: %2$lld families this week.";
 "%1$@: %2$lld. Rough." = "%1$@: %2$lld. Rough.";
@@ -36,6 +35,7 @@
 "%1$lld of your %2$lld germs" = "%1$lld of your %2$lld germs";
 "%@ a month" = "%@ a month";
 "%@ at the daycare" = "%@ at the daycare";
+"%@ badge" = "%@ badge";
 "%@ has you" = "%@ has you";
 "%@ is after you" = "%@ is after you";
 "%@ is better" = "%@ is better";
@@ -71,6 +71,8 @@
 "%lld illness" = "%lld illness";
 "%lld illnesses" = "%lld illnesses";
 "%lld more" = "%lld more";
+"%lld more day to beat your best run" = "%lld more day to beat your best run";
+"%lld more days to beat your best run" = "%lld more days to beat your best run";
 "%lld more right answer" = "%lld more right answer";
 "%lld more right answers" = "%lld more right answers";
 "%lld more suspect" = "%lld more suspect";
@@ -153,6 +155,7 @@
 "Antibiotics" = "Antibiotics";
 "Antibiotics?" = "Antibiotics?";
 "Any new symptoms?" = "Any new symptoms?";
+"App icon" = "App icon";
 "App icon unlocked: %@" = "App icon unlocked: %@";
 "Appearance" = "Appearance";
 "Apple's standard license agreement (EULA)" = "Apple's standard license agreement (EULA)";
@@ -173,8 +176,6 @@
 "Be kind. No offensive names, no harassment. Offenders are removed." = "Be kind. No offensive names, no harassment. Offenders are removed.";
 "Before the reveal" = "Before the reveal";
 "Behind it" = "Behind it";
-"Best run: %lld day" = "Best run: %lld day";
-"Best run: %lld days" = "Best run: %lld days";
 "Better" = "Better";
 "Better now" = "Better now";
 "Better on this day" = "Better on this day";
@@ -190,6 +191,7 @@
 "brought home" = "brought home";
 "Brought home %lld germ" = "Brought home %lld germ";
 "Brought home %lld germs" = "Brought home %lld germs";
+"Bubblegum" = "Bubblegum";
 "Bucket Holder" = "Bucket Holder";
 "Busiest month so far: %@." = "Busiest month so far: %@.";
 "Call it dodged" = "Call it dodged";
@@ -216,7 +218,6 @@
 "Check-ins" = "Check-ins";
 "Chief Mucus Officer" = "Chief Mucus Officer";
 "Choose photos" = "Choose photos";
-"Classic" = "Classic";
 "Clean for %lld day" = "Clean for %lld day";
 "Clean for %lld days" = "Clean for %lld days";
 "Clean record so far" = "Clean record so far";
@@ -233,6 +234,7 @@
 "Contact: %@" = "Contact: %@";
 "Continue" = "Continue";
 "Copy the address" = "Copy the address";
+"Coral" = "Coral";
 "Couch Captain" = "Couch Captain";
 "Couch champion" = "Couch champion";
 "Couch day" = "Couch day";
@@ -272,6 +274,7 @@
 "Daycare Professor" = "Daycare Professor";
 "Daycare settings" = "Daycare settings";
 "Daycare tried. You barely noticed." = "Daycare tried. You barely noticed.";
+"Daylight" = "Daylight";
 "days" = "days";
 "Days older than a week come with the Season Pass." = "Days older than a week come with the Season Pass.";
 "days sick" = "days sick";
@@ -300,6 +303,7 @@
 "Done" = "Done";
 "Done for today" = "Done for today";
 "Down to %lld" = "Down to %lld";
+"Each badge opens its color." = "Each badge opens its color.";
 "Ear pain" = "Ear pain";
 "Earn the Night Shift badge" = "Earn the Night Shift badge";
 "Earned" = "Earned";
@@ -347,6 +351,7 @@
 "Finish the album" = "Finish the album";
 "Finished your first daily quiz" = "Finished your first daily quiz";
 "First name" = "First name";
+"First stop: %lld days" = "First stop: %lld days";
 "Five different germs caught" = "Five different germs caught";
 "For" = "For";
 "For scale" = "For scale";
@@ -358,7 +363,7 @@
 "Frequent flyer" = "Frequent flyer";
 "Fresh Host" = "Fresh Host";
 "From %1$@ · %2$@" = "From %1$@ · %2$@";
-"From 10 PM, reminders wait until 7 AM and sounds stay off." = "From 10 PM, reminders wait until 7 AM and sounds stay off.";
+"From 10 PM to 7 AM, reminders wait for the morning." = "From 10 PM to 7 AM, reminders wait for the morning.";
 "from the daycare" = "from the daycare";
 "From the daycare" = "From the daycare";
 "Full Album" = "Full Album";
@@ -369,7 +374,6 @@
 "Germ of the week" = "Germ of the week";
 "germ this season" = "germ this season";
 "Germigo" = "Germigo";
-"Germigo %@ · Made in Montréal" = "Germigo %@ · Made in Montréal";
 "Germigo asks %1$@ whether %2$@ caught it. No diagnosis, just a reminder." = "Germigo asks %1$@ whether %2$@ caught it. No diagnosis, just a reminder.";
 "Germigo asks again in 2 days." = "Germigo asks again in 2 days.";
 "Germigo backup" = "Germigo backup";
@@ -393,7 +397,7 @@
 "Get Germigo, free on the App Store." = "Get Germigo, free on the App Store.";
 "Going around" = "Going around";
 "Going around %@" = "Going around %@";
-"Golden Dish" = "Golden Dish";
+"Golden" = "Golden";
 "Good for one uninterrupted nap." = "Good for one uninterrupted nap.";
 "Good to have" = "Good to have";
 "Got every myth right" = "Got every myth right";
@@ -520,7 +524,6 @@
 "Milestone unlocked" = "Milestone unlocked";
 "Mine" = "Mine";
 "Mint" = "Mint";
-"Mint opens after 30 days without a germ, or with the Season Pass." = "Mint opens after 30 days without a germ, or with the Season Pass.";
 "Mode" = "Mode";
 "Month" = "Month";
 "Month recap" = "Month recap";
@@ -560,7 +563,6 @@
 "Night Owl" = "Night Owl";
 "Night Shift" = "Night Shift";
 "Night shift +%lld" = "Night shift +%lld";
-"Night Shift opens with its badge, or with the Season Pass." = "Night Shift opens with its badge, or with the Season Pass.";
 "night shifts" = "night shifts";
 "Night-shift logs" = "Night-shift logs";
 "No" = "No";
@@ -679,7 +681,6 @@
 "Purchases" = "Purchases";
 "QR code of the daycare" = "QR code of the daycare";
 "Quick facts" = "Quick facts";
-"Quiet hours" = "Quiet hours";
 "Quiet week. Suspicious." = "Quiet week. Suspicious.";
 "quiz day" = "quiz day";
 "quiz days" = "quiz days";
@@ -793,6 +794,7 @@
 "Skin and critter germs" = "Skin and critter germs";
 "Skin, eyes and hair" = "Skin, eyes and hair";
 "Skip" = "Skip";
+"Sky" = "Sky";
 "Sleepless Night Survivor" = "Sleepless Night Survivor";
 "Slurp! Thank you." = "Slurp! Thank you.";
 "Snap! It's in %@'s file." = "Snap! It's in %@'s file.";
@@ -800,11 +802,14 @@
 "Sneak attack" = "Sneak attack";
 "Sniffle Scout" = "Sniffle Scout";
 "Sniffles" = "Sniffles";
+"Snow Day" = "Snow Day";
 "Someone's sick" = "Someone's sick";
 "Something else" = "Something else";
 "Something went wrong. Try again." = "Something went wrong. Try again.";
 "Sore throat" = "Sore throat";
+"Sound" = "Sound";
 "Sounds and haptics" = "Sounds and haptics";
+"Sounds stay off from 10 PM to 7 AM" = "Sounds stay off from 10 PM to 7 AM";
 "Soup Bowl" = "Soup Bowl";
 "Soup Sommelier" = "Soup Sommelier";
 "Soup, tissues, tea" = "Soup, tissues, tea";
@@ -898,6 +903,7 @@
 "The photo couldn't be saved." = "The photo couldn't be saved.";
 "The Season Pass and tips are handled by Apple. Germigo never sees your payment details." = "The Season Pass and tips are handled by Apple. Germigo never sees your payment details.";
 "The Season Pass isn't available right now. Try again later." = "The Season Pass isn't available right now. Try again later.";
+"The Season Pass opens every theme." = "The Season Pass opens every theme.";
 "The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings." = "The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings.";
 "The server can't be reached right now." = "The server can't be reached right now.";
 "The server can't be reached, so your crew and daycare data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have it removed." = "The server can't be reached, so your crew and daycare data can't be removed from it yet. You can try again later, or erase this phone now and write to support to have it removed.";
@@ -909,6 +915,7 @@
 "The whole history" = "The whole history";
 "The whole history comes with the Season Pass." = "The whole history comes with the Season Pass.";
 "Their germs, photos and countdowns are removed too. Your own journal stays." = "Their germs, photos and countdowns are removed too. Your own journal stays.";
+"Theme" = "Theme";
 "Then %@ a year. Cancel anytime." = "Then %@ a year. Cancel anytime.";
 "They fit everything you ticked." = "They fit everything you ticked.";
 "Thirty days without a germ" = "Thirty days without a germ";
@@ -927,7 +934,6 @@
 "Timeline" = "Timeline";
 "Timing" = "Timing";
 "Tissue Apprentice" = "Tissue Apprentice";
-"Tissue Box" = "Tissue Box";
 "Tissue Tester" = "Tissue Tester";
 "Titles follow your journal: delete a log and its titles can go with it." = "Titles follow your journal: delete a log and its titles can go with it.";
 "To send notices by email from this address. You can add it later." = "To send notices by email from this address. You can add it later.";
@@ -1034,6 +1040,7 @@
 "Your %@ recap" = "Your %@ recap";
 "Your address" = "Your address";
 "Your best run yet" = "Your best run yet";
+"Your best run yet. Next stop: %lld days" = "Your best run yet. Next stop: %lld days";
 "Your call" = "Your call";
 "Your crew is waiting" = "Your crew is waiting";
 "Your daycare tells you when an illness is going around in your child's group. Free for families and daycares." = "Your daycare tells you when an illness is going around in your child's group. Free for families and daycares.";

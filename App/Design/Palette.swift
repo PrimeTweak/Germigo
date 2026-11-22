@@ -17,29 +17,50 @@ struct Palette {
     let isDark: Bool
 
     static func make(theme: Theme, scheme: ColorScheme, contrast: ColorSchemeContrast = .standard) -> Palette {
-        let dark = theme == .nightShift || scheme == .dark
         let strong = contrast == .increased
-        if dark {
+        let tone = Tone.of(theme)
+        if scheme == .dark {
             let ink = Color(hex: Swatch.frost)
             return Palette(background: Color(hex: Swatch.navy), surface: Color(hex: Swatch.navySurface),
                            surfaceAlt: Color(hex: Swatch.navyRaised), ink: ink,
                            inkSecondary: ink.opacity(strong ? 0.88 : 0.72), inkTertiary: ink.opacity(strong ? 0.78 : 0.6),
                            hairline: ink.opacity(strong ? 0.24 : 0.1),
-                           accent: Color(hex: theme == .mint ? Swatch.mint : Swatch.irisSoft),
-                           onAccent: Color(hex: Swatch.navy), isDark: true)
+                           accent: Color(hex: tone.nightAccent), onAccent: Color(hex: Swatch.navy), isDark: true)
         }
         let ink = Color(hex: Swatch.ink)
-        let secondary = ink.opacity(strong ? 0.84 : 0.72)
-        let tertiary = ink.opacity(strong ? 0.78 : 0.64)
-        let hairline = ink.opacity(strong ? 0.22 : 0.1)
-        if theme == .mint {
-            return Palette(background: Color(hex: Swatch.mintBase), surface: .white, surfaceAlt: Color(hex: Swatch.mintAlt),
-                           ink: ink, inkSecondary: secondary, inkTertiary: tertiary, hairline: hairline,
-                           accent: Color(hex: Swatch.mintInk), onAccent: .white, isDark: false)
+        return Palette(background: tone.ground, surface: tone.surface, surfaceAlt: tone.surfaceAlt, ink: ink,
+                       inkSecondary: ink.opacity(strong ? 0.84 : 0.72), inkTertiary: ink.opacity(strong ? 0.78 : 0.64),
+                       hairline: ink.opacity(strong ? 0.22 : 0.1),
+                       accent: Color(hex: tone.accent), onAccent: .white, isDark: false)
+    }
+}
+
+/// What a theme sets: its accent by day and by night, and its daytime grounds. The night grounds are shared.
+private struct Tone {
+    let accent: UInt32
+    let nightAccent: UInt32
+    let ground: Color
+    let surface: Color
+    let surfaceAlt: Color
+
+    static func of(_ theme: Theme) -> Tone {
+        switch theme {
+        case .agar:
+            return Tone(accent: Swatch.iris, nightAccent: Swatch.irisSoft, ground: .white,
+                        surface: Color(hex: Swatch.mist), surfaceAlt: Color(hex: Swatch.mistDeep))
+        case .coral:
+            return Tone(accent: Swatch.coralInk, nightAccent: Swatch.coralSoft, ground: Color(hex: Swatch.coralWash),
+                        surface: .white, surfaceAlt: Color(hex: Swatch.coralMist))
+        case .sky:
+            return Tone(accent: Swatch.azureInk, nightAccent: Swatch.skyLight, ground: Color(hex: Swatch.skyWash),
+                        surface: .white, surfaceAlt: Color(hex: Swatch.skyMist))
+        case .mint:
+            return Tone(accent: Swatch.mintInk, nightAccent: Swatch.mint, ground: Color(hex: Swatch.mintBase),
+                        surface: .white, surfaceAlt: Color(hex: Swatch.mintAlt))
+        case .bubblegum:
+            return Tone(accent: Swatch.pinkInk, nightAccent: Swatch.pinkLight, ground: Color(hex: Swatch.pinkWash),
+                        surface: .white, surfaceAlt: Color(hex: Swatch.pinkMist))
         }
-        return Palette(background: .white, surface: Color(hex: Swatch.mist), surfaceAlt: Color(hex: Swatch.mistDeep),
-                       ink: ink, inkSecondary: secondary, inkTertiary: tertiary, hairline: hairline,
-                       accent: Color(hex: Swatch.iris), onAccent: .white, isDark: false)
     }
 }
 

@@ -471,6 +471,25 @@ do {
     check(ends?.count == 2 && ends?[0] != nil && ends?[1] == nil, "a kid's end date loads, and is empty when missing")
 }
 
+// MARK: - The run and the themes
+
+do {
+    let fresh = RunGoal(days: 0, record: 0)
+    check(fresh.target == 7 && !fresh.isBest && fresh.share == 0, "a first run aims at the first milestone")
+    let chasing = RunGoal(days: 12, record: 23)
+    check(chasing.target == 23 && !chasing.isBest && abs(chasing.share - 12.0 / 23.0) < 0.001, "below the record, the run aims at it")
+    let ahead = RunGoal(days: 24, record: 24)
+    check(ahead.target == 30 && ahead.isBest, "once the record is beaten, the run aims at the next milestone")
+    let top = RunGoal(days: 400, record: 400)
+    check(top.target == 400 && top.share == 1, "past the last milestone, the track is full")
+
+    let old = try? JSONDecoder().decode(AppSettings.self, from: Data("""
+    {"appearance":"dark","theme":"nightShift","soundsOn":false,"checkInsOn":true,"lessonAlertsOn":true,"crewAlertsOn":true,"sideloadPass":false}
+    """.utf8))
+    check(old?.theme == .agar && old?.soundsOn == false, "a theme that no longer exists reads as the standard one, and the settings load")
+    check(Theme.allCases.filter { $0.badgeID == nil } == [.agar], "every theme but the standard one opens with a badge")
+}
+
 // MARK: - Germ of the week
 
 do {
