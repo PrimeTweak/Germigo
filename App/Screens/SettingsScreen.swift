@@ -202,7 +202,7 @@ struct SettingsScreen: View {
         }
         .frame(minHeight: 54)
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     /// Under the notifications: the hours when reminders wait, told by the mascot asleep. It is not a setting.
@@ -250,7 +250,7 @@ struct SettingsScreen: View {
                     .padding(.leading, 44)
                 Link(destination: url) {
                     SettingsRow(symbol: "bell.slash.fill", title: tr("Turn on in iOS Settings"),
-                                detail: tr("Notifications are off for Germigo, so no reminder can reach you.")) {
+                                detail: tr("Notifications are off for Germily, so no reminder can reach you.")) {
                         RowChevron()
                     }
                 }
@@ -258,7 +258,7 @@ struct SettingsScreen: View {
             }
         }
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private var helpCard: some View {
@@ -271,12 +271,12 @@ struct SettingsScreen: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private var dataCard: some View {
         VStack(spacing: 0) {
-            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germigo backup"))) {
+            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germily backup"))) {
                 SettingsRow(symbol: "archivebox.fill", title: tr("Back up now"), detail: tr("Journal and photos, where you choose")) {
                     Image(systemName: "square.and.arrow.up")
                         .font(.callout.weight(.semibold))
@@ -297,7 +297,7 @@ struct SettingsScreen: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private var aboutCard: some View {
@@ -305,7 +305,7 @@ struct SettingsScreen: View {
             NavigationLink {
                 AboutScreen()
             } label: {
-                SettingsRow(symbol: "info.circle.fill", title: tr("About Germigo")) {
+                SettingsRow(symbol: "info.circle.fill", title: tr("About Germily")) {
                     HStack(spacing: 8) {
                         Text(verbatim: AppConfig.versionLabel)
                             .font(.callout)
@@ -320,12 +320,12 @@ struct SettingsScreen: View {
             Button {
                 showTips = true
             } label: {
-                SettingsRow(art: "sticker-soup", title: tr("Offer a soup"), detail: tr("A small tip, if Germigo made you laugh")) {
+                SettingsRow(art: "sticker-soup", title: tr("Offer a soup"), detail: tr("A small tip, if Germily made you laugh")) {
                     RowChevron()
                 }
             }
             .buttonStyle(.plain)
-            #if GERMIGO_SIDELOAD
+            #if GERMILY_SIDELOAD
             Divider()
                 .padding(.leading, 44)
             Toggle(isOn: setting(\.sideloadPass)) {
@@ -335,7 +335,7 @@ struct SettingsScreen: View {
             #endif
         }
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 }
 
@@ -467,7 +467,7 @@ private struct PassTicket: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 8) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("Germigo · Admit one household"))
+                    Text(tr("Germily · Admit one household"))
                         .font(.caption.weight(.bold))
                         .opacity(0.7)
                     Text(tr("Season Pass"))
@@ -622,7 +622,7 @@ private struct Shine: View {
 private struct LookCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var icon = AppIconOption.germigo
+    @State private var icon = AppIconOption.germily
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -670,7 +670,7 @@ private struct LookCard: View {
             .padding(.bottom, 14)
         }
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
         .onAppear {
             icon = AppIconManager.current
         }
@@ -759,7 +759,7 @@ private struct SneezyFooter: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(tr("Wake the germ"))
-            Text(verbatim: "Germigo " + AppConfig.versionLabel)
+            Text(verbatim: "Germily " + AppConfig.versionLabel)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.top, 6)
@@ -863,7 +863,7 @@ struct TipSheet: View {
                         .foregroundStyle(palette.ink)
                         .contentTransition(.opacity)
                     Text(thankedAt == nil ? tr("No ads and no data sold, ever. A soup now and then keeps it that way.")
-                                          : tr("The germs are furious. Germigo is warm and fed."))
+                                          : tr("The germs are furious. Germily is warm and fed."))
                         .font(.callout)
                         .foregroundStyle(palette.inkSecondary)
                         .multilineTextAlignment(.center)
@@ -1000,7 +1000,7 @@ struct TipSheet: View {
                     .frame(height: 36)
                     .background(palette.accent, in: Capsule())
             }
-            .germigoCard(padding: 12)
+            .germilyCard(padding: 12)
         }
         .buttonStyle(PressableStyle())
         .disabled(purchases.isPurchasing)

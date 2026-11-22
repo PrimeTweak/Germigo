@@ -160,7 +160,7 @@ struct PaywallView: View {
             step(tr("Today"), tr("Everything opens. No charge."), isFirst: true, isLast: false)
             if let day = plan.reminderDay {
                 step(trCount(day, one: "In %lld day", other: "In %lld days"),
-                     tr("A reminder from Germigo, if notifications are on."), isFirst: false, isLast: false)
+                     tr("A reminder from Germily, if notifications are on."), isFirst: false, isLast: false)
             }
             step(trCount(plan.days, one: "In %lld day", other: "In %lld days"),
                  tr("The Pass starts: %@. Cancel before and pay nothing.", price), isFirst: false, isLast: true)

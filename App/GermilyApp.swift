@@ -2,7 +2,7 @@ import StoreKit
 import SwiftUI
 
 @main
-struct GermigoApp: App {
+struct GermilyApp: App {
     @State private var model = AppModel.shared
     @State private var purchases = PurchaseManager.shared
     @State private var crew = CrewStore.shared
@@ -106,8 +106,8 @@ private struct ThemedRoot: View {
 
     private var noticeMessage: String {
         model.journalNotice == .saveFailed
-            ? tr("Germigo couldn't write to this phone. Free up some storage, then make your change again.")
-            : tr("Germigo kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy.")
+            ? tr("Germily couldn't write to this phone. Free up some storage, then make your change again.")
+            : tr("Germily kept the file and started a new journal. You can export the kept file from Settings, under Data and privacy.")
     }
 }
 

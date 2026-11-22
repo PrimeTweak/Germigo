@@ -300,7 +300,7 @@ struct LockedHistoryRow: View {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.inkTertiary)
             }
-            .germigoCard(padding: 12)
+            .germilyCard(padding: 12)
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showPaywall) {

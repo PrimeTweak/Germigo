@@ -19,7 +19,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Germigo</string>
+	<string>Germily</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
@@ -29,10 +29,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>ca.germigo.app</string>
+			<string>ca.germily.app</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>germigo</string>
+				<string>germily</string>
 			</array>
 		</dict>
 	</array>
@@ -58,33 +58,35 @@
 	<true/>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>ca.germigo.app.refresh</string>
+		<string>ca.germily.app.refresh</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 	</array>
-	<key>GermigoServerURL</key>
+	<key>GermilyServerURL</key>
 	<string>https://REPLACE-ME.invalid</string>
-	<key>GermigoShareURL</key>
+	<key>GermilyShareURL</key>
 	<string>https://REPLACE-ME.invalid/get</string>
-	<key>GermigoLessonsURL</key>
+	<key>GermilyLessonsURL</key>
 	<string>https://REPLACE-ME.invalid/lessons.json</string>
-	<key>GermigoSupportEmail</key>
+	<key>GermilySupportEmail</key>
 	<string>REPLACE-ME@example.invalid</string>
-	<key>GermigoPublisherName</key>
+	<key>GermilyPublisherName</key>
 	<string>REPLACE-ME.invalid</string>
-	<key>GermigoCrewEnabled</key>
+	<key>GermilyCrewEnabled</key>
 	<true/>
-	<key>GermigoMetaAppID</key>
+	<key>GermilyEmailNoticesEnabled</key>
+	<false/>
+	<key>GermilyMetaAppID</key>
 	<string>REPLACE-ME.invalid</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram-stories</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Germigo uses the camera only when you take a photo for your household's sick history or scan a daycare's code.</string>
+	<string>Germily uses the camera only when you take a photo for your household's sick history or scan a daycare's code.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Germigo saves the share cards you choose to keep to your photo library.</string>
+	<string>Germily saves the share cards you choose to keep to your photo library.</string>
 </dict>
 </plist>

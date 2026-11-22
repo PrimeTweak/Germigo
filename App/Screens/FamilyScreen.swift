@@ -636,7 +636,7 @@ private struct PersonFileScreen: View {
                         .minimumScaleFactor(0.8)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .germigoCard(padding: 12)
+                .germilyCard(padding: 12)
                 .accessibilityElement(children: .combine)
             }
         }

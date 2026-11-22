@@ -4,16 +4,16 @@ import StoreKit
 
 /// Product identifiers, as created in App Store Connect.
 enum PassProduct {
-    static let yearlyID = "ca.germigo.app.pass.yearly"
-    static let monthlyID = "ca.germigo.app.pass.monthly"
+    static let yearlyID = "ca.germily.app.pass.yearly"
+    static let monthlyID = "ca.germily.app.pass.monthly"
     static let all = [yearlyID, monthlyID]
 }
 
 /// The tip jar: three consumable soups, as created in App Store Connect.
 enum TipProduct {
-    static let smallID = "ca.germigo.app.tip.small"
-    static let mediumID = "ca.germigo.app.tip.medium"
-    static let largeID = "ca.germigo.app.tip.large"
+    static let smallID = "ca.germily.app.tip.small"
+    static let mediumID = "ca.germily.app.tip.medium"
+    static let largeID = "ca.germily.app.tip.large"
     static let all = [smallID, mediumID, largeID]
 }
 
@@ -57,7 +57,7 @@ final class PurchaseManager {
     }
 
     var hasPass: Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if AppModel.shared.data.settings.sideloadPass { return true }
         #endif
         return storePass

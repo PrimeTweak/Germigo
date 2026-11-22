@@ -3,7 +3,7 @@
 # Usage: sh tools/run_logic_tests.sh
 set -e
 cd "$(dirname "$0")/.."
-OUT="${TMPDIR:-/tmp}/germigo-logic-tests"
+OUT="${TMPDIR:-/tmp}/germily-logic-tests"
 xcrun swiftc -swift-version 5 -o "$OUT" \
   Tests/LogicTests/main.swift \
   Shared/L10n.swift Shared/Swatch.swift \

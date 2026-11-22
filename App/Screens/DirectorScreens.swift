@@ -26,7 +26,9 @@ struct DaycareSetupSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(tr("Tell families when an illness is going around, from the app or by email. Free for daycares."))
+                    Text(AppConfig.emailNoticesEnabled
+                         ? tr("Tell families when an illness is going around, from the app or by email. Free for daycares.")
+                         : tr("Tell families when an illness is going around, right from the app. Free for daycares."))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)
@@ -40,20 +42,22 @@ struct DaycareSetupSheet: View {
                             if value.count > 40 { name = String(value.prefix(40)) }
                         }
                     GroupsEditor(groups: $groups, newGroup: $newGroup, suggestions: suggestions)
-                    VStack(alignment: .leading, spacing: 6) {
-                        TextField(tr("Email (optional)"), text: $email)
-                            .keyboardType(.emailAddress)
-                            .textContentType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .foregroundStyle(palette.ink)
-                            .padding(.horizontal, 16)
-                            .frame(height: 54)
-                            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
-                        Text(tr("To send notices by email from this address. You can add it later."))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkTertiary)
-                            .padding(.horizontal, 4)
+                    if AppConfig.emailNoticesEnabled {
+                        VStack(alignment: .leading, spacing: 6) {
+                            TextField(tr("Email (optional)"), text: $email)
+                                .keyboardType(.emailAddress)
+                                .textContentType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .foregroundStyle(palette.ink)
+                                .padding(.horizontal, 16)
+                                .frame(height: 54)
+                                .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+                            Text(tr("To send notices by email from this address. You can add it later."))
+                                .font(.footnote)
+                                .foregroundStyle(palette.inkTertiary)
+                                .padding(.horizontal, 4)
+                        }
                     }
                     Toggle(isOn: $authorized) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -68,7 +72,7 @@ struct DaycareSetupSheet: View {
                     .tint(palette.accent)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .germigoCard(padding: 0)
+                    .germilyCard(padding: 0)
                     Button(tr("Read the Terms of Use")) {
                         showTerms = true
                     }
@@ -194,7 +198,7 @@ private struct GroupsEditor: View {
                 }
             }
             .padding(.horizontal, 16)
-            .germigoCard(padding: 0)
+            .germilyCard(padding: 0)
             if !suggestions.isEmpty, groups.count < DirectorLimits.groups {
                 ChipRows {
                     ForEach(suggestions, id: \.self) { suggestion in
@@ -304,16 +308,18 @@ struct DirectorScreen: View {
                     } label: {
                         row("person.3.fill", tr("Groups"), String(info.groups.count))
                     }
-                    Divider()
-                    NavigationLink {
-                        EmailNoticesScreen()
-                    } label: {
-                        row("envelope.fill", tr("Send by email"), info.email == nil ? tr("Set up") : tr("On"))
+                    if AppConfig.emailNoticesEnabled {
+                        Divider()
+                        NavigationLink {
+                            EmailNoticesScreen()
+                        } label: {
+                            row("envelope.fill", tr("Send by email"), info.email == nil ? tr("Set up") : tr("On"))
+                        }
                     }
                 }
                 .buttonStyle(.plain)
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
                 SectionHeader(title: tr("Sent"))
                 if daycare.isStale {
                     StaleFeedNote()
@@ -322,7 +328,7 @@ struct DirectorScreen: View {
                     Text(tr("No notices sent yet."))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
-                        .germigoCard()
+                        .germilyCard()
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(state.notices.enumerated()), id: \.element.id) { item in
@@ -337,7 +343,7 @@ struct DirectorScreen: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .germigoCard(padding: 0)
+                    .germilyCard(padding: 0)
                 }
                 Text(footnote)
                     .font(.footnote)
@@ -448,7 +454,7 @@ struct NoticeComposer: View {
                             .font(.caption)
                             .foregroundStyle(palette.inkTertiary)
                     }
-                    .germigoCard()
+                    .germilyCard()
                     if let message = daycare.errorMessage {
                         Text(message)
                             .font(.footnote.weight(.semibold))
@@ -609,8 +615,8 @@ struct InviteScreen: View {
                         .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity)
-                    .germigoCard(padding: 18)
-                    Text(tr("Parents open Germigo, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has."))
+                    .germilyCard(padding: 18)
+                    Text(tr("Parents open Germily, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
                         .padding(.horizontal, 4)
@@ -629,7 +635,7 @@ struct InviteScreen: View {
     }
 
     private func inviteText(_ info: DirectorDaycare) -> String {
-        tr("Get %1$@'s illness notices on Germigo, free: open Crew, tap Join a daycare and enter the code %2$@.",
+        tr("Get %1$@'s illness notices on Germily, free: open Crew, tap Join a daycare and enter the code %2$@.",
            info.name, DaycareCode.display(info.code)) + (AppConfig.serverURL == nil ? "" : " " + DaycareCode.link(info.code))
     }
 
@@ -650,7 +656,7 @@ private struct DaycarePoster: View {
 
     var body: some View {
         VStack(spacing: 22) {
-            Text(verbatim: "germigo")
+            Text(verbatim: "germily")
                 .font(.system(size: 34, weight: .black))
                 .kerning(-1.4)
             VStack(spacing: 6) {
@@ -673,7 +679,7 @@ private struct DaycarePoster: View {
                 .font(.system(size: 40, weight: .heavy, design: .monospaced))
                 .kerning(6)
             VStack(alignment: .leading, spacing: 10) {
-                step(1, tr("Get Germigo, free on the App Store."))
+                step(1, tr("Get Germily, free on the App Store."))
                 step(2, tr("Open Crew, then tap Join a daycare."))
                 step(3, tr("Scan this code or type it, then pick your child's group."))
             }
@@ -832,7 +838,7 @@ struct EmailNoticesScreen: View {
                                 .font(.footnote)
                                 .foregroundStyle(palette.inkTertiary)
                         }
-                        .germigoCard()
+                        .germilyCard()
                         if let sender = info.email {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text(tr("Write to this private address from %@:", sender))
@@ -874,18 +880,18 @@ struct EmailNoticesScreen: View {
                                 Label(tr("Only the subject is read. The message is never shared."), systemImage: "lock")
                                     .font(.footnote)
                                     .foregroundStyle(palette.inkSecondary)
-                                Label(tr("Germigo replies to confirm how many families got it. If the illness or the group is unclear, it asks instead of sending. Leave the group out to reach the whole daycare."),
+                                Label(tr("Germily replies to confirm how many families got it. If the illness or the group is unclear, it asks instead of sending. Leave the group out to reach the whole daycare."),
                                       systemImage: "checkmark")
                                     .font(.footnote)
                                     .foregroundStyle(palette.inkSecondary)
                             }
-                            .germigoCard()
+                            .germilyCard()
                         }
                     } else {
                         Text(tr("Notices by email aren't set up on this server yet. Send them from the app in the meantime."))
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
-                            .germigoCard()
+                            .germilyCard()
                     }
                     if let message = daycare.errorMessage {
                         Text(message)
@@ -928,6 +934,7 @@ private struct DirectorSettingsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var confirmClose = false
+    @State private var confirmRenew = false
 
     var body: some View {
         NavigationStack {
@@ -947,6 +954,24 @@ private struct DirectorSettingsSheet: View {
                                   || name == daycare.director?.daycare.name || daycare.isLoading)
                     } header: {
                         Text(tr("Name"))
+                    }
+                    Section {
+                        Button(tr("New code")) {
+                            confirmRenew = true
+                        }
+                        .disabled(daycare.isLoading)
+                        .confirmationDialog(tr("Replace the code?"), isPresented: $confirmRenew, titleVisibility: .visible) {
+                            Button(tr("Replace the code"), role: .destructive) {
+                                Task { _ = await daycare.renewCode() }
+                            }
+                            Button(tr("Cancel"), role: .cancel) {}
+                        } message: {
+                            Text(tr("Share the new code or print the poster again."))
+                        }
+                    } header: {
+                        Text(tr("Code"))
+                    } footer: {
+                        Text(tr("The current code and poster stop working. Families already on the list stay."))
                     }
                     Section {
                         NavigationLink {

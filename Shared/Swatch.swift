@@ -1,6 +1,6 @@
 import Foundation
 
-/// Every color value used by Germigo, shared by the app and the widgets.
+/// Every color value used by Germily, shared by the app and the widgets.
 /// Roles that follow the theme, the color scheme and Increase Contrast live in `Palette`.
 enum Swatch {
     // Ink and surfaces

@@ -142,7 +142,7 @@ struct DaycareSection: View {
                 Text(tr("Turn on in iOS Settings"))
                     .font(.callout.weight(.semibold))
                     .foregroundStyle(palette.ink)
-                Text(tr("Notifications are off for Germigo, so daycare notices can't alert you."))
+                Text(tr("Notifications are off for Germily, so daycare notices can't alert you."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.leading)
@@ -154,7 +154,7 @@ struct DaycareSection: View {
                 .foregroundStyle(palette.inkTertiary)
                 .accessibilityHidden(true)
         }
-        .germigoCard(padding: 12)
+        .germilyCard(padding: 12)
     }
 
     private func directorCard(_ state: DirectorState) -> some View {
@@ -174,7 +174,7 @@ struct DaycareSection: View {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(palette.inkTertiary)
         }
-        .germigoCard(padding: 12)
+        .germilyCard(padding: 12)
     }
 
     private var invitation: some View {
@@ -202,7 +202,7 @@ struct DaycareSection: View {
                 .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
             }
         }
-        .germigoCard(padding: 14)
+        .germilyCard(padding: 14)
     }
 }
 
@@ -257,7 +257,7 @@ private struct MembershipCard: View {
                             in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             }
         }
-        .germigoCard(padding: 12)
+        .germilyCard(padding: 12)
     }
 }
 
@@ -343,7 +343,7 @@ struct DaycareScreen: View {
             if let membership = daycare.membership(id) {
                 content(membership)
             } else {
-                ContentUnavailableView(tr("This daycare is no longer on Germigo."), systemImage: "house")
+                ContentUnavailableView(tr("This daycare is no longer on Germily."), systemImage: "house")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -380,7 +380,7 @@ struct DaycareScreen: View {
                     Text(tr("No notices lately. Good news."))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
-                        .germigoCard()
+                        .germilyCard()
                 } else {
                     VStack(spacing: 0) {
                         ForEach(Array(notices.enumerated()), id: \.element.id) { item in
@@ -398,7 +398,7 @@ struct DaycareScreen: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .germigoCard(padding: 0)
+                    .germilyCard(padding: 0)
                 }
                 SectionHeader(title: tr("Groups"))
                 VStack(alignment: .leading, spacing: 12) {
@@ -410,7 +410,7 @@ struct DaycareScreen: View {
                     }
                     .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
                 }
-                .germigoCard()
+                .germilyCard()
                 Button(tr("Leave this daycare")) {
                     confirmLeave = true
                 }
@@ -551,7 +551,7 @@ struct NoticeScreen: View {
                             .foregroundStyle(palette.ink)
                             .textSelection(.enabled)
                     }
-                    .germigoCard()
+                    .germilyCard()
                 }
                 if !germ.symptoms.isEmpty {
                     Text(tr("What to watch for"))
@@ -607,7 +607,7 @@ struct NoticeScreen: View {
     private func footnote(kids: [Kid], names: String, notice: DaycareNotice, germ: Germ) -> String {
         guard !kids.isEmpty else { return HealthNotice.text }
         let due = NotificationManager.daycareWatchDate(noticeDate: notice.date, germ: germ)
-        return tr("Germigo asks %1$@ whether %2$@ caught it. No diagnosis, just a reminder.",
+        return tr("Germily asks %1$@ whether %2$@ caught it. No diagnosis, just a reminder.",
                   due.formatted(.relative(presentation: .named)), names) + " " + HealthNotice.text
     }
 }

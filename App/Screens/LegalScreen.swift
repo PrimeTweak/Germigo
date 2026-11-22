@@ -69,7 +69,7 @@ struct LegalScreen: View {
                         .foregroundStyle(palette.inkSecondary)
                 }
                 if let publisher = AppConfig.publisherName {
-                    Text(tr("Germigo is published by %@.", publisher))
+                    Text(tr("Germily is published by %@.", publisher))
                         .font(.subheadline)
                         .foregroundStyle(palette.ink)
                 }

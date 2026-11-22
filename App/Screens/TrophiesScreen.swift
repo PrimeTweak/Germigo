@@ -208,7 +208,7 @@ struct TrophiesScreen: View {
                 .multilineTextAlignment(.leading)
                 .padding(.top, 10)
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     private func figure(_ value: Int, _ label: String) -> some View {
@@ -328,7 +328,7 @@ struct TrophiesScreen: View {
             .buttonStyle(.plain)
             .padding(.top, 16)
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     private func slot(_ item: ShelfItem, index: Int) -> some View {
@@ -412,7 +412,7 @@ struct TrophiesScreen: View {
                 }
                 .padding(.top, 14)
             }
-            .germigoCard()
+            .germilyCard()
             .sheet(isPresented: $showLeagueShare) {
                 SharePreviewSheet(title: tr("Family league")) {
                     FamilyLeagueShareCard(seasonNumber: model.season.number, places: places(entries, you: model.displayName))
@@ -437,7 +437,7 @@ struct TrophiesScreen: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .germigoCard(padding: 14)
+                .germilyCard(padding: 14)
             }
             .buttonStyle(.plain)
         }
@@ -466,7 +466,7 @@ struct TrophiesScreen: View {
                 Spacer(minLength: 8)
                 PassOfferTag()
             }
-            .germigoCard(padding: 14)
+            .germilyCard(padding: 14)
         }
         .buttonStyle(.plain)
     }
@@ -512,7 +512,7 @@ struct TrophiesScreen: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private func row(_ symbol: String, _ title: String, _ value: String) -> some View {

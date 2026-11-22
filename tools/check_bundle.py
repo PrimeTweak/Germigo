@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Inspects a built Germigo.app and reports what is actually inside it.
+"""Inspects a built Germily.app and reports what is actually inside it.
 
-Usage: python3 tools/check_bundle.py path/to/Germigo.app
+Usage: python3 tools/check_bundle.py path/to/Germily.app
 Missing essentials fail the check; everything else is printed as a measured fact or a warning.
 """
 import pathlib
@@ -10,16 +10,16 @@ import sys
 
 ALTERNATES = ["AppIconDaylight", "AppIconNightShift", "AppIconSnowDay", "AppIconSoupBowl", "AppIconGolden", "AppIconHolo"]
 ESSENTIAL = [
-    "Germigo", "Info.plist", "Assets.car", "germs.json", "articles.json", "legal.json",
+    "Germily", "Info.plist", "Assets.car", "germs.json", "articles.json", "legal.json",
     "en.lproj/Localizable.strings", "fr.lproj/Localizable.strings",
-    "PlugIns/GermigoWidgets.appex/GermigoWidgets", "PlugIns/GermigoWidgets.appex/Info.plist",
+    "PlugIns/GermilyWidgets.appex/GermilyWidgets", "PlugIns/GermilyWidgets.appex/Info.plist",
 ]
 EXPECTED = [
     "PrivacyInfo.xcprivacy", "flap.wav", "reveal.wav", "badge.wav",
     "en.lproj/InfoPlist.strings", "fr.lproj/InfoPlist.strings",
-    "PlugIns/GermigoWidgets.appex/Assets.car", "PlugIns/GermigoWidgets.appex/PrivacyInfo.xcprivacy",
-    "PlugIns/GermigoWidgets.appex/en.lproj/Localizable.strings",
-    "PlugIns/GermigoWidgets.appex/fr.lproj/Localizable.strings",
+    "PlugIns/GermilyWidgets.appex/Assets.car", "PlugIns/GermilyWidgets.appex/PrivacyInfo.xcprivacy",
+    "PlugIns/GermilyWidgets.appex/en.lproj/Localizable.strings",
+    "PlugIns/GermilyWidgets.appex/fr.lproj/Localizable.strings",
 ]
 
 
@@ -46,7 +46,7 @@ def main():
     info, widget = {}, {}
     try:
         info = plistlib.loads((app / "Info.plist").read_bytes())
-        widget = plistlib.loads((app / "PlugIns/GermigoWidgets.appex/Info.plist").read_bytes())
+        widget = plistlib.loads((app / "PlugIns/GermilyWidgets.appex/Info.plist").read_bytes())
     except Exception as error:
         errors.append(f"unreadable Info.plist: {error}")
 

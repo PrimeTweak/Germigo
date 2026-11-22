@@ -1,6 +1,6 @@
 'use strict';
 
-// Germigo crew server: private daycare groups, an anonymous outbreak radar,
+// Germily crew server: private daycare groups, an anonymous outbreak radar,
 // a small feed of germs caught and beaten with preset reactions, daycare notices, and the app's legal pages.
 
 const http = require('node:http');
@@ -38,7 +38,8 @@ const WRITE_DELAY = 250;
 const HEADERS_TIMEOUT = 10 * 1000;
 const REQUEST_TIMEOUT = 30 * 1000;
 const MAX_CONNECTIONS = 1000;
-const PUBLIC_PAGES = new Set(['GET /', 'GET /get', 'GET /privacy', 'GET /terms', 'GET /health-data', 'GET /support']);
+const MAX_LESSONS_BYTES = 1_000_000;
+const PUBLIC_PAGES = new Set(['GET /', 'GET /get', 'GET /privacy', 'GET /terms', 'GET /health-data', 'GET /support', 'GET /lessons.json']);
 const LIMITS = {
   all: [120, MINUTE],
   pages: [120, MINUTE],
@@ -55,6 +56,7 @@ const LIMITS = {
   repliesPerDay: [20, DAY],
   subscriptionsPerDay: [40, DAY],
   daycareUpdates: [20, MINUTE],
+  codeRenewals: [5, DAY],
   inbound: [60, MINUTE],
 };
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -74,6 +76,14 @@ const BLOCKED_WORDS = [
   'sex', 'sexy', 'rape', 'dick', 'cock', 'pussy', 'tits', 'anal', 'cum', 'kkk', 'fag', 'pute', 'bite', 'cul',
   'merde', 'chatte', 'couille', 'viol', 'nique', 'pd',
 ];
+// Notes are matched word by word, plurals included, without letter swaps, on insults with no everyday meaning.
+const NOTE_BLOCKED_WORDS = new Set([
+  'fuck', 'fucking', 'fucked', 'fucker', 'motherfucker', 'shit', 'shitty', 'bullshit', 'bitch', 'bitches', 'cunt',
+  'asshole', 'nigger', 'nigga', 'faggot', 'fag', 'whore', 'slut', 'retarded', 'dickhead', 'douchebag',
+  'wanker', 'twat', 'merde', 'putain', 'pute', 'salope', 'salaud', 'connard', 'connarde', 'connasse', 'encule',
+  'enculer', 'enfoire', 'negre', 'couille', 'nique', 'niquer', 'ntm', 'fdp', 'tabarnak', 'tabarnac',
+  'calisse', 'caliss', 'osti', 'ostie', 'esti', 'estie', 'ciboire', 'criss',
+]);
 
 class ApiError extends Error {
   constructor(status, code) {
@@ -105,6 +115,24 @@ function cleanName(raw, maxLength, extraBlocked) {
   if (anywhere.some((bad) => squeezed.includes(bad))) return null;
   if (words.some((word) => BLOCKED_WORDS.includes(word))) return null;
   return name;
+}
+
+function hasBlockedWord(note) {
+  const words = note.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z]+/);
+  return words.some((word) => NOTE_BLOCKED_WORDS.has(word) || NOTE_BLOCKED_WORDS.has(word.replace(/s$/, '')));
+}
+
+// IPv6 addresses are counted by their /64 network, which one home or phone can rotate through.
+function networkOf(address) {
+  const value = String(address || 'unknown').toLowerCase().split('%')[0];
+  const mapped = value.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+  if (mapped) return mapped[1];
+  if (!value.includes(':')) return value;
+  const [head, tail] = value.split('::');
+  const left = head ? head.split(':') : [];
+  const right = tail ? tail.split(':') : [];
+  const groups = tail === undefined ? left : left.concat(Array(Math.max(8 - left.length - right.length, 0)).fill('0'), right);
+  return groups.slice(0, 4).map((group) => (parseInt(group, 16) || 0).toString(16)).join(':') + '::/64';
 }
 
 function hashToken(token) {
@@ -139,7 +167,7 @@ function basicPassword(req) {
 
 function createApp(options = {}) {
   const dataDir = options.dataDir || process.env.DATA_DIR || path.join(__dirname, 'data');
-  const dataFile = path.join(dataDir, 'germigo.json');
+  const dataFile = path.join(dataDir, 'germily.json');
   const adminToken = options.adminToken || process.env.ADMIN_TOKEN || '';
   const supportEmail = options.supportEmail || process.env.SUPPORT_EMAIL || '';
   const publisherName = options.publisherName || process.env.PUBLISHER_NAME || '';
@@ -152,6 +180,7 @@ function createApp(options = {}) {
   const clock = options.now || (() => Date.now());
   const legal = JSON.parse(fs.readFileSync(path.join(__dirname, 'legal.json'), 'utf8'));
   const illnesses = JSON.parse(fs.readFileSync(path.join(__dirname, 'illnesses.json'), 'utf8'));
+  const lessons = loadLessons(options.lessonsFile || path.join(__dirname, 'lessons.json'));
   const pusher = options.pusher || createPusher();
   const mailer = options.mailer || createMailer();
   const inboundToken = options.inboundToken ?? process.env.INBOUND_EMAIL_TOKEN ?? '';
@@ -316,6 +345,7 @@ function createApp(options = {}) {
     const note = String(raw).replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     if (note.length > NOTE_LIMIT) throw new ApiError(400, 'note_too_long');
     if (NOTE_LINK_PATTERN.test(note)) throw new ApiError(400, 'note_rejected');
+    if (hasBlockedWord(note)) throw new ApiError(400, 'note_rejected');
     return note;
   }
 
@@ -601,7 +631,7 @@ function createApp(options = {}) {
       ? `<p><a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">${escapeHtml(web.eulaLabel[lang])}</a></p>`
       : '';
     const body = `<h1>${escapeHtml(title)}</h1><p class="meta">${updated}</p>${publisher}${sections}${eula}${contactBlock(lang)}`;
-    return page(`Germigo · ${title}`, lang, body);
+    return page(`Germily · ${title}`, lang, body);
   }
 
   function contactBlock(lang) {
@@ -618,7 +648,7 @@ function createApp(options = {}) {
     const links = `<p><a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a> · `
       + `<a href="/terms${suffix}">${escapeHtml(web.termsTitle[lang])}</a> · `
       + `<a href="/health-data${suffix}">${escapeHtml(web.healthTitle[lang])}</a></p>`;
-    return page(`Germigo · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
+    return page(`Germily · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
   }
 
   // The page a share card's QR code opens.
@@ -629,7 +659,7 @@ function createApp(options = {}) {
       ? `<a class="store" href="${escapeHtml(appStoreURL)}">${escapeHtml(web.landingStore[lang])}</a>`
       : `<p class="soon">${escapeHtml(web.landingSoon[lang])}</p>`;
     const suffix = lang === 'fr' ? '?lang=fr' : '';
-    const body = '<p class="mark">germigo</p>'
+    const body = '<p class="mark">germily</p>'
       + `<h1>${escapeHtml(web.landingTagline[lang])}</h1><p class="lede">${escapeHtml(web.landingIntro[lang])}</p>`
       + `<ul>${points}</ul>${store}`
       + `<p class="links"><a href="/support${suffix}">${escapeHtml(web.supportTitle[lang])}</a> · `
@@ -639,7 +669,7 @@ function createApp(options = {}) {
       + '.lede{font-size:19px}ul{padding:0;list-style:none}li{background:#fff;border-radius:16px;padding:14px 16px;margin:8px 0}'
       + '.store{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:99px;background:#1E1A26;color:#F6F1E7;'
       + 'text-decoration:none;font-weight:700}.soon{margin:18px 0;font-weight:700}.links{color:#6b6675;font-size:15px}';
-    return page('Germigo', lang, body, style);
+    return page('Germily', lang, body, style);
   }
 
   // Where a daycare's QR code leads: its name, its code, and how to join from the app.
@@ -649,7 +679,7 @@ function createApp(options = {}) {
     const store = /^https:\/\/apps\.apple\.com\//.test(appStoreURL)
       ? `<a class="store" href="${escapeHtml(appStoreURL)}">${escapeHtml(web.landingStore[lang])}</a>`
       : `<p class="soon">${escapeHtml(web.landingSoon[lang])}</p>`;
-    const body = '<p class="mark">germigo</p>'
+    const body = '<p class="mark">germily</p>'
       + `<h1>${escapeHtml(web.daycareHeading[lang].replace('{name}', daycare.name))}</h1>`
       + `<p class="lede">${escapeHtml(web.daycareSteps[lang])}</p><p class="code">${code}</p>${store}`;
     const style = '.mark{font-size:44px;font-weight:900;letter-spacing:-2px;margin:8px 0 18px}.lede{font-size:19px}'
@@ -712,7 +742,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
   load();
 });`;
     return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
-      + '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Germigo · Moderation</title>'
+      + '<meta name="viewport" content="width=device-width, initial-scale=1"><title>Germily · Moderation</title>'
       + '<style>body{font:17px/1.5 -apple-system,system-ui,sans-serif;color:#1E1A26;background:#F6F1E7;margin:0}'
       + 'main{max-width:680px;margin:0 auto;padding:32px 22px 64px}h1{font-size:30px;margin:0 0 12px}'
       + 'h2{font-size:18px;margin:0 0 4px}section{background:#fff;border-radius:18px;padding:16px;margin:12px 0}'
@@ -759,7 +789,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
   async function route(req, res) {
     const url = new URL(req.url, 'http://localhost');
     const key = req.method + ' ' + url.pathname;
-    const ip = clientAddress(req);
+    const ip = networkOf(clientAddress(req));
 
     if (key === 'GET /health') return json(res, 200, { ok: true });
     // The public pages have their own counter, so page loads cannot use up the app's.
@@ -768,6 +798,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
     if (key === 'GET /terms') return html(res, legalPage('terms', language(req, url)));
     if (key === 'GET /health-data') return html(res, legalPage('health', language(req, url)));
     if (key === 'GET /support') return html(res, supportPage(language(req, url)));
+    if (key === 'GET /lessons.json') return lessonFile(req, res);
     if (key === 'GET /' || key === 'GET /get') return html(res, landingPage(language(req, url)));
     if (req.method === 'GET' && url.pathname.startsWith('/d/')) {
       limit(ip, 'join');
@@ -917,7 +948,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
     if (key === 'POST /v1/inbound-email') {
       limit(ip, 'inbound');
       if (!inboundToken || !sameSecret(basicPassword(req), inboundToken)) {
-        res.setHeader('WWW-Authenticate', 'Basic realm="Germigo"');
+        res.setHeader('WWW-Authenticate', 'Basic realm="Germily"');
         throw new ApiError(401, 'unauthorized');
       }
       return json(res, 200, await receiveEmail(await readBody(req, MAX_EMAIL_BYTES)));
@@ -943,6 +974,12 @@ document.getElementById('form').addEventListener('submit', (event) => {
         }
         if (body.email !== undefined) daycare.email = cleanEmail(body.email);
         if (body.language !== undefined) daycare.language = cleanLanguage(body.language);
+        save(true);
+        return json(res, 200, directorState(daycare));
+      }
+      if (key === 'POST /v1/daycare/code') {
+        limit(daycare.id, 'codeRenewals');
+        daycare.code = newDaycareCode();
         save(true);
         return json(res, 200, directorState(daycare));
       }
@@ -1082,6 +1119,32 @@ document.getElementById('form').addEventListener('submit', (event) => {
     'Strict-Transport-Security': 'max-age=31536000',
   };
 
+  // The online lesson file, read once at start; a changed file arrives with the next deploy.
+  function loadLessons(file) {
+    try {
+      const body = fs.readFileSync(file);
+      if (body.length > MAX_LESSONS_BYTES || !Array.isArray(JSON.parse(body.toString('utf8')).lessons)) {
+        console.error(`lessons: ${file} is over 1 MB or has no lessons list; not served`);
+        return null;
+      }
+      return { body, etag: '"' + crypto.createHash('sha256').update(body).digest('hex').slice(0, 32) + '"' };
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.error(`lessons: ${file} does not read; not served`);
+      return null;
+    }
+  }
+
+  function lessonFile(req, res) {
+    if (!lessons) throw new ApiError(404, 'not_found');
+    const headers = { ...baseHeaders, ETag: lessons.etag, 'Cache-Control': 'no-cache' };
+    if (req.headers['if-none-match'] === lessons.etag) {
+      res.writeHead(304, headers);
+      return res.end();
+    }
+    res.writeHead(200, { ...headers, 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(lessons.body);
+  }
+
   function json(res, status, body) {
     res.writeHead(status, {
       ...baseHeaders, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store',
@@ -1120,7 +1183,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
   return server;
 }
 
-module.exports = { createApp, cleanName };
+module.exports = { createApp, cleanName, hasBlockedWord, networkOf };
 
 if (require.main === module) {
   if (process.env.NODE_ENV === 'production' && !process.env.DATA_DIR) {
@@ -1133,7 +1196,7 @@ if (require.main === module) {
   const port = Number(process.env.PORT) || 8080;
   const server = createApp();
   server.listen(port, () => {
-    console.log(`Germigo crew server listening on ${port}`);
+    console.log(`Germily crew server listening on ${port}`);
   });
   for (const signal of ['SIGTERM', 'SIGINT']) {
     process.on(signal, () => {

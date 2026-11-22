@@ -1,4 +1,4 @@
-# Germigo
+# Germily
 
 iOS app (SwiftUI, iOS 26.2+, English and French) that turns the germs a kid brings home from daycare into a card collection for the parent, with a small Node server in `server/`. `README.md` describes the layout, the configuration keys and the server.
 

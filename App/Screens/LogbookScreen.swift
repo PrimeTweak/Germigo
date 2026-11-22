@@ -21,7 +21,7 @@ struct LogbookScreen: View {
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .germigoCard()
+                        .germilyCard()
                 }
                 ForEach(Array(shown.enumerated()), id: \.element.id) { item in
                     card(item.element)
@@ -60,7 +60,7 @@ struct LogbookScreen: View {
             }
             .accessibilityLabel(tr("More"))
         }
-        .germigoCard(padding: 12)
+        .germilyCard(padding: 12)
     }
 
     var body: some View {
@@ -244,7 +244,7 @@ private struct KidsGermsView: View {
             }
             .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
             if illnesses.isEmpty {
-                Text(tr("When a kid gets sick, add it here. Germigo starts your incubation countdown and remembers who brought what home."))
+                Text(tr("When a kid gets sick, add it here. Germily starts your incubation countdown and remembers who brought what home."))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
@@ -319,7 +319,7 @@ private struct KidsGermsView: View {
                 }
                 .accessibilityLabel(tr("More"))
             }
-            .germigoCard(padding: 12)
+            .germilyCard(padding: 12)
         }
     }
 

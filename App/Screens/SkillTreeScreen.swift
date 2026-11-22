@@ -42,7 +42,7 @@ struct SkillTreeScreen: View {
             }
             Spacer(minLength: 0)
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     private func branchCard(_ branch: SkillBranch, nodes: [SkillNode]) -> some View {
@@ -78,7 +78,7 @@ struct SkillTreeScreen: View {
                     .accessibilityHidden(true)
             }
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     private func nodeButton(_ node: SkillNode, tint: Color) -> some View {
@@ -150,7 +150,7 @@ struct SkillTreeScreen: View {
                         .foregroundStyle(palette.ink)
                 }
             }
-            .germigoCard()
+            .germilyCard()
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(worn ? .isSelected : [])

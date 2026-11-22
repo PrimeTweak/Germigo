@@ -92,7 +92,7 @@ struct ShareWordmark: View {
         let link = AppConfig.shareURL
         HStack(spacing: 14) {
             VStack(alignment: link == nil ? .center : .leading, spacing: 2) {
-                Text(verbatim: "germigo")
+                Text(verbatim: "germily")
                     .font(.system(size: 30, weight: .black))
                     .kerning(-1.2)
                 Text(tr("Daycare germs, collected."))

@@ -40,7 +40,7 @@ struct ProtectHomeView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .germigoCard()
+                    .germilyCard()
                 }
                 if !steps.isEmpty {
                     SectionHeader(title: tr("Protect the rest of the house"))
@@ -59,7 +59,7 @@ struct ProtectHomeView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .germigoCard()
+                    .germilyCard()
                     VStack(alignment: .leading, spacing: 4) {
                         Text(tr("Sources"))
                             .font(.footnote.weight(.semibold))
@@ -94,7 +94,7 @@ struct ProtectHomeView: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    .germigoCard()
+                    .germilyCard()
                 }
             }
             .padding(.horizontal, 20)
@@ -328,7 +328,7 @@ struct HealthHistory: View {
             rows.append(tr("Also caught at home:"))
             rows += caughtAtHome.map { "- " + $0 }
         }
-        rows.append(tr("Dates and germs as logged in Germigo, with no diagnosis."))
+        rows.append(tr("Dates and germs as logged in Germily, with no diagnosis."))
         return rows
     }
 
@@ -390,7 +390,7 @@ struct HealthHistory: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .germigoCard()
+                .germilyCard()
             }
             if all.count > found.count {
                 LockedHistoryRow(count: all.count - found.count)
@@ -398,7 +398,7 @@ struct HealthHistory: View {
             if asPaper {
                 paperActions(found, others: others)
             } else {
-                Text(tr("Dates and germs as you logged them. Germigo adds no diagnosis."))
+                Text(tr("Dates and germs as you logged them. Germily adds no diagnosis."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
@@ -560,7 +560,7 @@ struct HealthHistory: View {
                     .frame(width: 46, height: 46)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(tr("Germigo · For the doctor"))
+                    Text(tr("Germily · For the doctor"))
                         .font(.caption2)
                         .foregroundStyle(soft)
                     Text(model.name(for: person))
@@ -613,7 +613,7 @@ struct HealthHistory: View {
                 }
             }
             PaperRule()
-            Text(tr("Dates and germs as logged in Germigo, with no diagnosis."))
+            Text(tr("Dates and germs as logged in Germily, with no diagnosis."))
                 .font(.caption2)
                 .foregroundStyle(soft)
                 .padding(.top, 10)

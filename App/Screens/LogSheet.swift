@@ -452,7 +452,7 @@ struct LogForm: View {
         .tint(palette.accent)
         .foregroundStyle(palette.ink)
         .padding(.horizontal, 16)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private var logButton: some View {

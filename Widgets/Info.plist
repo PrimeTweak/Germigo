@@ -19,7 +19,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Germigo</string>
+	<string>Germily</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>

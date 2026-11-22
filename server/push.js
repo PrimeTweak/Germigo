@@ -18,7 +18,7 @@ function createPusher(options = {}) {
   const key = (options.key ?? process.env.APNS_KEY ?? '').replace(/\\n/g, '\n');
   const keyID = options.keyID ?? process.env.APNS_KEY_ID ?? '';
   const teamID = options.teamID ?? process.env.APNS_TEAM_ID ?? '';
-  const topic = options.topic ?? process.env.APNS_TOPIC ?? 'ca.germigo.app';
+  const topic = options.topic ?? process.env.APNS_TOPIC ?? 'ca.germily.app';
   const sandbox = options.sandbox ?? process.env.APNS_ENV === 'sandbox';
   const host = sandbox ? 'https://api.sandbox.push.apple.com' : 'https://api.push.apple.com';
   const enabled = Boolean(key && keyID && teamID);

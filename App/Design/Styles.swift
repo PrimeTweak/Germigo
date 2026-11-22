@@ -28,7 +28,7 @@ extension View {
     }
 
     /// The rounded quiet surface used for grouped content.
-    func germigoCard(padding: CGFloat = 16) -> some View {
+    func germilyCard(padding: CGFloat = 16) -> some View {
         modifier(CardBackground(padding: padding))
     }
 
@@ -54,7 +54,7 @@ extension View {
 /// The one health disclaimer, shown wherever health notes appear.
 enum HealthNotice {
     static var text: String {
-        tr("Germigo shares general information from public health sources. It is not medical advice and does not replace a health professional.")
+        tr("Germily shares general information from public health sources. It is not medical advice and does not replace a health professional.")
     }
 }
 

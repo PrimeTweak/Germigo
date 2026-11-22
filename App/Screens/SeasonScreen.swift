@@ -97,7 +97,7 @@ struct SeasonScreen: View {
             } label: {
                 ValueRow(title: tr("Your %@ recap", recap.monthName))
                     .padding(.horizontal, 16)
-                    .germigoCard(padding: 0)
+                    .germilyCard(padding: 0)
             }
             .buttonStyle(.plain)
         }
@@ -127,7 +127,7 @@ struct SeasonScreen: View {
                         .font(.footnote.weight(.bold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .germigoCard()
+                .germilyCard()
             }
             .buttonStyle(.plain)
         }
@@ -150,7 +150,7 @@ struct SeasonScreen: View {
                         showDuel = true
                     }
                 }
-                .germigoCard()
+                .germilyCard()
             }
         } else {
             Button {
@@ -168,7 +168,7 @@ struct SeasonScreen: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .germigoCard()
+                .germilyCard()
             }
             .buttonStyle(.plain)
         }
@@ -248,7 +248,7 @@ struct SeasonScreen: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .germigoCard(padding: 14)
+        .germilyCard(padding: 14)
         .accessibilityElement(children: .combine)
     }
 
@@ -279,7 +279,7 @@ struct SeasonScreen: View {
                 }
             }
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     private func chartCard(_ stats: SeasonStats, season: Season) -> some View {
@@ -318,7 +318,7 @@ struct SeasonScreen: View {
                 .frame(height: 150)
                 .accessibilityLabel(tr("Germs by month"))
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 
@@ -350,7 +350,7 @@ struct SeasonScreen: View {
                 }
                 Spacer(minLength: 0)
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 

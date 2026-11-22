@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 @main
-struct GermigoWidgetsBundle: WidgetBundle {
+struct GermilyWidgetsBundle: WidgetBundle {
     var body: some Widget {
         StreakWidget()
         IncubationWidget()

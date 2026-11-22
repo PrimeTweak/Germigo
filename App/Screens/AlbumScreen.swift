@@ -145,7 +145,7 @@ struct AlbumScreen: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 28)
         .padding(.horizontal, 20)
-        .germigoCard()
+        .germilyCard()
     }
 
     private func card(_ batch: Batch, order: [UUID]) -> some View {
@@ -190,7 +190,7 @@ struct AlbumScreen: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     private func subtitle(_ batch: Batch) -> String {

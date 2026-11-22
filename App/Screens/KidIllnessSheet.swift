@@ -86,9 +86,9 @@ struct KidIllnessForm: View {
                 .tint(palette.accent)
                 .foregroundStyle(palette.ink)
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
                 Text(hasWindow
-                     ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Germigo also puts the countdown on the Lock Screen.")
+                     ? tr("Watching sends a check-in when your window opens and closes. During the last 8 hours of the window, opening Germily also puts the countdown on the Lock Screen.")
                      : tr("No countdown for this one. The case file explains what to watch for."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)

@@ -24,7 +24,7 @@ enum PassReason: String, Identifiable, CaseIterable {
         case .doctor: tr("Hand the doctor a clean file.")
         case .stats: tr("See who brings the most home.")
         case .crew: tr("Know what's going around.")
-        case .looks: tr("Make Germigo yours.")
+        case .looks: tr("Make Germily yours.")
         case .holo: tr("Turn your cards holo.")
         }
     }
@@ -32,7 +32,7 @@ enum PassReason: String, Identifiable, CaseIterable {
     /// One line under the headline.
     var detail: String {
         switch self {
-        case .general: tr("The Season Pass opens Germigo for the whole household, all season.")
+        case .general: tr("The Season Pass opens Germily for the whole household, all season.")
         case .household: tr("Every kid, your partner and the couple duel.")
         case .history: tr("The free journal shows the last 7 days. The Pass keeps the whole season.")
         case .photos: tr("Rashes, thermometers, daycare notes: filed by illness, ready to show.")

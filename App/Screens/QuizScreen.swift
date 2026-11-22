@@ -405,7 +405,7 @@ struct QuizScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .germigoCard(padding: 0)
+            .germilyCard(padding: 0)
             Text(tr("A new quiz tomorrow."))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)

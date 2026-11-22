@@ -43,7 +43,7 @@ struct BadgesScreen: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 138, alignment: .topLeading)
-                    .germigoCard(padding: 14)
+                    .germilyCard(padding: 14)
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(earned ? tr("Earned") : tr("Locked"))
                     .cascadeIn(item.offset / 2)

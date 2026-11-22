@@ -11,7 +11,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-TARGETS = {"Germigo": ["App", "Shared"], "GermigoWidgets": ["Widgets", "Shared"]}
+TARGETS = {"Germily": ["App", "Shared"], "GermilyWidgets": ["Widgets", "Shared"]}
 CATALOG = {"App": "App/Assets.xcassets", "Widgets": "Widgets/Assets.xcassets"}
 SWATCH = "Shared/Swatch.swift"
 STRING = r'"((?:[^"\\]|\\.)*)"'

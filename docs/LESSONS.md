@@ -1,6 +1,6 @@
 # Online lessons
 
-New lessons reach the app without an update. The app reads one JSON file from the address in `GermigoLessonsURL` (`App/Info.plist`) when it comes to the foreground and during background refresh when iOS allows it, at most once an hour. It asks only for a changed copy: a host that sends `ETag` or `Last-Modified` answers in a few bytes when nothing changed, and a host that sends neither makes every check download the whole file. It keeps the last copy that read correctly; the six bundled lessons stay in every case.
+New lessons reach the app without an update. The app reads one JSON file from the address in `GermilyLessonsURL` (`App/Info.plist`) when it comes to the foreground and during background refresh when iOS allows it, at most once an hour. It asks only for a changed copy: a host that sends `ETag` or `Last-Modified` answers in a few bytes when nothing changed, and a host that sends neither makes every check download the whole file. It keeps the last copy that read correctly; the six bundled lessons stay in every case.
 
 ## Rules in the app
 
@@ -41,4 +41,4 @@ UTF-8 JSON, served over https with status 200, under 1 MB. Every lesson needs En
 
 ## Hosting
 
-Any https address that serves the file works. GitHub Pages serves public repositories on GitHub Free; a private repository needs GitHub Pro. A raw file address from a public repository also works.
+The crew server serves `server/lessons.json` at `/lessons.json`, with an `ETag`. Put `<server>/lessons.json` in `GermilyLessonsURL`. To publish, edit the file and push: the host redeploys, and the server reads the file when it starts. A file over 1 MB, or without a `lessons` list, is not served, and the app keeps its copy.

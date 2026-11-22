@@ -62,7 +62,7 @@ private struct HoloPreview: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .germigoCard(padding: 14)
+                .germilyCard(padding: 14)
             }
             .buttonStyle(PressableStyle())
             .sheet(isPresented: $showPaywall) {
@@ -257,7 +257,7 @@ struct LabScreen: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 14)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 
     /// What the search finds, among the illnesses and the lessons.

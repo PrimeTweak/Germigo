@@ -40,7 +40,7 @@ struct CrewScreen: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     if model.hasPass, crew.isMember, let state = crew.state {
-                        ShareLink(item: tr("Join my Germigo crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
+                        ShareLink(item: tr("Join my Germily crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
                             Image(systemName: "person.badge.plus")
                         }
                         .accessibilityLabel(tr("Invite"))
@@ -166,7 +166,7 @@ private struct CrewTeaser: View {
                     row("trophy.fill", tr("Most valuable patient"), tr("A leaderboard nobody wants to win."))
                 }
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
                 Button(PurchaseManager.shared.offerLabel) {
                     showPaywall = true
                 }
@@ -272,7 +272,7 @@ private struct CrewJoinView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
                 if mode == .create {
                     emblemPicker
                 }
@@ -289,7 +289,7 @@ private struct CrewJoinView: View {
                 .tint(palette.accent)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
                 VStack(alignment: .leading, spacing: 8) {
                     Button(tr("Read the Terms of Use")) {
                         legal = .terms
@@ -528,7 +528,7 @@ private struct CrewHome: View {
             Text(tr("Quiet week. Suspicious."))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
-                .germigoCard()
+                .germilyCard()
         } else {
             ForEach(crew.visibleFeed.prefix(20)) { event in
                 let isMine = event.memberID == state.me.id
@@ -555,7 +555,7 @@ private struct CrewHome: View {
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
         }
-        .germigoCard()
+        .germilyCard()
     }
 
     @ViewBuilder
@@ -576,7 +576,7 @@ private struct CrewHome: View {
                 })
                 .padding(.top, 14)
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 
@@ -606,7 +606,7 @@ private struct CrewHome: View {
                 }
             }
             .padding(.horizontal, 16)
-            .germigoCard(padding: 0)
+            .germilyCard(padding: 0)
         }
     }
 }

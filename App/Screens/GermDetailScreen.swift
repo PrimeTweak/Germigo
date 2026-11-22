@@ -122,7 +122,7 @@ struct GermDetailScreen: View {
                         }
                     }
                 }
-                .germigoCard()
+                .germilyCard()
             }
         }
     }
@@ -155,7 +155,7 @@ struct GermDetailScreen: View {
                             .padding(.horizontal, 2)
                     }
                 }
-                .germigoCard(padding: 12)
+                .germilyCard(padding: 12)
             }
         }
     }
@@ -206,7 +206,7 @@ struct GermDetailScreen: View {
                 .font(.caption)
                 .foregroundStyle(palette.inkSecondary)
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 
@@ -261,7 +261,7 @@ struct GermDetailScreen: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
             }
         }
     }
@@ -290,7 +290,7 @@ struct GermDetailScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .germigoCard(padding: 0)
+            .germilyCard(padding: 0)
         }
     }
 
@@ -318,7 +318,7 @@ struct GermDetailScreen: View {
                 }
             }
             .padding(.horizontal, 16)
-            .germigoCard(padding: 0)
+            .germilyCard(padding: 0)
         }
     }
 
@@ -459,7 +459,7 @@ struct GermDetailScreen: View {
                     }
                 }
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 
@@ -536,7 +536,7 @@ struct GermDetailScreen: View {
                     }
                 }
             }
-            .germigoCard()
+            .germilyCard()
         }
     }
 
@@ -560,7 +560,7 @@ struct GermDetailScreen: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .germigoCard()
+                .germilyCard()
             }
         }
     }
@@ -595,7 +595,7 @@ struct GermDetailScreen: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .germigoCard(padding: 0)
+                .germilyCard(padding: 0)
             }
         }
     }
@@ -640,7 +640,7 @@ struct SourceList: View {
             }
         }
         .padding(.horizontal, 16)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 }
 

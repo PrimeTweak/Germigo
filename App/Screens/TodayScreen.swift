@@ -883,13 +883,13 @@ private struct SickKitSheet: View {
                         }
                     }
                     .padding(.horizontal, 16)
-                    .germigoCard(padding: 0)
+                    .germilyCard(padding: 0)
                     NavigationLink {
                         GermDetailScreen(germ: germ)
                     } label: {
                         ValueRow(title: tr("Case file and when to call"))
                             .padding(.horizontal, 16)
-                            .germigoCard(padding: 0)
+                            .germilyCard(padding: 0)
                     }
                     .buttonStyle(.plain)
                     Button {

@@ -238,7 +238,7 @@ final class AppModel {
 
     func isIconUnlocked(_ icon: AppIconOption) -> Bool {
         switch icon {
-        case .germigo, .daylight: return true
+        case .germily, .daylight: return true
         case .nightShift: return hasBadge(BadgeCatalog.nightShift)
         case .snowDay: return count(of: GermCatalog.commonColdID) >= 3
         case .golden: return data.logs.count >= 20
@@ -713,7 +713,7 @@ final class AppModel {
 
     /// Opens what a widget or a link asked for.
     func open(_ url: URL) {
-        guard url.scheme == "germigo", data.onboardingDone else { return }
+        guard url.scheme == "germily", data.onboardingDone else { return }
         selectedTab = .today
         if url.host == "log" {
             pendingMilestone = nil
@@ -843,9 +843,9 @@ final class AppModel {
             data.settings.wornTitle = nil
         }
         let icon = AppIconManager.current
-        if icon != .germigo, !isIconUnlocked(icon) {
+        if icon != .germily, !isIconUnlocked(icon) {
             Task {
-                _ = await AppIconManager.apply(.germigo)
+                _ = await AppIconManager.apply(.germily)
             }
         }
     }

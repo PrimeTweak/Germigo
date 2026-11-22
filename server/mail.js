@@ -66,16 +66,16 @@ function parseSubject(subject, groups, illnesses) {
 
 const REPLIES = {
   sent: {
-    en: (count, what) => [`Sent: ${what}`, `Your notice reached ${count} ${count === 1 ? 'family' : 'families'} on Germigo.`],
-    fr: (count, what) => [`Envoyé : ${what}`, `Votre avis a été transmis à ${count} ${count === 1 ? 'famille' : 'familles'} sur Germigo.`],
+    en: (count, what) => [`Sent: ${what}`, `Your notice reached ${count} ${count === 1 ? 'family' : 'families'} on Germily.`],
+    fr: (count, what) => [`Envoyé : ${what}`, `Votre avis a été transmis à ${count} ${count === 1 ? 'famille' : 'familles'} sur Germily.`],
   },
   illness: {
-    en: () => ['Not sent: which illness?', 'Germigo could not find the illness in the subject. Write it first, then the group, for example "Stomach bug - Toddlers". Nothing was sent.'],
-    fr: () => ['Non envoyé : quelle maladie?', 'Germigo n\'a pas trouvé la maladie dans l\'objet. Écrivez-la d\'abord, puis le groupe, par exemple « Gastro - Trottineurs ». Rien n\'a été envoyé.'],
+    en: () => ['Not sent: which illness?', 'Germily could not find the illness in the subject. Write it first, then the group, for example "Stomach bug - Toddlers". Nothing was sent.'],
+    fr: () => ['Non envoyé : quelle maladie?', 'Germily n\'a pas trouvé la maladie dans l\'objet. Écrivez-la d\'abord, puis le groupe, par exemple « Gastro - Trottineurs ». Rien n\'a été envoyé.'],
   },
   group: {
-    en: (names) => ['Not sent: which group?', `Germigo could not match the group. Use one of these names, or leave it out to reach the whole daycare: ${names}. Nothing was sent.`],
-    fr: (names) => ['Non envoyé : quel groupe?', `Germigo n'a pas reconnu le groupe. Utilisez un de ces noms, ou ne mettez rien pour toute la garderie : ${names}. Rien n'a été envoyé.`],
+    en: (names) => ['Not sent: which group?', `Germily could not match the group. Use one of these names, or leave it out to reach the whole daycare: ${names}. Nothing was sent.`],
+    fr: (names) => ['Non envoyé : quel groupe?', `Germily n'a pas reconnu le groupe. Utilisez un de ces noms, ou ne mettez rien pour toute la garderie : ${names}. Rien n'a été envoyé.`],
   },
   limit: {
     en: () => ['Not sent: daily limit reached', 'This daycare has sent the most notices allowed today. Try again tomorrow.'],

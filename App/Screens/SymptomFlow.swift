@@ -574,7 +574,7 @@ private struct UrgentPage: View {
                     .font(.title.weight(.bold))
                     .foregroundStyle(palette.ink)
                     .multilineTextAlignment(.center)
-                Text(tr("Germigo doesn't guess on this one. Call a health line now, or the emergency number if it looks serious."))
+                Text(tr("Germily doesn't guess on this one. Call a health line now, or the emergency number if it looks serious."))
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
@@ -847,7 +847,7 @@ private struct SuspectsPage: View {
     private var footnote: String {
         let guess = tr("A guess for your logbook, not a diagnosis.")
         guard flow.isNew, model.data.settings.checkInsOn else { return guess }
-        return tr("Germigo asks again in 2 days.") + " " + guess
+        return tr("Germily asks again in 2 days.") + " " + guess
     }
 
     private func bottomBar(quiet: Bool) -> some View {

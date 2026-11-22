@@ -1,8 +1,8 @@
 {
-  "name": "germigo-crew-server",
+  "name": "germily-crew-server",
   "version": "1.0.0",
   "private": true,
-  "description": "Crew server and legal pages for the Germigo app. No dependencies.",
+  "description": "Crew server and legal pages for the Germily app. No dependencies.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

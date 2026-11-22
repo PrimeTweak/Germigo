@@ -1,7 +1,7 @@
-name: Germigo
+name: Germily
 
 options:
-  bundleIdPrefix: ca.germigo
+  bundleIdPrefix: ca.germily
   developmentLanguage: en
   createIntermediateGroups: true
   generateEmptyDirectories: false
@@ -22,44 +22,44 @@ settings:
     ENABLE_PREVIEWS: NO
 
 targets:
-  Germigo:
+  Germily:
     type: application
     platform: iOS
     sources:
       - path: App
         excludes:
           - "Info.plist"
-          - "Germigo.entitlements"
+          - "Germily.entitlements"
       - path: Shared
     settings:
       base:
-        PRODUCT_NAME: Germigo
-        PRODUCT_BUNDLE_IDENTIFIER: ca.germigo.app
+        PRODUCT_NAME: Germily
+        PRODUCT_BUNDLE_IDENTIFIER: ca.germily.app
         INFOPLIST_FILE: App/Info.plist
-        CODE_SIGN_ENTITLEMENTS: App/Germigo.entitlements
+        CODE_SIGN_ENTITLEMENTS: App/Germily.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS: YES
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: "AppIconDaylight AppIconNightShift AppIconSnowDay AppIconSoupBowl AppIconGolden AppIconHolo"
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
     dependencies:
-      - target: GermigoWidgets
+      - target: GermilyWidgets
 
-  GermigoWidgets:
+  GermilyWidgets:
     type: app-extension
     platform: iOS
     sources:
       - path: Widgets
         excludes:
           - "Info.plist"
-          - "GermigoWidgets.entitlements"
+          - "GermilyWidgets.entitlements"
       - path: Shared
     settings:
       base:
-        PRODUCT_NAME: GermigoWidgets
-        PRODUCT_BUNDLE_IDENTIFIER: ca.germigo.app.widgets
+        PRODUCT_NAME: GermilyWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: ca.germily.app.widgets
         INFOPLIST_FILE: Widgets/Info.plist
-        CODE_SIGN_ENTITLEMENTS: Widgets/GermigoWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Widgets/GermilyWidgets.entitlements
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME: WidgetBackground
         APPLICATION_EXTENSION_API_ONLY: YES
@@ -67,10 +67,10 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
 
 schemes:
-  Germigo:
+  Germily:
     build:
       targets:
-        Germigo: all
+        Germily: all
     run:
       config: Debug
     archive:

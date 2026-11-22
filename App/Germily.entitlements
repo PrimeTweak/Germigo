@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.ca.germigo.app</string>
+		<string>group.ca.germily.app</string>
 	</array>
 </dict>
 </plist>

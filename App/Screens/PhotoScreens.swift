@@ -192,7 +192,7 @@ struct AddPhotoSheet: View {
                     }
                     label(tr("When"))
                     when
-                    Label(tr("Photos stay on this phone and in your backups. Germigo never uploads them."), systemImage: "lock.fill")
+                    Label(tr("Photos stay on this phone and in your backups. Germily never uploads them."), systemImage: "lock.fill")
                         .font(.footnote)
                         .foregroundStyle(palette.inkSecondary)
                         .padding(.horizontal, 4)

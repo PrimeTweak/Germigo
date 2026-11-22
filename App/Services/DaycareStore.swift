@@ -22,7 +22,7 @@ final class DaycareStore {
     private(set) var memberships: [Membership]
     private(set) var director: DirectorState?
     private(set) var readIDs: Set<String>
-    /// Kids being watched after a notice, as "noticeID/kidID", with the time Germigo asks.
+    /// Kids being watched after a notice, as "noticeID/kidID", with the time Germily asks.
     private(set) var watches: [String: Date]
     var errorMessage: String?
     /// True when the last background refresh could not reach the server, so the notices may be out of date.
@@ -95,6 +95,8 @@ final class DaycareStore {
         let note: String
     }
 
+    private struct EmptyBody: Encodable {}
+
     private struct Lookup: Decodable {
         let daycare: DaycareInfo
     }
@@ -110,7 +112,7 @@ final class DaycareStore {
         watches = (defaults.dictionary(forKey: Keys.watches) as? [String: Date]) ?? [:]
         pushToken = defaults.string(forKey: Keys.pushToken)
         pushDelivered = Set(defaults.stringArray(forKey: Keys.pushDelivered) ?? [])
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if AppConfig.serverURL == nil {
             memberships = [Self.demoMembership()]
             director = nil
@@ -122,7 +124,7 @@ final class DaycareStore {
 
     /// True in a test build without a server: the daycare is a sample that never leaves the phone.
     var isDemo: Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         return !isConfigured
         #else
         return false
@@ -282,7 +284,7 @@ final class DaycareStore {
 
     /// The daycare a code belongs to, before joining it.
     func lookup(code: String) async -> DaycareInfo? {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo { return Self.demoInfo }
         #endif
         var found: DaycareInfo?
@@ -295,7 +297,7 @@ final class DaycareStore {
     }
 
     func join(code: String, kidGroups: [String: String]) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             let info = Self.demoInfo
             let feed = DaycareFeed(daycare: info, groupIDs: Self.groupIDs(kidGroups), notices: Self.demoNotices)
@@ -316,7 +318,7 @@ final class DaycareStore {
     }
 
     func setGroups(_ membership: Membership, kidGroups: [String: String]) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             let feed = DaycareFeed(daycare: membership.feed.daycare, groupIDs: Self.groupIDs(kidGroups),
                                    notices: membership.feed.notices)
@@ -334,7 +336,7 @@ final class DaycareStore {
 
     /// Stops the notices and deletes the subscription from the server.
     func leave(_ membership: Membership) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             forget(membership)
             return true
@@ -349,7 +351,7 @@ final class DaycareStore {
     }
 
     func report(_ notice: DaycareNotice, in membership: Membership) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             let feed = DaycareFeed(daycare: membership.feed.daycare, groupIDs: membership.feed.groupIDs,
                                    notices: membership.feed.notices.filter { $0.id != notice.id })
@@ -423,7 +425,7 @@ final class DaycareStore {
     // MARK: - Running a daycare
 
     func create(name: String, groups: [String], email: String?) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             let made = groups.map { DaycareGroup(id: UUID().uuidString, name: $0, families: 0) }
             store(DirectorState(daycare: DirectorDaycare(id: "demo-daycare", name: name, code: "PTPO7K2Q", email: email,
@@ -444,7 +446,7 @@ final class DaycareStore {
     /// Renames the daycare, replaces its groups or its sending address; a group keeps its ID when renamed,
     /// and an ID the server doesn't know makes a new group.
     func update(name: String? = nil, groups: [DaycareGroup]? = nil, email: String? = nil) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo, let current = director {
             let daycare = current.daycare
             let kept = groups.map { list in
@@ -468,7 +470,7 @@ final class DaycareStore {
     }
 
     func send(germID: String, groupID: String?, note: String) async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo, let current = director {
             let reached = groupID.flatMap { id in current.daycare.groups.first { $0.id == id }?.families } ?? current.daycare.families
             let notice = DaycareNotice(id: UUID().uuidString, groupID: groupID, germID: germID, note: note,
@@ -487,9 +489,30 @@ final class DaycareStore {
         }
     }
 
+    /// Replaces the daycare's code: the old code and poster stop working, families already in stay.
+    func renewCode() async -> Bool {
+        #if GERMILY_SIDELOAD
+        if isDemo, let current = director {
+            let daycare = current.daycare
+            let code = String((0..<DaycareCode.length).map { _ in "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".randomElement()! })
+            store(DirectorState(daycare: DirectorDaycare(id: daycare.id, name: daycare.name, code: code, email: daycare.email,
+                                                         inbox: daycare.inbox, families: daycare.families, groups: daycare.groups),
+                                notices: current.notices))
+            return true
+        }
+        #endif
+        let token = Keychain.get(Keys.director)
+        return await run(onUnauthorized: { self.forgetDirector() }, message: { error in
+            error.code == "rate_limited" ? tr("Five new codes a day at most. Try again tomorrow.") : error.daycareMessage
+        }) {
+            let state: DirectorState = try await self.client(token).send("POST", "v1/daycare/code", EmptyBody())
+            self.store(state)
+        }
+    }
+
     /// Deletes the daycare, its notices and its families' subscriptions from the server.
     func close() async -> Bool {
-        #if GERMIGO_SIDELOAD
+        #if GERMILY_SIDELOAD
         if isDemo {
             forgetDirector()
             return true
@@ -534,7 +557,7 @@ final class DaycareStore {
     }
 }
 
-#if GERMIGO_SIDELOAD
+#if GERMILY_SIDELOAD
 /// The sample daycare of a test build without a server: made-up notices, kept in memory only.
 extension DaycareStore {
     static let demoInfo = DaycareInfo(

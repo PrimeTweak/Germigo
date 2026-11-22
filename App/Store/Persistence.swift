@@ -49,7 +49,7 @@ enum Persistence {
 
     static var directory: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return base.appendingPathComponent("Germigo", isDirectory: true)
+        return base.appendingPathComponent("Germily", isDirectory: true)
     }
 
     private static var fileURL: URL {

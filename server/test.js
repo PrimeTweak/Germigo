@@ -8,7 +8,7 @@ const fs = require('node:fs');
 const http2 = require('node:http2');
 const os = require('node:os');
 const path = require('node:path');
-const { createApp, cleanName } = require('./server.js');
+const { createApp, cleanName, hasBlockedWord, networkOf } = require('./server.js');
 const { createPusher } = require('./push.js');
 const { parseSubject } = require('./mail.js');
 const legal = require('./legal.json');
@@ -17,7 +17,7 @@ const illnesses = require('./illnesses.json');
 const DAY = 24 * 3600 * 1000;
 
 async function main() {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-test-'));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germily-test-'));
   let now = Date.UTC(2026, 10, 17, 15, 0, 0);
   const options = {
     dataDir, adminToken: 'admin-secret', supportEmail: 'help@example.org', publisherName: 'Test Publisher',
@@ -55,6 +55,20 @@ async function main() {
   assert.equal(cleanName('visit www.spam.com', 24, []), null);
   assert.equal(cleanName('Ladybugs', 24, ['ladybug']), null);
 
+  // Notice notes refuse insults but keep everyday words the name filter would catch
+  for (const note of ['Quelle câlisse de semaine', 'This SHIT spreads fast', 'Bande de connards']) {
+    assert.equal(hasBlockedWord(note), true, note);
+  }
+  for (const note of ['Ne soyez pas en retard demain', 'Bite-size snacks only', 'La tapette à mouches est rangée', 'Anal itching at night']) {
+    assert.equal(hasBlockedWord(note), false, note);
+  }
+
+  // Limits count an IPv6 address by its /64 network
+  assert.equal(networkOf('2001:db8:1:2:aaaa:bbbb:cccc:dddd'), '2001:db8:1:2::/64');
+  assert.equal(networkOf('2001:db8::1'), '2001:db8:0:0::/64');
+  assert.equal(networkOf('::ffff:203.0.113.9'), '203.0.113.9');
+  assert.equal(networkOf('203.0.113.9'), '203.0.113.9');
+
   // Public pages
   assert.equal((await call('GET', '/health')).data.ok, true);
   const privacy = await call('GET', '/privacy');
@@ -69,6 +83,13 @@ async function main() {
   assert.ok(healthPage.includes(legal.web.healthTitle.en) && healthPage.includes(legal.health[0].title.en));
   assert.ok((await call('GET', '/health-data?lang=fr')).data.includes(legal.web.healthTitle.fr));
   assert.ok((await call('GET', '/')).data.includes('href="/health-data"'));
+  const lessonFile = await call('GET', '/lessons.json');
+  assert.equal(lessonFile.status, 200);
+  assert.ok(Array.isArray(lessonFile.data.lessons));
+  assert.equal(lessonFile.headers.get('cache-control'), 'no-cache');
+  const etag = lessonFile.headers.get('etag');
+  assert.match(etag, /^"[0-9a-f]{32}"$/);
+  assert.equal((await call('GET', '/lessons.json', { headers: { 'If-None-Match': etag } })).status, 304);
   const support = (await call('GET', '/support?lang=fr')).data;
   assert.match(support, /help@example\.org/);
   assert.ok(support.includes(legal.web.supportIntro.fr.split(' ')[0]));
@@ -175,7 +196,7 @@ async function main() {
   // Data survives a restart, in a file only its owner can read
   await new Promise((resolve) => server.close(resolve));
   if (process.platform !== 'win32') {
-    assert.equal(fs.statSync(path.join(dataDir, 'germigo.json')).mode & 0o777, 0o600);
+    assert.equal(fs.statSync(path.join(dataDir, 'germily.json')).mode & 0o777, 0o600);
   }
   server = createApp(options);
   await new Promise((resolve) => server.listen(0, resolve));
@@ -191,7 +212,7 @@ async function main() {
   assert.equal(state.crew.families, 2);
   assert.deepEqual(state.feed, []);
   assert.deepEqual(state.radar, []);
-  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8'));
+  const stored = JSON.parse(fs.readFileSync(path.join(dataDir, 'germily.json'), 'utf8'));
   assert.equal(stored.members.some((member) => member.id === marieID), false);
   assert.equal(stored.events.some((event) => event.memberID === marieID), false);
   assert.equal(JSON.stringify(stored).includes(alex), false);
@@ -204,7 +225,7 @@ async function main() {
   assert.notEqual(rotated, code);
   assert.equal((await call('POST', '/v1/crews/join', { body: { code, displayName: 'Jonathan' } })).data.error, 'invalid_code');
   assert.equal((await call('DELETE', '/v1/crew/me', { token: alex })).status, 204);
-  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8')).crews.length, 0);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germily.json'), 'utf8')).crews.length, 0);
 
   // Old events expire and the radar window is seven days
   now += 61000;
@@ -222,7 +243,7 @@ async function main() {
   assert.equal((await call('GET', '/v1/crew', { token: pat })).data.feed.length, 0);
   now += 400 * DAY;
   await call('POST', '/v1/crew/events', { token: pat, body: { germID: 'rhino', named: false } });
-  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germigo.json'), 'utf8')).events.length, 1);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dataDir, 'germily.json'), 'utf8')).events.length, 1);
 
   // A member who has not connected for that long is removed with the old events
   assert.equal((await call('GET', '/v1/crew', { token: second.token })).status, 401);
@@ -300,8 +321,8 @@ async function main() {
   await new Promise((resolve) => server.close(resolve));
 
   // Behind one trusted proxy, the address the proxy appended decides, not the client's own claim
-  const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-proxy-')), trustProxyHops: 1 });
-  const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-store-')),
+  const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-proxy-')), trustProxyHops: 1 });
+  const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-store-')),
     appStoreURL: 'https://apps.apple.com/app/id000000000' });
   await new Promise((resolve) => listed.listen(0, resolve));
   const listedPage = await (await fetch(`http://127.0.0.1:${listed.address().port}/get`)).text();
@@ -322,16 +343,35 @@ async function main() {
     body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': '203.0.113.8' },
   });
   assert.equal(other.status, 404);
+  blocked = 0;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const result = await call('POST', '/v1/crews/join', {
+      body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': `2001:db8:7:7::${attempt.toString(16)}` },
+    });
+    if (result.status === 429) blocked += 1;
+  }
+  assert.equal(blocked, 2);
+  const neighbour = await call('POST', '/v1/crews/join', {
+    body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Forwarded-For': '2001:db8:7:8::1' },
+  });
+  assert.equal(neighbour.status, 404);
   await new Promise((resolve) => proxied.close(resolve));
 
+  // Without a lesson file, the address answers 404 and the app keeps its copy
+  const bare = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-bare-')),
+    lessonsFile: path.join(os.tmpdir(), 'germily-no-lessons.json') });
+  await new Promise((resolve) => bare.listen(0, resolve));
+  assert.equal((await fetch(`http://127.0.0.1:${bare.address().port}/lessons.json`)).status, 404);
+  await new Promise((resolve) => bare.close(resolve));
+
   // Small changes are grouped into one write; membership changes are written at once
-  const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-slow-'));
+  const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germily-slow-'));
   const slow = createApp({ ...options, dataDir: slowDir, writeDelay: 60000 });
   await new Promise((resolve) => slow.listen(0, resolve));
   base = `http://127.0.0.1:${slow.address().port}`;
   now += DAY;
   const solo = (await call('POST', '/v1/crews', { body: { name: 'Fireflies', displayName: 'Lou', emblem: 1 } })).data;
-  const slowFile = path.join(slowDir, 'germigo.json');
+  const slowFile = path.join(slowDir, 'germily.json');
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).members.length, 1);
   await call('POST', '/v1/crew/events', { token: solo.token, body: { germID: 'flu', named: true } });
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 0);
@@ -388,13 +428,13 @@ async function main() {
   http2.connect = () => connect(`http://127.0.0.1:${apns.address().port}`);
   const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
   const pusher = createPusher({
-    key: privateKey.export({ type: 'pkcs8', format: 'pem' }), keyID: 'KEY123', teamID: 'TEAM456', topic: 'ca.germigo.app',
+    key: privateKey.export({ type: 'pkcs8', format: 'pem' }), keyID: 'KEY123', teamID: 'TEAM456', topic: 'ca.germily.app',
   });
   const mailed = [];
   const mailer = { send: async (to, subject, body) => { mailed.push({ to, subject, body }); return true; } };
-  const daycareDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-daycare-'));
+  const daycareDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germily-daycare-'));
   const daycareOptions = {
-    ...options, dataDir: daycareDir, pusher, mailer, inboundToken: 'inbound-secret', inboundDomain: 'in.germigo.test',
+    ...options, dataDir: daycareDir, pusher, mailer, inboundToken: 'inbound-secret', inboundDomain: 'in.germily.test',
   };
   let daycareServer = createApp(daycareOptions);
   await new Promise((resolve) => daycareServer.listen(0, resolve));
@@ -413,7 +453,7 @@ async function main() {
   })).data;
   let desk = director.state;
   assert.equal(desk.daycare.code.length, 8);
-  assert.match(desk.daycare.inbox, /^cpeleslucioles-[a-z0-9]{5}@in\.germigo\.test$/);
+  assert.match(desk.daycare.inbox, /^cpeleslucioles-[a-z0-9]{5}@in\.germily\.test$/);
   assert.equal(desk.daycare.email, 'direction@lucioles.ca');
   assert.deepEqual(desk.daycare.groups.map((group) => group.name), ['Poupons', 'Trottineurs', 'Les Grands']);
   const [poupons, trottineurs, grands] = desk.daycare.groups.map((group) => group.id);
@@ -459,7 +499,7 @@ async function main() {
   assert.equal(pushed[0].token, 'aa'.repeat(32));
   assert.deepEqual(pushed[0].payload.aps.alert, { title: 'CPE Les Lucioles', body: 'Gastro dans le groupe Trottineurs' });
   assert.equal(pushed[0].payload.noticeID, desk.notices[0].id);
-  assert.equal(pushed[0].headers['apns-topic'], 'ca.germigo.app');
+  assert.equal(pushed[0].headers['apns-topic'], 'ca.germily.app');
   const [jwtHead, jwtClaims, jwtSignature] = pushed[0].headers.authorization.slice(7).split('.');
   assert.equal(JSON.parse(Buffer.from(jwtHead, 'base64url')).kid, 'KEY123');
   assert.equal(JSON.parse(Buffer.from(jwtClaims, 'base64url')).iss, 'TEAM456');
@@ -478,7 +518,7 @@ async function main() {
   assert.equal(pushed.length, 3);
   assert.equal(pushed.find((message) => message.token.startsWith('bb')).payload.aps.alert.body, 'Head lice at the daycare');
   assert.equal(pushed.find((message) => message.token.startsWith('cc')).payload.aps.alert.body, 'Poux à la garderie');
-  let storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8'));
+  let storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8'));
   assert.deepEqual(storedDaycares.subscriptions.map((subscription) => subscription.pushToken), ['aa'.repeat(32), null, null, null]);
   assert.equal(JSON.stringify(storedDaycares).includes(director.token), false);
   assert.equal((await call('GET', '/v1/daycare-subscription', { token: cleo })).data.notices.length, 1);
@@ -487,6 +527,19 @@ async function main() {
   assert.equal((await call('GET', '/v1/daycare', { token: ana.token })).status, 401);
   assert.equal((await call('GET', '/v1/daycare-subscription', { token: director.token })).status, 401);
   assert.equal((await call('GET', '/v1/crew', { token: director.token })).status, 401);
+
+  // A new code: the old one stops working, families already in stay, five renewals a day at most
+  const oldCode = desk.daycare.code;
+  const renewed = (await call('POST', '/v1/daycare/code', { token: director.token })).data;
+  assert.notEqual(renewed.daycare.code, oldCode);
+  assert.equal(renewed.daycare.code.length, 8);
+  assert.equal(renewed.daycare.families, 4);
+  now += 61 * 1000;
+  assert.equal((await call('GET', '/v1/daycares/' + oldCode)).status, 404);
+  assert.equal((await call('GET', '/v1/daycares/' + renewed.daycare.code)).data.daycare.name, 'CPE Les Lucioles');
+  assert.equal((await call('POST', '/v1/daycare/code', { token: ana.token })).status, 401);
+  for (let renewal = 0; renewal < 4; renewal += 1) await call('POST', '/v1/daycare/code', { token: director.token });
+  assert.equal((await call('POST', '/v1/daycare/code', { token: director.token })).data.error, 'rate_limited');
 
   // A parent changes groups and turns alerts back on
   now += 61000;
@@ -540,7 +593,7 @@ async function main() {
   parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
   assert.equal(parent.notices[0].source, 'email');
   assert.equal(parent.notices[0].note, '');
-  assert.ok(!fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8').includes('Surveillez'));
+  assert.ok(!fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8').includes('Surveillez'));
   assert.equal((await inbound(letter('Allo'))).data.status, 'unclear');
   assert.equal(mailed[1].subject, 'Non envoyé : quelle maladie?');
   await inbound(letter('Gastro - Bébés'));
@@ -572,7 +625,7 @@ async function main() {
   assert.equal((await call('GET', '/v1/daycare', { token: director.token })).data.daycare.families, 3);
   assert.equal((await call('DELETE', '/v1/daycare', { token: director.token })).status, 204);
   assert.equal((await call('GET', '/v1/daycare-subscription', { token: ana.token })).status, 401);
-  storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8'));
+  storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8'));
   assert.equal(storedDaycares.daycares.length + storedDaycares.subscriptions.length + storedDaycares.notices.length, 0);
 
   // A daycare nobody opens for that long is removed
@@ -585,7 +638,7 @@ async function main() {
   await new Promise((resolve) => daycareServer.close(resolve));
 
   // A daycare's list has a ceiling, and one address adds forty families a day at most
-  const ceiling = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-ceiling-')), maxSubscriptions: 3 });
+  const ceiling = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-ceiling-')), maxSubscriptions: 3 });
   await new Promise((resolve) => ceiling.listen(0, resolve));
   base = `http://127.0.0.1:${ceiling.address().port}`;
   now += DAY;
@@ -594,7 +647,7 @@ async function main() {
   for (let family = 0; family < 3; family += 1) assert.equal((await enroll(small)).status, 200);
   assert.equal((await enroll(small)).data.error, 'daycare_full');
   await new Promise((resolve) => ceiling.close(resolve));
-  const busy = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-busy-')) });
+  const busy = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-busy-')) });
   await new Promise((resolve) => busy.listen(0, resolve));
   base = `http://127.0.0.1:${busy.address().port}`;
   now += DAY;

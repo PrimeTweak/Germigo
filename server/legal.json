@@ -18,8 +18,8 @@
       "fr": "Dernière mise à jour :"
     },
     "publisherLabel": {
-      "en": "Germigo is published by",
-      "fr": "Germigo est publié par"
+      "en": "Germily is published by",
+      "fr": "Germily est publié par"
     },
     "contactLabel": {
       "en": "Contact:",
@@ -38,8 +38,8 @@
       "fr": "Les microbes de garderie, en collection."
     },
     "landingIntro": {
-      "en": "The first year of daycare, logged one germ at a time. Germigo turns every cold your kid brings home into a card, a badge and a reason to laugh about it.",
-      "fr": "La première année de garderie, notée un microbe à la fois. Germigo transforme chaque rhume rapporté à la maison en carte, en badge et en raison d'en rire."
+      "en": "The first year of daycare, logged one germ at a time. Germily turns every cold your kid brings home into a card, a badge and a reason to laugh about it.",
+      "fr": "La première année de garderie, notée un microbe à la fois. Germily transforme chaque rhume rapporté à la maison en carte, en badge et en raison d'en rire."
     },
     "landingPoints": [
       {
@@ -68,8 +68,8 @@
       "fr": "Pour supprimer tes données : dans l'app, Réglages, puis Données et confidentialité, puis Tout supprimer. Quitter un groupe supprime tes données du serveur."
     },
     "daycareHeading": {
-      "en": "{name} sends its illness notices with Germigo.",
-      "fr": "{name} envoie ses avis de maladie avec Germigo."
+      "en": "{name} sends its illness notices with Germily.",
+      "fr": "{name} envoie ses avis de maladie avec Germily."
     },
     "daycareSteps": {
       "en": "Get the free app, open Crew and tap Join a daycare, then enter this code. Free for families.",
@@ -87,8 +87,8 @@
         "fr": "En bref"
       },
       "body": {
-        "en": "Germigo keeps your journal on your phone. Nothing is shared unless you join a crew or a daycare, and then only what is needed. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
-        "fr": "Germigo garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe ou à une garderie, et alors seulement ce qui est nécessaire. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
+        "en": "Germily keeps your journal on your phone. Nothing is shared unless you join a crew or a daycare, and then only what is needed. There are no ads, no trackers and no third-party analytics, and nothing is sold.",
+        "fr": "Germily garde ton journal sur ton téléphone. Rien n'est partagé, sauf si tu te joins à un groupe ou à une garderie, et alors seulement ce qui est nécessaire. Il n'y a ni publicité, ni traceur, ni outil d'analyse tiers, et rien n'est vendu."
       }
     },
     {
@@ -97,8 +97,8 @@
         "fr": "Qui est responsable"
       },
       "body": {
-        "en": "Germigo is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them at the contact address at the end of this policy, or through Contact support in the app's settings.",
-        "fr": "Germigo est publié par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire à l'adresse de contact à la fin de cette politique, ou avec Contacter le soutien, dans les réglages de l'app."
+        "en": "Germily is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them at the contact address at the end of this policy, or through Contact support in the app's settings.",
+        "fr": "Germily est publié par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire à l'adresse de contact à la fin de cette politique, ou avec Contacter le soutien, dans les réglages de l'app."
       }
     },
     {
@@ -107,8 +107,8 @@
         "fr": "Ce qui reste sur ton téléphone"
       },
       "body": {
-        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Germigo never uploads it. The developer cannot see it. The camera is used only when you take a photo or scan a daycare's code.",
-        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Germigo ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo ou scannes le code d'une garderie."
+        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Germily never uploads it. The developer cannot see it. The camera is used only when you take a photo or scan a daycare's code.",
+        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Germily ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo ou scannes le code d'une garderie."
       }
     },
     {
@@ -127,8 +127,8 @@
         "fr": "Avis de garderie"
       },
       "body": {
-        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups, the illness notices it sends with their optional note and, if it sends notices by email, the address it writes from. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has. A notice sent by email passes through an email delivery service located outside Québec, which receives the message and hands it to the server. Only messages from the daycare's own address are used, and the server keeps only the illness and the group read from the subject: the text of the message is not kept.",
-        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes, les avis de maladie qu'elle envoie avec leur note facultative et, si elle envoie ses avis par courriel, l'adresse d'où elle écrit. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe. Un avis envoyé par courriel passe par un service d'envoi de courriels situé hors du Québec, qui reçoit le message et le remet au serveur. Seuls les messages venant de l'adresse de la garderie sont utilisés, et le serveur garde seulement la maladie et le groupe lus dans l'objet : le texte du message n'est pas conservé."
+        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups and the illness notices it sends with their optional note. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has.",
+        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes et les avis de maladie qu'elle envoie avec leur note facultative. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe."
       }
     },
     {
@@ -147,8 +147,8 @@
         "fr": "Leçons"
       },
       "body": {
-        "en": "New lessons come from a file that Germigo downloads from a web host. Like any web page, the host sees your phone's IP address when the file is downloaded. Nothing about you or your journal is sent.",
-        "fr": "Les nouvelles leçons viennent d'un fichier que Germigo télécharge chez un hébergeur web. Comme pour n'importe quelle page web, l'hébergeur voit l'adresse IP de ton téléphone pendant le téléchargement. Rien sur toi ni sur ton journal n'est envoyé."
+        "en": "New lessons come from a file that Germily downloads from a web host. Like any web page, the host sees your phone's IP address when the file is downloaded. Nothing about you or your journal is sent.",
+        "fr": "Les nouvelles leçons viennent d'un fichier que Germily télécharge chez un hébergeur web. Comme pour n'importe quelle page web, l'hébergeur voit l'adresse IP de ton téléphone pendant le téléchargement. Rien sur toi ni sur ton journal n'est envoyé."
       }
     },
     {
@@ -157,8 +157,8 @@
         "fr": "Achats"
       },
       "body": {
-        "en": "The Season Pass and tips are sold and billed by Apple. Germigo receives only the confirmation that a subscription is active or a tip went through. It never sees your name, your Apple Account or your payment details.",
-        "fr": "La Passe de saison et les pourboires sont vendus et facturés par Apple. Germigo reçoit seulement la confirmation qu'un abonnement est actif ou qu'un pourboire est passé. Il ne voit jamais ton nom, ton compte Apple ni tes renseignements de paiement."
+        "en": "The Season Pass and tips are sold and billed by Apple. Germily receives only the confirmation that a subscription is active or a tip went through. It never sees your name, your Apple Account or your payment details.",
+        "fr": "La Passe de saison et les pourboires sont vendus et facturés par Apple. Germily reçoit seulement la confirmation qu'un abonnement est actif ou qu'un pourboire est passé. Il ne voit jamais ton nom, ton compte Apple ni tes renseignements de paiement."
       }
     },
     {
@@ -177,8 +177,8 @@
         "fr": "Enfants"
       },
       "body": {
-        "en": "Germigo is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone. Daycare notices never name a child.",
-        "fr": "Germigo est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone. Les avis de garderie ne nomment jamais un enfant."
+        "en": "Germily is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone. Daycare notices never name a child.",
+        "fr": "Germily est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone. Les avis de garderie ne nomment jamais un enfant."
       }
     },
     {
@@ -215,12 +215,12 @@
   "terms": [
     {
       "title": {
-        "en": "What Germigo is",
-        "fr": "Ce qu'est Germigo"
+        "en": "What Germily is",
+        "fr": "Ce qu'est Germily"
       },
       "body": {
-        "en": "Germigo is an entertainment app with general health information for parents. It is not a medical device. It does not diagnose, treat or prevent any illness.",
-        "fr": "Germigo est une app de divertissement qui offre de l'information générale sur la santé aux parents. Ce n'est pas un instrument médical. Il ne diagnostique, ne traite et ne prévient aucune maladie."
+        "en": "Germily is an entertainment app with general health information for parents. It is not a medical device. It does not diagnose, treat or prevent any illness.",
+        "fr": "Germily est une app de divertissement qui offre de l'information générale sur la santé aux parents. Ce n'est pas un instrument médical. Il ne diagnostique, ne traite et ne prévient aucune maladie."
       }
     },
     {
@@ -269,8 +269,8 @@
         "fr": "Ton contenu"
       },
       "body": {
-        "en": "You are responsible for the names you choose and for what you share in a crew or send as a daycare. You allow Germigo to show them to the members of that crew or the families of that daycare, and nothing more.",
-        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe ou envoies comme garderie. Tu autorises Germigo à les montrer aux membres de ce groupe ou aux familles de cette garderie, et rien de plus."
+        "en": "You are responsible for the names you choose and for what you share in a crew or send as a daycare. You allow Germily to show them to the members of that crew or the families of that daycare, and nothing more.",
+        "fr": "Tu es responsable des noms que tu choisis et de ce que tu partages dans un groupe ou envoies comme garderie. Tu autorises Germily à les montrer aux membres de ce groupe ou aux familles de cette garderie, et rien de plus."
       }
     },
     {
@@ -279,8 +279,8 @@
         "fr": "Aucune garantie"
       },
       "body": {
-        "en": "Germigo is provided as is. The developer does their best to keep it accurate and available but cannot promise it will be free of errors or interruptions. Nothing in these terms limits the rights that consumer protection law gives you.",
-        "fr": "Germigo est fourni tel quel. Le développeur fait de son mieux pour le garder exact et accessible, sans pouvoir promettre qu'il sera exempt d'erreurs ou d'interruptions. Rien dans ces conditions ne limite les droits que te donne la loi sur la protection du consommateur."
+        "en": "Germily is provided as is. The developer does their best to keep it accurate and available but cannot promise it will be free of errors or interruptions. Nothing in these terms limits the rights that consumer protection law gives you.",
+        "fr": "Germily est fourni tel quel. Le développeur fait de son mieux pour le garder exact et accessible, sans pouvoir promettre qu'il sera exempt d'erreurs ou d'interruptions. Rien dans ces conditions ne limite les droits que te donne la loi sur la protection du consommateur."
       }
     },
     {
@@ -301,8 +301,8 @@
         "fr": "Données de santé recueillies"
       },
       "body": {
-        "en": "Germigo collects one kind of consumer health data: the germs you choose to share with a crew, with the time you shared each one and, for those shared under your crew name, when you got over it. It is used only to count the germ on your crew's radar and, if you turn that on, to show it in your crew's feed. It is never used for ads, profiling or anything else. Your journal, its symptoms, severity and notes, your photos and your kids' names stay on your phone and are not collected.",
-        "fr": "Germigo recueille un seul type de données de santé : les microbes que tu choisis de partager avec un groupe, avec le moment de chaque partage et, pour ceux partagés sous ton nom de groupe, le moment où tu t'en es remis. Ils servent seulement à compter le microbe sur le radar de ton groupe et, si tu l'actives, à l'afficher dans le fil de ton groupe. Ils ne servent jamais à la publicité, au profilage ni à rien d'autre. Ton journal, ses symptômes, son intensité et ses notes, tes photos et les prénoms de tes enfants restent sur ton téléphone et ne sont pas recueillis."
+        "en": "Germily collects one kind of consumer health data: the germs you choose to share with a crew, with the time you shared each one and, for those shared under your crew name, when you got over it. It is used only to count the germ on your crew's radar and, if you turn that on, to show it in your crew's feed. It is never used for ads, profiling or anything else. Your journal, its symptoms, severity and notes, your photos and your kids' names stay on your phone and are not collected.",
+        "fr": "Germily recueille un seul type de données de santé : les microbes que tu choisis de partager avec un groupe, avec le moment de chaque partage et, pour ceux partagés sous ton nom de groupe, le moment où tu t'en es remis. Ils servent seulement à compter le microbe sur le radar de ton groupe et, si tu l'actives, à l'afficher dans le fil de ton groupe. Ils ne servent jamais à la publicité, au profilage ni à rien d'autre. Ton journal, ses symptômes, son intensité et ses notes, tes photos et les prénoms de tes enfants restent sur ton téléphone et ne sont pas recueillis."
       }
     },
     {
@@ -331,8 +331,8 @@
         "fr": "Avec qui elles sont partagées"
       },
       "body": {
-        "en": "The members of your crew. A hosting provider runs the server for the developer and only stores the data on its behalf. Germigo has no affiliates and never sells health data.",
-        "fr": "Les membres de ton groupe. Un hébergeur fait fonctionner le serveur pour le développeur et ne fait que conserver les données pour lui. Germigo n'a pas de sociétés affiliées et ne vend jamais de données de santé."
+        "en": "The members of your crew. A hosting provider runs the server for the developer and only stores the data on its behalf. Germily has no affiliates and never sells health data.",
+        "fr": "Les membres de ton groupe. Un hébergeur fait fonctionner le serveur pour le développeur et ne fait que conserver les données pour lui. Germily n'a pas de sociétés affiliées et ne vend jamais de données de santé."
       }
     },
     {
@@ -341,8 +341,8 @@
         "fr": "Tes droits"
       },
       "body": {
-        "en": "You can confirm whether Germigo collects or shares your health data and see it, with the list of everyone it was shared with: the Crew tab shows it, and you can also write to the contact address. You can withdraw your consent at any time by turning off \"Tell\" your crew or by leaving the crew. Leaving the crew, or Delete everything in Settings, deletes your shared germs from the server at once. Requests sent to the contact address are answered within 45 days. If a request is refused, you can appeal by replying to that answer; the appeal is answered in writing within 45 days.",
-        "fr": "Tu peux confirmer si Germigo recueille ou partage tes données de santé et les consulter, avec la liste de tous ceux avec qui elles ont été partagées : l'onglet Groupe les montre, et tu peux aussi écrire à l'adresse de contact. Tu peux retirer ton consentement en tout temps en désactivant « Avertir » ton groupe ou en quittant le groupe. Quitter le groupe, ou Tout supprimer dans les réglages, supprime sur-le-champ tes microbes partagés du serveur. Les demandes envoyées à l'adresse de contact reçoivent une réponse dans les 45 jours. Si une demande est refusée, tu peux faire appel en répondant à cette réponse; l'appel reçoit une réponse écrite dans les 45 jours."
+        "en": "You can confirm whether Germily collects or shares your health data and see it, with the list of everyone it was shared with: the Crew tab shows it, and you can also write to the contact address. You can withdraw your consent at any time by turning off \"Tell\" your crew or by leaving the crew. Leaving the crew, or Delete everything in Settings, deletes your shared germs from the server at once. Requests sent to the contact address are answered within 45 days. If a request is refused, you can appeal by replying to that answer; the appeal is answered in writing within 45 days.",
+        "fr": "Tu peux confirmer si Germily recueille ou partage tes données de santé et les consulter, avec la liste de tous ceux avec qui elles ont été partagées : l'onglet Groupe les montre, et tu peux aussi écrire à l'adresse de contact. Tu peux retirer ton consentement en tout temps en désactivant « Avertir » ton groupe ou en quittant le groupe. Quitter le groupe, ou Tout supprimer dans les réglages, supprime sur-le-champ tes microbes partagés du serveur. Les demandes envoyées à l'adresse de contact reçoivent une réponse dans les 45 jours. Si une demande est refusée, tu peux faire appel en répondant à cette réponse; l'appel reçoit une réponse écrite dans les 45 jours."
       }
     }
   ]

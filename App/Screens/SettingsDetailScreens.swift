@@ -105,9 +105,9 @@ struct DataScreen: View {
             Item(symbol: "eye.slash", title: tr("No tracking"),
                  detail: tr("No ads, no trackers, no third-party analytics, no data sold.")),
             Item(symbol: "creditcard", title: tr("Purchases"),
-                 detail: tr("The Season Pass and tips are handled by Apple. Germigo never sees your payment details.")),
+                 detail: tr("The Season Pass and tips are handled by Apple. Germily never sees your payment details.")),
             Item(symbol: "externaldrive", title: tr("Backups"),
-                 detail: tr("A backup saves your whole journal and its photos as a file, where you choose. Restore a backup reads it back on this phone or a new one. Germigo never uploads it.")),
+                 detail: tr("A backup saves your whole journal and its photos as a file, where you choose. Restore a backup reads it back on this phone or a new one. Germily never uploads it.")),
             Item(symbol: "trash", title: tr("Your call"),
                  detail: tr("Export your journal or delete everything from here at any time. Leaving a crew or a daycare deletes your data from the server."))
         ]
@@ -176,10 +176,10 @@ struct DataScreen: View {
         } message: {
             Text(backupSummary)
         }
-        .alert(tr("This file isn't a Germigo backup"), isPresented: $backupUnreadable) {
+        .alert(tr("This file isn't a Germily backup"), isPresented: $backupUnreadable) {
             Button(tr("OK"), role: .cancel) {}
         } message: {
-            Text(tr("Pick a backup file made by Germigo."))
+            Text(tr("Pick a backup file made by Germily."))
         }
     }
 
@@ -227,7 +227,7 @@ struct DataScreen: View {
     private var journalSection: some View {
         Section {
             if !model.data.logs.isEmpty {
-                ShareLink(item: journalExport, preview: SharePreview(tr("Germigo journal"))) {
+                ShareLink(item: journalExport, preview: SharePreview(tr("Germily journal"))) {
                     LabeledContent {
                         Text(verbatim: "CSV")
                     } label: {
@@ -235,7 +235,7 @@ struct DataScreen: View {
                     }
                 }
             }
-            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germigo backup"))) {
+            ShareLink(item: JournalBackup(data: model.data), preview: SharePreview(tr("Germily backup"))) {
                 LabeledContent {
                     Text(verbatim: "JSON")
                 } label: {
@@ -250,7 +250,7 @@ struct DataScreen: View {
         } header: {
             Text(tr("Your journal"))
         } footer: {
-            Text(tr("A backup goes where you save it. Germigo never uploads it."))
+            Text(tr("A backup goes where you save it. Germily never uploads it."))
         }
     }
 
@@ -274,7 +274,7 @@ struct DataScreen: View {
                   backup.data.logs.count, started, backup.data.photos.count)
     }
 
-    /// Opens a file picked in Files and keeps it only if it is a Germigo journal.
+    /// Opens a file picked in Files and keeps it only if it is a Germily journal.
     private func readBackup(_ url: URL) {
         let scoped = url.startAccessingSecurityScopedResource()
         defer {
@@ -303,8 +303,8 @@ struct DataScreen: View {
             crew.resetLocal()
             daycare.resetLocal()
             model.eraseEverything()
-            if AppIconManager.current != .germigo {
-                _ = await AppIconManager.apply(.germigo)
+            if AppIconManager.current != .germily {
+                _ = await AppIconManager.apply(.germily)
             }
         }
     }
@@ -355,7 +355,7 @@ struct AboutScreen: View {
         }
         .scrollContentBackground(.hidden)
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("About Germigo"))
+        .navigationTitle(tr("About Germily"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }

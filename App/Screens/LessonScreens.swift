@@ -46,7 +46,7 @@ struct LessonCard: View {
             }
         }
         .padding(.horizontal, 18)
-        .germigoCard(padding: 0)
+        .germilyCard(padding: 0)
     }
 }
 

@@ -86,10 +86,10 @@ extension CrewAPIError {
     var daycareMessage: String {
         switch code {
         case "invalid_code": return tr("No daycare matches that code.")
-        case "unauthorized": return tr("This daycare is no longer on Germigo.")
+        case "unauthorized": return tr("This daycare is no longer on Germily.")
         case "email_rejected": return tr("That email address doesn't look right.")
         case "note_too_long": return tr("The note is too long.")
-        case "note_rejected": return tr("A note can't hold a link or an email address.")
+        case "note_rejected": return tr("A note can't hold a link, an email address or an insult.")
         case "daycare_full": return tr("This daycare's list is full.")
         case "offline": return tr("The server can't be reached right now.")
         default: return errorDescription ?? tr("Something went wrong. Try again.")

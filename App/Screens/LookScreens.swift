@@ -74,7 +74,7 @@ struct AppIconScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var current = AppIconOption.germigo
+    @State private var current = AppIconOption.germily
     @State private var popped: AppIconOption?
     @State private var nudges: [AppIconOption: Int] = [:]
     @State private var showPaywall = false
@@ -115,7 +115,7 @@ struct AppIconScreen: View {
     private func caption(for option: AppIconOption, state: PieceState) -> String {
         switch state {
         case .inUse: return tr("In use")
-        case .open: return option == .germigo || option == .daylight ? option.requirement : tr("Unlocked")
+        case .open: return option == .germily || option == .daylight ? option.requirement : tr("Unlocked")
         case .locked: return option.requirement
         }
     }

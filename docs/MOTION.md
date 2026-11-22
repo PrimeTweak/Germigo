@@ -1,6 +1,6 @@
 # Motion
 
-How things move in Germigo. The characters carry the life of the app; the interface stays calm and answers what the person does.
+How things move in Germily. The characters carry the life of the app; the interface stays calm and answers what the person does.
 
 ## Principles
 
