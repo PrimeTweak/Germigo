@@ -242,7 +242,7 @@ struct CharacterPose: Equatable {
         case .ouch:
             shiftX += 2 * sin(2 * .pi * elapsed / 0.06) * (1 - p)
         case .squish:
-            let give = exp(-5 * p) * cos(2 * .pi * 1.75 * p) * min(1, elapsed / 0.05)
+            let give = Self.keyframes(p, [(0, 0), (0.12, 1), (0.35, -0.3), (0.6, 0.08), (1, 0)])
             stretchY -= 0.2 * give
             stretchX += 0.15 * give
         case .dizzy:
