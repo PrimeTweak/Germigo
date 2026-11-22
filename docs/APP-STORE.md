@@ -69,11 +69,13 @@ If Crew is disabled, the answer is "Data Not Collected".
 
 **Review notes.** Suggested text:
 
-> Germigo is a humor app for parents with general health information from public sources. It does not diagnose.
+> Germigo is a humor app for parents with general health information from public sources. It does not diagnose: the symptom pages only sort the app's catalog for the parent's own logbook, and the result says it is a guess.
 > No account is needed. To test Crew: subscribe in the sandbox, open the Crew tab, start a crew, then join it from a second device with the invite code.
 > Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours on the server's moderation page.
 > Daycare notices are free: in Crew, tap I run a daycare, create one, then open Invite families for its code. On a second device, tap Join a daycare, enter the code and pick a group. Send a notice from Daycare mode: the second device gets a push. Report is in the notice's menu.
 > Leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases all local data.
+
+Add a link to a short video of the two-device flows (Crew, and a daycare notice arriving as a push): a reviewer with one device cannot see them.
 
 ## 4. Open risks
 

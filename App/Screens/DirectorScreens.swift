@@ -43,6 +43,7 @@ struct DaycareSetupSheet: View {
                     VStack(alignment: .leading, spacing: 6) {
                         TextField(tr("Email (optional)"), text: $email)
                             .keyboardType(.emailAddress)
+                            .textContentType(.emailAddress)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .foregroundStyle(palette.ink)
@@ -314,6 +315,9 @@ struct DirectorScreen: View {
                 .padding(.horizontal, 16)
                 .germigoCard(padding: 0)
                 SectionHeader(title: tr("Sent"))
+                if daycare.isStale {
+                    StaleFeedNote()
+                }
                 if state.notices.isEmpty {
                     Text(tr("No notices sent yet."))
                         .font(.subheadline)
@@ -810,6 +814,7 @@ struct EmailNoticesScreen: View {
                                 .foregroundStyle(palette.inkSecondary)
                             TextField(tr("director@daycare.ca"), text: $email)
                                 .keyboardType(.emailAddress)
+                                .textContentType(.emailAddress)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
                                 .foregroundStyle(palette.ink)

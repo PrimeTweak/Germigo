@@ -33,11 +33,14 @@ extension View {
         modifier(CardBackground(radius: radius, padding: padding))
     }
 
-    /// Gives a control shorter than 44 points a 44-point touch area without moving what surrounds it.
-    func hitTarget(height: CGFloat) -> some View {
+    /// Gives a control smaller than 44 points a 44-point touch area without moving what surrounds it.
+    func hitTarget(width: CGFloat = 44, height: CGFloat) -> some View {
+        let across = max(0, (44 - width) / 2)
         let reach = max(0, (44 - height) / 2)
-        return padding(.vertical, reach)
+        return padding(.horizontal, across)
+            .padding(.vertical, reach)
             .contentShape(Rectangle())
+            .padding(.horizontal, -across)
             .padding(.vertical, -reach)
     }
 }

@@ -25,6 +25,8 @@ final class DaycareStore {
     /// Kids being watched after a notice, as "noticeID/kidID", with the time Germigo asks.
     private(set) var watches: [String: Date]
     var errorMessage: String?
+    /// True when the last background refresh could not reach the server, so the notices may be out of date.
+    private(set) var isStale = false
     /// A notice opened from a notification, waiting for the Crew tab to show it.
     var openedNoticeID: String?
 
@@ -229,10 +231,12 @@ final class DaycareStore {
         do {
             try await work()
             if !quiet { errorMessage = nil }
+            isStale = false
             return true
         } catch let error as CrewAPIError {
             if error.code == "unauthorized" { onUnauthorized() }
             if !quiet || error.code == "unauthorized" { errorMessage = message(error) }
+            if quiet, error.code == "offline" { isStale = true }
             return false
         } catch {
             if !quiet { errorMessage = tr("Something went wrong. Try again.") }

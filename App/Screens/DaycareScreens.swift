@@ -316,6 +316,18 @@ struct NoticeRow: View {
     }
 }
 
+/// Says the notices on screen are the last ones saved, when the server did not answer.
+struct StaleFeedNote: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Label(tr("Can't reach the server. These are the last notices saved on this phone."), systemImage: "wifi.slash")
+            .font(.footnote)
+            .foregroundStyle(palette.inkSecondary)
+            .padding(.horizontal, 4)
+    }
+}
+
 /// A followed daycare: its notices, the kids' groups, and leaving.
 struct DaycareScreen: View {
     let id: String
@@ -361,6 +373,9 @@ struct DaycareScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 8)
                 SectionHeader(title: tr("Notices"))
+                if daycare.isStale {
+                    StaleFeedNote()
+                }
                 if notices.isEmpty {
                     Text(tr("No notices lately. Good news."))
                         .font(.subheadline)

@@ -295,6 +295,7 @@ struct AddPhotoSheet: View {
                             .foregroundStyle(.white)
                             .frame(width: 40, height: 40)
                             .background(.black.opacity(0.45), in: Circle())
+                            .hitTarget(width: 40, height: 40)
                     }
                     .padding(12)
                     .accessibilityLabel(tr("Start over"))

@@ -195,6 +195,7 @@
 "Busiest month so far: %@." = "Mois le plus chargé jusqu'ici : %@.";
 "Call it dodged" = "Le compter comme esquivé";
 "Can help, when a doctor prescribes them" = "Peuvent aider, quand un médecin les prescrit";
+"Can't reach the server. These are the last notices saved on this phone." = "Serveur injoignable. Voici les derniers avis gardés sur ce téléphone.";
 "Cancel" = "Annuler";
 "Card %1$@ · %2$@ · From %3$@" = "Carte %1$@ · %2$@ · De %3$@";
 "Card %1$@, %2$@, not caught yet" = "Carte %1$@, %2$@, pas encore attrapée";

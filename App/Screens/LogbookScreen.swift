@@ -56,7 +56,7 @@ struct LogbookScreen: View {
                     .font(.body.weight(.bold))
                     .foregroundStyle(palette.inkSecondary)
                     .frame(width: 40, height: 40)
-                    .contentShape(Rectangle())
+                    .hitTarget(width: 40, height: 40)
             }
             .accessibilityLabel(tr("More"))
         }
@@ -315,7 +315,7 @@ private struct KidsGermsView: View {
                         .font(.body.weight(.bold))
                         .foregroundStyle(palette.inkSecondary)
                         .frame(width: 40, height: 40)
-                        .contentShape(Rectangle())
+                        .hitTarget(width: 40, height: 40)
                 }
                 .accessibilityLabel(tr("More"))
             }

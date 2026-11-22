@@ -331,6 +331,7 @@ private struct BetterButton: View {
                 .frame(height: 34)
                 .background(palette.isDark ? palette.surfaceAlt : palette.background, in: Capsule())
                 .liftShadow()
+                .hitTarget(height: 34)
         }
         .buttonStyle(PressableStyle())
     }
