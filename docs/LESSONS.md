@@ -5,7 +5,7 @@ New lessons reach the app without an update. The app downloads one JSON file fro
 ## Rules in the app
 
 - A lesson appears on its `released` day, at midnight in the phone's time zone.
-- For its first 7 days it is open to everyone, listed under This week, and the Lab shows a dot on the lessons button until it is read.
+- For its first 7 days it is open to everyone, listed under This week, and the Guide puts it forward as the new lesson until it is read.
 - After that week it joins the ladder: each online lesson, in release order, needs 5 more right answers in the daily quiz than the one before it (30, 35, 40, and so on after the bundled 25).
 - A lesson read once stays open.
 - Each upcoming lesson is announced at 10 AM on its release day, unless New lessons is off in Settings. The announcement is scheduled when the app reads the file, so publishing a lesson a few days ahead makes it reach more phones on time.

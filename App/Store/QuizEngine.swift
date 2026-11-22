@@ -249,11 +249,21 @@ enum QuizEngine {
         return Int((Double(days) / 7).rounded(.down))
     }
 
-    /// The germ that opens the Lab's collection for the week; the mystery germ never does.
+    /// The germ the Guide puts forward for the week; the mystery germ never is.
     static func germOfTheWeek(_ germs: [Germ], now: Date) -> Germ? {
+        weekPick(germs, now: now, halfway: false)
+    }
+
+    /// The germ whose myth is played this week: half an album away from the germ of the week,
+    /// so the two differ as soon as the album holds two germs.
+    static func mythOfTheWeek(_ germs: [Germ], now: Date) -> Germ? {
+        weekPick(germs, now: now, halfway: true)
+    }
+
+    private static func weekPick(_ germs: [Germ], now: Date, halfway: Bool) -> Germ? {
         let pool = germs.filter { $0.id != GermCatalog.mysteryID }
         guard !pool.isEmpty else { return nil }
-        let index = weekIndex(now) % pool.count
+        let index = (weekIndex(now) + (halfway ? pool.count / 2 : 0)) % pool.count
         return pool[(index + pool.count) % pool.count]
     }
 }

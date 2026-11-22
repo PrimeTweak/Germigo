@@ -14,7 +14,7 @@ struct GermCardView: View {
     var finish = Finish.standard
     var count = 0
     var isNew = false
-    /// A locked card whose Lab questions were all answered right.
+    /// A locked card whose quiz questions were all answered right.
     var studied = false
 
     private var height: CGFloat { width * 1.39 }

@@ -42,7 +42,7 @@ Set in `App/Info.plist`:
 | `GermigoSupportEmail` | Contact address shown in Settings, the legal screens and Crew. |
 | `GermigoPublisherName` | Person or company that publishes the app, named in the legal screens. |
 | `GermigoShareURL` | Page the QR code on every share card opens, normally `<server>/get`. While it holds the placeholder, cards carry no QR code. |
-| `GermigoLessonsURL` | https address of the online lesson file (see `docs/LESSONS.md`). While it holds the placeholder, the Lab shows only the bundled lessons. |
+| `GermigoLessonsURL` | https address of the online lesson file (see `docs/LESSONS.md`). While it holds the placeholder, the Guide shows only the bundled lessons. |
 | `GermigoCrewEnabled` | `false` removes the Crew tab and its settings. |
 
 The app opens `germigo://log` (log sheet) and `germigo://today`. The streak widget uses them.
@@ -65,7 +65,7 @@ Skill tree titles, streak milestones, the couple duel and the season story are c
 
 The household's characters are the images `buddy-<n>-well` and `buddy-<n>-sick`. A kid's `colorIndex` picks one, as do the journal's `hostLook` and `partnerLook`.
 
-The Lab's daily quiz is built in `App/Store/QuizEngine.swift` from the myths, boss attacks and timings in `germs.json`. The journal keeps only the day's round, the questions asked or missed, the days done and the count of right answers, which unlocks the lessons and adds points.
+The Guide tab (`App/Screens/LabScreen.swift`) holds the search, the daily quiz, the week's germ, myth and lesson, the illnesses shelved by part of the body, and the lessons. What it has already revealed and the answer to the week's myth are kept in `UserDefaults` under `GuideKeys`, outside the journal and its backup. The daily quiz is built in `App/Store/QuizEngine.swift` from the myths, boss attacks and timings in `germs.json`. The journal keeps only the day's round, the questions asked or missed, the days done and the count of right answers, which unlocks the lessons and adds points.
 
 ## Text
 

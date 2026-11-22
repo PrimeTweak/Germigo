@@ -692,7 +692,7 @@ private struct SuspectsPage: View {
 
     private func subtitle(_ lineup: Lineup) -> String {
         guard let best = lineup.top.first else {
-            return tr("Nothing in the lab fits these signs yet.")
+            return tr("Nothing in the guide fits these signs yet.")
         }
         if !lineup.isFull {
             return tr("The closest ones fit %1$lld of your %2$lld signs.", best.matched, lineup.chosen)

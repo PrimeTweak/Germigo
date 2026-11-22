@@ -75,4 +75,17 @@ enum LessonEngine {
         data.readArticles.contains(article.id) || isOpenToAll(article, now: now)
             || data.quiz.rightTotal >= article.unlockAtAnswers
     }
+
+    /// The lessons in reading order: this week's unread ones, the other open unread ones,
+    /// the locked ones by step, then those already read.
+    static func readingOrder(_ articles: [Article], data: AppData, now: Date) -> [Article] {
+        func rank(_ article: Article) -> Int {
+            if data.readArticles.contains(article.id) { return 3 }
+            if isOpenToAll(article, now: now) { return 0 }
+            return isUnlocked(article, data: data, now: now) ? 1 : 2
+        }
+        return articles.enumerated()
+            .sorted { (rank($0.element), $0.offset) < (rank($1.element), $1.offset) }
+            .map { $0.element }
+    }
 }

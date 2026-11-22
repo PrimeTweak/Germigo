@@ -30,6 +30,7 @@
 "%1$lld days free, then %2$@." = "%1$lld jours gratuits, puis %2$@.";
 "%1$lld germs · %2$lld days" = "%1$lld microbes · %2$lld jours";
 "%1$lld of %2$lld" = "%1$lld sur %2$lld";
+"%1$lld of %2$lld caught" = "%1$lld sur %2$lld attrapés";
 "%1$lld of %2$lld points to level %3$lld" = "%1$lld points sur %2$lld vers le niveau %3$lld";
 "%1$lld of %2$lld right. A new quiz tomorrow." = "%1$lld bonnes réponses sur %2$lld. Nouveau quiz demain.";
 "%1$lld of your %2$lld germs" = "%1$lld de tes %2$lld microbes";
@@ -50,7 +51,6 @@
 "%@: how long does it usually last?" = "%@ : combien de temps ça dure, en général ?";
 "%@: what's behind it?" = "%@ : qu'est-ce qui se cache derrière ?";
 "%@: when do symptoms usually start?" = "%@ : quand les symptômes commencent-ils, en général ?";
-"%lld caught" = "Attrapés : %lld";
 "%lld day" = "%lld jour";
 "%lld day without a germ" = "%lld jour sans microbe";
 "%lld day without a germ is on the line." = "%lld jour sans microbe est en jeu.";
@@ -84,12 +84,12 @@
 "%lld photos" = "%lld photos";
 "%lld photos, newest first" = "%lld photos, les plus récentes en premier";
 "%lld pts" = "%lld pts";
-"%lld question · about a minute" = "%lld question · environ une minute";
-"%lld questions · about a minute" = "%lld questions · environ une minute";
 "%lld report" = "%lld signalement";
 "%lld reports" = "%lld signalements";
 "%lld sick day" = "%lld jour malade";
 "%lld sick days" = "%lld jours malade";
+"%lld sign to watch for" = "%lld signe à surveiller";
+"%lld signs to watch for" = "%lld signes à surveiller";
 "%lld suspects" = "%lld suspects";
 "%lld time" = "%lld fois";
 "%lld times" = "%lld fois";
@@ -140,7 +140,6 @@
 "Airways" = "Voies respiratoires";
 "Album" = "Album";
 "Alias" = "Alias";
-"All %lld" = "Tous les %lld";
 "All clear" = "Tout va bien";
 "All clear. For now." = "Rien à signaler. Pour l'instant.";
 "All germs" = "Tous les microbes";
@@ -207,7 +206,6 @@
 "Catch 20 germs" = "Attrape 20 microbes";
 "Catch 3 colds" = "Attrape 3 rhumes";
 "Caught" = "Attrapé";
-"Caught %lld" = "Attrapés %lld";
 "Caught %lld time this season" = "Attrapé %lld fois cette saison";
 "Caught %lld times this season" = "Attrapé %lld fois cette saison";
 "Caught it" = "Attrapé";
@@ -397,11 +395,13 @@
 "Going around %@" = "Ça court chez %@";
 "Golden Dish" = "Coupelle dorée";
 "Good for one uninterrupted nap." = "Bon pour une sieste sans interruption.";
+"Good to have" = "Bon à savoir";
 "Got every myth right" = "Tous les mythes réussis";
 "got you" = "t'ont eu";
 "Group name" = "Nom du groupe";
 "Groups" = "Groupes";
 "Guess, then swipe to see." = "Devine, puis glisse pour voir.";
+"Guide" = "Guide";
 "Gut" = "Ventre";
 "Half Album" = "Demi-album";
 "Hand-Washing Zealot" = "Fanatique du lavage de mains";
@@ -410,6 +410,7 @@
 "Health line" = "Ligne santé";
 "Help" = "Aide";
 "Help lines" = "Lignes d'aide";
+"Hides the signs" = "Masque les signes";
 "History" = "Historique";
 "Hoarse voice" = "Voix enrouée";
 "Holder" = "Titulaire";
@@ -429,6 +430,7 @@
 "Icons, themes and the incubation widget" = "Icônes, thèmes et widget d'incubation";
 "Illness" = "Maladie";
 "Illness notices from" = "Avis de maladie de";
+"Illnesses" = "Maladies";
 "Immune Legend" = "Légende immunitaire";
 "In %lld week" = "Dans %lld semaine";
 "In %lld weeks" = "Dans %lld semaines";
@@ -472,13 +474,7 @@
 "Kids" = "Enfants";
 "Kids brought it home. You stepped aside." = "Les enfants l'ont rapporté. Tu t'es tassé.";
 "Know what's going around" = "Sache ce qui court";
-"Lab" = "Labo";
-"Lab day" = "jour au Labo";
-"Lab days" = "jours au Labo";
 "Lab Rat" = "Rat de labo";
-"Lab streak" = "Série du labo";
-"Lab streak: %lld day" = "Série du labo : %lld jour";
-"Lab streak: %lld days" = "Série du labo : %lld jours";
 "Last updated %@" = "Dernière mise à jour : %@";
 "Lasts" = "Durée";
 "Lasts: %@" = "Durée : %@";
@@ -491,6 +487,7 @@
 "Leave this daycare?" = "Quitter cette garderie ?";
 "left in window" = "avant la fin de la fenêtre";
 "Legendary" = "Légendaire";
+"Lesson to read" = "Leçon à lire";
 "Lessons" = "Leçons";
 "Lessons open with right answers in the daily quiz." = "Les leçons s'ouvrent avec les bonnes réponses du quiz du jour.";
 "Level %1$lld · %2$@" = "Niveau %1$lld · %2$@";
@@ -546,8 +543,8 @@
 "New card" = "Nouvelle carte";
 "New icons unlock as the season goes." = "De nouvelles icônes se débloquent au fil de la saison.";
 "New kid" = "Nouvel enfant";
-"New lesson in the Lab" = "Nouvelle leçon au Labo";
-"New lesson, %1$lld of %2$lld" = "Nouvelle leçon, %1$lld sur %2$lld";
+"New lesson" = "Nouvelle leçon";
+"New lesson in the Guide" = "Nouvelle leçon dans le Guide";
 "New lessons" = "Nouvelles leçons";
 "New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz." = "De nouvelles leçons sortent régulièrement. Chacune est ouverte à tous pendant 7 jours, puis s'ouvre avec les bonnes réponses du quiz du jour.";
 "New notice" = "Nouvel avis";
@@ -556,6 +553,7 @@
 "Next" = "Suivant";
 "Next 48 hours" = "Prochaines 48 heures";
 "Next day" = "Jour suivant";
+"Next lesson" = "Prochaine leçon";
 "Next up" = "Prochain objectif";
 "Next: %1$@, %2$lld of %3$lld." = "Prochain : %1$@, %2$lld sur %3$lld.";
 "Night" = "Nuit";
@@ -572,7 +570,6 @@
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
 "No daycare matches that code." = "Aucune garderie ne correspond à ce code.";
 "No germs logged yet. It won't last." = "Aucun microbe noté pour l'instant. Ça ne durera pas.";
-"No illness matches your search." = "Aucune maladie ne correspond à ta recherche.";
 "No kid is sick right now. Enjoy it." = "Aucun enfant malade en ce moment. Profites-en.";
 "No notices lately. Good news." = "Aucun avis ces temps-ci. Bonne nouvelle.";
 "No notices sent yet." = "Aucun avis envoyé pour le moment.";
@@ -586,9 +583,11 @@
 "Nobody stands out yet this season." = "Personne ne se démarque encore cette saison.";
 "Nobody was sick. Suspiciously quiet." = "Personne n'était malade. Calme suspect.";
 "Nose and throat germs" = "Microbes du nez et de la gorge";
+"Nose, throat and lungs" = "Nez, gorge et poumons";
 "Not at this daycare" = "Pas à cette garderie";
 "Not bad at all." = "Pas mal du tout.";
 "Not caught yet" = "Pas encore attrapé";
+"Not met yet" = "Pas encore rencontré";
 "Not one sick week so far." = "Aucune semaine malade jusqu'ici.";
 "Not quite." = "Pas tout à fait.";
 "Not sure" = "Pas certain";
@@ -596,11 +595,11 @@
 "Not yet" = "Pas encore";
 "Note (optional)" = "Note (facultative)";
 "Nothing brought home yet" = "Encore rien ramené";
-"Nothing here yet. It won't last." = "Rien ici pour l'instant. Ça ne durera pas.";
 "Nothing in particular" = "Rien en particulier";
-"Nothing in the lab fits these signs yet." = "Rien au labo ne colle à ces signes pour l'instant.";
+"Nothing in the guide fits these signs yet." = "Rien dans le guide ne colle à ces signes pour l'instant.";
 "Nothing logged in the last 6 months." = "Rien de noté dans les 6 derniers mois.";
 "Nothing logged yet." = "Rien de noté pour l'instant.";
+"Nothing matches your search." = "Rien ne correspond à ta recherche.";
 "Nothing to report" = "Rien à signaler";
 "Nothing was deleted" = "Rien n'a été supprimé";
 "Nothing yet. Enjoy it while it lasts." = "Rien encore. Profites-en pendant que ça dure.";
@@ -631,6 +630,8 @@
 "Open Crew, then tap Join a daycare." = "Ouvre Groupe, puis touche Rejoindre une garderie.";
 "Open the case file" = "Ouvrir le dossier";
 "Open the web version" = "Ouvrir la version Web";
+"Open to all · %lld day" = "Ouverte à tous · %lld jour";
+"Open to all · %lld days" = "Ouverte à tous · %lld jours";
 "Open to everyone this week." = "Ouverte à tous cette semaine.";
 "Open to everyone · %lld day left" = "Ouverte à tous · encore %lld jour";
 "Open to everyone · %lld days left" = "Ouverte à tous · encore %lld jours";
@@ -680,6 +681,11 @@
 "Quick facts" = "En bref";
 "Quiet hours" = "Heures de silence";
 "Quiet week. Suspicious." = "Semaine tranquille. Louche.";
+"quiz day" = "jour de quiz";
+"quiz days" = "jours de quiz";
+"Quiz streak" = "Série du quiz";
+"Quiz streak: %lld day" = "Série du quiz : %lld jour";
+"Quiz streak: %lld days" = "Série du quiz : %lld jours";
 "Québec's official criteria" = "Les critères officiels du Québec";
 "Rare" = "Rare";
 "Rash Cartographer" = "Cartographe des rougeurs";
@@ -731,7 +737,7 @@
 "Scan the code" = "Scanner le code";
 "Scan the daycare's code" = "Scanner le code de la garderie";
 "Scan this code or type it, then pick your child's group." = "Scanne ce code ou tape-le, puis choisis le groupe de ton enfant.";
-"Search an illness" = "Chercher une maladie";
+"Search an illness or a lesson" = "Chercher une maladie ou une leçon";
 "Season" = "Saison";
 "Season %lld" = "Saison %lld";
 "Season %lld recap" = "Bilan de la saison %lld";
@@ -740,6 +746,7 @@
 "Season story" = "Récit de la saison";
 "Seasons" = "Saisons";
 "Section" = "Section";
+"See all %lld" = "Tout voir (%lld)";
 "See my score" = "Voir mon score";
 "See the Season Pass" = "Voir la Passe de saison";
 "See the suspects" = "Voir les suspects";
@@ -770,6 +777,7 @@
 "Share this card" = "Partager cette carte";
 "Show %lld more" = "Afficher %lld de plus";
 "Show photos" = "Voir les photos";
+"Shows the signs" = "Affiche les signes";
 "Shows up" = "Apparaît";
 "Sick" = "Malade";
 "Sick %1$lld weeks out of %2$lld." = "Malade %1$lld semaines sur %2$lld.";
@@ -783,6 +791,7 @@
 "Skill tree" = "Arbre de compétences";
 "Skin" = "Peau";
 "Skin and critter germs" = "Microbes de peau et bestioles";
+"Skin, eyes and hair" = "Peau, yeux et cheveux";
 "Skip" = "Passer";
 "Sleepless Night Survivor" = "Survivant des nuits blanches";
 "Slurp! Thank you." = "Slurp ! Merci.";
@@ -823,7 +832,7 @@
 "Stomach pain" = "Mal de ventre";
 "Stop the reminders" = "Arrêter les rappels";
 "Studied" = "Étudié";
-"Studied %lld" = "Étudiés %lld";
+"Studied in the quiz" = "Étudié au quiz";
 "Subject:" = "Objet :";
 "Subscribe" = "M'abonner";
 "Survive the season." = "Survivre à la saison.";
@@ -935,6 +944,7 @@
 "Try %lld days free" = "Essaie %lld jours gratuits";
 "Try again" = "Réessayer";
 "Try later" = "Réessayer plus tard";
+"Tummy and others" = "Ventre et autres";
 "Turn on in iOS Settings" = "Activer dans Réglages iOS";
 "Twelve different germs caught" = "Douze microbes différents attrapés";
 "Unblock everyone (%lld)" = "Débloquer tout le monde (%lld)";

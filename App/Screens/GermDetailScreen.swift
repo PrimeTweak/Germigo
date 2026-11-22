@@ -8,6 +8,7 @@ struct GermDetailScreen: View {
     @State private var showShare = false
     @State private var showBossShare = false
     @State private var checkedSigns: Set<Int> = []
+    @State private var showsSigns = false
     @State private var mythAnswer: Bool?
 
     private var caught: Int { model.count(of: germ.id) }
@@ -17,13 +18,13 @@ struct GermDetailScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 hero
+                doctorBanner
                 aboutSection
                 symptomsSection
                 timeline
                 spreadSection
                 helps
                 quickFacts
-                doctorBanner
                 mythSection
                 deepDive
                 bossSection
@@ -321,87 +322,113 @@ struct GermDetailScreen: View {
         }
     }
 
-    /// The "when to call" advice as a list to go down, one sign at a time.
+    /// The "when to call" advice, right under the hero: one row that opens on the signs to go down.
     private var doctorBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 13) {
-                IconTile(symbol: "cross.case.fill", size: 36)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("When to call"))
-                        .font(.headline)
-                        .foregroundStyle(palette.ink)
-                    Text(germ.doctorLead.value)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(palette.ink.opacity(0.85))
-                        .fixedSize(horizontal: false, vertical: true)
+            Button {
+                Haptics.tap()
+                withAnimation(.snappy) {
+                    showsSigns.toggle()
                 }
-            }
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(germ.doctorSigns.enumerated()), id: \.offset) { item in
-                    let checked = checkedSigns.contains(item.offset)
-                    Button {
-                        Haptics.tap()
-                        if checked {
-                            checkedSigns.remove(item.offset)
-                        } else {
-                            checkedSigns.insert(item.offset)
-                        }
-                    } label: {
-                        HStack(alignment: .top, spacing: 12) {
-                            Image(systemName: checked ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundStyle(checked ? palette.accent : palette.inkTertiary)
-                            Text(item.element.value)
-                                .font(.subheadline)
-                                .foregroundStyle(palette.ink)
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.vertical, 8)
-                        .contentShape(Rectangle())
+            } label: {
+                HStack(spacing: 13) {
+                    IconTile(symbol: "cross.case.fill", size: 36)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tr("When to call"))
+                            .font(.headline)
+                            .foregroundStyle(palette.ink)
+                        Text(showsSigns ? germ.doctorLead.value
+                                        : trCount(germ.doctorSigns.count, one: "%lld sign to watch for", other: "%lld signs to watch for"))
+                            .font(.subheadline.weight(showsSigns ? .semibold : .regular))
+                            .foregroundStyle(palette.ink.opacity(0.85))
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(checked ? .isSelected : [])
+                    Spacer(minLength: 4)
+                    Image(systemName: "chevron.down")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(palette.inkSecondary)
+                        .rotationEffect(.degrees(showsSigns ? 180 : 0))
+                        .accessibilityHidden(true)
                 }
+                .contentShape(Rectangle())
             }
-            if let note = germ.doctorNote {
-                Text(note.value)
-                    .font(.subheadline)
-                    .foregroundStyle(palette.ink.opacity(0.85))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            Text(tr("In an emergency, call your local emergency number."))
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(palette.ink)
-            if let kid = germ.kidReference, let url = URL(string: kid.url) {
-                Divider()
-                Link(destination: url) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "figure.and.child.holdinghands")
-                            .font(.body.weight(.semibold))
-                            .frame(width: 36)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(tr("Is it your kid?"))
-                                .font(.subheadline.weight(.semibold))
-                            Text(tr("Advice for children: %@", kid.name))
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                                .multilineTextAlignment(.leading)
-                        }
-                        Spacer(minLength: 4)
-                        Image(systemName: "arrow.up.right")
-                            .font(.footnote.weight(.bold))
-                            .foregroundStyle(palette.inkTertiary)
-                    }
-                    .foregroundStyle(palette.ink)
-                }
+            .buttonStyle(.plain)
+            .accessibilityHint(showsSigns ? tr("Hides the signs") : tr("Shows the signs"))
+            if showsSigns {
+                signs
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.12),
                     in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
+
+    /// The signs to check off, the note, the emergency line and the page that covers children.
+    @ViewBuilder
+    private var signs: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(germ.doctorSigns.enumerated()), id: \.offset) { item in
+                let checked = checkedSigns.contains(item.offset)
+                Button {
+                    Haptics.tap()
+                    if checked {
+                        checkedSigns.remove(item.offset)
+                    } else {
+                        checkedSigns.insert(item.offset)
+                    }
+                } label: {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(checked ? palette.accent : palette.inkTertiary)
+                        Text(item.element.value)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.ink)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(checked ? .isSelected : [])
+            }
+        }
+        if let note = germ.doctorNote {
+            Text(note.value)
+                .font(.subheadline)
+                .foregroundStyle(palette.ink.opacity(0.85))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        Text(tr("In an emergency, call your local emergency number."))
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.ink)
+        if let kid = germ.kidReference, let url = URL(string: kid.url) {
+            Divider()
+            Link(destination: url) {
+                HStack(spacing: 12) {
+                    Image(systemName: "figure.and.child.holdinghands")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 36)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(tr("Is it your kid?"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(tr("Advice for children: %@", kid.name))
+                            .font(.footnote)
+                            .foregroundStyle(palette.inkSecondary)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer(minLength: 4)
+                    Image(systemName: "arrow.up.right")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(palette.inkTertiary)
+                }
+                .foregroundStyle(palette.ink)
+            }
+        }
     }
 
     /// The germ as a boss: a joke health bar, the fight in phases, and the weakness from its notes.

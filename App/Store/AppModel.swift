@@ -251,9 +251,9 @@ final class AppModel {
             .sorted { ($0.releasedOn ?? now) > ($1.releasedOn ?? now) }
     }
 
-    /// True while a lesson of the week is still unread.
-    var hasNewLesson: Bool {
-        lessonsThisWeek().contains { !data.readArticles.contains($0.id) }
+    /// Every lesson, the next one to read first.
+    func lessonsToRead(now: Date = Date()) -> [Article] {
+        LessonEngine.readingOrder(catalog.articles, data: data, now: now)
     }
 
     /// The first day a free journal shows; nil with the Season Pass, which shows every day.
@@ -365,7 +365,7 @@ final class AppModel {
         commit()
     }
 
-    // MARK: - Lab
+    // MARK: - Quiz
 
     var quizBank: [QuizQuestion] {
         QuizEngine.bank(catalog.germs)
@@ -389,7 +389,7 @@ final class AppModel {
         QuizEngine.streak(doneDays: data.quiz.doneDays, sickDays: QuizEngine.sickDays(logs: data.logs, now: now), now: now)
     }
 
-    /// True while the parent is sick, which pauses the Lab streak instead of breaking it.
+    /// True while the parent is sick, which pauses the quiz streak instead of breaking it.
     var onSickLeave: Bool {
         activeLog?.sufferer.includesMe == true
     }
@@ -479,7 +479,7 @@ final class AppModel {
         }
     }
 
-    /// Germs whose Lab questions were all answered right at least once.
+    /// Germs whose quiz questions were all answered right at least once.
     var studiedGermIDs: Set<String> {
         QuizEngine.studied(bank: quizBank, rightIDs: data.quiz.rightIDs)
     }

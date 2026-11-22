@@ -200,7 +200,7 @@ enum NotificationManager {
         for (article, day) in dated.prefix(lessonLimit) {
             let title = article.title.value
             let joint = title.hasSuffix("?") || title.hasSuffix("!") || title.hasSuffix(".") ? " " : ". "
-            addMorning(id: lessonKey(article.id), on: day, title: tr("New lesson in the Lab"),
+            addMorning(id: lessonKey(article.id), on: day, title: tr("New lesson in the Guide"),
                        body: title + joint + tr("Open to everyone this week."))
         }
     }

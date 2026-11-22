@@ -1,0 +1,161 @@
+import SwiftUI
+
+/// Every lesson: open ones to read, locked ones with what opens them.
+struct LessonsScreen: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let fresh = model.lessonsThisWeek()
+        let ladder = model.catalog.articles.filter { !fresh.contains($0) }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                if !fresh.isEmpty {
+                    SectionHeader(title: tr("This week"))
+                    LessonCard(articles: fresh)
+                    SectionHeader(title: tr("All lessons"))
+                }
+                LessonCard(articles: ladder)
+                Text(AppConfig.lessonsURL == nil
+                     ? tr("Lessons open with right answers in the daily quiz.")
+                     : tr("New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.horizontal, 4)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 28)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("Lessons"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Lessons stacked in one card, with a hairline between them.
+struct LessonCard: View {
+    let articles: [Article]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(articles.enumerated()), id: \.element.id) { item in
+                if item.offset > 0 {
+                    Divider()
+                }
+                LessonRow(article: item.element)
+            }
+        }
+        .padding(.horizontal, 18)
+        .germigoCard(padding: 0)
+    }
+}
+
+/// One lesson: its title and summary once open, or what opens it. A locked one wiggles its padlock when tapped.
+struct LessonRow: View {
+    let article: Article
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var nudges = 0
+
+    var body: some View {
+        if model.isArticleUnlocked(article) {
+            NavigationLink(value: article) {
+                label(locked: false)
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button {
+                Haptics.tap()
+                nudges += 1
+            } label: {
+                label(locked: true)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func label(locked: Bool) -> some View {
+        let now = Date()
+        let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
+        let openWeek = LessonEngine.isOpenToAll(article, now: now)
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(article.title.value)
+                    .font(.body)
+                    .foregroundStyle(locked ? palette.inkSecondary : palette.ink)
+                    .multilineTextAlignment(.leading)
+                Text(locked ? trCount(remaining, one: "%lld more right answer", other: "%lld more right answers")
+                            : article.summary.value)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                if openWeek {
+                    let left = LessonEngine.daysLeft(article, now: now)
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                        Text(trCount(left, one: "Open to everyone · %lld day left", other: "Open to everyone · %lld days left"))
+                    }
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.accent)
+                    .padding(.top, 5)
+                }
+            }
+            Spacer(minLength: 4)
+            if locked {
+                Image(systemName: "lock.fill")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkTertiary)
+                    .symbolEffect(.wiggle, value: nudges)
+                    .accessibilityHidden(true)
+            } else if !model.data.readArticles.contains(article.id) {
+                Circle()
+                    .fill(palette.accent)
+                    .frame(width: 8, height: 8)
+                    .accessibilityLabel(tr("New"))
+            }
+        }
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+}
+
+struct ArticleScreen: View {
+    let article: Article
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text(article.title.value)
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(article.summary.value)
+                    .font(.title3)
+                    .foregroundStyle(palette.inkSecondary)
+                ForEach(Array(article.paragraphs.enumerated()), id: \.offset) { item in
+                    Text(item.element.value)
+                        .font(.body)
+                        .foregroundStyle(palette.ink)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if !article.sources.isEmpty {
+                    SectionHeader(title: tr("Sources"))
+                    SourceList(references: article.sources)
+                }
+                Text(HealthNotice.text)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .padding(.horizontal, 22)
+            .padding(.vertical, 16)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            model.markArticleRead(article.id)
+        }
+    }
+}

@@ -394,7 +394,7 @@ struct QuizScreen: View {
             VStack(alignment: .leading, spacing: 0) {
                 ValueRow(title: tr("Points"), value: tr("+%lld pts", score * RewardEngine.quizAnswerPoints), showsChevron: false)
                 Divider()
-                ValueRow(title: tr("Lab streak"), value: trCount(streak, one: "%lld day", other: "%lld days"), showsChevron: false)
+                ValueRow(title: tr("Quiz streak"), value: trCount(streak, one: "%lld day", other: "%lld days"), showsChevron: false)
                 if let next = model.nextLesson {
                     Divider()
                     ValueRow(title: next.article.title.value, value: trCount(next.remaining, one: "%lld to go", other: "%lld to go"), showsChevron: false)

@@ -284,7 +284,7 @@ do {
     month.quiz.doneDays = [QuizEngine.dayKey(day(4)), QuizEngine.dayKey(day(40))]
     let recap = MonthRecapEngine.recap(data: month, catalog: catalog, month: day(1), now: day(60))
     check(recap.caught == 2 && recap.daysSick == 5 && recap.labDays == 1,
-          "the month recap counts its own germs, sick days and Lab days")
+          "the month recap counts its own germs, sick days and quiz days")
     check(recap.nemesis?.id == "rhino", "the month's nemesis is its most frequent germ")
     check(MonthRecapEngine.recap(data: makeData(), catalog: catalog, month: day(1), now: day(60)).isEmpty,
           "a quiet month has no recap")
@@ -482,6 +482,12 @@ do {
           "a new germ comes on Monday")
     check((0..<10).allSatisfy { QuizEngine.germOfTheWeek(pool, now: day(4 + 7 * $0))?.id != GermCatalog.mysteryID },
           "the mystery germ is never the germ of the week")
+    check(QuizEngine.mythOfTheWeek(pool, now: monday)?.id == QuizEngine.mythOfTheWeek(pool, now: day(10))?.id,
+          "the myth of the week holds from Monday to Sunday")
+    check((0..<10).allSatisfy { week in
+        let now = day(4 + 7 * week)
+        return QuizEngine.mythOfTheWeek(pool, now: now)?.id != QuizEngine.germOfTheWeek(pool, now: now)?.id
+    }, "the myth of the week belongs to another germ than the germ of the week")
 }
 
 // MARK: - Photos
@@ -573,6 +579,12 @@ do {
                             feed: [lesson("early", "2026-10-08"), lesson("late", "2026-10-15")], now: day(10))
     check(shelf.articles.map { $0.id } == ["b0", "b5", "b25", "early"], "a lesson shows from its release day")
     check(shelf.upcoming.map { $0.id } == ["late"], "a lesson waits for its release day")
+    check(LessonEngine.readingOrder(shelf.articles, data: makeData(), now: day(10)).map { $0.id } == ["early", "b0", "b5", "b25"],
+          "this week's lesson leads the reading order, then the open one, then the locked ones")
+    var reader = makeData()
+    reader.readArticles = ["b0", "early"]
+    check(LessonEngine.readingOrder(shelf.articles, data: reader, now: day(10)).map { $0.id } == ["b5", "b25", "b0", "early"],
+          "lessons already read go last")
 
     if let early = shelf.articles.last {
         var data = makeData()

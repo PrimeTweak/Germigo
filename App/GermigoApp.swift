@@ -130,20 +130,20 @@ struct MainTabs: View {
             TodayScreen()
                 .tabItem { Label(tr("Today"), systemImage: "house.fill") }
                 .tag(AppTab.today)
+            LabScreen()
+                .tabItem { Label(tr("Guide"), systemImage: "book.fill") }
+                .tag(AppTab.lab)
             FamilyScreen()
                 .tabItem { Label(tr("Family"), systemImage: "figure.2.and.child.holdinghands") }
                 .tag(AppTab.family)
-            LabScreen()
-                .tabItem { Label(tr("Lab"), systemImage: "flask.fill") }
-                .tag(AppTab.lab)
-            TrophiesScreen()
-                .tabItem { Label(tr("Trophies"), systemImage: "trophy.fill") }
-                .tag(AppTab.trophies)
             if AppConfig.crewEnabled {
                 CrewScreen()
                     .tabItem { Label(tr("Crew"), systemImage: "person.3.fill") }
                     .tag(AppTab.crew)
             }
+            TrophiesScreen()
+                .tabItem { Label(tr("Trophies"), systemImage: "trophy.fill") }
+                .tag(AppTab.trophies)
         }
         .tabViewBottomAccessory(isEnabled: model.activeLog != nil && model.selectedTab != .today) {
             SickAccessory()

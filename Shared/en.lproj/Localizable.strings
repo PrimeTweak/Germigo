@@ -30,6 +30,7 @@
 "%1$lld days free, then %2$@." = "%1$lld days free, then %2$@.";
 "%1$lld germs · %2$lld days" = "%1$lld germs · %2$lld days";
 "%1$lld of %2$lld" = "%1$lld of %2$lld";
+"%1$lld of %2$lld caught" = "%1$lld of %2$lld caught";
 "%1$lld of %2$lld points to level %3$lld" = "%1$lld of %2$lld points to level %3$lld";
 "%1$lld of %2$lld right. A new quiz tomorrow." = "%1$lld of %2$lld right. A new quiz tomorrow.";
 "%1$lld of your %2$lld germs" = "%1$lld of your %2$lld germs";
@@ -50,7 +51,6 @@
 "%@: how long does it usually last?" = "%@: how long does it usually last?";
 "%@: what's behind it?" = "%@: what's behind it?";
 "%@: when do symptoms usually start?" = "%@: when do symptoms usually start?";
-"%lld caught" = "%lld caught";
 "%lld day" = "%lld day";
 "%lld day without a germ" = "%lld day without a germ";
 "%lld day without a germ is on the line." = "%lld day without a germ is on the line.";
@@ -84,12 +84,12 @@
 "%lld photos" = "%lld photos";
 "%lld photos, newest first" = "%lld photos, newest first";
 "%lld pts" = "%lld pts";
-"%lld question · about a minute" = "%lld question · about a minute";
-"%lld questions · about a minute" = "%lld questions · about a minute";
 "%lld report" = "%lld report";
 "%lld reports" = "%lld reports";
 "%lld sick day" = "%lld sick day";
 "%lld sick days" = "%lld sick days";
+"%lld sign to watch for" = "%lld sign to watch for";
+"%lld signs to watch for" = "%lld signs to watch for";
 "%lld suspects" = "%lld suspects";
 "%lld time" = "%lld time";
 "%lld times" = "%lld times";
@@ -140,7 +140,6 @@
 "Airways" = "Airways";
 "Album" = "Album";
 "Alias" = "Alias";
-"All %lld" = "All %lld";
 "All clear" = "All clear";
 "All clear. For now." = "All clear. For now.";
 "All germs" = "All germs";
@@ -207,7 +206,6 @@
 "Catch 20 germs" = "Catch 20 germs";
 "Catch 3 colds" = "Catch 3 colds";
 "Caught" = "Caught";
-"Caught %lld" = "Caught %lld";
 "Caught %lld time this season" = "Caught %lld time this season";
 "Caught %lld times this season" = "Caught %lld times this season";
 "Caught it" = "Caught it";
@@ -397,11 +395,13 @@
 "Going around %@" = "Going around %@";
 "Golden Dish" = "Golden Dish";
 "Good for one uninterrupted nap." = "Good for one uninterrupted nap.";
+"Good to have" = "Good to have";
 "Got every myth right" = "Got every myth right";
 "got you" = "got you";
 "Group name" = "Group name";
 "Groups" = "Groups";
 "Guess, then swipe to see." = "Guess, then swipe to see.";
+"Guide" = "Guide";
 "Gut" = "Gut";
 "Half Album" = "Half Album";
 "Hand-Washing Zealot" = "Hand-Washing Zealot";
@@ -410,6 +410,7 @@
 "Health line" = "Health line";
 "Help" = "Help";
 "Help lines" = "Help lines";
+"Hides the signs" = "Hides the signs";
 "History" = "History";
 "Hoarse voice" = "Hoarse voice";
 "Holder" = "Holder";
@@ -429,6 +430,7 @@
 "Icons, themes and the incubation widget" = "Icons, themes and the incubation widget";
 "Illness" = "Illness";
 "Illness notices from" = "Illness notices from";
+"Illnesses" = "Illnesses";
 "Immune Legend" = "Immune Legend";
 "In %lld week" = "In %lld week";
 "In %lld weeks" = "In %lld weeks";
@@ -472,13 +474,7 @@
 "Kids" = "Kids";
 "Kids brought it home. You stepped aside." = "Kids brought it home. You stepped aside.";
 "Know what's going around" = "Know what's going around";
-"Lab" = "Lab";
-"Lab day" = "Lab day";
-"Lab days" = "Lab days";
 "Lab Rat" = "Lab Rat";
-"Lab streak" = "Lab streak";
-"Lab streak: %lld day" = "Lab streak: %lld day";
-"Lab streak: %lld days" = "Lab streak: %lld days";
 "Last updated %@" = "Last updated %@";
 "Lasts" = "Lasts";
 "Lasts: %@" = "Lasts: %@";
@@ -491,6 +487,7 @@
 "Leave this daycare?" = "Leave this daycare?";
 "left in window" = "left in window";
 "Legendary" = "Legendary";
+"Lesson to read" = "Lesson to read";
 "Lessons" = "Lessons";
 "Lessons open with right answers in the daily quiz." = "Lessons open with right answers in the daily quiz.";
 "Level %1$lld · %2$@" = "Level %1$lld · %2$@";
@@ -546,8 +543,8 @@
 "New card" = "New card";
 "New icons unlock as the season goes." = "New icons unlock as the season goes.";
 "New kid" = "New kid";
-"New lesson in the Lab" = "New lesson in the Lab";
-"New lesson, %1$lld of %2$lld" = "New lesson, %1$lld of %2$lld";
+"New lesson" = "New lesson";
+"New lesson in the Guide" = "New lesson in the Guide";
 "New lessons" = "New lessons";
 "New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz." = "New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz.";
 "New notice" = "New notice";
@@ -556,6 +553,7 @@
 "Next" = "Next";
 "Next 48 hours" = "Next 48 hours";
 "Next day" = "Next day";
+"Next lesson" = "Next lesson";
 "Next up" = "Next up";
 "Next: %1$@, %2$lld of %3$lld." = "Next: %1$@, %2$lld of %3$lld.";
 "Night" = "Night";
@@ -572,7 +570,6 @@
 "No crew matches that code." = "No crew matches that code.";
 "No daycare matches that code." = "No daycare matches that code.";
 "No germs logged yet. It won't last." = "No germs logged yet. It won't last.";
-"No illness matches your search." = "No illness matches your search.";
 "No kid is sick right now. Enjoy it." = "No kid is sick right now. Enjoy it.";
 "No notices lately. Good news." = "No notices lately. Good news.";
 "No notices sent yet." = "No notices sent yet.";
@@ -586,9 +583,11 @@
 "Nobody stands out yet this season." = "Nobody stands out yet this season.";
 "Nobody was sick. Suspiciously quiet." = "Nobody was sick. Suspiciously quiet.";
 "Nose and throat germs" = "Nose and throat germs";
+"Nose, throat and lungs" = "Nose, throat and lungs";
 "Not at this daycare" = "Not at this daycare";
 "Not bad at all." = "Not bad at all.";
 "Not caught yet" = "Not caught yet";
+"Not met yet" = "Not met yet";
 "Not one sick week so far." = "Not one sick week so far.";
 "Not quite." = "Not quite.";
 "Not sure" = "Not sure";
@@ -596,11 +595,11 @@
 "Not yet" = "Not yet";
 "Note (optional)" = "Note (optional)";
 "Nothing brought home yet" = "Nothing brought home yet";
-"Nothing here yet. It won't last." = "Nothing here yet. It won't last.";
 "Nothing in particular" = "Nothing in particular";
-"Nothing in the lab fits these signs yet." = "Nothing in the lab fits these signs yet.";
+"Nothing in the guide fits these signs yet." = "Nothing in the guide fits these signs yet.";
 "Nothing logged in the last 6 months." = "Nothing logged in the last 6 months.";
 "Nothing logged yet." = "Nothing logged yet.";
+"Nothing matches your search." = "Nothing matches your search.";
 "Nothing to report" = "Nothing to report";
 "Nothing was deleted" = "Nothing was deleted";
 "Nothing yet. Enjoy it while it lasts." = "Nothing yet. Enjoy it while it lasts.";
@@ -631,6 +630,8 @@
 "Open Crew, then tap Join a daycare." = "Open Crew, then tap Join a daycare.";
 "Open the case file" = "Open the case file";
 "Open the web version" = "Open the web version";
+"Open to all · %lld day" = "Open to all · %lld day";
+"Open to all · %lld days" = "Open to all · %lld days";
 "Open to everyone this week." = "Open to everyone this week.";
 "Open to everyone · %lld day left" = "Open to everyone · %lld day left";
 "Open to everyone · %lld days left" = "Open to everyone · %lld days left";
@@ -680,6 +681,11 @@
 "Quick facts" = "Quick facts";
 "Quiet hours" = "Quiet hours";
 "Quiet week. Suspicious." = "Quiet week. Suspicious.";
+"quiz day" = "quiz day";
+"quiz days" = "quiz days";
+"Quiz streak" = "Quiz streak";
+"Quiz streak: %lld day" = "Quiz streak: %lld day";
+"Quiz streak: %lld days" = "Quiz streak: %lld days";
 "Québec's official criteria" = "Québec's official criteria";
 "Rare" = "Rare";
 "Rash Cartographer" = "Rash Cartographer";
@@ -731,7 +737,7 @@
 "Scan the code" = "Scan the code";
 "Scan the daycare's code" = "Scan the daycare's code";
 "Scan this code or type it, then pick your child's group." = "Scan this code or type it, then pick your child's group.";
-"Search an illness" = "Search an illness";
+"Search an illness or a lesson" = "Search an illness or a lesson";
 "Season" = "Season";
 "Season %lld" = "Season %lld";
 "Season %lld recap" = "Season %lld recap";
@@ -740,6 +746,7 @@
 "Season story" = "Season story";
 "Seasons" = "Seasons";
 "Section" = "Section";
+"See all %lld" = "See all %lld";
 "See my score" = "See my score";
 "See the Season Pass" = "See the Season Pass";
 "See the suspects" = "See the suspects";
@@ -770,6 +777,7 @@
 "Share this card" = "Share this card";
 "Show %lld more" = "Show %lld more";
 "Show photos" = "Show photos";
+"Shows the signs" = "Shows the signs";
 "Shows up" = "Shows up";
 "Sick" = "Sick";
 "Sick %1$lld weeks out of %2$lld." = "Sick %1$lld weeks out of %2$lld.";
@@ -783,6 +791,7 @@
 "Skill tree" = "Skill tree";
 "Skin" = "Skin";
 "Skin and critter germs" = "Skin and critter germs";
+"Skin, eyes and hair" = "Skin, eyes and hair";
 "Skip" = "Skip";
 "Sleepless Night Survivor" = "Sleepless Night Survivor";
 "Slurp! Thank you." = "Slurp! Thank you.";
@@ -823,7 +832,7 @@
 "Stomach pain" = "Stomach pain";
 "Stop the reminders" = "Stop the reminders";
 "Studied" = "Studied";
-"Studied %lld" = "Studied %lld";
+"Studied in the quiz" = "Studied in the quiz";
 "Subject:" = "Subject:";
 "Subscribe" = "Subscribe";
 "Survive the season." = "Survive the season.";
@@ -935,6 +944,7 @@
 "Try %lld days free" = "Try %lld days free";
 "Try again" = "Try again";
 "Try later" = "Try later";
+"Tummy and others" = "Tummy and others";
 "Turn on in iOS Settings" = "Turn on in iOS Settings";
 "Twelve different germs caught" = "Twelve different germs caught";
 "Unblock everyone (%lld)" = "Unblock everyone (%lld)";

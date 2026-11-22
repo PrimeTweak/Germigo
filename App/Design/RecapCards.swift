@@ -82,7 +82,7 @@ struct MonthRecapCard: View {
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                     tile(recap.caught, trCount(recap.caught, one: "germ caught", other: "germs caught"))
                     tile(recap.daysSick, trCount(recap.daysSick, one: "day sick", other: "days sick"))
-                    tile(recap.labDays, trCount(recap.labDays, one: "Lab day", other: "Lab days"))
+                    tile(recap.labDays, trCount(recap.labDays, one: "quiz day", other: "quiz days"))
                     tile(recap.dodged, trCount(recap.dodged, one: "germ dodged", other: "germs dodged"))
                 }
                 .padding(.top, 22)
