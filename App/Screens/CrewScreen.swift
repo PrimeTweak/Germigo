@@ -15,7 +15,6 @@ struct CrewScreen: View {
     @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @State private var showPaywall = false
-    @State private var showSettings = false
     @State private var path = NavigationPath()
 
     var body: some View {
@@ -39,32 +38,11 @@ struct CrewScreen: View {
             .navigationTitle(tr("Crew"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    if model.hasPass, crew.isMember, let state = crew.state {
-                        ShareLink(item: tr("Join my Germily crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
-                            Image(systemName: "person.badge.plus")
-                        }
-                        .accessibilityLabel(tr("Invite"))
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    if model.hasPass, crew.isMember {
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Image(systemName: "person.2.badge.gearshape")
-                        }
-                        .accessibilityLabel(tr("Crew settings"))
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()
                 }
             }
             .sheet(isPresented: $showPaywall) {
                 PaywallView(reason: .crew)
-            }
-            .sheet(isPresented: $showSettings) {
-                CrewSettingsSheet()
             }
             .navigationDestination(for: DaycareRoute.self) { route in
                 switch route {
@@ -402,6 +380,7 @@ private struct CrewHome: View {
     @Environment(\.palette) private var palette
     @State private var reportTarget: ReportTarget?
     @State private var showReported = false
+    @State private var showSettings = false
 
     var body: some View {
         ScrollView {
@@ -444,6 +423,9 @@ private struct CrewHome: View {
             Button(tr("OK"), role: .cancel) {}
         } message: {
             Text(tr("Thanks. This member is now hidden on your phone, and the report is reviewed within 24 hours."))
+        }
+        .sheet(isPresented: $showSettings) {
+            CrewSettingsSheet()
         }
     }
 
@@ -493,7 +475,7 @@ private struct CrewHome: View {
                         .font(.title2.weight(.bold))
                         .foregroundStyle(palette.ink)
                         .lineLimit(1)
-                    Text(tr("Daycare group") + " · " + trCount(state.crew.families, one: "%lld family", other: "%lld families"))
+                    Text(tr("Crew") + " · " + trCount(state.crew.families, one: "%lld family", other: "%lld families"))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                 }
@@ -517,11 +499,37 @@ private struct CrewHome: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    actions
+                }
+                VStack(spacing: 10) {
+                    actions
+                }
+            }
+            .padding(.top, 14)
         }
         .padding(16)
         .background(LinearGradient(colors: [Color(hex: Swatch.coralPale).opacity(palette.isDark ? 0.25 : 0.45), palette.surface],
                                    startPoint: .topLeading, endPoint: .bottomTrailing),
                     in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+    }
+
+    /// Invite and crew settings, side by side, or stacked when the labels don't fit.
+    @ViewBuilder
+    private var actions: some View {
+        ShareLink(item: tr("Join my Germily crew \"%1$@\" with the code %2$@.", state.crew.name, state.crew.code)) {
+            Label(tr("Invite parents"), systemImage: "person.badge.plus")
+                .fixedSize()
+        }
+        .buttonStyle(PillButtonStyle(kind: .ink, height: 44))
+        Button {
+            showSettings = true
+        } label: {
+            Label(tr("Crew settings"), systemImage: "gearshape")
+                .fixedSize()
+        }
+        .buttonStyle(PillButtonStyle(kind: .ghost, height: 44))
     }
 
     @ViewBuilder

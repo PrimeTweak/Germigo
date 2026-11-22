@@ -286,7 +286,6 @@
 "Daycare Crew is an outbreak radar for your group." = "Le Groupe de garderie, c'est un radar des éclosions pour ton groupe.";
 "Daycare germs are" = "Les microbes de garderie";
 "Daycare germs, collected." = "Les microbes de garderie, en collection.";
-"Daycare group" = "Groupe de garderie";
 "Daycare mode" = "Mode garderie";
 "Daycare name" = "Nom de la garderie";
 "Daycare notices" = "Avis de garderie";
@@ -490,9 +489,9 @@
 "Incubation: %@" = "Incubation : %@";
 "Infants" = "Poupons";
 "Instagram Stories" = "Stories Instagram";
-"Invite" = "Inviter";
 "Invite code" = "Code d'invitation";
 "Invite families" = "Inviter les familles";
+"Invite parents" = "Inviter des parents";
 "Iron Parent" = "Parent de fer";
 "Is it your kid?" = "C'est ton enfant ?";
 "It disappears from your phone, and the report is reviewed within 24 hours." = "Il disparaît de ton téléphone, et le signalement est examiné dans les 24 heures.";

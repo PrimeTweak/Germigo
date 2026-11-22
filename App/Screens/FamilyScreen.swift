@@ -90,6 +90,7 @@ struct FamilyScreen: View {
                     }
                     .accessibilityLabel(tr("Add a kid"))
                 }
+                ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()
                 }

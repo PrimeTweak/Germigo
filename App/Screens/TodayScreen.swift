@@ -68,6 +68,7 @@ struct TodayScreen: View {
                         }
                         .accessibilityLabel(tr("Someone's sick"))
                     }
+                    ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()

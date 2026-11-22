@@ -286,7 +286,6 @@
 "Daycare Crew is an outbreak radar for your group." = "Daycare Crew is an outbreak radar for your group.";
 "Daycare germs are" = "Daycare germs are";
 "Daycare germs, collected." = "Daycare germs, collected.";
-"Daycare group" = "Daycare group";
 "Daycare mode" = "Daycare mode";
 "Daycare name" = "Daycare name";
 "Daycare notices" = "Daycare notices";
@@ -490,9 +489,9 @@
 "Incubation: %@" = "Incubation: %@";
 "Infants" = "Infants";
 "Instagram Stories" = "Instagram Stories";
-"Invite" = "Invite";
 "Invite code" = "Invite code";
 "Invite families" = "Invite families";
+"Invite parents" = "Invite parents";
 "Iron Parent" = "Iron Parent";
 "Is it your kid?" = "Is it your kid?";
 "It disappears from your phone, and the report is reviewed within 24 hours." = "It disappears from your phone, and the report is reviewed within 24 hours.";
