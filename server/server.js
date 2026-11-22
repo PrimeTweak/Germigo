@@ -181,6 +181,7 @@ function createApp(options = {}) {
   const publisherName = options.publisherName || process.env.PUBLISHER_NAME || '';
   const appStoreURL = options.appStoreURL || process.env.APP_STORE_URL || '';
   const trustedHops = Number(options.trustProxyHops ?? process.env.TRUST_PROXY_HOPS ?? 0) || 0;
+  const addressHeader = String(options.clientIPHeader ?? process.env.CLIENT_IP_HEADER ?? '').trim().toLowerCase();
   const writeDelay = options.writeDelay ?? WRITE_DELAY;
   const maxSubscriptions = options.maxSubscriptions ?? MAX_SUBSCRIPTIONS;
   const extraBlocked = (options.blockedWords || process.env.BLOCKED_WORDS || '')
@@ -222,10 +223,11 @@ function createApp(options = {}) {
     return undefined;
   }
 
-  // The address the request really came from. A forwarded header is only read
-  // when a known number of proxies stand in front, and then from the trusted end.
+  // The address the request really came from: the header the host sets, when one is named;
+  // otherwise X-Forwarded-For, read from the trusted end when a known number of proxies stand in front.
   function clientAddress(req) {
     const direct = req.socket.remoteAddress || 'unknown';
+    if (addressHeader) return String(req.headers[addressHeader] || '').split(',')[0].trim() || direct;
     if (trustedHops <= 0) return direct;
     const chain = String(req.headers['x-forwarded-for'] || '').split(',').map((part) => part.trim()).filter(Boolean);
     return chain.length >= trustedHops ? chain[chain.length - trustedHops] : direct;
@@ -736,15 +738,6 @@ async function load() {
     const data = await api('GET', '/admin/reports');
     const count = data.reports.length + data.notices.length;
     status.textContent = count ? count + ' open report(s).' : 'No open reports.';
-    const check = node('section');
-    check.append(node('h2', 'Connection seen by the server'));
-    const seen = data.connection;
-    for (const [label, value] of [['Socket', seen.socket], ['X-Forwarded-For', seen.forwardedFor], ['X-Real-IP', seen.realIP],
-      ['Forwarded', seen.forwarded], ['X-Envoy-External-Address', seen.envoy], ['TRUST_PROXY_HOPS', String(seen.hops)],
-      ['Address kept for limits', seen.kept], ['Network counted', seen.network]]) {
-      check.append(node('p', label + ': ' + (value === null ? '(none)' : value)));
-    }
-    list.append(check);
     for (const report of data.reports) {
       const card = node('section');
       card.append(node('h2', (report.memberName || 'Removed member') + ' · ' + (report.crewName || 'Removed crew')));
@@ -864,13 +857,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
             illness: illnesses[notice.germID].en, reports: notice.reports.length,
           };
         });
-        const header = (name) => (req.headers[name] === undefined ? null : String(req.headers[name]));
-        const connection = {
-          socket: req.socket.remoteAddress || null, forwardedFor: header('x-forwarded-for'), realIP: header('x-real-ip'),
-          forwarded: header('forwarded'), envoy: header('x-envoy-external-address'), hops: trustedHops,
-          kept: clientAddress(req), network: ip,
-        };
-        return json(res, 200, { reports: open, notices, connection });
+        return json(res, 200, { reports: open, notices });
       }
       const notice = url.pathname.match(/^\/admin\/notices\/([0-9a-f-]{36})\/(remove|clear)$/);
       if (req.method === 'POST' && notice) {

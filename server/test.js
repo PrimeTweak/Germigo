@@ -326,6 +326,27 @@ async function main() {
 
   await new Promise((resolve) => server.close(resolve));
 
+  // When the host names its own address header, that header decides and X-Forwarded-For is ignored
+  const named = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-header-')),
+    clientIPHeader: 'X-Real-IP', trustProxyHops: 1 });
+  await new Promise((resolve) => named.listen(0, resolve));
+  base = `http://127.0.0.1:${named.address().port}`;
+  now += DAY;
+  let held = 0;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const result = await call('POST', '/v1/crews/join', {
+      body: { code: 'AAAAAA', displayName: 'Spam' },
+      headers: { 'X-Real-IP': '146.75.212.3', 'X-Forwarded-For': `146.75.212.3, 79.127.217.${attempt}` },
+    });
+    if (result.status === 429) held += 1;
+  }
+  assert.equal(held, 2);
+  const elsewhere = await call('POST', '/v1/crews/join', {
+    body: { code: 'AAAAAA', displayName: 'Spam' }, headers: { 'X-Real-IP': '146.75.213.9', 'X-Forwarded-For': '146.75.213.9, 79.127.217.66' },
+  });
+  assert.equal(elsewhere.status, 404);
+  await new Promise((resolve) => named.close(resolve));
+
   // Behind one trusted proxy, the address the proxy appended decides, not the client's own claim
   const proxied = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-proxy-')), trustProxyHops: 1 });
   const listed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-store-')),

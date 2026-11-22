@@ -98,7 +98,8 @@ node test.js
 | `SUPPORT_EMAIL` | Contact shown on `/support`, `/privacy`, `/terms` and `/health-data`. |
 | `PUBLISHER_NAME` | Publisher named on `/privacy`, `/terms` and `/health-data`. |
 | `APP_STORE_URL` | App Store link shown on the landing page (`/` and `/get`). Until it is set, the page says the app is coming soon. |
-| `TRUST_PROXY_HOPS` | Number of reverse proxies in front of the server. Default 0: the socket address is used and `X-Forwarded-For` is ignored. Most hosts need 1. |
+| `CLIENT_IP_HEADER` | Header the host sets with the client's address, read instead of `X-Forwarded-For`. On Railway: `x-real-ip`. |
+| `TRUST_PROXY_HOPS` | For hosts that append to `X-Forwarded-For`: number of reverse proxies in front of the server. Default 0: the socket address is used and `X-Forwarded-For` is ignored. Not read when `CLIENT_IP_HEADER` is set. |
 | `BLOCKED_WORDS` | Extra comma-separated words rejected in names. |
 | `APNS_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID` | The Apple push key (`.p8` content, newlines may be written `\n`), its key ID and the team ID. Without them, daycare notices are stored but no push is sent. |
 | `APNS_TOPIC` | Bundle identifier the pushes are for. Default `ca.germily.app`. |
@@ -107,7 +108,7 @@ node test.js
 | `INBOUND_EMAIL_DOMAIN` | Domain of the daycares' private addresses, for example `notices.germily.app`. Without it, notices by email are off. |
 | `INBOUND_EMAIL_TOKEN` | Password of the inbound webhook, sent as HTTP Basic credentials. |
 
-Rate limits are counted per client address, an IPv6 address by its /64 network, so `TRUST_PROXY_HOPS` must match the host: too low and every user shares one limit, too high and a client can forge its address. The public pages and `/lessons.json` have their own limit of 120 loads a minute per address; `/health` is not counted, so the host can check it often. The limits are kept in memory and start over when the server restarts.
+Rate limits are counted per client address, an IPv6 address by its /64 network, so the address must come from the host: with the wrong setting every user shares one limit, or a client can forge its address. Measured on Railway: `X-Forwarded-For` holds the client and then a Railway hop, so `TRUST_PROXY_HOPS=1` would count every user as that hop, while `X-Real-IP` holds the client. The public pages and `/lessons.json` have their own limit of 120 loads a minute per address; `/health` is not counted, so the host can check it often. The limits are kept in memory and start over when the server restarts.
 
 Run one instance, with autoscaling off: the server holds `germily.json` in memory and two processes would overwrite each other. A request must send its headers within 10 seconds and finish within 30, and the server accepts 1,000 connections at once.
 
