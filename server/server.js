@@ -26,6 +26,12 @@ const MAX_SUBSCRIPTIONS = 600;
 const NOTE_LIMIT = 280;
 // A note is a sentence, so a link is a scheme, a www, a .com or an email address in it.
 const NOTE_LINK_PATTERN = /https?:\/\/|www\.|\.com\b|\S@\S/i;
+// Whether the illness is only seen or confirmed, and the ready-made lines a daycare can add, in display order.
+const NOTICE_STATUSES = {
+  symptoms: { en: 'symptoms seen', fr: 'symptômes observés' },
+  confirmed: { en: 'confirmed case', fr: 'cas confirmé' },
+};
+const NOTICE_MESSAGES = ['watch', 'cleaning', 'stay_home', 'tell_us', 'public_health'];
 const CREW_CODE_LENGTH = 8;
 const DAYCARE_CODE_LENGTH = 8;
 const NOTICE_WINDOW = 60 * 24 * 3600 * 1000;
@@ -349,6 +355,12 @@ function createApp(options = {}) {
     return note;
   }
 
+  function cleanMessages(raw) {
+    if (raw === undefined || raw === null) return [];
+    if (!Array.isArray(raw) || raw.some((id) => !NOTICE_MESSAGES.includes(id))) throw new ApiError(400, 'invalid');
+    return NOTICE_MESSAGES.filter((id) => raw.includes(id));
+  }
+
   function cleanPushToken(raw) {
     const token = typeof raw === 'string' ? raw.toLowerCase() : '';
     return PUSH_TOKEN_PATTERN.test(token) ? token : null;
@@ -387,7 +399,10 @@ function createApp(options = {}) {
   }
 
   function noticeView(notice) {
-    return { id: notice.id, groupID: notice.groupID, germID: notice.germID, note: notice.note, at: notice.at, source: notice.source };
+    return {
+      id: notice.id, groupID: notice.groupID, germID: notice.germID, status: notice.status || null,
+      messages: notice.messages || [], note: notice.note, at: notice.at, source: notice.source,
+    };
   }
 
   function publicDaycare(daycare) {
@@ -431,24 +446,26 @@ function createApp(options = {}) {
   function alertFor(daycare, notice, lang) {
     const illness = illnesses[notice.germID] ? illnesses[notice.germID][lang] : notice.germID;
     const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
-    const body = lang === 'fr'
+    const where = lang === 'fr'
       ? (group ? `${illness} dans le groupe ${group.name}` : `${illness} à la garderie`)
       : (group ? `${illness} in the ${group.name} group` : `${illness} at the daycare`);
-    return { title: daycare.name, body };
+    const status = NOTICE_STATUSES[notice.status];
+    return { title: daycare.name, body: status ? where + (lang === 'fr' ? ' : ' : ': ') + status[lang] : where };
   }
 
   // Stores a notice, then alerts every family it reaches; tokens Apple refuses are forgotten.
-  async function publish(daycare, germID, groupID, note, source) {
+  // The alert carries the illness, the group and the status, never the note.
+  async function publish(daycare, { germID, groupID, status, messages, note }, source) {
     limit(daycare.id, 'noticesPerDay');
     const recipients = db.subscriptions.filter((subscription) => subscription.daycareID === daycare.id
       && (groupID === null || subscription.groupIDs.includes(groupID)));
     const notice = {
-      id: crypto.randomUUID(), daycareID: daycare.id, groupID, germID, note, at: clock(), source,
+      id: crypto.randomUUID(), daycareID: daycare.id, groupID, germID, status, messages, note, at: clock(), source,
       recipients: recipients.length, reports: [],
     };
     db.notices.push(notice);
     save(true);
-    const messages = recipients.filter((subscription) => subscription.pushToken).map((subscription) => ({
+    const alerts = recipients.filter((subscription) => subscription.pushToken).map((subscription) => ({
       token: subscription.pushToken,
       alert: alertFor(daycare, notice, subscription.language),
       thread: daycare.id,
@@ -456,7 +473,7 @@ function createApp(options = {}) {
     }));
     let result = { sent: 0, gone: [] };
     try {
-      result = await pusher.send(messages);
+      result = await pusher.send(alerts);
     } catch (error) {
       console.error('[push]', error.message);
     }
@@ -481,7 +498,7 @@ function createApp(options = {}) {
   }
 
   // A notice by email: the private address picks the daycare, only its director's address may send,
-  // and the subject gives the illness and the group. The text of the message is never read or kept.
+  // and the subject gives the illness and the group, without a status. The text of the message is never read or kept.
   async function receiveEmail(body) {
     const recipients = [body.OriginalRecipient, body.To, ...(Array.isArray(body.ToFull) ? body.ToFull.map((to) => to.Email) : [])]
       .flatMap((value) => String(value || '').split(','))
@@ -500,7 +517,7 @@ function createApp(options = {}) {
       answer = reply('group', lang, daycare.groups.map((group) => group.name).join(', '));
     } else {
       try {
-        const notice = await publish(daycare, parsed.germID, parsed.groupID, '', 'email');
+        const notice = await publish(daycare, { germID: parsed.germID, groupID: parsed.groupID, status: null, messages: [], note: '' }, 'email');
         const illness = illnesses[notice.germID][lang];
         const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
         answer = reply('sent', lang, notice.recipients, group ? `${illness} · ${group.name}` : illness);
@@ -988,7 +1005,10 @@ document.getElementById('form').addEventListener('submit', (event) => {
         if (!GERM_IDS.has(body.germID) || body.germID === 'mystery') throw new ApiError(400, 'invalid');
         const groupID = body.groupID === null || body.groupID === undefined ? null : String(body.groupID);
         if (groupID !== null && !daycare.groups.some((group) => group.id === groupID)) throw new ApiError(400, 'invalid');
-        await publish(daycare, body.germID, groupID, cleanNote(body.note), 'app');
+        if (!Object.hasOwn(NOTICE_STATUSES, body.status)) throw new ApiError(400, 'invalid');
+        await publish(daycare, {
+          germID: body.germID, groupID, status: body.status, messages: cleanMessages(body.messages), note: cleanNote(body.note),
+        }, 'app');
         return json(res, 200, directorState(daycare));
       }
       if (key === 'DELETE /v1/daycare') {

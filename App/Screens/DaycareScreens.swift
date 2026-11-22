@@ -457,7 +457,7 @@ struct DaycareScreen: View {
     }
 }
 
-/// One notice: the illness, the group, the daycare's note, what to watch for.
+/// One notice: the illness, its status, the group, the daycare's messages and note, what to watch for and the illness file.
 struct NoticeScreen: View {
     let id: String
     @Environment(AppModel.self) private var model
@@ -534,6 +534,14 @@ struct NoticeScreen: View {
                     Text(DaycareText.title(notice, germ: germ, groups: groups))
                         .font(.title2.weight(.bold))
                         .foregroundStyle(palette.ink)
+                    if let status = notice.noticeStatus {
+                        Label(status.title, systemImage: status.symbol)
+                            .font(.footnote.weight(.bold))
+                            .foregroundStyle(palette.accent)
+                            .padding(.horizontal, 10)
+                            .frame(height: 26)
+                            .background(palette.accent.opacity(0.12), in: Capsule())
+                    }
                     HStack(spacing: 6) {
                         DaycareBadge(size: 18)
                         Text(membership.feed.daycare.name + " · " + DaycareText.when(notice))
@@ -541,15 +549,26 @@ struct NoticeScreen: View {
                             .foregroundStyle(palette.inkSecondary)
                     }
                 }
-                if !notice.note.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
+                if !notice.lines.isEmpty || !notice.note.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text(tr("From the daycare"))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(palette.inkSecondary)
-                        Text(notice.note)
+                        ForEach(notice.lines) { line in
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text(verbatim: "•")
+                                Text(line.text)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                             .font(.callout)
                             .foregroundStyle(palette.ink)
-                            .textSelection(.enabled)
+                        }
+                        if !notice.note.isEmpty {
+                            Text(notice.note)
+                                .font(.callout)
+                                .foregroundStyle(palette.ink)
+                                .textSelection(.enabled)
+                        }
                     }
                     .germilyCard()
                 }
@@ -568,6 +587,29 @@ struct NoticeScreen: View {
                         }
                     }
                 }
+                NavigationLink(value: germ) {
+                    HStack(spacing: 12) {
+                        GermImage(germ: germ, size: 36)
+                            .frame(width: 44, height: 44)
+                            .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(tr("See the file"))
+                                .font(.callout.weight(.semibold))
+                                .foregroundStyle(palette.ink)
+                            Text(tr("How it spreads, how long it lasts and when to call."))
+                                .font(.footnote)
+                                .foregroundStyle(palette.inkSecondary)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(palette.inkTertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .germilyCard(padding: 12)
+                }
+                .buttonStyle(PressableStyle())
                 HStack(spacing: 10) {
                     if !kids.isEmpty {
                         Button {

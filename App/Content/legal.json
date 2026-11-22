@@ -127,8 +127,8 @@
         "fr": "Avis de garderie"
       },
       "body": {
-        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups and the illness notices it sends with their optional note. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has.",
-        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes et les avis de maladie qu'elle envoie avec leur note facultative. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe."
+        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups and the illness notices it sends: the illness, whether symptoms were seen or the case is confirmed, the ready-made messages it picks and its optional note. Notices have no field for a child. The daycare writes its note and answers for it, and must never name a child in it. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has.",
+        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes et les avis de maladie qu'elle envoie : la maladie, si des symptômes ont été observés ou si le cas est confirmé, les messages tout faits qu'elle choisit et sa note facultative. Les avis n'ont aucun champ pour un enfant. La garderie écrit sa note et en est responsable, et ne doit jamais y nommer un enfant. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe."
       }
     },
     {
@@ -177,8 +177,8 @@
         "fr": "Enfants"
       },
       "body": {
-        "en": "Germily is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone. Daycare notices never name a child.",
-        "fr": "Germily est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone. Les avis de garderie ne nomment jamais un enfant."
+        "en": "Germily is made for parents and is not directed at children. Kids' first names are entered by a parent and stay on the parent's phone. Daycare notices have no field for a child, and the daycare's note must never name one.",
+        "fr": "Germily est conçu pour les parents et ne s'adresse pas aux enfants. Les prénoms des enfants sont saisis par un parent et restent sur son téléphone. Les avis de garderie n'ont aucun champ pour un enfant, et la note de la garderie ne doit jamais en nommer un."
       }
     },
     {
@@ -259,8 +259,8 @@
         "fr": "Avis de garderie"
       },
       "body": {
-        "en": "Daycare notices are free, for parents and for daycares. Only a person the daycare authorizes may sign it up and send notices. Notices are for telling families that an illness is going around: never name a child or give a detail that could identify one, and do not use them for anything else. Parents can report a notice from its menu. Reports are reviewed within 24 hours, and a daycare that breaks these rules is removed. A notice is general information, not a diagnosis, and does not replace the daycare's own obligations or public health instructions.",
-        "fr": "Les avis de garderie sont gratuits, pour les parents comme pour les garderies. Seule une personne autorisée par la garderie peut l'inscrire et envoyer des avis. Les avis servent à informer les familles qu'une maladie circule : ne nomme jamais un enfant, ne donne aucun détail qui permettrait d'en reconnaître un et ne les utilise pas pour autre chose. Les parents peuvent signaler un avis depuis son menu. Les signalements sont examinés dans les 24 heures, et une garderie qui ne respecte pas ces règles est retirée. Un avis est une information générale, pas un diagnostic, et ne remplace ni les obligations de la garderie ni les consignes de santé publique."
+        "en": "Daycare notices are free, for parents and for daycares. Only a person the daycare authorizes may sign it up and send notices. Notices are for telling families that an illness is going around: never name a child or give a detail that could identify one, and do not use them for anything else. The daycare alone answers for its notes. Choose “Confirmed case” only once the illness has been confirmed. Parents can report a notice from its menu. Reports are reviewed within 24 hours, and a daycare that breaks these rules is removed. A notice is general information, not a diagnosis, and does not replace the daycare's own obligations or public health instructions.",
+        "fr": "Les avis de garderie sont gratuits, pour les parents comme pour les garderies. Seule une personne autorisée par la garderie peut l'inscrire et envoyer des avis. Les avis servent à informer les familles qu'une maladie circule : ne nomme jamais un enfant, ne donne aucun détail qui permettrait d'en reconnaître un et ne les utilise pas pour autre chose. La garderie est seule responsable de ses notes. Choisis « Cas confirmé » seulement quand la maladie a été confirmée. Les parents peuvent signaler un avis depuis son menu. Les signalements sont examinés dans les 24 heures, et une garderie qui ne respecte pas ces règles est retirée. Un avis est une information générale, pas un diagnostic, et ne remplace ni les obligations de la garderie ni les consignes de santé publique."
       }
     },
     {

@@ -92,6 +92,8 @@ final class DaycareStore {
     private struct NoticeBody: Encodable {
         let germID: String
         let groupID: String?
+        let status: String
+        let messages: [String]
         let note: String
     }
 
@@ -469,11 +471,13 @@ final class DaycareStore {
         }
     }
 
-    func send(germID: String, groupID: String?, note: String) async -> Bool {
+    func send(germID: String, groupID: String?, status: NoticeStatus, messages: [NoticeMessage], note: String) async -> Bool {
+        let picked = NoticeMessage.allCases.filter { messages.contains($0) }.map(\.rawValue)
         #if GERMILY_SIDELOAD
         if isDemo, let current = director {
             let reached = groupID.flatMap { id in current.daycare.groups.first { $0.id == id }?.families } ?? current.daycare.families
-            let notice = DaycareNotice(id: UUID().uuidString, groupID: groupID, germID: germID, note: note,
+            let notice = DaycareNotice(id: UUID().uuidString, groupID: groupID, germID: germID, status: status.rawValue,
+                                       messages: picked, note: note,
                                        at: Date().timeIntervalSince1970 * 1000, recipients: reached, reports: 0)
             store(DirectorState(daycare: current.daycare, notices: [notice] + current.notices))
             return true
@@ -484,7 +488,8 @@ final class DaycareStore {
             error.code == "rate_limited" ? tr("Ten notices a day at most. Try again tomorrow.") : error.daycareMessage
         }) {
             let state: DirectorState = try await self.client(token).send(
-                "POST", "v1/daycare/notices", NoticeBody(germID: germID, groupID: groupID, note: note))
+                "POST", "v1/daycare/notices",
+                NoticeBody(germID: germID, groupID: groupID, status: status.rawValue, messages: picked, note: note))
             self.store(state)
         }
     }
@@ -570,10 +575,12 @@ extension DaycareStore {
         let now = Date().timeIntervalSince1970 * 1000
         let hour = 3_600_000.0
         return [
-            DaycareNotice(id: "demo-notice-1", groupID: "demo-g2", germID: "noro",
+            DaycareNotice(id: "demo-notice-1", groupID: "demo-g2", germID: "noro", status: NoticeStatus.confirmed.rawValue,
+                          messages: [NoticeMessage.watch.rawValue, NoticeMessage.tellUs.rawValue],
                           note: tr("3 children went home sick this morning."),
                           at: now - 2 * hour),
-            DaycareNotice(id: "demo-notice-2", groupID: nil, germID: "pinky", note: "", at: now - 9 * 24 * hour)
+            DaycareNotice(id: "demo-notice-2", groupID: nil, germID: "pinky", status: NoticeStatus.symptoms.rawValue,
+                          note: "", at: now - 9 * 24 * hour)
         ]
     }
 

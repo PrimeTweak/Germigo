@@ -359,7 +359,7 @@ struct DirectorScreen: View {
     }
 
     private var footnote: String {
-        var text = tr("Families see the illness, the group, your note and what to watch for. Never a child's name.")
+        var text = tr("Families see the illness, the status, the group, your messages and your note. You write the note and answer for it: never a child's name or a detail that points to one.")
         if daycare.isDemo {
             text = tr("A sample daycare for this test build. Nothing leaves this phone.") + " " + text
         }
@@ -389,15 +389,17 @@ struct DirectorScreen: View {
     }
 }
 
-/// A new notice in three choices: the illness, who gets it, an optional note.
+/// A new notice: the illness, its status, who gets it, then optional ready-made messages and a note.
 struct NoticeComposer: View {
     @Environment(AppModel.self) private var model
     @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var germID: String?
+    @State private var status: NoticeStatus?
     /// The group that gets the notice; empty for the whole daycare.
     @State private var scope = ""
+    @State private var messages: Set<NoticeMessage> = []
     @State private var note = ""
     @State private var showAll = false
     @State private var sending = false
@@ -435,13 +437,27 @@ struct NoticeComposer: View {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.ink)
                     .padding(.horizontal, 4)
-                    label(tr("Who gets it"))
+                    label(tr("Status"))
                     ChipRows {
-                        chip(tr("Whole daycare"), id: "")
-                        ForEach(daycare.director?.daycare.groups ?? []) { group in
-                            chip(group.name, id: group.id)
+                        ForEach(NoticeStatus.allCases) { item in
+                            chip(item.title, selected: status == item) {
+                                status = item
+                            }
                         }
                     }
+                    label(tr("Who gets it"))
+                    ChipRows {
+                        chip(tr("Whole daycare"), selected: scope.isEmpty) {
+                            scope = ""
+                        }
+                        ForEach(daycare.director?.daycare.groups ?? []) { group in
+                            chip(group.name, selected: scope == group.id) {
+                                scope = group.id
+                            }
+                        }
+                    }
+                    label(tr("Messages (optional)"))
+                    messageList
                     label(tr("Note (optional)"))
                     VStack(alignment: .trailing, spacing: 6) {
                         TextField(tr("What families should know"), text: $note, axis: .vertical)
@@ -472,8 +488,8 @@ struct NoticeComposer: View {
                         }
                     }
                     .buttonStyle(PillButtonStyle(kind: .ink))
-                    .disabled(germID == nil || sending)
-                    Text(tr("Families see the illness, the group, your note and what to watch for. Never a child's name."))
+                    .disabled(germID == nil || status == nil || sending)
+                    Text(tr("Families see the illness, the status, the group, your messages and your note. You write the note and answer for it: never a child's name or a detail that points to one."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
                         .padding(.horizontal, 4)
@@ -537,11 +553,46 @@ struct NoticeComposer: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private func chip(_ title: String, id: String) -> some View {
-        let selected = scope == id
-        return Button {
+    /// The ready-made lines, each one checked or not.
+    private var messageList: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(NoticeMessage.allCases) { message in
+                let picked = messages.contains(message)
+                Button {
+                    Haptics.tap()
+                    if picked {
+                        messages.remove(message)
+                    } else {
+                        messages.insert(message)
+                    }
+                } label: {
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: picked ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(picked ? palette.accent : palette.inkTertiary)
+                        Text(message.text)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.ink)
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(picked ? .isSelected : [])
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 6)
+        .germilyCard(padding: 0)
+    }
+
+    private func chip(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
             withAnimation(Tempo.quick) {
-                scope = id
+                action()
             }
         } label: {
             Text(title)
@@ -557,12 +608,12 @@ struct NoticeComposer: View {
     }
 
     private func send() {
-        guard let germID else { return }
+        guard let germID, let status else { return }
         sending = true
         let reached = recipients
         Task {
-            let done = await daycare.send(germID: germID, groupID: scope.isEmpty ? nil : scope,
-                                          note: note.trimmingCharacters(in: .whitespacesAndNewlines))
+            let done = await daycare.send(germID: germID, groupID: scope.isEmpty ? nil : scope, status: status,
+                                          messages: Array(messages), note: note.trimmingCharacters(in: .whitespacesAndNewlines))
             sending = false
             if done {
                 model.toast = trCount(reached, one: "Sent to %lld family.", other: "Sent to %lld families.")

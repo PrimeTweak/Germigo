@@ -485,19 +485,25 @@ async function main() {
   assert.equal(desk.daycare.families, 4);
   assert.deepEqual(desk.daycare.groups.map((group) => group.families), [1, 2, 0]);
 
-  // A notice for one group reaches that group only, with the daycare's name as the title
-  const notify = (body) => call('POST', '/v1/daycare/notices', { token: director.token, body });
+  // A notice for one group reaches that group only, with the daycare's name as the title and the status, never the note
+  const notify = (body) => call('POST', '/v1/daycare/notices', { token: director.token, body: { status: 'symptoms', ...body } });
   assert.equal((await notify({ germID: 'mystery' })).status, 400);
+  for (const status of [undefined, 'suspected', 'toString']) assert.equal((await notify({ germID: 'noro', status })).data.error, 'invalid');
+  for (const messages of ['watch', ['watch', 'call_me']]) assert.equal((await notify({ germID: 'noro', messages })).data.error, 'invalid');
   assert.equal((await notify({ germID: 'noro', groupID: 'unknown' })).status, 400);
   assert.equal((await notify({ germID: 'noro', note: 'x'.repeat(281) })).data.error, 'note_too_long');
   for (const note of ['Voir https://exemple.test', 'Infos sur www.exemple.ca', 'exemple.com', 'Écrire à direction@lucioles.ca']) {
     assert.equal((await notify({ germID: 'noro', note })).data.error, 'note_rejected');
   }
-  desk = (await notify({ germID: 'noro', groupID: trottineurs, note: 'Lavez bien les mains.' })).data;
+  desk = (await notify({
+    germID: 'noro', groupID: trottineurs, status: 'confirmed', messages: ['tell_us', 'watch', 'watch'], note: 'Lavez bien les mains.',
+  })).data;
   assert.equal(desk.notices[0].recipients, 2);
+  assert.equal(desk.notices[0].status, 'confirmed');
+  assert.deepEqual(desk.notices[0].messages, ['watch', 'tell_us']);
   assert.equal(pushed.length, 1);
   assert.equal(pushed[0].token, 'aa'.repeat(32));
-  assert.deepEqual(pushed[0].payload.aps.alert, { title: 'CPE Les Lucioles', body: 'Gastro dans le groupe Trottineurs' });
+  assert.deepEqual(pushed[0].payload.aps.alert, { title: 'CPE Les Lucioles', body: 'Gastro dans le groupe Trottineurs : cas confirmé' });
   assert.equal(pushed[0].payload.noticeID, desk.notices[0].id);
   assert.equal(pushed[0].headers['apns-topic'], 'ca.germily.app');
   const [jwtHead, jwtClaims, jwtSignature] = pushed[0].headers.authorization.slice(7).split('.');
@@ -508,6 +514,8 @@ async function main() {
   let parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
   assert.equal(parent.notices.length, 1);
   assert.equal(parent.notices[0].note, 'Lavez bien les mains.');
+  assert.equal(parent.notices[0].status, 'confirmed');
+  assert.deepEqual(parent.notices[0].messages, ['watch', 'tell_us']);
   assert.equal((await call('GET', '/v1/daycare-subscription', { token: ben })).data.notices.length, 0);
 
   // A notice for the whole daycare reaches everyone; tokens Apple refuses are forgotten
@@ -516,8 +524,8 @@ async function main() {
   desk = (await notify({ germID: 'lousy', groupID: null })).data;
   assert.equal(desk.notices[0].recipients, 4);
   assert.equal(pushed.length, 3);
-  assert.equal(pushed.find((message) => message.token.startsWith('bb')).payload.aps.alert.body, 'Head lice at the daycare');
-  assert.equal(pushed.find((message) => message.token.startsWith('cc')).payload.aps.alert.body, 'Poux à la garderie');
+  assert.equal(pushed.find((message) => message.token.startsWith('bb')).payload.aps.alert.body, 'Head lice at the daycare: symptoms seen');
+  assert.equal(pushed.find((message) => message.token.startsWith('cc')).payload.aps.alert.body, 'Poux à la garderie : symptômes observés');
   let storedDaycares = JSON.parse(fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8'));
   assert.deepEqual(storedDaycares.subscriptions.map((subscription) => subscription.pushToken), ['aa'.repeat(32), null, null, null]);
   assert.equal(JSON.stringify(storedDaycares).includes(director.token), false);
@@ -590,8 +598,11 @@ async function main() {
   assert.equal(mailed[0].subject, 'Envoyé : Gastro · Les Trottineurs');
   assert.match(mailed[0].body, /2 familles/);
   assert.equal(pushed.length, 1);
+  assert.equal(pushed[0].payload.aps.alert.body, 'Gastro dans le groupe Les Trottineurs');
   parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
   assert.equal(parent.notices[0].source, 'email');
+  assert.equal(parent.notices[0].status, null);
+  assert.deepEqual(parent.notices[0].messages, []);
   assert.equal(parent.notices[0].note, '');
   assert.ok(!fs.readFileSync(path.join(daycareDir, 'germily.json'), 'utf8').includes('Surveillez'));
   assert.equal((await inbound(letter('Allo'))).data.status, 'unclear');

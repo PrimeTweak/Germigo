@@ -124,6 +124,7 @@
 "A reminder from Germily, if notifications are on." = "Un rappel de Germily, si les notifications sont activées.";
 "A sample crew for this test build. Nothing leaves this phone." = "Un groupe d'exemple pour cette version de test. Rien ne quitte ce téléphone.";
 "A sample daycare for this test build. Nothing leaves this phone." = "Une garderie d'exemple pour cette version de test. Rien ne quitte ce téléphone.";
+"A sick child stays home, as public health advises." = "Un enfant malade reste à la maison, selon les consignes de la santé publique.";
 "A small tip, if Germily made you laugh" = "Un petit pourboire, si Germily t'a fait rire";
 "A tip is a one-time purchase. It unlocks nothing; it just feels nice." = "Un pourboire est un achat unique. Il ne débloque rien; ça fait juste du bien.";
 "A wide and unwanted collection." = "Une collection vaste et non désirée.";
@@ -231,6 +232,7 @@
 "Clean for %lld day" = "En forme depuis %lld jour";
 "Clean for %lld days" = "En forme depuis %lld jours";
 "Clean record so far" = "Dossier vierge pour l'instant";
+"Cleaning and handwashing are stepped up." = "Le nettoyage et le lavage des mains sont renforcés.";
 "Close" = "Fermer";
 "Close for good" = "Fermer pour de bon";
 "Close the daycare" = "Fermer la garderie";
@@ -241,6 +243,7 @@
 "Collector" = "Collectionneur";
 "coming home." = "débarquent à la maison.";
 "Common" = "Commun";
+"Confirmed case" = "Cas confirmé";
 "Contact support" = "Contacter le soutien";
 "Contact: %@" = "Contact : %@";
 "Continue" = "Continuer";
@@ -359,7 +362,7 @@
 "Fact" = "Fait";
 "Fact!" = "Fait !";
 "Fact." = "Fait.";
-"Families see the illness, the group, your note and what to watch for. Never a child's name." = "Les familles voient la maladie, le groupe, ta note et quoi surveiller. Jamais le nom d'un enfant.";
+"Families see the illness, the status, the group, your messages and your note. You write the note and answer for it: never a child's name or a detail that points to one." = "Les familles voient la maladie, le statut, le groupe, tes messages et ta note. Tu écris la note et tu en es responsable : jamais le nom d'un enfant ni un détail qui permet de le reconnaître.";
 "Families stop getting notices. This can't be undone." = "Les familles ne reçoivent plus d'avis. Impossible à annuler.";
 "Family" = "Famille";
 "Family league" = "Ligue familiale";
@@ -454,6 +457,7 @@
 "Holo cards and extras" = "Cartes holo et extras";
 "How bad?" = "C'est pire comment ?";
 "How it spreads" = "Comment ça se transmet";
+"How it spreads, how long it lasts and when to call." = "Comment ça se transmet, combien de temps ça dure et quand appeler.";
 "HP" = "PV";
 "I agree to the crew rules" = "J'accepte les règles des groupes";
 "I caught %@!" = "J'ai attrapé %@ !";
@@ -532,6 +536,7 @@
 "Lesson to read" = "Leçon à lire";
 "Lessons" = "Leçons";
 "Lessons open with right answers in the daily quiz." = "Les leçons s'ouvrent avec les bonnes réponses du quiz du jour.";
+"Let us know if your child has symptoms." = "Avisez-nous si votre enfant a des symptômes.";
 "Level %1$lld · %2$@" = "Niveau %1$lld · %2$@";
 "Lice Comb Ninja" = "Ninja du peigne fin";
 "Light" = "Clair";
@@ -560,6 +565,7 @@
 "Me" = "Moi";
 "Meh" = "Bof";
 "Members" = "Membres";
+"Messages (optional)" = "Messages (facultatifs)";
 "Milestone reached. Open Germily to frame it." = "Cap franchi. Ouvre Germily pour l'encadrer.";
 "Milestone unlocked" = "Cap franchi";
 "Mine" = "Les miens";
@@ -724,6 +730,7 @@
 "Privacy Policy" = "Politique de confidentialité";
 "Private · invite only" = "Privé · sur invitation";
 "Protect the rest of the house" = "Protège le reste de la maison";
+"Public health has been told." = "La santé publique a été avisée.";
 "Purchase" = "Achat";
 "Purchases" = "Achats";
 "QR code of the daycare" = "Code QR de la garderie";
@@ -801,6 +808,7 @@
 "Section" = "Section";
 "See all %lld" = "Tout voir (%lld)";
 "See my score" = "Voir mon score";
+"See the file" = "Voir la fiche";
 "See the Season Pass" = "Voir la Passe de saison";
 "See the suspects" = "Voir les suspects";
 "See the suspects anyway" = "Voir les suspects quand même";
@@ -883,6 +891,7 @@
 "Start the crew" = "Créer le groupe";
 "Started" = "Début";
 "Started %@" = "Début : %@";
+"Status" = "Statut";
 "Still a mystery" = "Toujours un mystère";
 "Still fine" = "Ça va encore";
 "Still fine. What now?" = "Ça va encore. Et maintenant ?";
@@ -900,6 +909,7 @@
 "Survived it %lld times." = "J'y ai survécu %lld fois.";
 "Symptoms" = "Symptômes";
 "Symptoms changed?" = "Symptômes changés ?";
+"Symptoms seen" = "Symptômes observés";
 "Symptoms start" = "Début des symptômes";
 "Symptoms updated." = "Symptômes mis à jour.";
 "Symptoms usually show %1$lld to %2$lld h after exposure." = "Les symptômes apparaissent en général de %1$lld à %2$lld h après l'exposition.";
@@ -1040,6 +1050,7 @@
 "Wanted poster" = "Avis de recherche";
 "Warms up one sniffle" = "Réchauffe un petit rhume";
 "Watch %@" = "Surveiller %@";
+"Watch for symptoms in the next few days." = "Surveillez l'apparition de symptômes dans les prochains jours.";
 "Watch for: %@" = "À surveiller : %@";
 "Watch my window" = "Surveiller ma fenêtre";
 "Watching %@" = "Surveillance : %@";

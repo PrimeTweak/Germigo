@@ -18,6 +18,9 @@ struct DaycareNotice: Codable, Identifiable, Hashable {
     let id: String
     let groupID: String?
     let germID: String
+    /// Kept as text so a status this version does not know leaves the rest of the feed readable; email notices have none.
+    var status: String?
+    var messages: [String]?
     let note: String
     let at: Double
     /// Families reached and reports received; only the daycare sees them.
@@ -25,6 +28,51 @@ struct DaycareNotice: Codable, Identifiable, Hashable {
     var reports: Int?
 
     var date: Date { Date(timeIntervalSince1970: at / 1000) }
+    var noticeStatus: NoticeStatus? { status.flatMap(NoticeStatus.init(rawValue:)) }
+    var lines: [NoticeMessage] { (messages ?? []).compactMap(NoticeMessage.init(rawValue:)) }
+}
+
+/// What the daycare knows about the illness it announces.
+enum NoticeStatus: String, CaseIterable, Identifiable {
+    case symptoms
+    case confirmed
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .symptoms: return tr("Symptoms seen")
+        case .confirmed: return tr("Confirmed case")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .symptoms: return "eye.fill"
+        case .confirmed: return "checkmark.seal.fill"
+        }
+    }
+}
+
+/// The ready-made lines a daycare can add to a notice, in the order families read them.
+enum NoticeMessage: String, CaseIterable, Identifiable {
+    case watch
+    case cleaning
+    case stayHome = "stay_home"
+    case tellUs = "tell_us"
+    case publicHealth = "public_health"
+
+    var id: String { rawValue }
+
+    var text: String {
+        switch self {
+        case .watch: return tr("Watch for symptoms in the next few days.")
+        case .cleaning: return tr("Cleaning and handwashing are stepped up.")
+        case .stayHome: return tr("A sick child stays home, as public health advises.")
+        case .tellUs: return tr("Let us know if your child has symptoms.")
+        case .publicHealth: return tr("Public health has been told.")
+        }
+    }
 }
 
 /// What a family subscribed to a daycare receives.

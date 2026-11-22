@@ -124,6 +124,7 @@
 "A reminder from Germily, if notifications are on." = "A reminder from Germily, if notifications are on.";
 "A sample crew for this test build. Nothing leaves this phone." = "A sample crew for this test build. Nothing leaves this phone.";
 "A sample daycare for this test build. Nothing leaves this phone." = "A sample daycare for this test build. Nothing leaves this phone.";
+"A sick child stays home, as public health advises." = "A sick child stays home, as public health advises.";
 "A small tip, if Germily made you laugh" = "A small tip, if Germily made you laugh";
 "A tip is a one-time purchase. It unlocks nothing; it just feels nice." = "A tip is a one-time purchase. It unlocks nothing; it just feels nice.";
 "A wide and unwanted collection." = "A wide and unwanted collection.";
@@ -231,6 +232,7 @@
 "Clean for %lld day" = "Clean for %lld day";
 "Clean for %lld days" = "Clean for %lld days";
 "Clean record so far" = "Clean record so far";
+"Cleaning and handwashing are stepped up." = "Cleaning and handwashing are stepped up.";
 "Close" = "Close";
 "Close for good" = "Close for good";
 "Close the daycare" = "Close the daycare";
@@ -241,6 +243,7 @@
 "Collector" = "Collector";
 "coming home." = "coming home.";
 "Common" = "Common";
+"Confirmed case" = "Confirmed case";
 "Contact support" = "Contact support";
 "Contact: %@" = "Contact: %@";
 "Continue" = "Continue";
@@ -359,7 +362,7 @@
 "Fact" = "Fact";
 "Fact!" = "Fact!";
 "Fact." = "Fact.";
-"Families see the illness, the group, your note and what to watch for. Never a child's name." = "Families see the illness, the group, your note and what to watch for. Never a child's name.";
+"Families see the illness, the status, the group, your messages and your note. You write the note and answer for it: never a child's name or a detail that points to one." = "Families see the illness, the status, the group, your messages and your note. You write the note and answer for it: never a child's name or a detail that points to one.";
 "Families stop getting notices. This can't be undone." = "Families stop getting notices. This can't be undone.";
 "Family" = "Family";
 "Family league" = "Family league";
@@ -454,6 +457,7 @@
 "Holo cards and extras" = "Holo cards and extras";
 "How bad?" = "How bad?";
 "How it spreads" = "How it spreads";
+"How it spreads, how long it lasts and when to call." = "How it spreads, how long it lasts and when to call.";
 "HP" = "HP";
 "I agree to the crew rules" = "I agree to the crew rules";
 "I caught %@!" = "I caught %@!";
@@ -532,6 +536,7 @@
 "Lesson to read" = "Lesson to read";
 "Lessons" = "Lessons";
 "Lessons open with right answers in the daily quiz." = "Lessons open with right answers in the daily quiz.";
+"Let us know if your child has symptoms." = "Let us know if your child has symptoms.";
 "Level %1$lld · %2$@" = "Level %1$lld · %2$@";
 "Lice Comb Ninja" = "Lice Comb Ninja";
 "Light" = "Light";
@@ -560,6 +565,7 @@
 "Me" = "Me";
 "Meh" = "Meh";
 "Members" = "Members";
+"Messages (optional)" = "Messages (optional)";
 "Milestone reached. Open Germily to frame it." = "Milestone reached. Open Germily to frame it.";
 "Milestone unlocked" = "Milestone unlocked";
 "Mine" = "Mine";
@@ -724,6 +730,7 @@
 "Privacy Policy" = "Privacy Policy";
 "Private · invite only" = "Private · invite only";
 "Protect the rest of the house" = "Protect the rest of the house";
+"Public health has been told." = "Public health has been told.";
 "Purchase" = "Purchase";
 "Purchases" = "Purchases";
 "QR code of the daycare" = "QR code of the daycare";
@@ -801,6 +808,7 @@
 "Section" = "Section";
 "See all %lld" = "See all %lld";
 "See my score" = "See my score";
+"See the file" = "See the file";
 "See the Season Pass" = "See the Season Pass";
 "See the suspects" = "See the suspects";
 "See the suspects anyway" = "See the suspects anyway";
@@ -883,6 +891,7 @@
 "Start the crew" = "Start the crew";
 "Started" = "Started";
 "Started %@" = "Started %@";
+"Status" = "Status";
 "Still a mystery" = "Still a mystery";
 "Still fine" = "Still fine";
 "Still fine. What now?" = "Still fine. What now?";
@@ -900,6 +909,7 @@
 "Survived it %lld times." = "Survived it %lld times.";
 "Symptoms" = "Symptoms";
 "Symptoms changed?" = "Symptoms changed?";
+"Symptoms seen" = "Symptoms seen";
 "Symptoms start" = "Symptoms start";
 "Symptoms updated." = "Symptoms updated.";
 "Symptoms usually show %1$lld to %2$lld h after exposure." = "Symptoms usually show %1$lld to %2$lld h after exposure.";
@@ -1040,6 +1050,7 @@
 "Wanted poster" = "Wanted poster";
 "Warms up one sniffle" = "Warms up one sniffle";
 "Watch %@" = "Watch %@";
+"Watch for symptoms in the next few days." = "Watch for symptoms in the next few days.";
 "Watch for: %@" = "Watch for: %@";
 "Watch my window" = "Watch my window";
 "Watching %@" = "Watching %@";

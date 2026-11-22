@@ -73,6 +73,9 @@ struct CrewScreen: View {
                 case .director: DirectorScreen()
                 }
             }
+            .navigationDestination(for: Germ.self) { germ in
+                GermDetailScreen(germ: germ)
+            }
             .task {
                 await crew.refresh()
             }

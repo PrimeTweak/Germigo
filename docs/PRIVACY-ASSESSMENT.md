@@ -8,7 +8,7 @@ Working draft of the privacy impact assessment that Québec's private-sector pri
 | --- | --- | --- | --- |
 | Shared germs, with the time shared and the recovery time | Yes, health | Crew server | Until the member leaves; 400 days at most |
 | Crew name and emblem, display name, reactions, hashed session key | No | Crew server | Until the member leaves; 400 days without opening the crew |
-| Daycare name, group names, notices and their notes | No | Crew server | Until the daycare closes; 400 days without opening |
+| Daycare name, group names, notices with their status, ready-made messages and notes | No | Crew server | Until the daycare closes; 400 days without opening |
 | Groups chosen, app language, hashed session key, Apple push address | No | Crew server; the push address also at Apple | Until the parent leaves; 400 days without opening |
 | IP address | No | Server memory for rate limits; host logs | One day at most in memory; host logs: To complete from Railway's log retention for the plan |
 | Journal, symptoms, photos, kids' and partner's first names | Yes, health | The phone only | Not communicated |
