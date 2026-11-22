@@ -824,69 +824,82 @@ private struct FeedRow: View {
     }
 }
 
-/// Name sharing, renaming, blocked members, and leaving.
+/// The parent's place in the crew: the crew and its code, what is shared, the name shown, and leaving.
 private struct CrewSettingsSheet: View {
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var renamed = false
+    @State private var copied = false
     @State private var confirmLeave = false
+
+    private static let nameLimit = 20
 
     private var sharesName: Binding<Bool> {
         Binding(get: { crew.sharesName }, set: { crew.setSharesName($0) })
     }
 
+    private var typedName: String {
+        name.trimmingCharacters(in: .whitespaces)
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section {
-                    Toggle(tr("Post my germs to the feed"), isOn: sharesName)
-                } footer: {
-                    Text(tr("Off: your germs only add 1 to the radar, with no name. On: they also appear in the feed and the leaderboard under your crew name."))
-                }
-                Section {
-                    TextField(tr("Your name in the crew"), text: $name)
-                        .textInputAutocapitalization(.words)
-                    Button(tr("Save name")) {
-                        Task {
-                            renamed = await crew.rename(name.trimmingCharacters(in: .whitespaces))
-                        }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
+                    if let state = crew.state {
+                        crewCard(state)
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).count < 2 || crew.isLoading)
-                    if renamed {
-                        Label(tr("Name saved."), systemImage: "checkmark")
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
+                    SectionHeader(title: tr("Sharing"))
+                    Toggle(isOn: sharesName) {
+                        SettingsRowLabel(symbol: crew.sharesName ? "eye.fill" : "eye.slash.fill", title: tr("Show my germs"),
+                                         detail: tr("In the feed and the leaderboard, with your name"), trigger: crew.sharesName)
                     }
-                    if let message = crew.errorMessage {
-                        Text(message)
-                            .font(.footnote)
-                            .foregroundStyle(palette.ink)
-                    }
-                }
-                if !crew.blockedIDs.isEmpty {
-                    Section {
-                        Button(tr("Unblock everyone (%lld)", crew.blockedIDs.count)) {
+                    .frame(minHeight: 54)
+                    .padding(.horizontal, 14)
+                    .germilyCard(padding: 0)
+                    caption(tr("Off, they still count on the radar, without your name."))
+                    SectionHeader(title: tr("Your name"))
+                    nameCard
+                    nameStatus
+                    if !crew.blockedIDs.isEmpty {
+                        Button {
                             crew.unblockAll()
+                        } label: {
+                            SettingsRow(symbol: "person.crop.circle.badge.checkmark",
+                                        title: tr("Unblock everyone (%lld)", crew.blockedIDs.count)) {}
                         }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 14)
+                        .germilyCard(padding: 0)
+                        .padding(.top, 12)
                     }
-                }
-                Section {
-                    Button(tr("Leave crew and delete my data"), role: .destructive) {
+                    Button {
                         confirmLeave = true
+                    } label: {
+                        SettingsRow(symbol: "rectangle.portrait.and.arrow.right", title: tr("Leave the crew"), tint: .red) {}
                     }
-                } footer: {
-                    Text(tr("Removes your name, your reactions and the germs you shared from the server. Your journal stays on this phone."))
+                    .buttonStyle(.plain)
+                    .disabled(crew.isLoading)
+                    .padding(.horizontal, 14)
+                    .germilyCard(padding: 0)
+                    .padding(.top, 12)
+                    caption(tr("Removes your name, your reactions and the germs you shared from the server. Your journal stays on this phone."))
                 }
+                .padding(.horizontal, Spacing.page)
+                .padding(.bottom, 28)
             }
+            .background(palette.background.ignoresSafeArea())
             .tint(palette.accent)
             .navigationTitle(tr("Crew settings"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        dismiss()
+                        Task {
+                            if await saveName() { dismiss() }
+                        }
                     } label: {
                         Image(systemName: "checkmark")
                     }
@@ -906,6 +919,115 @@ private struct CrewSettingsSheet: View {
                 Button(tr("Cancel"), role: .cancel) {}
             }
         }
+    }
+
+    /// The crew's emblem, name and size, and its invite code, copied with a touch.
+    private func crewCard(_ state: CrewState) -> some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Image(systemName: CrewEmblem.symbol(state.crew.emblem))
+                    .font(.title3)
+                    .foregroundStyle(Color.white)
+                    .frame(width: 44, height: 44)
+                    .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
+                                               startPoint: .top, endPoint: .bottom),
+                                in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(state.crew.name)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .lineLimit(1)
+                    Text(trCount(state.crew.families, one: "%lld family", other: "%lld families"))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 0)
+            }
+            .frame(minHeight: 62)
+            .accessibilityElement(children: .combine)
+            Divider()
+                .padding(.leading, 44)
+            Button {
+                Clipboard.copy(state.crew.code)
+                Haptics.tap()
+                copied = true
+                Task {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    copied = false
+                }
+            } label: {
+                SettingsRow(symbol: "number", title: tr("Invite code")) {
+                    HStack(spacing: 8) {
+                        Text(verbatim: state.crew.code)
+                            .font(.callout.weight(.semibold))
+                            .tracking(1.5)
+                            .foregroundStyle(palette.ink)
+                        Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(palette.accent)
+                            .contentTransition(.symbolEffect(.replace))
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(copied ? tr("Copied") : state.crew.code)
+        }
+        .padding(.horizontal, 14)
+        .germilyCard(padding: 0)
+    }
+
+    private var nameCard: some View {
+        HStack(spacing: 12) {
+            SettingsTile(symbol: "person.fill")
+            TextField(tr("Your name in the crew"), text: $name)
+                .textInputAutocapitalization(.words)
+                .submitLabel(.done)
+                .foregroundStyle(palette.ink)
+                .onSubmit {
+                    Task {
+                        _ = await saveName()
+                    }
+                }
+                .onChange(of: name) { _, newValue in
+                    renamed = false
+                    if newValue.count > Self.nameLimit { name = String(newValue.prefix(Self.nameLimit)) }
+                }
+        }
+        .frame(minHeight: 54)
+        .padding(.horizontal, 14)
+        .germilyCard(padding: 0)
+    }
+
+    /// Who sees the name, then whether it was saved or what went wrong.
+    @ViewBuilder
+    private var nameStatus: some View {
+        if let message = crew.errorMessage {
+            caption(message)
+        } else if renamed {
+            Label(tr("Name saved."), systemImage: "checkmark")
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.horizontal, 8)
+        } else {
+            caption(tr("The crew sees it in the feed, the leaderboard and the members."))
+        }
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.footnote)
+            .foregroundStyle(palette.inkSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 8)
+    }
+
+    /// Saves a changed name of two letters or more; true when there was nothing to save or it was saved.
+    private func saveName() async -> Bool {
+        let current = crew.state?.me.name ?? ""
+        guard typedName.count >= 2, typedName != current else { return true }
+        renamed = await crew.rename(typedName)
+        return renamed
     }
 }
 

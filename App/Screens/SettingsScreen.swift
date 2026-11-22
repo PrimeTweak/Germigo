@@ -365,40 +365,56 @@ struct SettingsScreen: View {
 
 // MARK: - Rows
 
+/// The rounded tile at the start of a settings row, with a symbol or a sticker.
+struct SettingsTile: View {
+    var symbol: String?
+    var art: String?
+    /// The symbol bounces each time this value changes.
+    var trigger = false
+    /// A color for the symbol and its tile, such as red for leaving.
+    var tint: Color?
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
+            .fill((tint ?? palette.ink).opacity(tint == nil ? 0.07 : 0.12))
+            .frame(width: 32, height: 32)
+            .overlay {
+                if let art {
+                    Image(art)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(3)
+                } else if let symbol {
+                    Image(systemName: symbol)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(tint ?? palette.ink)
+                        .contentTransition(.symbolEffect(.replace))
+                        .symbolEffect(.bounce, value: trigger)
+                }
+            }
+            .accessibilityHidden(true)
+    }
+}
+
 /// The leading part of a settings row: a tile with a symbol or a sticker, a title and a line under it.
-private struct SettingsRowLabel: View {
+struct SettingsRowLabel: View {
     var symbol: String?
     var art: String?
     let title: String
     var detail: String?
     /// The symbol bounces each time this value changes.
     var trigger = false
+    var tint: Color?
     @Environment(\.palette) private var palette
 
     var body: some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
-                .fill(palette.ink.opacity(0.07))
-                .frame(width: 32, height: 32)
-                .overlay {
-                    if let art {
-                        Image(art)
-                            .resizable()
-                            .scaledToFit()
-                            .padding(3)
-                    } else if let symbol {
-                        Image(systemName: symbol)
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(palette.ink)
-                            .contentTransition(.symbolEffect(.replace))
-                            .symbolEffect(.bounce, value: trigger)
-                    }
-                }
-                .accessibilityHidden(true)
+            SettingsTile(symbol: symbol, art: art, trigger: trigger, tint: tint)
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
                     .font(.body)
-                    .foregroundStyle(palette.ink)
+                    .foregroundStyle(tint ?? palette.ink)
                 if let detail {
                     Text(detail)
                         .font(.footnote)
@@ -412,13 +428,13 @@ private struct SettingsRowLabel: View {
 }
 
 /// A settings row: its label on the leading side, a control or a chevron on the other.
-private struct SettingsRow<Trailing: View>: View {
+struct SettingsRow<Trailing: View>: View {
     let label: SettingsRowLabel
     let trailing: Trailing
 
-    init(symbol: String? = nil, art: String? = nil, title: String, detail: String? = nil,
+    init(symbol: String? = nil, art: String? = nil, title: String, detail: String? = nil, tint: Color? = nil,
          @ViewBuilder trailing: () -> Trailing) {
-        label = SettingsRowLabel(symbol: symbol, art: art, title: title, detail: detail)
+        label = SettingsRowLabel(symbol: symbol, art: art, title: title, detail: detail, tint: tint)
         self.trailing = trailing()
     }
 

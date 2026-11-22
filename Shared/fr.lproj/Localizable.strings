@@ -249,6 +249,7 @@
 "Contact support" = "Contacter le soutien";
 "Contact: %@" = "Contact : %@";
 "Continue" = "Continuer";
+"Copied" = "Copié";
 "Copy as text" = "Copier en texte";
 "Copy the address" = "Copier l'adresse";
 "Coral" = "Corail";
@@ -484,6 +485,7 @@
 "In a crew" = "Dans un groupe";
 "In an emergency, call your local emergency number." = "En cas d'urgence, appelle ton numéro d'urgence local.";
 "In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "En cas d'urgence, appelle ton numéro d'urgence local. Pour un conseil, appelle ton médecin ou ta ligne santé locale.";
+"In the feed and the leaderboard, with your name" = "Dans le fil et au classement, avec ton nom";
 "In the window" = "Dans la fenêtre";
 "In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Germily turns each one into a card, points and a good laugh." = "Pendant leur première année de garderie, les enfants attrapent de 12 à 15 infections respiratoires. Tu vas en attraper ta part. Germily transforme chacune en carte, en points et en fou rire.";
 "In use" = "En cours";
@@ -534,6 +536,7 @@
 "Leave" = "Quitter";
 "Leave and delete" = "Quitter et supprimer";
 "Leave crew and delete my data" = "Quitter le groupe et supprimer mes données";
+"Leave the crew" = "Quitter le groupe";
 "Leave this crew?" = "Quitter ce groupe ?";
 "Leave this daycare" = "Quitter cette garderie";
 "Leave this daycare?" = "Quitter cette garderie ?";
@@ -673,7 +676,7 @@
 "Notifications are off for Germily, so no reminder can reach you." = "Les notifications sont désactivées pour Germily : aucun rappel ne peut te parvenir.";
 "Now" = "En cours";
 "Now it's %@." = "Maintenant, c'est %@.";
-"Off: your germs only add 1 to the radar, with no name. On: they also appear in the feed and the leaderboard under your crew name." = "Désactivé : tes microbes ajoutent seulement 1 au radar, sans nom. Activé : ils apparaissent aussi dans le fil et au classement, sous ton nom de groupe.";
+"Off, they still count on the radar, without your name." = "Désactivé, ils comptent quand même dans le radar, sans ton nom.";
 "Offensive name" = "Nom offensant";
 "Offer a soup" = "Offre une soupe";
 "Official info" = "Info officielle";
@@ -731,7 +734,6 @@
 "Poison centre, Québec" = "Centre antipoison du Québec";
 "Poison Help" = "Centre antipoison";
 "Porcelain Diplomat" = "Diplomate de la porcelaine";
-"Post my germs to the feed" = "Publier mes microbes dans le fil";
 "Poster" = "Affiche";
 "Preschool" = "Grands";
 "Previous day" = "Jour précédent";
@@ -802,7 +804,6 @@
 "Same germ twice within 30 days" = "Le même microbe deux fois en 30 jours";
 "Same germ, again and again. Loyal." = "Le même microbe, encore et encore. Fidèle.";
 "Save" = "Enregistrer";
-"Save name" = "Enregistrer le nom";
 "Scan the code" = "Scanner le code";
 "Scan the daycare's code" = "Scanner le code de la garderie";
 "Scan this code or type it, then pick your child's group." = "Scanne ce code ou tape-le, puis choisis le groupe de ton enfant.";
@@ -850,8 +851,10 @@
 "Share the standings" = "Partager le classement";
 "Share the win" = "Partager la victoire";
 "Share this card" = "Partager cette carte";
+"Sharing" = "Partage";
 "Shh… it's late." = "Chut… il est tard.";
 "Show %lld more" = "Afficher %lld de plus";
+"Show my germs" = "Montrer mes microbes";
 "Show photos" = "Voir les photos";
 "Shows the calendar" = "Affiche le calendrier";
 "Shows the signs" = "Affiche les signes";
@@ -963,6 +966,7 @@
 "The closest ones fit %1$lld of your %2$lld signs." = "Les plus proches collent à %1$lld de tes %2$lld signes.";
 "The Collector" = "Le collectionneur";
 "The couch is quiet. Too quiet." = "Le divan est calme. Trop calme.";
+"The crew sees it in the feed, the leaderboard and the members." = "Le groupe le voit dans le fil, au classement et dans les membres.";
 "The crew server can't be reached right now." = "Le serveur des groupes est inaccessible pour l'instant.";
 "The crew server isn't set up for this build yet." = "Le serveur des groupes n'est pas encore configuré pour cette version.";
 "The current code and poster stop working. Families already on the list stay." = "Le code actuel et l'affiche cessent de fonctionner. Les familles déjà inscrites restent.";
@@ -1161,6 +1165,7 @@
 "Your kid, then the whole household: who caught what, from whom, and for how long." = "Ton enfant, puis toute la maisonnée : qui a attrapé quoi, de qui, et pour combien de temps.";
 "Your month recap is ready in Season." = "Ton récap du mois t'attend dans Saison.";
 "Your mystery bug is 2 days old. A new sign could name it." = "Ton microbe mystère a 2 jours. Un nouveau signe pourrait le nommer.";
+"Your name" = "Ton nom";
 "Your name in the crew" = "Ton nom dans le groupe";
 "Your nemesis" = "Ton ennemi juré";
 "Your parent type" = "Ton genre de parent";

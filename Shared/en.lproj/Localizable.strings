@@ -249,6 +249,7 @@
 "Contact support" = "Contact support";
 "Contact: %@" = "Contact: %@";
 "Continue" = "Continue";
+"Copied" = "Copied";
 "Copy as text" = "Copy as text";
 "Copy the address" = "Copy the address";
 "Coral" = "Coral";
@@ -484,6 +485,7 @@
 "In a crew" = "In a crew";
 "In an emergency, call your local emergency number." = "In an emergency, call your local emergency number.";
 "In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "In an emergency, call your local emergency number. For advice, call your doctor or your local health line.";
+"In the feed and the leaderboard, with your name" = "In the feed and the leaderboard, with your name";
 "In the window" = "In the window";
 "In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Germily turns each one into a card, points and a good laugh." = "In their first year of daycare, kids catch 12 to 15 respiratory bugs. You'll catch your share. Germily turns each one into a card, points and a good laugh.";
 "In use" = "In use";
@@ -534,6 +536,7 @@
 "Leave" = "Leave";
 "Leave and delete" = "Leave and delete";
 "Leave crew and delete my data" = "Leave crew and delete my data";
+"Leave the crew" = "Leave the crew";
 "Leave this crew?" = "Leave this crew?";
 "Leave this daycare" = "Leave this daycare";
 "Leave this daycare?" = "Leave this daycare?";
@@ -673,7 +676,7 @@
 "Notifications are off for Germily, so no reminder can reach you." = "Notifications are off for Germily, so no reminder can reach you.";
 "Now" = "Now";
 "Now it's %@." = "Now it's %@.";
-"Off: your germs only add 1 to the radar, with no name. On: they also appear in the feed and the leaderboard under your crew name." = "Off: your germs only add 1 to the radar, with no name. On: they also appear in the feed and the leaderboard under your crew name.";
+"Off, they still count on the radar, without your name." = "Off, they still count on the radar, without your name.";
 "Offensive name" = "Offensive name";
 "Offer a soup" = "Offer a soup";
 "Official info" = "Official info";
@@ -731,7 +734,6 @@
 "Poison centre, Québec" = "Poison centre, Québec";
 "Poison Help" = "Poison Help";
 "Porcelain Diplomat" = "Porcelain Diplomat";
-"Post my germs to the feed" = "Post my germs to the feed";
 "Poster" = "Poster";
 "Preschool" = "Preschool";
 "Previous day" = "Previous day";
@@ -802,7 +804,6 @@
 "Same germ twice within 30 days" = "Same germ twice within 30 days";
 "Same germ, again and again. Loyal." = "Same germ, again and again. Loyal.";
 "Save" = "Save";
-"Save name" = "Save name";
 "Scan the code" = "Scan the code";
 "Scan the daycare's code" = "Scan the daycare's code";
 "Scan this code or type it, then pick your child's group." = "Scan this code or type it, then pick your child's group.";
@@ -850,8 +851,10 @@
 "Share the standings" = "Share the standings";
 "Share the win" = "Share the win";
 "Share this card" = "Share this card";
+"Sharing" = "Sharing";
 "Shh… it's late." = "Shh… it's late.";
 "Show %lld more" = "Show %lld more";
+"Show my germs" = "Show my germs";
 "Show photos" = "Show photos";
 "Shows the calendar" = "Shows the calendar";
 "Shows the signs" = "Shows the signs";
@@ -963,6 +966,7 @@
 "The closest ones fit %1$lld of your %2$lld signs." = "The closest ones fit %1$lld of your %2$lld signs.";
 "The Collector" = "The Collector";
 "The couch is quiet. Too quiet." = "The couch is quiet. Too quiet.";
+"The crew sees it in the feed, the leaderboard and the members." = "The crew sees it in the feed, the leaderboard and the members.";
 "The crew server can't be reached right now." = "The crew server can't be reached right now.";
 "The crew server isn't set up for this build yet." = "The crew server isn't set up for this build yet.";
 "The current code and poster stop working. Families already on the list stay." = "The current code and poster stop working. Families already on the list stay.";
@@ -1161,6 +1165,7 @@
 "Your kid, then the whole household: who caught what, from whom, and for how long." = "Your kid, then the whole household: who caught what, from whom, and for how long.";
 "Your month recap is ready in Season." = "Your month recap is ready in Season.";
 "Your mystery bug is 2 days old. A new sign could name it." = "Your mystery bug is 2 days old. A new sign could name it.";
+"Your name" = "Your name";
 "Your name in the crew" = "Your name in the crew";
 "Your nemesis" = "Your nemesis";
 "Your parent type" = "Your parent type";
