@@ -147,7 +147,7 @@ struct TourPageView: View {
     private func doctorCard(_ germ: Germ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 13) {
-                IconTile(symbol: "cross.case.fill", size: 36)
+                IconTile(symbol: "stethoscope", size: 36)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(tr("When to call"))
                         .font(.headline)

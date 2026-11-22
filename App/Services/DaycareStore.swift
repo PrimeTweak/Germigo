@@ -566,9 +566,9 @@ final class DaycareStore {
 /// The sample daycare of a test build without a server: made-up notices, kept in memory only.
 extension DaycareStore {
     static let demoInfo = DaycareInfo(
-        id: "demo-petits-pois", name: "CPE Les Petits Pois",
-        groups: [DaycareGroup(id: "demo-g1", name: "Poupons"), DaycareGroup(id: "demo-g2", name: "Trottineurs"),
-                 DaycareGroup(id: "demo-g3", name: "Grands")],
+        id: "demo-petits-pois", name: tr("Little Peas Daycare"),
+        groups: [DaycareGroup(id: "demo-g1", name: tr("Infants")), DaycareGroup(id: "demo-g2", name: tr("Toddlers")),
+                 DaycareGroup(id: "demo-g3", name: tr("Preschool"))],
         families: 42)
 
     static var demoNotices: [DaycareNotice] {

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Germ-free streak arithmetic shared by the store, badges and widgets.
+/// Germ-free streak and day-count arithmetic, from the journal.
 enum StreakMath {
     static func days(from start: Date, to end: Date) -> Int {
         let calendar = Calendar.current

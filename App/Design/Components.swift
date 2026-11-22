@@ -9,7 +9,7 @@ struct PressableStyle: ButtonStyle {
     }
 }
 
-/// One of the two answers at the bottom of Today: a face and what it says.
+/// A big tappable answer: a face and what it says, as at the bottom of Today.
 struct FaceTile<Face: View>: View {
     let title: String
     let action: () -> Void

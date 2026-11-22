@@ -391,6 +391,13 @@ async function main() {
   await new Promise((resolve) => slow.close(resolve));
   assert.equal(JSON.parse(fs.readFileSync(slowFile, 'utf8')).events.length, 2);
 
+  // Every server text has its English and French, with the same parts
+  const text = require('./text.json');
+  for (const entry of [...Object.values(text.notice), ...Object.values(text.replies)]) {
+    assert.ok(entry.en && entry.fr);
+    if (typeof entry.en === 'object') assert.deepEqual(Object.keys(entry.fr).sort(), Object.keys(entry.en).sort());
+  }
+
   // Email subjects: illness first, then an optional group
   const sampleGroups = [{ id: 'g1', name: 'Trottineurs' }, { id: 'g2', name: 'Les Grands' }];
   assert.deepEqual(parseSubject('Gastro - Trottineurs', sampleGroups, illnesses), { germID: 'noro', groupID: 'g1' });

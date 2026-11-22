@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Inspects a built Germily.app and reports what is actually inside it.
-
-Usage: python3 tools/check_bundle.py path/to/Germily.app
-Missing essentials fail the check; everything else is printed as a measured fact or a warning.
-"""
+Usage: python3 tools/check_bundle.py path/to/Germily.app. Missing essentials fail the check;
+everything else is printed as a measured fact or a warning."""
 import pathlib
 import plistlib
 import sys

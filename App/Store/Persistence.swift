@@ -119,7 +119,7 @@ enum Persistence {
 
 /// The bundled germ catalog and articles, with the lessons of the online file.
 struct GermCatalog {
-    /// The germ that the Tissue Box icon counts.
+    /// The common cold: the Snow Day icon counts it, and onboarding shows its card.
     static let commonColdID = "rhino"
     /// The germ logged when nobody knows what it is yet.
     static let mysteryID = "mystery"

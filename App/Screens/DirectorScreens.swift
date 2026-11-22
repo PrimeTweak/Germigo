@@ -14,7 +14,7 @@ struct DaycareSetupSheet: View {
     @State private var submitting = false
 
     private var suggestions: [String] {
-        let names = AppLanguage.isFrench ? ["Poupons", "Trottineurs", "Grands"] : ["Infants", "Toddlers", "Preschool"]
+        let names = [tr("Infants"), tr("Toddlers"), tr("Preschool")]
         return names.filter { suggestion in !groups.contains { $0.lowercased() == suggestion.lowercased() } }
     }
 
@@ -855,6 +855,7 @@ struct DaycareGroupsScreen: View {
 
 /// Notices by email: the address the daycare writes from, and the private address it writes to.
 struct EmailNoticesScreen: View {
+    @Environment(AppModel.self) private var model
     @Environment(DaycareStore.self) private var daycare
     @Environment(\.palette) private var palette
     @State private var email = ""
@@ -972,7 +973,7 @@ struct EmailNoticesScreen: View {
     }
 
     private func example(_ info: DirectorDaycare) -> String {
-        let illness = AppLanguage.isFrench ? "Gastro" : "Stomach bug"
+        let illness = model.catalog.germ("noro")?.illness.value ?? ""
         guard let group = info.groups.first else { return illness }
         return illness + " - " + group.name
     }

@@ -47,7 +47,7 @@ enum AppConfig {
         (Bundle.main.object(forInfoDictionaryKey: "GermilyCrewEnabled") as? Bool) ?? true
     }
 
-    /// Daycares can send notices by email only when the server has an inbound address.
+    /// Shows notices by email to directors; turn it on only once the server has an inbound address.
     static var emailNoticesEnabled: Bool {
         (Bundle.main.object(forInfoDictionaryKey: "GermilyEmailNoticesEnabled") as? Bool) ?? false
     }
@@ -64,10 +64,6 @@ enum AppConfig {
         serverURL?.appendingPathComponent("health-data")
     }
 
-    static var supportURL: URL? {
-        serverURL?.appendingPathComponent("support")
-    }
-
     static var versionLabel: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
@@ -75,7 +71,7 @@ enum AppConfig {
     }
 }
 
-/// Minimal keychain storage for the crew session token.
+/// Keychain storage for the crew and daycare session tokens.
 enum Keychain {
     private static let service = "ca.germily.app"
 

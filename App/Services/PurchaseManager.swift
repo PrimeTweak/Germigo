@@ -39,10 +39,8 @@ final class PurchaseManager {
     /// Set when a purchase waits for an approval, such as Ask to Buy.
     var pendingNotice = false
 
-    @ObservationIgnored private var updatesTask: Task<Void, Never>?
-
     init() {
-        updatesTask = Task { [weak self] in
+        Task { [weak self] in
             for await update in StoreKit.Transaction.updates {
                 if case .verified(let transaction) = update {
                     await transaction.finish()

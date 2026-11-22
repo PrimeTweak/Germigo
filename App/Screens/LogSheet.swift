@@ -404,7 +404,7 @@ struct LogForm: View {
     private var detailsCard: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                IconTile(symbol: "moon.fill")
+                IconTile(symbol: "clock.fill")
                 DatePicker(tr("Started"), selection: $startedAt, in: AppModel.earliestNewEntry...Date(),
                            displayedComponents: [.date, .hourAndMinute])
                     .font(.body)

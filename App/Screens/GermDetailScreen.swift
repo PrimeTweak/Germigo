@@ -295,7 +295,7 @@ struct GermDetailScreen: View {
                 }
             } label: {
                 HStack(spacing: 13) {
-                    IconTile(symbol: "cross.case.fill", size: 36)
+                    IconTile(symbol: "stethoscope", size: 36)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(tr("When to call"))
                             .font(.headline)

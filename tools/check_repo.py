@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Checks that the repository is complete and consistent before a build.
-
-Usage: python3 tools/check_repo.py [--release]
-With --release, placeholders that must be replaced before an App Store upload also fail the check.
-"""
+Usage: python3 tools/check_repo.py [--release]. With --release, placeholders that must be
+replaced before an App Store upload also fail the check."""
 import json
 import pathlib
 import plistlib
@@ -29,7 +27,7 @@ REQUIRED = [
     "Shared/en.lproj/Localizable.strings", "Shared/fr.lproj/Localizable.strings",
     "Widgets/Info.plist", "Widgets/GermilyWidgets.entitlements", "Widgets/PrivacyInfo.xcprivacy",
     "server/server.js", "server/test.js", "server/legal.json", "server/package.json",
-    "server/illnesses.json", "server/push.js", "server/mail.js",
+    "server/illnesses.json", "server/text.json", "server/push.js", "server/mail.js",
     "README.md", "docs/APP-STORE.md",
     "App/Store/JournalRules.swift", "App/Store/ProgressEngine.swift", "Tests/LogicTests/main.swift", "tools/run_logic_tests.sh",
 ]

@@ -14,9 +14,11 @@ No Swift compiler runs outside the Build IPA workflow. When Swift changed, say t
 
 ## Rules
 
-- Everything in the repository is in English: code, comments, string keys, docs.
-- Comments describe what the code does, impersonally, in three lines at most.
-- No dead code: nothing unused, nothing commented out, nothing kept for later.
+- Everything in the repository is in English: code, comments, string keys, docs. French lives only in the strings files and the content files (`App/Content/*.json`, `server/legal.json`, `server/illnesses.json`, `server/text.json`).
+- Comments describe what the code does, impersonally and in plain words, in three lines at most. A comment that no longer matches its code is rewritten or removed.
+- No dead code: nothing unused, nothing never called, nothing commented out, nothing kept for later.
+- No leftover logs, probes or debug output. The server logs only errors and its start.
+- Every icon says what its control does, one idea keeps one icon across the app, and the rows of a list all have an icon or none do.
 - Corner radii come from `Radius`: three values, nothing in between.
 - Page margins come from `Spacing.page`; padding inside cards and controls keeps its own value.
 - Every door to the Season Pass passes its `PassReason` to `PaywallView` and words its offer with `PassOfferText`, `PassOfferTag` or `PassOfferLink`.

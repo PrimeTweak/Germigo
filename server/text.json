@@ -1,0 +1,103 @@
+{
+  "notice": {
+    "inGroup": {
+      "en": "{illness} in the {group} group",
+      "fr": "{illness} dans le groupe {group}"
+    },
+    "atDaycare": {
+      "en": "{illness} at the daycare",
+      "fr": "{illness} à la garderie"
+    },
+    "withStatus": {
+      "en": "{where}: {status}",
+      "fr": "{where} : {status}"
+    },
+    "symptoms": {
+      "en": "symptoms seen",
+      "fr": "symptômes observés"
+    },
+    "confirmed": {
+      "en": "confirmed case",
+      "fr": "cas confirmé"
+    }
+  },
+  "replies": {
+    "sent": {
+      "en": {
+        "subject": "Sent: {what}",
+        "body": "Your notice reached {count} families on Germily.",
+        "bodyOne": "Your notice reached 1 family on Germily."
+      },
+      "fr": {
+        "subject": "Envoyé : {what}",
+        "body": "Votre avis a été transmis à {count} familles sur Germily.",
+        "bodyOne": "Votre avis a été transmis à 1 famille sur Germily."
+      }
+    },
+    "illness": {
+      "en": {
+        "subject": "Not sent: which illness?",
+        "body": "Germily could not find the illness in the subject. Write it first, then the group, for example \"Stomach bug - Toddlers\". Nothing was sent."
+      },
+      "fr": {
+        "subject": "Non envoyé : quelle maladie?",
+        "body": "Germily n'a pas trouvé la maladie dans l'objet. Écrivez-la d'abord, puis le groupe, par exemple « Gastro - Trottineurs ». Rien n'a été envoyé."
+      }
+    },
+    "group": {
+      "en": {
+        "subject": "Not sent: which group?",
+        "body": "Germily could not match the group. Use one of these names, or leave it out to reach the whole daycare: {names}. Nothing was sent."
+      },
+      "fr": {
+        "subject": "Non envoyé : quel groupe?",
+        "body": "Germily n'a pas reconnu le groupe. Utilisez un de ces noms, ou ne mettez rien pour toute la garderie : {names}. Rien n'a été envoyé."
+      }
+    },
+    "limit": {
+      "en": {
+        "subject": "Not sent: daily limit reached",
+        "body": "This daycare has sent the most notices allowed today. Try again tomorrow."
+      },
+      "fr": {
+        "subject": "Non envoyé : limite du jour atteinte",
+        "body": "Cette garderie a envoyé le nombre maximal d'avis aujourd'hui. Réessayez demain."
+      }
+    }
+  },
+  "subjectWords": {
+    "whole": [
+      "whole daycare",
+      "all",
+      "everyone",
+      "everybody",
+      "tous",
+      "toutes",
+      "tout le monde",
+      "toute la garderie",
+      "la garderie",
+      "garderie",
+      "cpe",
+      "tous les groupes"
+    ],
+    "filler": [
+      "group",
+      "groupe",
+      "groups",
+      "groupes",
+      "the",
+      "le",
+      "la",
+      "les",
+      "in",
+      "dans",
+      "au",
+      "aux",
+      "a",
+      "de",
+      "du",
+      "des",
+      "at"
+    ]
+  }
+}

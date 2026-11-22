@@ -265,7 +265,7 @@ struct SettingsScreen: View {
         NavigationLink {
             HelpLinesScreen()
         } label: {
-            SettingsRow(symbol: "lifepreserver.fill", title: tr("Help lines"), detail: tr("Emergency and health lines")) {
+            SettingsRow(symbol: "phone.fill", title: tr("Help lines"), detail: tr("Emergency and health lines")) {
                 RowChevron()
             }
         }

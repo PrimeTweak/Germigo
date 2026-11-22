@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
-"""Static checks on the Swift sources that need no compiler.
-
-Catches the mistakes that are cheap to find early: unbalanced delimiters, missing translations,
-format strings whose arguments do not match, shared code that depends on app-only types,
-image names that are not in the asset catalog, and color values kept outside Shared/Swatch.swift.
-"""
+"""Static checks on the Swift sources, without a compiler: unbalanced delimiters, missing
+translations, format strings whose arguments do not match, shared code that uses app-only
+types, images missing from the asset catalog, and colors kept outside Shared/Swatch.swift."""
 import json
 import pathlib
 import re
@@ -171,6 +168,25 @@ def check_images(path, kept, folder):
             fail(f"{path}: image {match.group(1)!r} is not in {CATALOG[folder]}")
 
 
+def needs_memberwise(lines, index):
+    """True when the struct around a line has a public stored property without a default value."""
+    indent = len(lines[index]) - len(lines[index].lstrip())
+    for start in range(index - 1, -1, -1):
+        text = lines[start]
+        if text.strip() and len(text) - len(text.lstrip()) < indent:
+            if not re.search(r"\bstruct\b", text):
+                return True
+            break
+    else:
+        return True
+    for line in lines[start + 1:]:
+        if line.strip() and len(line) - len(line.lstrip()) < indent:
+            break
+        if len(line) - len(line.lstrip()) == indent and re.match(r"(let|var) \w+\s*:[^={]*$", line.strip()):
+            return True
+    return False
+
+
 def check_stored_properties(path, code):
     """Warns about private stored properties that make a memberwise initializer private."""
     lines = code.splitlines()
@@ -181,7 +197,7 @@ def check_stored_properties(path, code):
         if text.startswith("private let") and "=" in text:
             continue
         previous = lines[number - 2].strip() if number >= 2 else ""
-        if previous.startswith("@") or "static" in text:
+        if previous.startswith("@") or "static" in text or not needs_memberwise(lines, number - 1):
             continue
         warnings.append(f"{path}:{number}: private stored property may hide the memberwise initializer: {text[:60]}")
 

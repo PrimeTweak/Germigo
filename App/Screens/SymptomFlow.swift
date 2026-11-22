@@ -247,7 +247,7 @@ private struct WhoPage: View {
     }
 }
 
-/// Tick what you see or feel, meet the suspects, pick one or keep it a mystery.
+/// The signs to tick, then the suspects they point to: pick one or keep it a mystery.
 private struct SymptomPicker: View {
     let flow: SymptomFlow
     /// Who the pages are about on a new entry; an existing entry brings its own.

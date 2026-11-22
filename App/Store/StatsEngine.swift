@@ -47,7 +47,7 @@ struct SeasonStats {
     let longestChain: ChainStat?
 }
 
-/// Aggregates the season's logs for the Season tab and the recap card.
+/// Aggregates the season's logs for the Season page and the recap card.
 enum StatsEngine {
     /// One entry per week of the season so far: the first germ going on that week, or nil.
     static func sickWeekGerms(data: AppData, season: Season, now: Date) -> [String?] {

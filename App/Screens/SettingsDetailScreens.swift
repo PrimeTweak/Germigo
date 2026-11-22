@@ -106,7 +106,7 @@ struct DataScreen: View {
                  detail: tr("No ads, no trackers, no third-party analytics, no data sold.")),
             Item(symbol: "creditcard", title: tr("Purchases"),
                  detail: tr("The Season Pass and tips are handled by Apple. Germily never sees your payment details.")),
-            Item(symbol: "externaldrive", title: tr("Backups"),
+            Item(symbol: "archivebox", title: tr("Backups"),
                  detail: tr("A backup saves your whole journal and its photos as a file, where you choose. Restore a backup reads it back on this phone or a new one. Germily never uploads it.")),
             Item(symbol: "trash", title: tr("Your call"),
                  detail: tr("Export your journal or delete everything from here at any time. Leaving a crew or a daycare deletes your data from the server."))

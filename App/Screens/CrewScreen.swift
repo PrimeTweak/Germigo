@@ -8,7 +8,7 @@ enum CrewEmblem {
     }
 }
 
-/// The daycare group tab: daycare notices, then the crew's gate, sign-up, or the crew itself.
+/// The Crew tab: daycare notices first, then the crew's offer, sign-up, or the crew itself.
 struct CrewScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew

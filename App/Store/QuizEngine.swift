@@ -41,8 +41,6 @@ struct SeededGenerator: RandomNumberGenerator {
 /// Builds the daily quiz from the germ notes and keeps its history.
 enum QuizEngine {
     static let questionsPerDay = 3
-    /// Right answers needed for each new lesson.
-    static let answersPerLesson = 5
 
     static func dayKey(_ date: Date) -> String {
         let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
@@ -240,8 +238,7 @@ enum QuizEngine {
         return days
     }
 
-    /// The germ shown on a given day, in turn through the album.
-    /// Weeks counted from a Monday, so the count turns every Monday.
+    /// Whole weeks since a fixed Monday, so the count turns every Monday; the week's picks follow it.
     static func weekIndex(_ now: Date) -> Int {
         let calendar = Calendar.current
         let monday = calendar.date(from: DateComponents(year: 2024, month: 1, day: 1)) ?? Date(timeIntervalSince1970: 0)

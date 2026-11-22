@@ -1,9 +1,11 @@
 'use strict';
 
-// Daycare notices sent by email: reading the subject, and the confirmation sent back.
+// Daycare notices sent by email: reading the subject, and the reply sent back.
+// The words read in subjects and the replies, in English and French, live in text.json.
 
-const WHOLE = ['whole daycare', 'all', 'everyone', 'everybody', 'tous', 'toutes', 'tout le monde',
-  'toute la garderie', 'la garderie', 'garderie', 'cpe', 'tous les groupes'];
+const TEXT = require('./text.json');
+const WHOLE = TEXT.subjectWords.whole;
+const FILLER = TEXT.subjectWords.filler;
 
 function flatten(text) {
   return String(text || '')
@@ -23,8 +25,6 @@ function take(text, phrase) {
   if (index < 0) return null;
   return (padded.slice(0, index) + ' ' + padded.slice(index + target.length + 2)).replace(/\s+/g, ' ').trim();
 }
-
-const FILLER = ['group', 'groupe', 'groups', 'groupes', 'the', 'le', 'la', 'les', 'in', 'dans', 'au', 'aux', 'a', 'de', 'du', 'des', 'at'];
 
 function withoutFiller(text) {
   return text.split(' ').filter((word) => word && !FILLER.includes(word)).join(' ');
@@ -64,29 +64,17 @@ function parseSubject(subject, groups, illnesses) {
   return { error: 'group' };
 }
 
-const REPLIES = {
-  sent: {
-    en: (count, what) => [`Sent: ${what}`, `Your notice reached ${count} ${count === 1 ? 'family' : 'families'} on Germily.`],
-    fr: (count, what) => [`Envoyé : ${what}`, `Votre avis a été transmis à ${count} ${count === 1 ? 'famille' : 'familles'} sur Germily.`],
-  },
-  illness: {
-    en: () => ['Not sent: which illness?', 'Germily could not find the illness in the subject. Write it first, then the group, for example "Stomach bug - Toddlers". Nothing was sent.'],
-    fr: () => ['Non envoyé : quelle maladie?', 'Germily n\'a pas trouvé la maladie dans l\'objet. Écrivez-la d\'abord, puis le groupe, par exemple « Gastro - Trottineurs ». Rien n\'a été envoyé.'],
-  },
-  group: {
-    en: (names) => ['Not sent: which group?', `Germily could not match the group. Use one of these names, or leave it out to reach the whole daycare: ${names}. Nothing was sent.`],
-    fr: (names) => ['Non envoyé : quel groupe?', `Germily n'a pas reconnu le groupe. Utilisez un de ces noms, ou ne mettez rien pour toute la garderie : ${names}. Rien n'a été envoyé.`],
-  },
-  limit: {
-    en: () => ['Not sent: daily limit reached', 'This daycare has sent the most notices allowed today. Try again tomorrow.'],
-    fr: () => ['Non envoyé : limite du jour atteinte', 'Cette garderie a envoyé le nombre maximal d\'avis aujourd\'hui. Réessayez demain.'],
-  },
-};
+// Puts values into a text's {placeholders}.
+function fill(template, values = {}) {
+  return template.replace(/\{(\w+)\}/g, (match, key) => (key in values ? String(values[key]) : match));
+}
 
-function reply(kind, language, ...values) {
-  const set = REPLIES[kind];
-  const [subject, body] = (set[language] || set.en)(...values);
-  return { subject, body };
+// The reply for one outcome, in the daycare's language: sent, illness, group or limit.
+function reply(kind, language, values = {}) {
+  const set = TEXT.replies[kind];
+  const words = set[language] || set.en;
+  const body = values.count === 1 && words.bodyOne ? words.bodyOne : words.body;
+  return { subject: fill(words.subject, values), body: fill(body, values) };
 }
 
 // Sends one plain-text email through Postmark; without a token, nothing is sent.
@@ -110,4 +98,4 @@ function createMailer(options = {}) {
   return { enabled, send };
 }
 
-module.exports = { parseSubject, reply, createMailer, flatten };
+module.exports = { parseSubject, reply, createMailer, flatten, fill };

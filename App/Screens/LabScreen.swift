@@ -82,7 +82,7 @@ enum GuideKeys {
 }
 
 /// The Guide tab: a search over illnesses and lessons, the daily quiz, what is new this week,
-/// every illness shelved by part of the body, then the lessons.
+/// every illness shelved by part of the body, the lessons, then the help lines.
 struct LabScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette

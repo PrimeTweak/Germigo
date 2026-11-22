@@ -1,14 +1,15 @@
 'use strict';
 
-// Germily crew server: private daycare groups, an anonymous outbreak radar,
-// a small feed of germs caught and beaten with preset reactions, daycare notices, and the app's legal pages.
+// Germily server: private crews of families, an anonymous radar of germs going around,
+// a feed of germs caught and beaten with preset reactions, daycare notices, and the app's legal pages.
 
 const http = require('node:http');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { createPusher } = require('./push.js');
-const { parseSubject, reply, createMailer, flatten } = require('./mail.js');
+const { parseSubject, reply, createMailer, flatten, fill } = require('./mail.js');
+const TEXT = require('./text.json');
 
 const GERM_IDS = new Set([
   'rhino', 'mystery', 'lingerer', 'chesty', 'whisper', 'pressure', 'noro', 'pinky', 'rona', 'arsy', 'strep', 'flu',
@@ -27,10 +28,7 @@ const NOTE_LIMIT = 280;
 // A note is a sentence, so a link is a scheme, a www, a .com or an email address in it.
 const NOTE_LINK_PATTERN = /https?:\/\/|www\.|\.com\b|\S@\S/i;
 // Whether the illness is only seen or confirmed, and the ready-made lines a daycare can add, in display order.
-const NOTICE_STATUSES = {
-  symptoms: { en: 'symptoms seen', fr: 'symptômes observés' },
-  confirmed: { en: 'confirmed case', fr: 'cas confirmé' },
-};
+const NOTICE_STATUSES = new Set(['symptoms', 'confirmed']);
 const NOTICE_MESSAGES = ['watch', 'cleaning', 'stay_home', 'tell_us', 'public_health'];
 const CREW_CODE_LENGTH = 8;
 const DAYCARE_CODE_LENGTH = 8;
@@ -446,11 +444,10 @@ function createApp(options = {}) {
   function alertFor(daycare, notice, lang) {
     const illness = illnesses[notice.germID] ? illnesses[notice.germID][lang] : notice.germID;
     const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
-    const where = lang === 'fr'
-      ? (group ? `${illness} dans le groupe ${group.name}` : `${illness} à la garderie`)
-      : (group ? `${illness} in the ${group.name} group` : `${illness} at the daycare`);
-    const status = NOTICE_STATUSES[notice.status];
-    return { title: daycare.name, body: status ? where + (lang === 'fr' ? ' : ' : ': ') + status[lang] : where };
+    const words = TEXT.notice;
+    const where = group ? fill(words.inGroup[lang], { illness, group: group.name }) : fill(words.atDaycare[lang], { illness });
+    const body = notice.status ? fill(words.withStatus[lang], { where, status: words[notice.status][lang] }) : where;
+    return { title: daycare.name, body };
   }
 
   // Stores a notice, then alerts every family it reaches; tokens Apple refuses are forgotten.
@@ -514,13 +511,13 @@ function createApp(options = {}) {
     if (parsed.error === 'illness') {
       answer = reply('illness', lang);
     } else if (parsed.error === 'group') {
-      answer = reply('group', lang, daycare.groups.map((group) => group.name).join(', '));
+      answer = reply('group', lang, { names: daycare.groups.map((group) => group.name).join(', ') });
     } else {
       try {
         const notice = await publish(daycare, { germID: parsed.germID, groupID: parsed.groupID, status: null, messages: [], note: '' }, 'email');
         const illness = illnesses[notice.germID][lang];
         const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
-        answer = reply('sent', lang, notice.recipients, group ? `${illness} · ${group.name}` : illness);
+        answer = reply('sent', lang, { count: notice.recipients, what: group ? `${illness} · ${group.name}` : illness });
       } catch (error) {
         if (!(error instanceof ApiError) || error.code !== 'rate_limited') throw error;
         answer = reply('limit', lang);
@@ -1005,7 +1002,7 @@ document.getElementById('form').addEventListener('submit', (event) => {
         if (!GERM_IDS.has(body.germID) || body.germID === 'mystery') throw new ApiError(400, 'invalid');
         const groupID = body.groupID === null || body.groupID === undefined ? null : String(body.groupID);
         if (groupID !== null && !daycare.groups.some((group) => group.id === groupID)) throw new ApiError(400, 'invalid');
-        if (!Object.hasOwn(NOTICE_STATUSES, body.status)) throw new ApiError(400, 'invalid');
+        if (!NOTICE_STATUSES.has(body.status)) throw new ApiError(400, 'invalid');
         await publish(daycare, {
           germID: body.germID, groupID, status: body.status, messages: cleanMessages(body.messages), note: cleanNote(body.note),
         }, 'app');
@@ -1040,7 +1037,6 @@ document.getElementById('form').addEventListener('submit', (event) => {
         if (!notice) throw new ApiError(404, 'not_found');
         if (!notice.reports.includes(subscription.id)) {
           notice.reports.push(subscription.id);
-          console.log(`[notice report] daycare=${daycare.id} notice=${notice.id}`);
           save();
         }
         return json(res, 200, parentState(subscription));
@@ -1116,7 +1112,6 @@ document.getElementById('form').addEventListener('submit', (event) => {
           id: crypto.randomUUID(), crewID: me.crewID, reporterID: me.id, memberID: target.id,
           reason, at: clock(), resolved: false,
         });
-        console.log(`[report] crew=${me.crewID} member=${target.id} reason=${reason}`);
         save();
       }
       return json(res, 200, stateFor(me));

@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """Requests every source link shown in the app and reports the ones that do not answer.
-
-Usage: python3 tools/check_links.py
-Needs network access, so it runs as an informational step in CI.
-Some sites answer 401, 403 or 429 to any script while the page opens fine in a browser.
-Those links are listed as blocked, which means not verified here, and do not fail the run.
-"""
+Usage: python3 tools/check_links.py. Informational in CI. A site that refuses scripts
+(401, 403 or 429) is listed as blocked, not verified, and does not fail the run."""
 import json
 import pathlib
 import sys

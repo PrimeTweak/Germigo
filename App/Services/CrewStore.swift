@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// The parent's daycare crew: membership, radar, feed and moderation.
+/// The parent's crew: membership, radar, feed and moderation.
 @MainActor
 @Observable
 final class CrewStore {

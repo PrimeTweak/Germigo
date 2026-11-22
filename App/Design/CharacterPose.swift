@@ -88,11 +88,7 @@ struct TimedReaction: Equatable {
 
 /// Touches in a row: the fourth within three seconds makes the character dizzy.
 struct TapStreak {
-    private var taps: [Date]
-
-    init() {
-        taps = []
-    }
+    private var taps: [Date] = []
 
     /// Records a tap and returns what it earns.
     mutating func tap(at now: Date, usual: Reaction) -> Reaction {

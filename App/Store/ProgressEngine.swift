@@ -88,7 +88,7 @@ struct SkillNode: Identifiable, Hashable {
 enum SkillTree {
     static let capstoneID = "veteran"
 
-    /// Branches that must reach rank 2 for the capstone.
+    /// How many branches must reach rank 2 for the capstone.
     static let capstoneTarget = 3
 
     static func counts(data: AppData, catalog: GermCatalog) -> [SkillBranch: Int] {
@@ -186,7 +186,7 @@ enum Milestones {
 
 // MARK: - Next goal
 
-/// The closest thing to unlock, shown first on the You tab.
+/// The closest thing to unlock, shown on the Trophies player card.
 struct Goal: Hashable {
     let title: String
     let progress: Int
