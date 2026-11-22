@@ -13,6 +13,11 @@ struct RewardResult: Identifiable {
     let levelBefore: LevelInfo
     let levelAfter: LevelInfo
     let unlockedIcons: [AppIconOption]
+
+    /// True when the log brought something new: a card, a badge, a level or an icon.
+    var isNotable: Bool {
+        isNewCard || !newBadges.isEmpty || levelAfter.number > levelBefore.number || !unlockedIcons.isEmpty
+    }
 }
 
 /// What the boss-defeated screen shows after "I'm better".
@@ -72,6 +77,8 @@ final class AppModel {
     private(set) var catalog: GermCatalog
     let household = HouseholdGuide.load()
     var pendingReward: RewardResult?
+    /// The reward of a log made in a sheet; it shows once that sheet has closed.
+    @ObservationIgnored var stagedReward: RewardResult?
     var pendingVictory: Victory?
     var pendingKidVictory: KidVictory?
     var logRequest: LogRequest?
@@ -732,6 +739,32 @@ final class AppModel {
         rescheduleNotifications()
     }
 
+    /// The full reveal when the log brought something new; a toast for a repeat catch.
+    /// After a sheet, the reveal waits a second so the screen settles first.
+    func showReward(_ reward: RewardResult, settling: Bool = true) {
+        guard reward.isNotable else {
+            Haptics.success()
+            toast = tr("Repeat catch: %1$@, card ×%2$lld", reward.germ.name, count(of: reward.germ.id))
+            return
+        }
+        guard settling else {
+            pendingReward = reward
+            return
+        }
+        SoundPlayer.shared.play(.flap)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            self.pendingReward = reward
+        }
+    }
+
+    /// Shows the reward staged by a sheet that just closed.
+    func showStagedReward() {
+        guard let reward = stagedReward else { return }
+        stagedReward = nil
+        showReward(reward)
+    }
+
     /// Handles the Live Activity and notification buttons, which run in the app process.
     func handle(_ action: IntentAction) async {
         switch action {
@@ -741,7 +774,7 @@ final class AppModel {
                   illness.outcome == .open else { return }
             let draft = LogDraft(germID: illness.germID, source: .kid(illness.kidID), severity: 3,
                                  startedAt: Date(), sufferer: .me, kidIllnessID: illness.id)
-            pendingReward = logGerm(draft)
+            if let result = logGerm(draft) { showReward(result, settling: false) }
         case .stillFine(let exposureID):
             guard let id = UUID(uuidString: exposureID) else { return }
             LiveActivityManager.end(exposureID: id)

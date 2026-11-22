@@ -9,6 +9,7 @@ enum NotificationManager {
     private static let milestoneID = "streak-milestone"
     private static let wrappedID = "season-wrapped"
     private static let monthID = "month-recap"
+    private static let trialID = "trial-ending"
 
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
@@ -33,13 +34,15 @@ enum NotificationManager {
     static let noticeInfoKey = "noticeID"
 
     /// Lets reminders show as banners while the app is open, and gives them their buttons.
+    /// A button that changes the journal needs the phone unlocked.
     static func install() {
         center.delegate = presenter
-        let better = UNNotificationAction(identifier: ReminderAction.better, title: tr("I'm better"), options: [])
+        let better = UNNotificationAction(identifier: ReminderAction.better, title: tr("I'm better"), options: [.authenticationRequired])
         let stillSick = UNNotificationAction(identifier: ReminderAction.stillSick, title: tr("Still sick"), options: [])
         let caught = UNNotificationAction(identifier: ReminderAction.caught, title: tr("It got me"), options: [.foreground])
-        let stillFine = UNNotificationAction(identifier: ReminderAction.stillFine, title: tr("Still fine"), options: [])
-        let dodged = UNNotificationAction(identifier: ReminderAction.dodged, title: tr("Dodged it"), options: [])
+        let stillFine = UNNotificationAction(identifier: ReminderAction.stillFine, title: tr("Still fine"),
+                                             options: [.authenticationRequired])
+        let dodged = UNNotificationAction(identifier: ReminderAction.dodged, title: tr("Dodged it"), options: [.authenticationRequired])
         let kidCaught = UNNotificationAction(identifier: ReminderAction.kidCaught, title: tr("Caught it"), options: [.foreground])
         let allGood = UNNotificationAction(identifier: ReminderAction.allGood, title: tr("All good"), options: [])
         let categories = [
@@ -141,6 +144,18 @@ enum NotificationManager {
 
     static func cancelMilestone() {
         center.removePendingNotificationRequests(withIdentifiers: [milestoneID])
+    }
+
+    /// The reminder promised on the offer: two days before a free trial ends, whatever the check-in settings.
+    static func scheduleTrialReminder(endsAt: Date) {
+        cancelTrialReminder()
+        guard let date = TrialPlan.reminderDate(endsAt: endsAt, now: Date()) else { return }
+        add(id: trialID, title: trCount(TrialPlan.notice, one: "Your free trial ends in %lld day", other: "Your free trial ends in %lld days"),
+            body: tr("Keep the Season Pass, or cancel it in your App Store subscriptions."), at: adjusted(date))
+    }
+
+    static func cancelTrialReminder() {
+        center.removePendingNotificationRequests(withIdentifiers: [trialID])
     }
 
     static func scheduleWrapped(at date: Date, settings: AppSettings) {

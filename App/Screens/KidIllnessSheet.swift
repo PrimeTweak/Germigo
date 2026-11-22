@@ -60,10 +60,11 @@ struct KidIllnessForm: View {
             VStack(alignment: .leading, spacing: 18) {
                 if model.data.kids.isEmpty {
                     TextField(tr("Kid's name"), text: $newKidName)
+                        .characterLimit(AppModel.nameLimit, text: $newKidName)
                         .textInputAutocapitalization(.words)
                         .padding(.horizontal, 16)
                         .frame(height: 54)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 } else {
                     kidRow
                 }
@@ -117,7 +118,7 @@ struct KidIllnessForm: View {
         }
         .onAppear(perform: prefill)
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .household)
         }
     }
 

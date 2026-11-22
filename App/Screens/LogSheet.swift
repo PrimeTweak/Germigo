@@ -43,7 +43,7 @@ struct GermPicker: View {
                 .foregroundStyle(palette.inkSecondary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 88)
-                .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
             }
             .buttonStyle(.plain)
         }
@@ -67,9 +67,9 @@ struct GermPicker: View {
         .frame(maxWidth: .infinity)
         .frame(height: 88)
         .background(selected ? germ.lightTint : palette.surface,
-                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
                 .strokeBorder(selected ? germ.deepTint : Color.clear, lineWidth: 2)
         }
         .scaleEffect(selected ? 1.04 : 1)
@@ -123,7 +123,7 @@ private struct AllGermsList: View {
                 GermImage(germ: germ, size: 40, silhouette: model.count(of: germ.id) == 0)
                     .foregroundStyle(germ.deepTint)
                     .frame(width: 52, height: 52)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(germ.illness.value)
                         .font(.body.weight(.semibold))
@@ -141,34 +141,50 @@ private struct AllGermsList: View {
                 }
             }
             .padding(10)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 }
 
-/// Collects what the parent caught, from whom, and how bad it is.
+/// The log form in its own sheet, for logs that start outside the symptom pages.
 struct LogSheet: View {
     let request: LogRequest
     let onLogged: (RewardResult) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            LogForm(request: request, showsClose: true, onLogged: onLogged, close: { dismiss() })
+        }
+    }
+}
+
+/// Collects what the parent caught, from whom, and how bad it is.
+struct LogForm: View {
+    let request: LogRequest
+    /// False when the form is a page pushed after the symptom pages, which have their own back button.
+    let showsClose: Bool
+    let onLogged: (RewardResult) -> Void
+    /// Closes the sheet the form lives in.
+    let close: () -> Void
 
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
-    @Environment(\.dismiss) private var dismiss
 
     @State private var germID: String?
     @State private var source = GermSource.unknown
     @State private var severity = 3
     @State private var startedAt = Date()
     @State private var sufferer = Sufferer.me
-    @State private var tellCrew = true
+    @State private var tellCrew = CrewStore.shared.tellsCrew
     @State private var linkedIllnessID: UUID?
     @State private var didPrefill = false
     @State private var submitted = false
@@ -201,47 +217,47 @@ struct LogSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    if let illness = suggestion, let germ = model.catalog.germ(illness.germID) {
-                        suggestionCard(illness: illness, germ: germ)
-                    }
-                    group(tr("What is it?")) {
-                        GermPicker(selection: $germID)
-                    }
-                    group(tr("Who gave it to you?")) {
-                        sourceRow
-                    }
-                    group(tr("How bad?"), trailing: severityNames[severity - 1]) {
-                        severityRow
-                    }
-                    detailsCard
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                if let illness = suggestion, let germ = model.catalog.germ(illness.germID) {
+                    suggestionCard(illness: illness, germ: germ)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 110)
+                group(tr("What is it?")) {
+                    GermPicker(selection: $germID)
+                }
+                group(tr("Who gave it to you?")) {
+                    sourceRow
+                }
+                group(tr("How bad?"), trailing: severityNames[severity - 1]) {
+                    severityRow
+                }
+                detailsCard
             }
-            .background(palette.background.ignoresSafeArea())
-            .navigationTitle(tr("Log a germ"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .padding(.horizontal, Spacing.page)
+            .padding(.bottom, 110)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("Log a germ"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if showsClose {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        dismiss()
+                        close()
                     } label: {
                         Image(systemName: "xmark")
                     }
                     .accessibilityLabel(tr("Close"))
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                logButton
-            }
-            .onAppear(perform: prefill)
-            .onChange(of: germID) { _, newValue in
-                if let illness = suggestion, illness.germID != newValue {
-                    linkedIllnessID = nil
-                }
+        }
+        .safeAreaInset(edge: .bottom) {
+            logButton
+        }
+        .onAppear(perform: prefill)
+        .onChange(of: germID) { _, newValue in
+            if let illness = suggestion, illness.germID != newValue {
+                linkedIllnessID = nil
             }
         }
     }
@@ -293,9 +309,9 @@ struct LogSheet: View {
             .padding(.horizontal, 12)
             .frame(height: 70)
             .background(germ.lightTint.opacity(palette.isDark ? 0.18 : 1),
-                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(active ? germ.deepTint : Color.clear, lineWidth: 2)
             }
         }
@@ -381,7 +397,7 @@ struct LogSheet: View {
         }
         .frame(height: 76)
         .padding(.horizontal, 10)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .animation(Tempo.quick, value: severity)
     }
 
@@ -456,7 +472,7 @@ struct LogSheet: View {
         }
         .buttonStyle(PillButtonStyle(kind: .ink, height: 56))
         .disabled(germID == nil)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Spacing.page)
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
@@ -488,11 +504,12 @@ struct LogSheet: View {
         submitted = true
         Haptics.thud()
         let share = tellCrew && crew.isMember && model.hasPass
+        if crew.isMember && model.hasPass { crew.setTellsCrew(tellCrew) }
         Task {
             if model.data.settings.checkInsOn { await model.enableReminders() }
             if share { await crew.reportGerm(draft.germID, logID: result.log.id) }
         }
         onLogged(result)
-        dismiss()
+        close()
     }
 }

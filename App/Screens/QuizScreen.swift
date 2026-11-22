@@ -84,14 +84,14 @@ struct QuizScreen: View {
                 dismiss()
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 12)
         } else if picked != nil {
             Button(index + 1 >= questions.count ? tr("See my score") : tr("Next")) {
                 advance()
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 12)
         }
     }
@@ -168,7 +168,7 @@ struct QuizScreen: View {
         .padding(.vertical, 28)
         .padding(.horizontal, 22)
         .frame(maxWidth: .infinity, minHeight: 300)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay(alignment: .topLeading) {
             stamp(tr("Myth"), color: palette.ink)
                 .opacity(Double(max(0, -drag) / 100))
@@ -205,7 +205,7 @@ struct QuizScreen: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .overlay {
-                RoundedRectangle(cornerRadius: 8).stroke(color, lineWidth: 2.5)
+                RoundedRectangle(cornerRadius: Radius.small).stroke(color, lineWidth: 2.5)
             }
             .padding(18)
             .accessibilityHidden(true)
@@ -220,7 +220,7 @@ struct QuizScreen: View {
             .padding(.vertical, 30)
             .padding(.horizontal, 22)
             .frame(maxWidth: .infinity, minHeight: 170)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .liftShadow()
     }
 
@@ -248,9 +248,9 @@ struct QuizScreen: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(border, lineWidth: 2)
+                RoundedRectangle(cornerRadius: Radius.medium, style: .continuous).stroke(border, lineWidth: 2)
             }
             .contentShape(Rectangle())
         }
@@ -318,7 +318,7 @@ struct QuizScreen: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private func revealFacts(_ question: QuizQuestion) -> [(label: String, value: String)] {

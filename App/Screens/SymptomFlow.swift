@@ -37,7 +37,7 @@ enum SymptomFlow: Identifiable {
     }
 }
 
-/// Where the symptom pages hand over: closing, the parent's log sheet, or a kid's new illness.
+/// Where the symptom pages hand over: closing, the parent's log page, or a kid's new illness.
 struct FlowExits {
     let close: () -> Void
     let onLog: (LogRequest) -> Void
@@ -54,15 +54,15 @@ struct KidFormSeed: Hashable {
 /// The symptom pages: who is sick when it is someone else, then the signs, the suspects, and a pick.
 struct SymptomFlowSheet: View {
     let flow: SymptomFlow
-    /// Receives the request for the log sheet, which opens once this sheet has closed.
-    let onLog: (LogRequest) -> Void
     /// Receives a kid's illness added from these pages.
     let onAdded: (KidIllness) -> Void
 
+    @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @State private var logRequest: LogRequest?
 
     var body: some View {
-        let exits = FlowExits(close: { dismiss() }, onLog: onLog, onAdded: onAdded)
+        let exits = FlowExits(close: { dismiss() }, onLog: { logRequest = $0 }, onAdded: onAdded)
         NavigationStack {
             Group {
                 if case .someone = flow {
@@ -80,6 +80,10 @@ struct SymptomFlowSheet: View {
                     }
                     .accessibilityLabel(tr("Close"))
                 }
+            }
+            // The log form opens as the next page, so the parent stays in one sheet.
+            .navigationDestination(item: $logRequest) { request in
+                LogForm(request: request, showsClose: false, onLogged: { model.stagedReward = $0 }, close: { dismiss() })
             }
         }
     }
@@ -137,7 +141,7 @@ private struct WhoPage: View {
                 }
                 .padding(.top, 18)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 4)
             .padding(.bottom, 16)
         }
@@ -147,7 +151,7 @@ private struct WhoPage: View {
             SymptomPicker(flow: .someone, start: patient, exits: exits)
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .household)
         }
     }
 
@@ -179,8 +183,8 @@ private struct WhoPage: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 18)
             .frame(maxWidth: .infinity)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
     }
@@ -216,10 +220,10 @@ private struct WhoPage: View {
             .padding(.vertical, 18)
             .frame(maxWidth: .infinity)
             .overlay {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(palette.ink.opacity(0.18), style: StrokeStyle(lineWidth: 2, dash: [7, 6]))
             }
-            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
     }
@@ -295,7 +299,7 @@ private struct SymptomPicker: View {
                 urgentRow
                     .padding(.top, 9)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 4)
             .padding(.bottom, 16)
         }
@@ -327,10 +331,11 @@ private struct SymptomPicker: View {
             VStack(alignment: .leading, spacing: 10) {
                 patientChip(tr("A new kid"), look: model.nextKidLook)
                 TextField(tr("Kid's name"), text: $newKidName)
+                    .characterLimit(AppModel.nameLimit, text: $newKidName)
                     .textInputAutocapitalization(.words)
                     .padding(.horizontal, 16)
                     .frame(height: 54)
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
             }
             .padding(.bottom, 18)
         case .kid(let kidID):
@@ -379,12 +384,12 @@ private struct SymptomPicker: View {
             .padding(.horizontal, 14)
             .frame(height: 56)
             .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
-                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(isOn ? .isSelected : [])
@@ -428,7 +433,7 @@ private struct SymptomPicker: View {
                 .disabled(needsName)
             }
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Spacing.page)
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
@@ -490,7 +495,6 @@ private struct SymptomPicker: View {
             break
         case .me, .partner:
             exits.onLog(LogRequest(symptoms: orderedIDs, sufferer: patient.sufferer))
-            exits.close()
         }
     }
 }
@@ -534,12 +538,12 @@ private struct SymptomTile: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 88)
             .background(isOn ? palette.accent.opacity(palette.isDark ? 0.2 : 0.13) : palette.surface,
-                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .animation(Tempo.pop, value: isOn)
@@ -667,7 +671,7 @@ private struct SuspectsPage: View {
                 }
                 .padding(.top, 14)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 4)
             .padding(.bottom, 16)
         }
@@ -754,7 +758,7 @@ private struct SuspectsPage: View {
             .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
         }
         .padding(14)
-        .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .cascadeIn(index)
     }
 
@@ -769,7 +773,7 @@ private struct SuspectsPage: View {
             HStack(spacing: 12) {
                 GermImage(germ: germ, size: 50)
                     .frame(width: 62, height: 62)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
                         Text(germ.name)
@@ -797,12 +801,12 @@ private struct SuspectsPage: View {
             .padding(.vertical, 10)
             .padding(.leading, 10)
             .padding(.trailing, 14)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(isOn ? palette.accent : Color.clear, lineWidth: 2)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(isOn ? .isSelected : [])
@@ -826,8 +830,8 @@ private struct SuspectsPage: View {
             }
             .padding(.horizontal, 16)
             .frame(height: 50)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -869,7 +873,7 @@ private struct SuspectsPage: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Spacing.page)
         .padding(.top, 10)
         .padding(.bottom, 8)
         .background(.ultraThinMaterial)
@@ -894,7 +898,6 @@ private struct SuspectsPage: View {
                 break
             case .me, .partner:
                 exits.onLog(LogRequest(germID: germID, symptoms: ids, sufferer: patient.sufferer))
-                exits.close()
             }
         case .kidIllness(let illnessID):
             model.reassignKidIllness(illnessID, germID: germID, symptoms: ids)

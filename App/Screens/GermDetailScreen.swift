@@ -35,7 +35,7 @@ struct GermDetailScreen: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())
@@ -98,7 +98,7 @@ struct GermDetailScreen: View {
                                startPoint: .top, endPoint: .bottom)
                 RingsBackground(color: Color.white.opacity(palette.isDark ? 0.06 : 0.5), spacing: 26)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
     }
 
@@ -171,7 +171,7 @@ struct GermDetailScreen: View {
         }
         .padding(8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(palette.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
     }
 
     /// Exposure, first symptoms and length, from the timings in the notes.
@@ -362,7 +362,7 @@ struct GermDetailScreen: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.12),
-                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     /// The signs to check off, the note, the emergency line and the page that covers children.
@@ -406,7 +406,7 @@ struct GermDetailScreen: View {
         Text(tr("In an emergency, call your local emergency number."))
             .font(.footnote.weight(.semibold))
             .foregroundStyle(palette.ink)
-        if let kid = germ.kidReference, let url = URL(string: kid.url) {
+        if let kid = germ.kidReference, let url = kid.link {
             Divider()
             Link(destination: url) {
                 HStack(spacing: 12) {
@@ -622,7 +622,7 @@ struct SourceList: View {
                 if item.offset > 0 {
                     Divider()
                 }
-                if let url = URL(string: item.element.url) {
+                if let url = item.element.link {
                     Link(destination: url) {
                         HStack {
                             Text(item.element.name)

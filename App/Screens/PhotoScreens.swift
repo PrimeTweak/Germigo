@@ -207,7 +207,7 @@ struct AddPhotoSheet: View {
                     .disabled(images.isEmpty || saving)
                     .padding(.top, 10)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 24)
             }
             .background(palette.background.ignoresSafeArea())
@@ -249,7 +249,7 @@ struct AddPhotoSheet: View {
     @ViewBuilder
     private var preview: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                 .fill(palette.surface)
             if images.isEmpty {
                 VStack(spacing: 12) {
@@ -284,7 +284,7 @@ struct AddPhotoSheet: View {
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: images.count > 1 ? .always : .never))
-                .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 .overlay(alignment: .topTrailing) {
                     Button {
                         withAnimation(Tempo.quick) {
@@ -354,7 +354,7 @@ struct AddPhotoSheet: View {
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 48)
-                .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 .contentShape(Rectangle())
             }
             .buttonStyle(PressableStyle())
@@ -365,7 +365,7 @@ struct AddPhotoSheet: View {
                     .labelsHidden()
                     .tint(palette.accent)
                     .padding(8)
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                     .motionTransition(.opacity)
             }
         }

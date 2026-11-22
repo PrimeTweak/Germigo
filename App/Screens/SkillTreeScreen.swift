@@ -21,7 +21,7 @@ struct SkillTreeScreen: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())

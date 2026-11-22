@@ -19,7 +19,7 @@ struct WrappedScreen: View {
                     ForEach(pages) { item in
                         card(item, wrap: wrap, stats: stats)
                             .frame(width: 360, height: 640)
-                            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                             .scaleEffect(scale)
                             .frame(width: 360 * scale, height: 640 * scale)
                             .tag(item)
@@ -127,7 +127,7 @@ private struct NemesisGuessCard: View {
                             HStack(spacing: 14) {
                                 GermImage(germ: germ, size: 50)
                                     .padding(4)
-                                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                                 Text(germ.name)
                                     .font(.system(size: 21, weight: .bold))
                                 Spacer(minLength: 0)
@@ -138,9 +138,9 @@ private struct NemesisGuessCard: View {
                                 }
                             }
                             .padding(12)
-                            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                             .overlay {
-                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
                                     .stroke(isTop ? glow : Color.white.opacity(0.12), lineWidth: 2)
                             }
                             .opacity(guess != nil && !isTop ? 0.55 : 1)

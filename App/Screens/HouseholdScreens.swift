@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// After a kid's germ is added: habits that keep it from going around the house, and the daycare rules.
 struct ProtectHomeView: View {
@@ -30,7 +29,7 @@ struct ProtectHomeView: View {
                     HStack(spacing: 12) {
                         GermImage(germ: germ, size: 46)
                             .padding(4)
-                            .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .background(germ.lightTint, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(germ.illness.value)
                                 .font(.headline)
@@ -66,7 +65,7 @@ struct ProtectHomeView: View {
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(palette.inkSecondary)
                         ForEach(sources, id: \.url) { source in
-                            if let url = URL(string: source.url) {
+                            if let url = source.link {
                                 Link(source.name, destination: url)
                                     .font(.footnote)
                             }
@@ -74,7 +73,7 @@ struct ProtectHomeView: View {
                     }
                     .padding(.horizontal, 4)
                 }
-                if let daycare = model.household?.daycare, let url = URL(string: daycare.url) {
+                if let daycare = model.household?.daycare, let url = daycare.link {
                     SectionHeader(title: tr("Back to daycare?"))
                     Link(destination: url) {
                         HStack(spacing: 12) {
@@ -212,7 +211,7 @@ struct HealthHistory: View {
     var asPaper = false
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var showPaywall = false
+    @State private var door: PassReason?
     /// Illnesses opened or closed against their default.
     @State private var toggled: Set<UUID> = []
     @State private var seed: PhotoSeed?
@@ -431,16 +430,17 @@ struct HealthHistory: View {
                     }
                 } else {
                     Button {
-                        showPaywall = true
+                        door = .doctor
                     } label: {
                         Label(tr("Share for the doctor"), systemImage: "lock.fill")
                     }
                     .buttonStyle(PillButtonStyle(kind: .ghost))
+                    offerLine
                 }
             }
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
+        .sheet(item: $door) { reason in
+            PaywallView(reason: reason)
         }
         .sheet(item: $seed) { seed in
             AddPhotoSheet(seed: seed)
@@ -668,7 +668,7 @@ struct HealthHistory: View {
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
                 Button {
-                    UIPasteboard.general.string = summaryRows(found).joined(separator: "\n")
+                    Clipboard.copy(summaryRows(found).joined(separator: "\n"))
                     Haptics.tap()
                     model.toast = tr("Text copied.")
                 } label: {
@@ -680,19 +680,28 @@ struct HealthHistory: View {
                 }
             } else {
                 Button {
-                    showPaywall = true
+                    door = .doctor
                 } label: {
                     Label(tr("Send the PDF"), systemImage: "lock.fill")
                 }
                 .buttonStyle(PillButtonStyle(kind: .ghost))
+                offerLine
             }
         }
+    }
+
+    /// Under a locked way to send the file: what the Season Pass opens, and the offer.
+    private var offerLine: some View {
+        PassOfferText(reason: .doctor)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.accent)
+            .frame(maxWidth: .infinity)
     }
 
     /// A new photo for this person on that day of the illness: now for today, midday for a past day.
     private func addPhoto(_ line: Line, on day: Date, today: Bool) {
         guard model.hasPass else {
-            showPaywall = true
+            door = .photos
             return
         }
         let moment = today ? Date() : Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day

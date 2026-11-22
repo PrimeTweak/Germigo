@@ -62,7 +62,7 @@ struct AlbumScreen: View {
                     LockedHistoryRow(count: hidden)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
             .animation(Tempo.quick, value: person)
@@ -83,7 +83,7 @@ struct AlbumScreen: View {
             AddPhotoSheet(seed: seed)
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .photos)
         }
         .fullScreenCover(item: $focus) { focus in
             PhotoViewer(focus: focus)

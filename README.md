@@ -79,6 +79,8 @@ Every color value lives in `Shared/Swatch.swift`, shared by the app and the widg
 
 The themes are the cases of `Theme` (`App/Models/AppData.swift`). Each one sets an accent and its daytime grounds in `Palette.swift`, and opens with the badge named by `Theme.badgeID` or with the Season Pass; light or dark stays a separate choice. The app icons are the cases of `AppIconOption`, whose asset names must match `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` in `project.yml`.
 
+The Season Pass offer is `PaywallView`. Each place that leads to it passes a `PassReason` (`App/Store/PassRules.swift`), which sets the headline, the character and the words on the lock. While the App Store offers a free trial, the offer shows how it goes and `NotificationManager.scheduleTrialReminder` sends a reminder two days before the first payment. After a win closes, `ReviewAsk` asks for an App Store rating, at most every four months.
+
 ## Crew server
 
 ```
@@ -90,10 +92,10 @@ node test.js
 | Variable | Purpose |
 | --- | --- |
 | `PORT` | Listening port. Default 8080. |
-| `DATA_DIR` | Folder for `germigo.json`. Must be on a persistent disk, or crews are lost on restart. With `NODE_ENV=production` the server refuses to start without it. |
+| `DATA_DIR` | Folder for `germigo.json`, a file only its owner can read. Must be on a persistent disk, or crews are lost on restart. With `NODE_ENV=production` the server refuses to start without it. |
 | `ADMIN_TOKEN` | Unlocks the moderation page and its endpoints. |
-| `SUPPORT_EMAIL` | Contact shown on `/support`, `/privacy` and `/terms`. |
-| `PUBLISHER_NAME` | Publisher named on `/privacy` and `/terms`. |
+| `SUPPORT_EMAIL` | Contact shown on `/support`, `/privacy`, `/terms` and `/health-data`. |
+| `PUBLISHER_NAME` | Publisher named on `/privacy`, `/terms` and `/health-data`. |
 | `APP_STORE_URL` | App Store link shown on the landing page (`/` and `/get`). Until it is set, the page says the app is coming soon. |
 | `TRUST_PROXY_HOPS` | Number of reverse proxies in front of the server. Default 0: the socket address is used and `X-Forwarded-For` is ignored. Most hosts need 1. |
 | `BLOCKED_WORDS` | Extra comma-separated words rejected in names. |
@@ -102,23 +104,25 @@ node test.js
 | `APNS_ENV` | `sandbox` for builds run from Xcode. TestFlight and App Store builds use the default, production. |
 | `POSTMARK_TOKEN`, `MAIL_FROM` | Postmark server token and sender address for the replies to daycares that send notices by email. |
 | `INBOUND_EMAIL_DOMAIN` | Domain of the daycares' private addresses, for example `notices.germigo.app`. Without it, notices by email are off. |
-| `INBOUND_EMAIL_TOKEN` | Secret in the inbound webhook URL. |
+| `INBOUND_EMAIL_TOKEN` | Password of the inbound webhook, sent as HTTP Basic credentials. |
 
-Rate limits are counted per client address, so `TRUST_PROXY_HOPS` must match the host: too low and every user shares one limit, too high and a client can forge its address.
+Rate limits are counted per client address, so `TRUST_PROXY_HOPS` must match the host: too low and every user shares one limit, too high and a client can forge its address. The public pages have their own limit of 120 loads a minute per address; `/health` is not counted, so the host can check it often. The limits are kept in memory and start over when the server restarts.
+
+Run one instance, with autoscaling off: the server holds `germigo.json` in memory and two processes would overwrite each other. A request must send its headers within 10 seconds and finish within 30, and the server accepts 1,000 connections at once.
 
 Moderation: open `<server>/admin` in a browser, type the admin token, then remove a member or dismiss the reports about them. Removing a member also gives the crew a new invite code, so the old code no longer lets anyone in.
 
 Retention: shared germs older than 400 days, members who have not connected for 400 days and empty crews are removed automatically. One address can create 5 crews a day.
 
-`server/legal.json` must stay identical to `App/Content/legal.json`. It also holds the text of the web pages.
+`server/legal.json` must stay identical to `App/Content/legal.json`. It also holds the text of the web pages, including the consumer health data policy served at `/health-data` and linked from the home page. `docs/PRIVACY-ASSESSMENT.md` is the privacy assessment to complete before the server holds real data.
 
 ## Daycare notices
 
-Free for daycares and families, inside the Crew tab and outside the Season Pass. A director signs the daycare up from the app (I run a daycare), with up to 12 groups. Families join with the daycare's code, typed or scanned, and pick each kid's group; which kid is in which group stays on the phone, and the server keeps only the groups chosen, the push address and the language. A notice names an illness from the catalog, a group or the whole daycare, and an optional note of up to 280 characters.
+Free for daycares and families, inside the Crew tab and outside the Season Pass. A director signs the daycare up from the app (I run a daycare), with up to 12 groups. Families join with the daycare's code, typed or scanned, and pick each kid's group; which kid is in which group stays on the phone, and the server keeps only the groups chosen, the push address and the language. A notice names an illness from the catalog, a group or the whole daycare, and an optional note of up to 280 characters, without links.
 
 - **From the app.** Daycare mode > Send a notice. Each family it reaches gets a push titled with the daycare's name.
-- **By email.** Each daycare gets a private address on `INBOUND_EMAIL_DOMAIN`. Only mail from the address the director saved is used. The subject gives the illness, then the group (`Gastro - Trottineurs`); without a group, the notice goes to the whole daycare. The server always replies: sent to how many families, or what was unclear. Point the domain's MX record to Postmark, and set the inbound webhook to `<server>/v1/inbound-email?token=<INBOUND_EMAIL_TOKEN>`.
+- **By email.** Each daycare gets a private address on `INBOUND_EMAIL_DOMAIN`. Only mail from the address the director saved is used. The subject gives the illness, then the group (`Gastro - Trottineurs`); without a group, the notice goes to the whole daycare. The text of the message is never read or kept: a note can only be added from the app. The server always replies: sent to how many families, or what was unclear. Point the domain's MX record to Postmark, and set the inbound webhook to `https://germigo:<INBOUND_EMAIL_TOKEN>@<server host>/v1/inbound-email`, so the token travels in a header and not in the address the host logs.
 - **Poster.** The daycare's QR code opens `<server>/d/<code>`, a page with the code and how to join.
 
-Limits: 10 notices a day per daycare, 3 daycares a day per address. Reported notices appear on the moderation page, where a notice or a whole daycare can be removed. Notices older than 400 days, and daycares and subscriptions not opened for 400 days, are removed automatically. `server/illnesses.json` holds the illness names read in subjects and written in pushes; its names must match `germs.json`.
+Limits: 10 notices a day per daycare, 3 daycares a day per address, 600 families per daycare, 40 new families a day per address, and 20 replies a day to a daycare that writes by email. Reported notices appear on the moderation page, where a notice or a whole daycare can be removed. Notices older than 400 days, and daycares and subscriptions not opened for 400 days, are removed automatically. `server/illnesses.json` holds the illness names read in subjects and written in pushes; its names must match `germs.json`.
 

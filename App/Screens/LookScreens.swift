@@ -92,7 +92,7 @@ struct AppIconScreen: View {
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 10)
             .padding(.bottom, 28)
         }
@@ -100,7 +100,7 @@ struct AppIconScreen: View {
         .navigationTitle(tr("App icon"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .looks)
         }
         .onAppear {
             current = AppIconManager.current
@@ -131,11 +131,11 @@ struct AppIconScreen: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 88, height: 88)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     .shadow(color: Color.black.opacity(0.14), radius: 7, x: 0, y: 5)
                     .padding(6)
                     .overlay {
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                             .strokeBorder(state == .inUse ? palette.accent : Color.clear, lineWidth: 3)
                     }
                     .scaleEffect(popped == option ? 1.12 : 1)
@@ -199,13 +199,11 @@ struct ThemeScreen: View {
                     }
                 }
                 if !model.hasPass {
-                    Text(tr("The Season Pass opens every theme."))
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
+                    PassOfferLink(reason: .looks)
                         .padding(.horizontal, 4)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 10)
             .padding(.bottom, 28)
         }
@@ -300,9 +298,9 @@ private struct ThemePreview: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(look.background, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(look.background, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                 .strokeBorder(inUse ? look.accent : palette.hairline, lineWidth: inUse ? 3 : 1)
         }
         .accessibilityHidden(true)

@@ -54,6 +54,12 @@ struct GermTip: Codable, Hashable {
 struct GermReference: Codable, Hashable {
     let name: String
     let url: String
+
+    /// The address to open: https only, so a lesson file cannot start a call or open another app.
+    var link: URL? {
+        guard let link = URL(string: url), link.scheme?.lowercased() == "https" else { return nil }
+        return link
+    }
 }
 
 /// The skill tree branch a germ feeds.

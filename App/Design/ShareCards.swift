@@ -19,7 +19,7 @@ struct SharePreviewSheet<Card: View>: View {
             VStack(spacing: 24) {
                 card
                     .frame(width: 360, height: 640)
-                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                     .scaleEffect(0.78)
                     .frame(width: 281, height: 499)
                     .shadow(color: Color.black.opacity(0.18), radius: 18, x: 0, y: 12)
@@ -110,7 +110,7 @@ struct ShareWordmark: View {
                     .resizable()
                     .frame(width: 56, height: 56)
                     .padding(5)
-                    .background(Color.white, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             }
         }
         .foregroundStyle(color)
@@ -200,7 +200,7 @@ struct NapCouponCard: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .background(Color.white, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 .padding(.horizontal, 26)
                 .padding(.top, 24)
                 Spacer(minLength: 0)
@@ -278,7 +278,7 @@ struct WantedShareCard: View {
                 }
                 .padding(18)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .background(Color.white, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 .padding(.horizontal, 26)
                 .padding(.top, 22)
                 Spacer(minLength: 0)
@@ -362,6 +362,6 @@ struct SeasonRecapCard: View {
         }
         .padding(.horizontal, 18)
         .frame(height: 58)
-        .background(Color.white.opacity(0.85), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color.white.opacity(0.85), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
     }
 }

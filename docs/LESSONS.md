@@ -1,6 +1,6 @@
 # Online lessons
 
-New lessons reach the app without an update. The app downloads one JSON file from the address in `GermigoLessonsURL` (`App/Info.plist`) each time it comes to the foreground, and during background refresh when iOS allows it. It keeps the last copy that read correctly; the six bundled lessons stay in every case.
+New lessons reach the app without an update. The app reads one JSON file from the address in `GermigoLessonsURL` (`App/Info.plist`) when it comes to the foreground and during background refresh when iOS allows it, at most once an hour. It asks only for a changed copy: a host that sends `ETag` or `Last-Modified` answers in a few bytes when nothing changed, and a host that sends neither makes every check download the whole file. It keeps the last copy that read correctly; the six bundled lessons stay in every case.
 
 ## Rules in the app
 
@@ -12,7 +12,7 @@ New lessons reach the app without an update. The app downloads one JSON file fro
 
 ## File format
 
-UTF-8 JSON, served over https with status 200. Every lesson needs English and French text. A file that does not read is ignored and the previous copy stays.
+UTF-8 JSON, served over https with status 200, under 1 MB. Every lesson needs English and French text. A file that does not read, or is too large, is ignored and the previous copy stays. A source needs an https address: any other link is not shown.
 
 ```json
 {

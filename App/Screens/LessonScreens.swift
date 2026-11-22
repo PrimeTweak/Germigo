@@ -23,7 +23,7 @@ struct LessonsScreen: View {
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())
@@ -149,7 +149,7 @@ struct ArticleScreen: View {
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
             }
-            .padding(.horizontal, 22)
+            .padding(.horizontal, Spacing.page)
             .padding(.vertical, 16)
         }
         .background(palette.background.ignoresSafeArea())

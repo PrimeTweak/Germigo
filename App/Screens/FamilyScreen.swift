@@ -41,7 +41,7 @@ struct FamilyScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var editing: FamilyMember?
-    @State private var showPaywall = false
+    @State private var door: PassReason?
 
     var body: some View {
         let everyone = model.people
@@ -62,7 +62,7 @@ struct FamilyScreen: View {
                         }
                         .cascadeIn(item.offset)
                     }
-                    RecordTiles(showPaywall: $showPaywall)
+                    RecordTiles(door: $door)
                         .padding(.top, 4)
                         .cascadeIn(people.count)
                     FamilyCouch {
@@ -71,7 +71,7 @@ struct FamilyScreen: View {
                     .cascadeIn(people.count + 1)
                     footnote
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
                 .animation(Tempo.settle, value: people)
             }
@@ -83,7 +83,7 @@ struct FamilyScreen: View {
                         if model.canAddKid {
                             editing = .newKid
                         } else {
-                            showPaywall = true
+                            door = .household
                         }
                     } label: {
                         Image(systemName: model.canAddKid ? "plus" : "lock.fill")
@@ -100,8 +100,8 @@ struct FamilyScreen: View {
             .sheet(item: $editing) { member in
                 PersonEditSheet(member: member)
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
+            .sheet(item: $door) { reason in
+                PaywallView(reason: reason)
             }
         }
     }
@@ -128,7 +128,7 @@ struct FamilyScreen: View {
 
 /// The household's shared records as three tiles: the album, the doctor's file and the logbook.
 private struct RecordTiles: View {
-    @Binding var showPaywall: Bool
+    @Binding var door: PassReason?
     @Environment(AppModel.self) private var model
 
     var body: some View {
@@ -155,7 +155,7 @@ private struct RecordTiles: View {
                 .buttonStyle(PressableStyle())
             } else {
                 Button {
-                    showPaywall = true
+                    door = .doctor
                 } label: {
                     doctorTile(locked: true)
                 }
@@ -179,7 +179,7 @@ private struct RecordTiles: View {
     }
 
     private func doctorTile(locked: Bool) -> some View {
-        RecordTile(title: tr("For the doctor"), value: locked ? tr("Season Pass") : tr("Share a file"),
+        RecordTile(title: tr("For the doctor"), value: locked ? PurchaseManager.shared.shortOfferLabel : tr("Share a file"),
                    tint: Color(hex: Swatch.mint), locked: locked) {
             Image("record-doctor")
                 .resizable()
@@ -203,7 +203,7 @@ private struct RecordTile<Art: View>: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 26, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
         VStack(spacing: 2) {
             art
                 .frame(width: 72, height: 72)
@@ -285,7 +285,7 @@ private struct AlbumCover: View {
                 ForEach(Array(newest.enumerated()).reversed(), id: \.element.id) { item in
                     PhotoThumb(id: item.element.id, side: 50, radius: 11)
                         .overlay {
-                            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
                                 .strokeBorder(.white, lineWidth: 3)
                         }
                         .rotationEffect(.degrees(newest.count == 1 ? -4 : (item.offset == 0 ? 7 : -11)))
@@ -495,8 +495,8 @@ private struct FamilyCard: View {
         .padding(.trailing, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(status.germ.map { $0.tileTint(palette).opacity(0.55) } ?? palette.surface,
-                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     /// The photos of the illness going on, newest first.
@@ -581,7 +581,7 @@ private struct PersonFileScreen: View {
                 numbers
                 HealthHistory(person: person, since: nil)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(CharacterWash(tint: Buddy.tint(model.look(of: person)), reach: 0.4))
@@ -636,7 +636,7 @@ private struct PersonFileScreen: View {
                         .minimumScaleFactor(0.8)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .germigoCard(radius: 24, padding: 12)
+                .germigoCard(padding: 12)
                 .accessibilityElement(children: .combine)
             }
         }
@@ -697,12 +697,13 @@ private struct PersonEditSheet: View {
                         .frame(maxWidth: .infinity)
                     label(tr("Name"))
                     TextField(member == .me ? tr("You") : tr("First name"), text: $name)
+                        .characterLimit(AppModel.nameLimit, text: $name)
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
                         .foregroundStyle(palette.ink)
                         .padding(.horizontal, 16)
                         .frame(height: 54)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     label(tr("Character"))
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
                         ForEach(0..<Looks.count, id: \.self) { index in
@@ -717,7 +718,7 @@ private struct PersonEditSheet: View {
                         .padding(.top, 26)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 24)
             }
             .scrollDismissesKeyboard(.interactively)

@@ -7,6 +7,7 @@ import Observation
 final class CrewStore {
     static let shared = CrewStore()
     static let reactionKinds = ["soup", "tissue", "tea", "heart"]
+    static let codeLength = 8
 
     private(set) var state: CrewState?
     private(set) var isMember: Bool
@@ -15,6 +16,8 @@ final class CrewStore {
 
     /// When true, logged germs also appear in the feed under the crew name.
     private(set) var sharesName: Bool
+    /// Whether a logged germ is offered to the crew; off until the parent turns it on.
+    private(set) var tellsCrew: Bool
 
     /// Requests in flight; several can overlap.
     private var operations = 0
@@ -28,6 +31,7 @@ final class CrewStore {
     private enum Keys {
         static let token = "crew.token"
         static let sharesName = "crew.sharesName"
+        static let tellsCrew = "crew.tellsCrew"
         static let blocked = "crew.blocked"
         static let radarSeen = "crew.radarSeen"
         static let state = "crew.state"
@@ -80,6 +84,7 @@ final class CrewStore {
         token = stored
         isMember = stored != nil
         sharesName = UserDefaults.standard.bool(forKey: Keys.sharesName)
+        tellsCrew = UserDefaults.standard.bool(forKey: Keys.tellsCrew)
         blockedIDs = Set(UserDefaults.standard.stringArray(forKey: Keys.blocked) ?? [])
         state = stored == nil ? nil : Self.cachedState()
         #if GERMIGO_SIDELOAD
@@ -313,6 +318,11 @@ final class CrewStore {
         UserDefaults.standard.set(value, forKey: Keys.sharesName)
     }
 
+    func setTellsCrew(_ value: Bool) {
+        tellsCrew = value
+        UserDefaults.standard.set(value, forKey: Keys.tellsCrew)
+    }
+
     func block(_ memberID: String) {
         blockedIDs.insert(memberID)
         UserDefaults.standard.set(Array(blockedIDs), forKey: Keys.blocked)
@@ -344,7 +354,8 @@ final class CrewStore {
         Keychain.set(nil, for: Keys.token)
         isMember = false
         state = nil
-        for key in [Keys.radarSeen, Keys.state, Keys.pending, Keys.sharedLogs] {
+        tellsCrew = false
+        for key in [Keys.radarSeen, Keys.state, Keys.pending, Keys.sharedLogs, Keys.tellsCrew] {
             UserDefaults.standard.removeObject(forKey: key)
         }
     }
@@ -405,7 +416,7 @@ extension CrewStore {
                       at: now - 50 * hour, reactions: [:], mine: [])
         ]
         let radar = [RadarEntry(germID: "noro", families: 3), RadarEntry(germID: "rhino", families: 2)]
-        let info = CrewInfo(id: "demo", name: crewName, emblem: emblem, code: "TEST42", families: others.count + 1)
+        let info = CrewInfo(id: "demo", name: crewName, emblem: emblem, code: "TEST4242", families: others.count + 1)
         return CrewState(crew: info, me: me, members: [me] + others, radar: radar, feed: feed)
     }
 

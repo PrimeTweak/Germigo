@@ -113,7 +113,7 @@ struct DuelShareCard: View {
         .padding(.top, 26)
         .padding(.bottom, 16)
         .padding(.horizontal, 10)
-        .background(Color.white.opacity(leads ? 0.94 : 0.62), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.white.opacity(leads ? 0.94 : 0.62), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private func stat(_ value: String, _ label: String) -> some View {
@@ -176,7 +176,7 @@ struct BossShareCard: View {
                     line(tr("Loot"), tr("+%lld Sick Points", germ.rarity.basePoints))
                 }
                 .padding(16)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 .padding(.horizontal, 22)
                 .padding(.top, 16)
                 Spacer(minLength: 0)
@@ -327,7 +327,7 @@ struct WrapCard: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
             .padding(.top, 16)
         case .days:
             kicker(tr("Couch time"))
@@ -378,7 +378,7 @@ struct WrapCard: View {
                     Spacer(minLength: 0)
                 }
                 .padding(14)
-                .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .background(Color.white.opacity(0.7), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 .padding(.top, 30)
             }
         case .persona:
@@ -429,7 +429,7 @@ struct WrapCard: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
-        .background(Color.white.opacity(0.75), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(Color.white.opacity(0.75), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
     }
 }
 

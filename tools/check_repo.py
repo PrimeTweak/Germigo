@@ -186,14 +186,14 @@ def check_content():
         for index, item in enumerate(article.get("paragraphs", [])):
             localized(item, f"articles.json {aid}.paragraphs[{index}]")
         check_sources(article.get("sources"), f"articles.json {aid}")
-    for kind in ("privacy", "terms"):
+    for kind in ("privacy", "terms", "health"):
         sections = legal.get(kind) or []
         if not sections:
             fail(f"legal.json: no {kind} sections")
         for index, section in enumerate(sections):
             localized(section.get("title"), f"legal.json {kind}[{index}].title")
             localized(section.get("body"), f"legal.json {kind}[{index}].body")
-    for key in ("privacyTitle", "termsTitle", "supportTitle", "updatedLabel", "publisherLabel", "contactLabel",
+    for key in ("privacyTitle", "termsTitle", "healthTitle", "supportTitle", "updatedLabel", "publisherLabel", "contactLabel",
                 "eulaLabel", "supportIntro", "supportDelete", "landingTagline", "landingIntro", "landingStore",
                 "landingSoon", "daycareHeading", "daycareSteps"):
         localized((legal.get("web") or {}).get(key), f"legal.json web.{key}")

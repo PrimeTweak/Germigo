@@ -1,6 +1,7 @@
 import Foundation
 
-// Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding and character motion.
+// Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding, character motion
+// and the Season Pass offer.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -553,7 +554,7 @@ do {
 
 do {
     let season = Season(number: 1, start: day(0), end: day(365))
-    let kid = Kid(name: "Livia", colorIndex: 0)
+    let kid = Kid(name: "Lou", colorIndex: 0)
     var data = makeData(logs: [makeLog("rhino", from: day(2), to: day(4)), makeLog("noro", from: day(9), to: day(10)),
                                makeLog("rhino", from: day(20), to: day(20), sufferer: .partner)])
     data.partnerName = "Nathan"
@@ -653,6 +654,37 @@ do {
     check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.1).stretchY < 0.9, "a squish flattens the germ")
     check(CharacterPose.at(0, mood: .resting, reaction: .squish, elapsed: 0.7) == CharacterPose.at(0, mood: .resting),
           "a reaction ends after its duration")
+}
+
+// The Season Pass offer: each door has its own words, and the trial reminder goes out two days before the payment.
+do {
+    let doors = PassReason.allCases
+    check(Set(doors.map { $0.headline }).count == doors.count, "each door to the Season Pass has its own headline")
+    check(doors.allSatisfy { !$0.detail.isEmpty && !$0.gain.isEmpty }, "each door says what it gives")
+    check(TrialPlan(days: 7).reminderDay == 5, "a 7-day trial reminds on day 5")
+    check(TrialPlan(days: 14).reminderDay == 12, "a 14-day trial reminds on day 12")
+    check(TrialPlan(days: 3).reminderDay == nil, "a 3-day trial is too short for a reminder")
+    let end = day(7)
+    check(TrialPlan.reminderDate(endsAt: end, now: day(0)) == day(5), "the reminder is two days before the trial ends")
+    check(TrialPlan.reminderDate(endsAt: end, now: day(6)) == nil, "no reminder once its moment has passed")
+}
+
+// MARK: - Lesson file checks
+
+do {
+    let checked = day(0)
+    check(LessonEngine.isCheckDue(lastCheck: nil, now: checked), "a file never checked is due")
+    check(!LessonEngine.isCheckDue(lastCheck: checked, now: checked.addingTimeInterval(1800)), "half an hour later is too soon")
+    check(LessonEngine.isCheckDue(lastCheck: checked, now: checked.addingTimeInterval(3600)), "an hour later is due")
+    check(LessonEngine.isCheckDue(lastCheck: checked, now: checked.addingTimeInterval(-60)), "a clock set back is due")
+}
+
+// MARK: - Source links
+
+do {
+    check(GermReference(name: "Source", url: "https://example.org/page").link != nil, "an https source opens")
+    check(GermReference(name: "Source", url: "http://example.org/page").link == nil, "a plain http source does not open")
+    check(GermReference(name: "Source", url: "tel:911").link == nil, "a source cannot start a call")
 }
 
 if failures == 0 {

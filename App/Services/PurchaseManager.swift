@@ -91,15 +91,22 @@ final class PurchaseManager {
 
     func refreshEntitlements() async {
         var active: String?
+        var trialEnd: Date?
         for await entitlement in StoreKit.Transaction.currentEntitlements {
             if case .verified(let transaction) = entitlement,
                transaction.revocationDate == nil,
                PassProduct.all.contains(transaction.productID) {
                 active = transaction.productID
+                trialEnd = transaction.offer?.paymentMode == .freeTrial ? transaction.expirationDate : nil
             }
         }
         activeProductID = active
         storePass = active != nil
+        if let trialEnd {
+            NotificationManager.scheduleTrialReminder(endsAt: trialEnd)
+        } else {
+            NotificationManager.cancelTrialReminder()
+        }
         AppModel.shared.passDidChange()
     }
 
@@ -112,6 +119,9 @@ final class PurchaseManager {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else { return false }
                 await transaction.finish()
+                if transaction.offer?.paymentMode == .freeTrial {
+                    _ = await NotificationManager.ensureAuthorization()
+                }
                 await refreshEntitlements()
                 return hasPass
             case .pending:
@@ -160,6 +170,16 @@ final class PurchaseManager {
         }
         await refreshEntitlements()
         return failure
+    }
+
+    /// What a lock offers: the free trial while the person can still have one, otherwise a look at the Pass.
+    var offerLabel: String {
+        trialDays.map { tr("Try %lld days free", $0) } ?? tr("See the Season Pass")
+    }
+
+    /// The same offer where there is room for two words.
+    var shortOfferLabel: String {
+        trialDays.map { tr("%lld days free", $0) } ?? tr("Season Pass")
     }
 
     /// The free trial length in days, when the yearly plan offers one.

@@ -37,7 +37,7 @@ struct SeasonScreen: View {
                     chainCard(chain)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())
@@ -205,7 +205,7 @@ struct SeasonScreen: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
         .background(leads ? palette.accent.opacity(0.22) : palette.surfaceAlt.opacity(0.6),
-                    in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 
@@ -248,7 +248,7 @@ struct SeasonScreen: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .germigoCard(radius: 24, padding: 14)
+        .germigoCard(padding: 14)
         .accessibilityElement(children: .combine)
     }
 

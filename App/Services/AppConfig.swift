@@ -55,6 +55,10 @@ enum AppConfig {
         serverURL?.appendingPathComponent("terms")
     }
 
+    static var healthDataURL: URL? {
+        serverURL?.appendingPathComponent("health-data")
+    }
+
     static var supportURL: URL? {
         serverURL?.appendingPathComponent("support")
     }

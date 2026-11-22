@@ -36,7 +36,7 @@ struct TrophiesScreen: View {
                     shelfCard
                     links
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
             .background(CharacterWash(tint: TabWash.trophies))
@@ -59,7 +59,7 @@ struct TrophiesScreen: View {
                 PartnerEditSheet()
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView()
+                PaywallView(reason: .stats)
             }
         }
     }
@@ -141,7 +141,7 @@ struct TrophiesScreen: View {
         .padding(16)
         .background(LinearGradient(colors: [Buddy.tint(model.data.hostLook).opacity(palette.isDark ? 0.3 : 0.55), palette.surface],
                                    startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     // MARK: - Season
@@ -185,10 +185,7 @@ struct TrophiesScreen: View {
                         .foregroundStyle(palette.inkTertiary)
                         .accessibilityHidden(true)
                 } else {
-                    Image(systemName: "lock.fill")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.accent)
-                        .accessibilityLabel(tr("Needs the Season Pass"))
+                    PassOfferTag()
                 }
             }
             HStack(alignment: .top, spacing: 8) {
@@ -211,7 +208,7 @@ struct TrophiesScreen: View {
                 .multilineTextAlignment(.leading)
                 .padding(.top, 10)
         }
-        .germigoCard(radius: 28, padding: 16)
+        .germigoCard()
     }
 
     private func figure(_ value: Int, _ label: String) -> some View {
@@ -232,7 +229,7 @@ struct TrophiesScreen: View {
     /// A week of the season: its germ's face when one was going on, the current week outlined.
     private func weekCell(_ germID: String?, isNow: Bool) -> some View {
         let germ = germID.flatMap { model.catalog.germ($0) }
-        return RoundedRectangle(cornerRadius: 8, style: .continuous)
+        return RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
             .fill(germ.map { $0.tileTint(palette) } ?? palette.ink.opacity(0.1))
             .aspectRatio(1, contentMode: .fit)
             .overlay {
@@ -245,7 +242,7 @@ struct TrophiesScreen: View {
             }
             .overlay {
                 if isNow {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
                         .strokeBorder(palette.accent, lineWidth: 2)
                 }
             }
@@ -331,13 +328,13 @@ struct TrophiesScreen: View {
             .buttonStyle(.plain)
             .padding(.top, 16)
         }
-        .germigoCard(radius: 28, padding: 16)
+        .germigoCard()
     }
 
     private func slot(_ item: ShelfItem, index: Int) -> some View {
         let caught = item.count > 0
         return NavigationLink(value: item.germ) {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
                 .fill(caught ? item.germ.tileTint(palette) : palette.background)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
@@ -386,7 +383,7 @@ struct TrophiesScreen: View {
             .overlay {
                 Image(systemName: badge.symbol)
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(won ? palette.onAccent : (progress != nil ? palette.accent : palette.ink.opacity(0.28)))
+                    .foregroundStyle(won ? palette.onAccent : (progress != nil ? palette.accent : palette.ink.opacity(0.5)))
                     .symbolEffect(.bounce, value: won && appeared)
             }
             .accessibilityLabel(badge.title)
@@ -415,7 +412,7 @@ struct TrophiesScreen: View {
                 }
                 .padding(.top, 14)
             }
-            .germigoCard(radius: 28, padding: 16)
+            .germigoCard()
             .sheet(isPresented: $showLeagueShare) {
                 SharePreviewSheet(title: tr("Family league")) {
                     FamilyLeagueShareCard(seasonNumber: model.season.number, places: places(entries, you: model.displayName))
@@ -440,7 +437,7 @@ struct TrophiesScreen: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .germigoCard(radius: 28, padding: 14)
+                .germigoCard(padding: 14)
             }
             .buttonStyle(.plain)
         }
@@ -467,11 +464,9 @@ struct TrophiesScreen: View {
                         .foregroundStyle(palette.inkSecondary)
                 }
                 Spacer(minLength: 8)
-                Image(systemName: "lock.fill")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(palette.inkTertiary)
+                PassOfferTag()
             }
-            .germigoCard(radius: 28, padding: 14)
+            .germigoCard(padding: 14)
         }
         .buttonStyle(.plain)
     }

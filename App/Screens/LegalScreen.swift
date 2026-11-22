@@ -3,6 +3,7 @@ import SwiftUI
 enum LegalKind: String, Identifiable {
     case privacy
     case terms
+    case health
 
     var id: String { rawValue }
 }
@@ -12,11 +13,12 @@ struct LegalSection: Codable, Hashable {
     let body: LocalizedText
 }
 
-/// The privacy policy and terms bundled with the app, so they open offline.
+/// The privacy policy, the terms and the health data policy bundled with the app, so they open offline.
 struct LegalContent: Codable {
     let updated: String
     let privacy: [LegalSection]
     let terms: [LegalSection]
+    let health: [LegalSection]
 
     static func load() -> LegalContent? {
         guard let url = Bundle.main.url(forResource: "legal", withExtension: "json"),
@@ -35,11 +37,27 @@ struct LegalScreen: View {
 
     private var sections: [LegalSection] {
         guard let content else { return [] }
-        return kind == .privacy ? content.privacy : content.terms
+        switch kind {
+        case .privacy: return content.privacy
+        case .terms: return content.terms
+        case .health: return content.health
+        }
     }
 
     private var webURL: URL? {
-        kind == .privacy ? AppConfig.privacyURL : AppConfig.termsURL
+        switch kind {
+        case .privacy: AppConfig.privacyURL
+        case .terms: AppConfig.termsURL
+        case .health: AppConfig.healthDataURL
+        }
+    }
+
+    private var title: String {
+        switch kind {
+        case .privacy: tr("Privacy Policy")
+        case .terms: tr("Terms of Use")
+        case .health: tr("Health Data Policy")
+        }
     }
 
     var body: some View {
@@ -86,11 +104,11 @@ struct LegalScreen: View {
                 }
             }
             .tint(palette.isDark ? palette.accent : palette.ink)
-            .padding(.horizontal, 22)
+            .padding(.horizontal, Spacing.page)
             .padding(.vertical, 16)
         }
         .background(palette.background.ignoresSafeArea())
-        .navigationTitle(kind == .privacy ? tr("Privacy Policy") : tr("Terms of Use"))
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

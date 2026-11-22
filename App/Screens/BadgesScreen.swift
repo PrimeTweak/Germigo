@@ -43,13 +43,13 @@ struct BadgesScreen: View {
                         }
                     }
                     .frame(maxWidth: .infinity, minHeight: 138, alignment: .topLeading)
-                    .germigoCard(radius: 24, padding: 14)
+                    .germigoCard(padding: 14)
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(earned ? tr("Earned") : tr("Locked"))
                     .cascadeIn(item.offset / 2)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .background(palette.background.ignoresSafeArea())

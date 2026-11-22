@@ -31,7 +31,7 @@ struct LogbookScreen: View {
                     LockedHistoryRow(count: logs.count - shown.count)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
     }
@@ -60,7 +60,7 @@ struct LogbookScreen: View {
             }
             .accessibilityLabel(tr("More"))
         }
-        .germigoCard(radius: 24, padding: 12)
+        .germigoCard(padding: 12)
     }
 
     var body: some View {
@@ -76,7 +76,7 @@ struct LogbookScreen: View {
             if showsKids {
                 ScrollView {
                     KidsGermsView()
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, Spacing.page)
                         .padding(.bottom, 28)
                 }
             } else {
@@ -114,7 +114,7 @@ struct LogbookScreen: View {
             if let germ {
                 GermImage(germ: germ, size: 34)
                     .frame(width: 44, height: 44)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(germ?.illness.value ?? log.germID)
@@ -319,7 +319,7 @@ private struct KidsGermsView: View {
                 }
                 .accessibilityLabel(tr("More"))
             }
-            .germigoCard(radius: 24, padding: 12)
+            .germigoCard(padding: 12)
         }
     }
 

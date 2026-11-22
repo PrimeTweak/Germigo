@@ -81,7 +81,7 @@ struct VictoryView: View {
                     .buttonStyle(PillButtonStyle(kind: .ink))
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 24)
             .padding(.bottom, 12)
             .scaleEffect(shown || reduceMotion ? 1 : 0.94)
@@ -121,12 +121,12 @@ private struct BossKnockout: View {
                 }
                 .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .background(germ.lightTint, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 Text(verbatim: "K.O.")
                     .font(.title3.weight(.bold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: Swatch.irisSoft), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .background(Color(hex: Swatch.irisSoft), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                     .rotationEffect(.degrees(8))
                     .padding(12)
             }
@@ -154,14 +154,14 @@ private struct BossKnockout: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
-                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 }
             }
         }
         .padding(14)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                 .stroke(Color.white.opacity(0.1))
         }
     }
@@ -222,7 +222,7 @@ struct KidVictoryView: View {
                     .buttonStyle(PillButtonStyle(kind: .ink))
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 24)
             .padding(.bottom, 12)
             .scaleEffect(shown || reduceMotion ? 1 : 0.94)

@@ -17,6 +17,9 @@ No Swift compiler runs outside the Build IPA workflow. When Swift changed, say t
 - Everything in the repository is in English: code, comments, string keys, docs.
 - Comments describe what the code does, impersonally, in three lines at most.
 - No dead code: nothing unused, nothing commented out, nothing kept for later.
+- Corner radii come from `Radius`: three values, nothing in between.
+- Page margins come from `Spacing.page`; padding inside cards and controls keeps its own value.
+- Every door to the Season Pass passes its `PassReason` to `PaywallView` and words its offer with `PassOfferText`, `PassOfferTag` or `PassOfferLink`.
 - User-facing text goes through `tr()` or `trCount()`. The key is the English text, and both `Localizable.strings` files get the line.
 - `server/legal.json` and `App/Content/legal.json` are the same file, byte for byte.
 - Data that leaves the phone is reflected in `legal.json`, `App/PrivacyInfo.xcprivacy` and `docs/APP-STORE.md` in the same change.

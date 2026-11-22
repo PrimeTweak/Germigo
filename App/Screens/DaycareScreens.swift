@@ -254,7 +254,7 @@ private struct MembershipCard: View {
                 }
                 .padding(10)
                 .background(germ.lightTint.opacity(palette.isDark ? 0.18 : 0.32),
-                            in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             }
         }
         .germigoCard(padding: 12)
@@ -427,7 +427,7 @@ struct DaycareScreen: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .refreshable {
@@ -525,7 +525,7 @@ struct NoticeScreen: View {
         return ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                         .fill(germ.lightTint.opacity(palette.isDark ? 0.22 : 0.45))
                     GermImage(germ: germ, size: 116)
                 }
@@ -585,7 +585,7 @@ struct NoticeScreen: View {
                         }
                         .buttonStyle(PillButtonStyle(kind: watching ? .ghost : .ink, height: 50))
                     }
-                    if let reference, let url = URL(string: reference.url) {
+                    if let url = reference?.link {
                         Link(destination: url) {
                             Label(tr("Official info"), systemImage: "info.circle.fill")
                         }
@@ -596,7 +596,7 @@ struct NoticeScreen: View {
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .onAppear {
@@ -742,7 +742,7 @@ struct JoinDaycareSheet: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 60)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
     }
 
     private func foundCard(_ info: DaycareInfo) -> some View {
@@ -763,9 +763,9 @@ struct JoinDaycareSheet: View {
                 .accessibilityHidden(true)
         }
         .padding(14)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
                 .strokeBorder(Color(hex: Swatch.green), lineWidth: 1.5)
         }
     }

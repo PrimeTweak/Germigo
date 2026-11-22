@@ -2,14 +2,13 @@ import SwiftUI
 
 private struct CardBackground: ViewModifier {
     @Environment(\.palette) private var palette
-    let radius: CGFloat
     let padding: CGFloat
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 }
 
@@ -29,8 +28,15 @@ extension View {
     }
 
     /// The rounded quiet surface used for grouped content.
-    func germigoCard(radius: CGFloat = 24, padding: CGFloat = 16) -> some View {
-        modifier(CardBackground(radius: radius, padding: padding))
+    func germigoCard(padding: CGFloat = 16) -> some View {
+        modifier(CardBackground(padding: padding))
+    }
+
+    /// Keeps a text field's content within a number of characters while it is typed.
+    func characterLimit(_ limit: Int, text: Binding<String>) -> some View {
+        onChange(of: text.wrappedValue) { _, value in
+            if value.count > limit { text.wrappedValue = String(value.prefix(limit)) }
+        }
     }
 
     /// Gives a control smaller than 44 points a 44-point touch area without moving what surrounds it.
@@ -50,6 +56,21 @@ enum HealthNotice {
     static var text: String {
         tr("Germigo shares general information from public health sources. It is not medical advice and does not replace a health professional.")
     }
+}
+
+/// The margin between the screen edges and a page's content.
+enum Spacing {
+    static let page: CGFloat = 20
+}
+
+/// The three corner radii of the app. Bars, thumbnails sized by their side and capsules keep their own shape.
+enum Radius {
+    /// Cards, sheets and large panels.
+    static let large: CGFloat = 24
+    /// Tiles, rows and what sits inside a card.
+    static let medium: CGFloat = 20
+    /// Chips and small marks.
+    static let small: CGFloat = 12
 }
 
 /// Full-width capsule buttons: filled for the main action, quiet for the other one.
@@ -188,8 +209,6 @@ struct ValueRow: View {
     let title: String
     var value: String?
     var showsChevron = true
-    /// Shows a padlock in place of the chevron, for what the Season Pass opens.
-    var locked = false
     @Environment(\.palette) private var palette
 
     var body: some View {
@@ -205,12 +224,7 @@ struct ValueRow: View {
                     .foregroundStyle(palette.inkSecondary)
                     .lineLimit(1)
             }
-            if locked {
-                Image(systemName: "lock.fill")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.accent)
-                    .accessibilityLabel(tr("Needs the Season Pass"))
-            } else if showsChevron {
+            if showsChevron {
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.inkTertiary)

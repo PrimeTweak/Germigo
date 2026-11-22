@@ -1,8 +1,10 @@
 import StoreKit
 import SwiftUI
 
-/// The Season Pass offer. Prices and terms come from the App Store.
+/// The Season Pass offer. It leads with the door the person touched, shows how the trial goes,
+/// and keeps the button in reach. Prices and terms come from the App Store.
 struct PaywallView: View {
+    var reason = PassReason.general
     var onFinish: (() -> Void)?
 
     @Environment(PurchaseManager.self) private var purchases
@@ -10,8 +12,6 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selectedID = PassProduct.yearlyID
     @State private var legal: LegalKind?
-    /// The ticket's title, following the text size set in iOS.
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 42
 
     private let backdrop = Color(hex: Swatch.navy)
     private let panel = Color(hex: Swatch.navySurface)
@@ -28,33 +28,48 @@ struct PaywallView: View {
         selectedID == PassProduct.yearlyID ? purchases.trialDays : nil
     }
 
+    private var isSelling: Bool {
+        !model.hasPass && !purchases.products.isEmpty
+    }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                ticket
-                VStack(spacing: 4) {
-                    Text(tr("Survive the season."))
-                    Text(tr("Together."))
-                        .foregroundStyle(glow)
+            VStack(spacing: 22) {
+                hero
+                VStack(spacing: 8) {
+                    Text(reason.headline)
+                        .font(.title.weight(.bold))
+                    Text(reason.detail)
+                        .font(.subheadline)
+                        .opacity(0.72)
                 }
-                .font(.system(.title).weight(.bold))
                 .multilineTextAlignment(.center)
-                benefits
+                .fixedSize(horizontal: false, vertical: true)
                 if model.hasPass {
                     ownedCard
                 } else if purchases.products.isEmpty {
                     unavailableCard
                 } else {
+                    if let days = trialDays, let product = selected {
+                        timeline(TrialPlan(days: days), price: price(of: product))
+                    }
                     plans
-                    purchaseButton
-                    disclosure
+                }
+                benefits
+                if isSelling {
+                    terms
                 }
                 footerLinks
             }
             .foregroundStyle(frost)
-            .padding(.horizontal, 22)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 56)
-            .padding(.bottom, 24)
+            .padding(.bottom, 16)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if isSelling {
+                purchaseBar
+            }
         }
         .background(backdrop.ignoresSafeArea())
         .overlay(alignment: .topLeading) {
@@ -111,54 +126,82 @@ struct PaywallView: View {
         return String(year) + "–" + String((year + 1) % 100)
     }
 
-    private var ticket: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 2) {
-                Text(tr("Germigo · Admit one household"))
-                    .font(.caption2.weight(.bold))
-                    .opacity(0.7)
+    /// The door's character in a spotlight, with the stub of the Pass.
+    private var hero: some View {
+        ZStack(alignment: .bottom) {
+            Circle()
+                .fill(frost)
+                .frame(width: 140, height: 140)
+                .shadow(color: glow.opacity(0.55), radius: 26)
+            PassArt(reason: reason)
+                .frame(width: 140, height: 140)
+            HStack(spacing: 6) {
+                Image(systemName: "ticket.fill")
                 Text(tr("Season Pass"))
-                    .font(.system(size: titleSize, weight: .bold))
-                    .kerning(-1)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
+                Text(verbatim: seasonYears)
+                    .opacity(0.65)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 12)
-            ZStack {
-                TicketDash()
-                    .stroke(style: StrokeStyle(lineWidth: 1.5, dash: [5, 5]))
-                    .foregroundStyle(night.opacity(0.3))
-                    .frame(height: 2)
-                    .padding(.horizontal, 20)
-                HStack {
-                    Circle().fill(backdrop).frame(width: 22, height: 22).offset(x: -11)
-                    Spacer()
-                    Circle().fill(backdrop).frame(width: 22, height: 22).offset(x: 11)
+            .font(.footnote.weight(.bold))
+            .foregroundStyle(night)
+            .padding(.horizontal, 14)
+            .frame(height: 32)
+            .background(glow, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+            .rotationEffect(.degrees(-3))
+            .offset(y: 16)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(tr("Season Pass"))
+        }
+        .padding(.bottom, 16)
+    }
+
+    /// How the trial goes: today, the reminder, then the first payment.
+    private func timeline(_ plan: TrialPlan, price: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            step(tr("Today"), tr("Everything opens. No charge."), isFirst: true, isLast: false)
+            if let day = plan.reminderDay {
+                step(trCount(day, one: "In %lld day", other: "In %lld days"),
+                     tr("A reminder from Germigo, if notifications are on."), isFirst: false, isLast: false)
+            }
+            step(trCount(plan.days, one: "In %lld day", other: "In %lld days"),
+                 tr("The Pass starts: %@. Cancel before and pay nothing.", price), isFirst: false, isLast: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(panel, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func step(_ title: String, _ detail: String, isFirst: Bool, isLast: Bool) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(spacing: 0) {
+                Circle()
+                    .fill(isFirst ? glow : frost.opacity(0.32))
+                    .frame(width: 12, height: 12)
+                    .padding(.top, 4)
+                if !isLast {
+                    Rectangle()
+                        .fill(frost.opacity(0.18))
+                        .frame(width: 2)
+                        .frame(maxHeight: .infinity)
                 }
             }
-            HStack {
-                Text(seasonYears)
-                Spacer()
-                Image(systemName: "ticket.fill")
+            .frame(width: 12)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.callout.weight(.semibold))
+                Text(detail)
+                    .font(.footnote)
+                    .opacity(0.68)
             }
-            .font(.subheadline.weight(.bold))
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
+            .padding(.bottom, isLast ? 0 : 14)
         }
-        .foregroundStyle(night)
-        .frame(maxWidth: .infinity)
-        .background(frost)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .rotationEffect(.degrees(-2))
-        .padding(.horizontal, 8)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(tr("Season Pass"))
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 14) {
+            Text(tr("Everything in the Season Pass"))
+                .font(.headline)
             benefit("person.2.fill", tr("Your whole household"), tr("Your partner, the couple duel and every kid"))
             benefit("calendar", tr("The whole history"), tr("Past weeks, photos and the file for the doctor"))
             benefit("chart.bar.fill", tr("Your season in numbers"), tr("Top supplier, germs by month and the longest chain"))
@@ -239,10 +282,10 @@ struct PaywallView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(minHeight: 70)
-            .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .frame(minHeight: 64)
+            .background(panel, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                     .strokeBorder(isSelected ? glow : Color.clear, lineWidth: 2)
             }
         }
@@ -284,30 +327,50 @@ struct PaywallView: View {
         .disabled(selected == nil || purchases.isPurchasing)
     }
 
-    @ViewBuilder
-    private var disclosure: some View {
-        if let product = selected {
-            let price = product.displayPrice + " " + periodLabel(product)
-            VStack(spacing: 6) {
-                if let days = trialDays {
-                    Text(tr("%1$lld days free, then %2$@.", days, price))
-                        .font(.footnote.weight(.semibold))
-                } else {
-                    Text(price)
-                        .font(.footnote.weight(.semibold))
+    private func price(of product: Product) -> String {
+        product.displayPrice + " " + periodLabel(product)
+    }
+
+    /// The button and what it costs, always in reach at the bottom of the screen.
+    private var purchaseBar: some View {
+        VStack(spacing: 8) {
+            purchaseButton
+            if let product = selected {
+                Group {
+                    if let days = trialDays {
+                        Text(tr("%1$lld days free, then %2$@.", days, price(of: product)) + " " + tr("Cancel anytime."))
+                    } else {
+                        Text(price(of: product) + ". " + tr("Cancel anytime."))
+                    }
                 }
-                Text(tr("The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings."))
-                    .font(.caption)
-                    .opacity(0.6)
-                if product.isFamilyShareable {
-                    Text(tr("Family Sharing is included."))
-                        .font(.caption)
-                        .opacity(0.6)
-                }
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(frost.opacity(0.85))
+                .multilineTextAlignment(.center)
             }
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
         }
+        .padding(.horizontal, Spacing.page)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .frame(maxWidth: .infinity)
+        .background(backdrop.ignoresSafeArea(edges: .bottom))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(frost.opacity(0.1))
+                .frame(height: 1)
+        }
+    }
+
+    private var terms: some View {
+        VStack(spacing: 6) {
+            Text(tr("The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings."))
+            if selected?.isFamilyShareable == true {
+                Text(tr("Family Sharing is included."))
+            }
+        }
+        .font(.caption)
+        .opacity(0.6)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
     }
 
     private var ownedCard: some View {
@@ -322,7 +385,7 @@ struct PaywallView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(panel, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private var unavailableCard: some View {
@@ -347,7 +410,7 @@ struct PaywallView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity)
-        .background(panel, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(panel, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private var footerLinks: some View {
@@ -373,6 +436,70 @@ struct PaywallView: View {
         .foregroundStyle(frost.opacity(0.75))
         .buttonStyle(.plain)
         .frame(minHeight: 44)
+    }
+}
+
+/// The character that stands for a door to the Season Pass.
+private struct PassArt: View {
+    let reason: PassReason
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        switch reason {
+        case .general:
+            LivelyCharacter(mood: .stalking) {
+                picture("mascot-awake", side: 104)
+            }
+        case .household:
+            HStack(alignment: .bottom, spacing: -14) {
+                BuddyView(look: model.data.partnerLook, size: 46, lively: true)
+                BuddyView(look: model.data.kids.first?.colorIndex ?? 0, size: 58, leads: true, pokes: true)
+                BuddyView(look: model.data.hostLook, size: 46, lively: true)
+            }
+        case .history:
+            picture("record-logbook", side: 100)
+        case .photos:
+            picture("record-album", side: 100)
+        case .doctor:
+            picture("record-doctor", side: 100)
+        case .stats:
+            BuddyView(look: Looks.crown, size: 78, leads: true, pokes: true)
+        case .crew:
+            HStack(spacing: -10) {
+                picture("sticker-tissue", side: 46)
+                picture("sticker-soup", side: 58)
+                picture("sticker-tea", side: 46)
+            }
+        case .looks:
+            HStack(spacing: -8) {
+                icon("icon-preview-snowDay", tilt: -9)
+                icon("icon-preview-golden", tilt: 0)
+                icon("icon-preview-holo", tilt: 9)
+            }
+        case .holo:
+            if let germ = model.catalog.germs.max(by: { model.count(of: $0.id) < model.count(of: $1.id) }) {
+                GermCardView(germ: germ, width: 68, finish: .holo)
+                    .rotationEffect(.degrees(4))
+            }
+        }
+    }
+
+    private func picture(_ name: String, side: CGFloat) -> some View {
+        Image(name)
+            .resizable()
+            .scaledToFit()
+            .frame(width: side, height: side)
+            .accessibilityHidden(true)
+    }
+
+    private func icon(_ name: String, tilt: Double) -> some View {
+        Image(name)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 46, height: 46)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+            .rotationEffect(.degrees(tilt))
+            .accessibilityHidden(true)
     }
 }
 

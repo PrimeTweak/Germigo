@@ -23,6 +23,14 @@ enum LessonEngine {
     static let step = 5
     /// Days a new lesson stays open to everyone.
     static let openDays = 7
+    /// Least time between two checks of the online lesson file.
+    static let checkGap: TimeInterval = 3600
+
+    /// True when the online file has not been checked within the gap, or the clock went back.
+    static func isCheckDue(lastCheck: Date?, now: Date) -> Bool {
+        guard let lastCheck else { return true }
+        return now.timeIntervalSince(lastCheck) >= checkGap || now < lastCheck
+    }
 
     /// Midnight of the release day in the phone's time zone.
     static func releaseDay(_ text: String, calendar: Calendar = .current) -> Date? {

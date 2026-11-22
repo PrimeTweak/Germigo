@@ -89,6 +89,8 @@ extension CrewAPIError {
         case "unauthorized": return tr("This daycare is no longer on Germigo.")
         case "email_rejected": return tr("That email address doesn't look right.")
         case "note_too_long": return tr("The note is too long.")
+        case "note_rejected": return tr("A note can't hold a link or an email address.")
+        case "daycare_full": return tr("This daycare's list is full.")
         case "offline": return tr("The server can't be reached right now.")
         default: return errorDescription ?? tr("Something went wrong. Try again.")
         }

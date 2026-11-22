@@ -35,7 +35,7 @@ struct DaycareSetupSheet: View {
                         .foregroundStyle(palette.ink)
                         .padding(.horizontal, 16)
                         .frame(height: 54)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                         .onChange(of: name) { _, value in
                             if value.count > 40 { name = String(value.prefix(40)) }
                         }
@@ -49,7 +49,7 @@ struct DaycareSetupSheet: View {
                             .foregroundStyle(palette.ink)
                             .padding(.horizontal, 16)
                             .frame(height: 54)
-                            .background(palette.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                         Text(tr("To send notices by email from this address. You can add it later."))
                             .font(.footnote)
                             .foregroundStyle(palette.inkTertiary)
@@ -344,7 +344,7 @@ struct DirectorScreen: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .refreshable {
@@ -520,9 +520,9 @@ struct NoticeComposer: View {
             .frame(maxWidth: .infinity, minHeight: 80)
             .padding(4)
             .background(germ.lightTint.opacity(palette.isDark ? 0.22 : 0.4),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
                     .strokeBorder(palette.ink, lineWidth: selected ? 2.5 : 0)
             }
         }
@@ -583,7 +583,7 @@ struct InviteScreen: View {
                                 .resizable()
                                 .frame(width: 170, height: 170)
                                 .padding(10)
-                                .background(Color.white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                .background(Color.white, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                                 .accessibilityLabel(tr("QR code of the daycare"))
                         }
                         Text(tr("Daycare code"))
@@ -609,13 +609,13 @@ struct InviteScreen: View {
                         .padding(.top, 4)
                     }
                     .frame(maxWidth: .infinity)
-                    .germigoCard(radius: 28, padding: 18)
+                    .germigoCard(padding: 18)
                     Text(tr("Parents open Germigo, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has."))
                         .font(.footnote)
                         .foregroundStyle(palette.inkTertiary)
                         .padding(.horizontal, 4)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
                 .task(id: info.code) {
                     poster = Self.renderPoster(name: info.name, code: info.code)
@@ -820,7 +820,7 @@ struct EmailNoticesScreen: View {
                                 .foregroundStyle(palette.ink)
                                 .padding(.horizontal, 14)
                                 .frame(height: 50)
-                                .background(palette.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                             Button(tr("Save")) {
                                 Task {
                                     _ = await daycare.update(email: email.trimmingCharacters(in: .whitespaces))
@@ -839,7 +839,7 @@ struct EmailNoticesScreen: View {
                                     .font(.subheadline)
                                     .foregroundStyle(palette.inkSecondary)
                                 Button {
-                                    UIPasteboard.general.string = inbox
+                                    Clipboard.copy(inbox)
                                     copied = true
                                 } label: {
                                     HStack {
@@ -854,7 +854,7 @@ struct EmailNoticesScreen: View {
                                     }
                                     .padding(.horizontal, 14)
                                     .frame(height: 50)
-                                    .background(palette.background, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                                 }
                                 .accessibilityLabel(tr("Copy the address"))
                                 VStack(alignment: .leading, spacing: 4) {
@@ -864,9 +864,6 @@ struct EmailNoticesScreen: View {
                                     Text(labeled(tr("Subject:"), example(info)))
                                         .font(.footnote)
                                         .foregroundStyle(palette.ink)
-                                    Text(labeled(tr("Message:"), tr("3 children went home sick this morning.")))
-                                        .font(.footnote)
-                                        .foregroundStyle(palette.ink)
                                 }
                                 .padding(.leading, 10)
                                 .overlay(alignment: .leading) {
@@ -874,6 +871,9 @@ struct EmailNoticesScreen: View {
                                         .fill(palette.ink.opacity(0.15))
                                         .frame(width: 2)
                                 }
+                                Label(tr("Only the subject is read. The message is never shared."), systemImage: "lock")
+                                    .font(.footnote)
+                                    .foregroundStyle(palette.inkSecondary)
                                 Label(tr("Germigo replies to confirm how many families got it. If the illness or the group is unclear, it asks instead of sending. Leave the group out to reach the whole daycare."),
                                       systemImage: "checkmark")
                                     .font(.footnote)
@@ -894,7 +894,7 @@ struct EmailNoticesScreen: View {
                             .padding(.horizontal, 4)
                     }
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
                 .onAppear {
                     email = info.email ?? ""

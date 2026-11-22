@@ -53,7 +53,7 @@ struct RewardView: View {
                 buttons
                     .opacity(detailsIn ? 1 : 0)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 24)
             .padding(.bottom, 12)
         }
@@ -182,7 +182,7 @@ struct RewardView: View {
         }
         .padding(.horizontal, 14)
         .frame(minHeight: 68)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 

@@ -87,7 +87,7 @@ struct DayScreen: View {
                     .padding(.top, 10)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
             .id(day)
             .motionTransition(.asymmetric(insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
@@ -118,7 +118,7 @@ struct DayScreen: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .history)
         }
     }
 
@@ -236,10 +236,10 @@ private struct DayCard: View {
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
             .phaseAnimator([0.0, 0.85], trigger: photos.count) { card, flash in
                 card.overlay {
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                         .fill(Color.white.opacity(flash))
                         .allowsHitTesting(false)
                 }
@@ -250,7 +250,7 @@ private struct DayCard: View {
                 AddPhotoSheet(seed: seed)
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView()
+                PaywallView(reason: .photos)
             }
         }
     }
@@ -323,11 +323,11 @@ private struct LockedDay: View {
             Text(tr("This day is in the archives"))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(palette.ink)
-            Text(tr("Days older than a week come with the Season Pass."))
+            Text(PassReason.history.detail)
                 .font(.callout)
                 .foregroundStyle(palette.inkSecondary)
                 .multilineTextAlignment(.center)
-            Button(tr("See the Season Pass")) {
+            Button(PurchaseManager.shared.offerLabel) {
                 showPaywall = true
             }
             .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
@@ -336,7 +336,7 @@ private struct LockedDay: View {
         .frame(maxWidth: .infinity)
         .padding(.top, 36)
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .history)
         }
     }
 }

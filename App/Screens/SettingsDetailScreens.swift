@@ -333,6 +333,11 @@ struct AboutScreen: View {
                     } label: {
                         SettingsLabel(title: tr("Privacy Policy"))
                     }
+                    NavigationLink {
+                        LegalScreen(kind: .health)
+                    } label: {
+                        SettingsLabel(title: tr("Health Data Policy"))
+                    }
                     if let email = AppConfig.supportEmail, let url = URL(string: "mailto:" + email) {
                         Link(destination: url) {
                             LabeledContent {

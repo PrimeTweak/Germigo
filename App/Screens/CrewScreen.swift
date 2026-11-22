@@ -61,7 +61,7 @@ struct CrewScreen: View {
                 }
             }
             .sheet(isPresented: $showPaywall) {
-                PaywallView()
+                PaywallView(reason: .crew)
             }
             .sheet(isPresented: $showSettings) {
                 CrewSettingsSheet()
@@ -167,7 +167,7 @@ private struct CrewTeaser: View {
                 }
                 .padding(.horizontal, 16)
                 .germigoCard(padding: 0)
-                Button(tr("See the Season Pass")) {
+                Button(PurchaseManager.shared.offerLabel) {
                     showPaywall = true
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
@@ -185,7 +185,7 @@ private struct CrewTeaser: View {
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .confirmationDialog(tr("Leave this crew?"), isPresented: $confirmLeave, titleVisibility: .visible) {
@@ -233,14 +233,14 @@ private struct CrewJoinView: View {
     @State private var code = ""
     @State private var emblem = 0
     @State private var accepted = false
-    @State private var showRules = false
+    @State private var legal: LegalKind?
     @State private var submitting = false
 
     private var canSubmit: Bool {
         let nameOK = displayName.trimmingCharacters(in: .whitespaces).count >= 2
         let detailOK = mode == .create
             ? crewName.trimmingCharacters(in: .whitespaces).count >= 2
-            : code.trimmingCharacters(in: .whitespaces).count >= 6
+            : code.trimmingCharacters(in: .whitespaces).count == CrewStore.codeLength
         return nameOK && detailOK && accepted && !crew.isLoading && !submitting
     }
 
@@ -267,7 +267,7 @@ private struct CrewJoinView: View {
                             .font(.body.monospaced())
                             .frame(minHeight: 54)
                             .onChange(of: code) { _, newValue in
-                                if newValue.count > 8 { code = String(newValue.prefix(8)) }
+                                if newValue.count > CrewStore.codeLength { code = String(newValue.prefix(CrewStore.codeLength)) }
                             }
                     }
                 }
@@ -290,8 +290,13 @@ private struct CrewJoinView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .germigoCard(padding: 0)
-                Button(tr("Read the Terms of Use")) {
-                    showRules = true
+                VStack(alignment: .leading, spacing: 8) {
+                    Button(tr("Read the Terms of Use")) {
+                        legal = .terms
+                    }
+                    Button(tr("Read the health data policy")) {
+                        legal = .health
+                    }
                 }
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(palette.ink)
@@ -318,15 +323,15 @@ private struct CrewJoinView: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .onAppear {
             if displayName.isEmpty { displayName = model.data.profileName }
         }
-        .sheet(isPresented: $showRules) {
+        .sheet(item: $legal) { kind in
             NavigationStack {
-                LegalScreen(kind: .terms)
+                LegalScreen(kind: kind)
             }
         }
     }
@@ -352,7 +357,7 @@ private struct CrewJoinView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                         .background(emblem == item.offset ? palette.ink : palette.surface,
-                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                    in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(tr("Emblem %lld", item.offset + 1))
@@ -410,7 +415,7 @@ private struct CrewHome: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
         }
         .refreshable {
@@ -478,7 +483,7 @@ private struct CrewHome: View {
                     .frame(width: 60, height: 60)
                     .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
                                                startPoint: .top, endPoint: .bottom),
-                                in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                                in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(state.crew.name)
@@ -513,7 +518,7 @@ private struct CrewHome: View {
         .padding(16)
         .background(LinearGradient(colors: [Color(hex: Swatch.coralPale).opacity(palette.isDark ? 0.25 : 0.45), palette.surface],
                                    startPoint: .topLeading, endPoint: .bottomTrailing),
-                    in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     @ViewBuilder
@@ -550,7 +555,7 @@ private struct CrewHome: View {
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
         }
-        .germigoCard(radius: 28, padding: 16)
+        .germigoCard()
     }
 
     @ViewBuilder
@@ -571,7 +576,7 @@ private struct CrewHome: View {
                 })
                 .padding(.top, 14)
             }
-            .germigoCard(radius: 28, padding: 16)
+            .germigoCard()
         }
     }
 
@@ -693,7 +698,7 @@ private struct FeedRow: View {
             }
             .padding(14)
             .background(event.isWin ? Color(hex: Swatch.lime).opacity(palette.isDark ? 0.16 : 0.24) : palette.surface,
-                        in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
     }
 
@@ -711,7 +716,7 @@ private struct FeedRow: View {
             .saturation(event.isWin ? 0.35 : 1)
             .rotationEffect(.degrees(event.isWin ? -14 : 0))
             .frame(width: 52, height: 52)
-            .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             .overlay(alignment: .topTrailing) {
                 if event.isWin {
                     Text(verbatim: "K.O.")
@@ -719,7 +724,7 @@ private struct FeedRow: View {
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)
-                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                         .rotationEffect(.degrees(8))
                         .offset(x: 7, y: -7)
                 }
@@ -906,7 +911,7 @@ private struct RadarRow: View {
             HStack(spacing: 12) {
                 GermImage(germ: germ, size: 42)
                     .frame(width: 54, height: 54)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 VStack(alignment: .leading, spacing: 7) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text(germ.name)

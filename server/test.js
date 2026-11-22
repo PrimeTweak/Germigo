@@ -65,6 +65,10 @@ async function main() {
   const frenchTerms = (await call('GET', '/terms', { headers: { 'Accept-Language': 'fr-CA' } })).data;
   assert.ok(frenchTerms.includes(legal.web.eulaLabel.fr));
   assert.match((await call('GET', '/terms')).data, /stdeula/);
+  const healthPage = (await call('GET', '/health-data')).data;
+  assert.ok(healthPage.includes(legal.web.healthTitle.en) && healthPage.includes(legal.health[0].title.en));
+  assert.ok((await call('GET', '/health-data?lang=fr')).data.includes(legal.web.healthTitle.fr));
+  assert.ok((await call('GET', '/')).data.includes('href="/health-data"'));
   const support = (await call('GET', '/support?lang=fr')).data;
   assert.match(support, /help@example\.org/);
   assert.ok(support.includes(legal.web.supportIntro.fr.split(' ')[0]));
@@ -94,7 +98,7 @@ async function main() {
   assert.equal(created.status, 200);
   const alex = created.data.token;
   const code = created.data.state.crew.code;
-  assert.match(code, /^[A-Z2-9]{6}$/);
+  assert.match(code, /^[A-Z2-9]{8}$/);
   assert.equal(created.data.state.crew.families, 1);
   assert.equal(created.data.state.crew.emblem, 2);
 
@@ -163,12 +167,16 @@ async function main() {
   assert.equal(reports.length, 2);
   assert.equal(reports[0].memberName, 'Marie');
   assert.equal(reports[0].crewName, 'Ladybugs');
+  assert.deepEqual(Object.keys(reports[0]).sort(), ['at', 'crewName', 'memberID', 'memberName', 'reason']);
   await call('POST', `/admin/members/${marieID}/clear`, { token: 'admin-secret' });
   state = (await call('GET', '/v1/crew', { token: jon })).data;
   assert.equal(state.members.find((member) => member.id === marieID).name, 'Marie');
 
-  // Data survives a restart
+  // Data survives a restart, in a file only its owner can read
   await new Promise((resolve) => server.close(resolve));
+  if (process.platform !== 'win32') {
+    assert.equal(fs.statSync(path.join(dataDir, 'germigo.json')).mode & 0o777, 0o600);
+  }
   server = createApp(options);
   await new Promise((resolve) => server.listen(0, resolve));
   base = `http://127.0.0.1:${server.address().port}`;
@@ -272,6 +280,22 @@ async function main() {
   const malformed = await fetch(base + '/v1/crews', { method: 'POST', body: '{nope' });
   assert.equal(malformed.status, 400);
   assert.equal((await call('GET', '/v1/unknown', { token: pat })).status, 404);
+
+  // Public pages: 120 loads a minute per address, health checks aside; slow clients are dropped early
+  assert.equal(server.headersTimeout, 10000);
+  assert.equal(server.requestTimeout, 30000);
+  assert.equal(server.maxConnections, 1000);
+  now += DAY;
+  let served = 0;
+  for (let load = 0; load < 121; load += 1) {
+    if ((await call('GET', load % 2 ? '/privacy' : '/')).status === 200) served += 1;
+  }
+  assert.equal(served, 120);
+  assert.equal((await call('GET', '/terms')).status, 429);
+  assert.equal((await call('GET', '/health')).status, 200);
+  assert.equal((await call('GET', '/v1/crew', { token: pat })).status, 200);
+  now += 61 * 1000;
+  assert.equal((await call('GET', '/support')).status, 200);
 
   await new Promise((resolve) => server.close(resolve));
 
@@ -426,6 +450,9 @@ async function main() {
   assert.equal((await notify({ germID: 'mystery' })).status, 400);
   assert.equal((await notify({ germID: 'noro', groupID: 'unknown' })).status, 400);
   assert.equal((await notify({ germID: 'noro', note: 'x'.repeat(281) })).data.error, 'note_too_long');
+  for (const note of ['Voir https://exemple.test', 'Infos sur www.exemple.ca', 'exemple.com', 'Écrire à direction@lucioles.ca']) {
+    assert.equal((await notify({ germID: 'noro', note })).data.error, 'note_rejected');
+  }
   desk = (await notify({ germID: 'noro', groupID: trottineurs, note: 'Lavez bien les mains.' })).data;
   assert.equal(desk.notices[0].recipients, 2);
   assert.equal(pushed.length, 1);
@@ -489,14 +516,18 @@ async function main() {
   assert.deepEqual((await call('GET', '/v1/daycare-subscription', { token: ana.token })).data.groupIDs, [trottineurs]);
   assert.deepEqual(desk.daycare.groups.map((group) => group.families), [2, 1, 0]);
 
-  // By email: the webhook secret, the director's own address, then the subject decide
-  const inbound = (body, token = 'inbound-secret') => call('POST', '/v1/inbound-email?token=' + token, { body });
+  // By email: the webhook password, the director's own address, then the subject decide
+  const basic = (password) => ({ Authorization: 'Basic ' + Buffer.from('postmark:' + password).toString('base64') });
+  const inbound = (body, password = 'inbound-secret') => call('POST', '/v1/inbound-email', { body, headers: basic(password) });
   const inbox = desk.daycare.inbox;
   const letter = (subject, from = 'Direction <direction@lucioles.ca>') => ({
     From: from, FromFull: { Email: from.match(/<(.+)>/)[1] }, To: inbox, ToFull: [{ Email: inbox }],
     OriginalRecipient: inbox, Subject: subject, TextBody: 'Surveillez la fièvre.\n', StrippedTextReply: '',
   });
   assert.equal((await inbound(letter('Gastro'), 'wrong')).status, 401);
+  const inURL = await call('POST', '/v1/inbound-email?token=inbound-secret', { body: letter('Gastro') });
+  assert.equal(inURL.status, 401);
+  assert.match(inURL.headers.get('www-authenticate'), /^Basic /);
   assert.equal((await inbound(letter('Gastro', 'Someone <someone@spam.test>'))).data.status, 'ignored');
   assert.equal(mailed.length, 0);
   pushed.length = 0;
@@ -508,7 +539,8 @@ async function main() {
   assert.equal(pushed.length, 1);
   parent = (await call('GET', '/v1/daycare-subscription', { token: ana.token })).data;
   assert.equal(parent.notices[0].source, 'email');
-  assert.equal(parent.notices[0].note, 'Surveillez la fièvre.');
+  assert.equal(parent.notices[0].note, '');
+  assert.ok(!fs.readFileSync(path.join(daycareDir, 'germigo.json'), 'utf8').includes('Surveillez'));
   assert.equal((await inbound(letter('Allo'))).data.status, 'unclear');
   assert.equal(mailed[1].subject, 'Non envoyé : quelle maladie?');
   await inbound(letter('Gastro - Bébés'));
@@ -522,6 +554,10 @@ async function main() {
   assert.equal(sentToday, 10);
   await inbound(letter('Rhume'));
   assert.equal(mailed[3].subject, 'Non envoyé : limite du jour atteinte');
+
+  // Twenty replies a day at most, so a forged sender cannot flood the director's address
+  for (let attempt = 0; attempt < 30; attempt += 1) await inbound(letter('Allo'));
+  assert.equal(mailed.length, 20);
 
   // Notices survive a restart
   await new Promise((resolve) => daycareServer.close(resolve));
@@ -547,6 +583,31 @@ async function main() {
   assert.equal((await call('GET', '/v1/daycare', { token: idle.token })).status, 401);
 
   await new Promise((resolve) => daycareServer.close(resolve));
+
+  // A daycare's list has a ceiling, and one address adds forty families a day at most
+  const ceiling = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-ceiling-')), maxSubscriptions: 3 });
+  await new Promise((resolve) => ceiling.listen(0, resolve));
+  base = `http://127.0.0.1:${ceiling.address().port}`;
+  now += DAY;
+  const small = (await call('POST', '/v1/daycares', { body: { name: 'CPE Petit', groups: [] } })).data.state.daycare.code;
+  const enroll = (code) => call('POST', '/v1/daycare-subscriptions', { body: { code } });
+  for (let family = 0; family < 3; family += 1) assert.equal((await enroll(small)).status, 200);
+  assert.equal((await enroll(small)).data.error, 'daycare_full');
+  await new Promise((resolve) => ceiling.close(resolve));
+  const busy = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germigo-busy-')) });
+  await new Promise((resolve) => busy.listen(0, resolve));
+  base = `http://127.0.0.1:${busy.address().port}`;
+  now += DAY;
+  const large = (await call('POST', '/v1/daycares', { body: { name: 'CPE Grand', groups: [] } })).data.state.daycare.code;
+  for (let family = 0; family < 40; family += 1) {
+    if (family % 9 === 0) now += 61 * 1000;
+    assert.equal((await enroll(large)).status, 200);
+  }
+  now += 61 * 1000;
+  assert.equal((await enroll(large)).data.error, 'rate_limited');
+  now += DAY;
+  assert.equal((await enroll(large)).status, 200);
+  await new Promise((resolve) => busy.close(resolve));
   await new Promise((resolve) => apns.close(resolve));
   http2.connect = connect;
   fs.rmSync(daycareDir, { recursive: true, force: true });

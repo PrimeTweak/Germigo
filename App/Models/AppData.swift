@@ -5,6 +5,8 @@ enum Looks {
     static let count = 8
     static let host = 6
     static let partner = 7
+    /// The look that wears a crown.
+    static let crown = 3
 }
 
 struct Kid: Codable, Identifiable, Hashable {
@@ -365,7 +367,7 @@ struct LogDraft {
 }
 
 /// A request to open the log sheet, optionally prefilled from a kid's illness or from the symptom pages.
-struct LogRequest: Identifiable {
+struct LogRequest: Identifiable, Hashable {
     let id = UUID()
     var kidIllnessID: UUID?
     var germID: String?

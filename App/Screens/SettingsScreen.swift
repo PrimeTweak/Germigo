@@ -84,7 +84,7 @@ struct SettingsScreen: View {
                     SneezyFooter()
                         .padding(.top, 22)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
             .background(palette.background.ignoresSafeArea())
@@ -353,7 +353,7 @@ private struct SettingsRowLabel: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
                 .fill(palette.ink.opacity(0.07))
                 .frame(width: 32, height: 32)
                 .overlay {
@@ -507,7 +507,7 @@ private struct PassTicket: View {
                     .allowsHitTesting(false)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .animation(Tempo.quick, value: active)
     }
 
@@ -633,7 +633,7 @@ private struct LookCard: View {
                     Image(icon.previewAsset)
                         .resizable()
                         .scaledToFit()
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 }
             }
             .buttonStyle(.plain)
@@ -643,7 +643,7 @@ private struct LookCard: View {
                 ThemeScreen()
             } label: {
                 row(tr("Theme"), value: model.data.settings.theme.title) {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
                         .fill(palette.ink.opacity(0.07))
                         .overlay {
                             Circle()
@@ -890,7 +890,7 @@ struct TipSheet: View {
                             .multilineTextAlignment(.center)
                     }
                 }
-                .padding(.horizontal, 22)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 24)
             }
             .overlay {
@@ -1000,7 +1000,7 @@ struct TipSheet: View {
                     .frame(height: 36)
                     .background(palette.accent, in: Capsule())
             }
-            .germigoCard(radius: 24, padding: 12)
+            .germigoCard(padding: 12)
         }
         .buttonStyle(PressableStyle())
         .disabled(purchases.isPurchasing)

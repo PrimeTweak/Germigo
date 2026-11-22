@@ -34,6 +34,44 @@ enum GuideShelf: String, Hashable, CaseIterable, Identifiable {
     }
 }
 
+/// Without the Season Pass: what a holo card looks like, on the germ caught most, and the way to the offer.
+private struct HoloPreview: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var showPaywall = false
+
+    var body: some View {
+        if let germ = model.catalog.germs.max(by: { model.count(of: $0.id) < model.count(of: $1.id) }) {
+            Button {
+                showPaywall = true
+            } label: {
+                HStack(spacing: 16) {
+                    GermCardView(germ: germ, width: 64, finish: .holo)
+                        .rotationEffect(.degrees(-5))
+                        .accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(PassReason.holo.gain)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                        Text(PassReason.holo.detail)
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .multilineTextAlignment(.leading)
+                        PassOfferTag()
+                            .padding(.top, 2)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .germigoCard(padding: 14)
+            }
+            .buttonStyle(PressableStyle())
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(reason: .holo)
+            }
+        }
+    }
+}
+
 /// Where the Guide remembers what it has already shown: the weekly unmasking, the caught germs
 /// revealed, and the answer to the myth of the week.
 enum GuideKeys {
@@ -71,7 +109,7 @@ struct LabScreen: View {
                         .padding(.horizontal, 4)
                         .padding(.top, 8)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
             .background(CharacterWash(tint: TabWash.lab))
@@ -112,6 +150,9 @@ struct LabScreen: View {
         }
         ForEach(GuideShelf.allCases) { shelf in
             shelfRow(shelf, germs: shelf.germs(in: germs), studied: studied)
+        }
+        if !model.hasPass {
+            HoloPreview()
         }
         lessons
         extras
@@ -265,7 +306,7 @@ struct ShelfScreen: View {
                     .foregroundStyle(palette.inkTertiary)
                     .padding(.horizontal, 4)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 8)
             .padding(.bottom, 28)
         }
@@ -303,7 +344,7 @@ private struct GuideLegend: View {
                 .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.24 : 0.16))
                 .frame(width: 24, height: 24)
                 .background(tinted ? sample.tileTint(palette) : palette.surface,
-                            in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
             Text(title)
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
@@ -358,7 +399,7 @@ private struct GuideTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
                 .fill(tinted ? germ.tileTint(palette) : palette.surface)
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
@@ -529,7 +570,7 @@ private struct QuizBanner: View {
         .padding(.trailing, 12)
         .padding(.vertical, 14)
         .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
-        .background(ground, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .background(ground, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay(alignment: .topLeading) {
             LivelyCharacter(mood: done ? .resting : .stalking, phase: 1.3) {
                 Image(done ? "mascot-asleep" : "mascot-awake")
@@ -649,7 +690,7 @@ private struct WeekGermCard: View {
             .padding(.bottom, 4)
         }
         .background(unmasked ? germ.tileTint(palette) : palette.surface,
-                    in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .accessibilityElement(children: .combine)
         .task {
             await reveal()
@@ -705,8 +746,8 @@ private struct WeekMythCard: View {
         }
         .modifier(WeekCardFrame())
         .background(palette.accent.opacity(palette.isDark ? 0.22 : 0.11),
-                    in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .background(palette.background, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private func verdict(_ answer: Bool) -> some View {
@@ -797,7 +838,7 @@ private struct WeekLessonCard: View {
             }
         }
         .modifier(WeekCardFrame())
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 

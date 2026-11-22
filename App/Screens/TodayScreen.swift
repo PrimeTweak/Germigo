@@ -5,7 +5,6 @@ struct TodayScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var flow: SymptomFlow?
-    @State private var pendingLog: LogRequest?
     @State private var pendingWanted: KidIllness?
     @State private var wanted: KidIllness?
     @State private var exposurePage = 0
@@ -37,7 +36,7 @@ struct TodayScreen: View {
                         }
                     }
                     .frame(minHeight: max(0, height - 12), alignment: .top)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, Spacing.page)
                     .padding(.bottom, 12)
                 }
                 .onAppear {
@@ -81,7 +80,7 @@ struct TodayScreen: View {
                 DayScreen(day: route.day)
             }
             .sheet(item: $flow, onDismiss: handOff) { flow in
-                SymptomFlowSheet(flow: flow, onLog: { pendingLog = $0 }, onAdded: { pendingWanted = $0 })
+                SymptomFlowSheet(flow: flow, onAdded: { pendingWanted = $0 })
             }
             .sheet(item: $wanted) { illness in
                 WantedSheet(illness: illness)
@@ -95,12 +94,9 @@ struct TodayScreen: View {
         pageHeight = height
     }
 
-    /// The log sheet, or a new kid's wanted poster, opens once the symptom pages have closed.
+    /// The reward of a log, or a new kid's wanted poster, shows once the symptom pages have closed.
     private func handOff() {
-        if let request = pendingLog {
-            pendingLog = nil
-            model.logRequest = request
-        }
+        model.showStagedReward()
         if let illness = pendingWanted {
             pendingWanted = nil
             wanted = illness
@@ -178,7 +174,7 @@ private struct StageActions: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 7)
-                        .background(palette.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .background(palette.ink.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                 }
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: 8) {
@@ -604,7 +600,7 @@ private struct WeekStrip: View {
                 .frame(height: 20)
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .history)
         }
     }
 
@@ -617,7 +613,7 @@ private struct WeekStrip: View {
             HStack(spacing: 8) {
                 Image(systemName: "lock.fill")
                     .symbolEffect(.wiggle, value: shownWeek)
-                Text(tr("Past weeks come with the Season Pass"))
+                PassOfferText(reason: .history)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
@@ -907,7 +903,7 @@ private struct SickKitSheet: View {
                         .foregroundStyle(palette.inkTertiary)
                         .padding(.horizontal, 4)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 24)
             }
             .background(palette.background.ignoresSafeArea())

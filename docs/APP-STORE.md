@@ -23,7 +23,7 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 | 3.1.2 Subscription disclosure | Name, period, full price most prominent, trial length and price after it, auto-renewal, Restore, Terms, Privacy | `PaywallView.swift` |
 | 3.1.2 Manage subscription | Settings opens the system subscription sheet | `SettingsScreen.swift` |
 | 4.6 Alternate icons | Changed only by the user, from Settings | `SettingsDetailScreens.swift` |
-| 5.1.1(i) Privacy policy | In the app (offline) and on the server at `/privacy` | `LegalScreen.swift`, `server/server.js` |
+| 5.1.1(i) Privacy policy | In the app (offline) and on the server at `/privacy`; the consumer health data policy at `/health-data`, linked from the home page as Washington's My Health My Data Act requires | `LegalScreen.swift`, `server/server.js` |
 | Purpose strings | Camera (photos for the sick history, scanning a daycare's code), and photo library (add only), in English and French. Picking photos uses the system picker, which needs no permission. | `App/*/InfoPlist.strings` |
 | 5.1.1(v) Accounts | No account or sign-in. Leaving a crew or a daycare, or closing a daycare, deletes the server data. Delete everything erases the device data and what this phone put on the server. | `CrewStore.leave`, `DaycareStore`, `AppModel.eraseEverything` |
 | 5.1.2 Data use | No ads, trackers or third-party SDKs | whole app |
@@ -34,9 +34,9 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 
 1. **Apple Developer Program.** Enrollment is required for TestFlight and the App Store.
 2. **Bundle identifier.** `ca.germigo.app` must be available to the account. If it is not, change it in `project.yml` (both targets), both `.entitlements` files, `Shared/AppGroup.swift`, `App/Services/AppConfig.swift` (refresh task and keychain service), `App/Info.plist` (`BGTaskSchedulerPermittedIdentifiers`) and `PassProduct` and `TipProduct` in `App/Services/PurchaseManager.swift`.
-3. **Crew server.** Deploy `server/` on a host with a persistent disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN`, `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `GermigoServerURL`. To ship without Crew, set `GermigoCrewEnabled` to `false`.
+3. **Crew server.** Deploy `server/` on a host with a persistent, encrypted disk. Set `NODE_ENV=production`, `DATA_DIR`, `ADMIN_TOKEN` (random, 32 characters or more: it is the only lock on the moderation page), `SUPPORT_EMAIL`, `PUBLISHER_NAME` and `TRUST_PROXY_HOPS` (see the README), then put its https address in `GermigoServerURL`. Run one instance with autoscaling off, and set the host's spending limit, preferably a hard limit that stops the service. Check `TRUST_PROXY_HOPS` on the live host: the limits that protect invite codes are counted per client address. To ship without Crew, set `GermigoCrewEnabled` to `false`. Before the server holds real data, complete `docs/PRIVACY-ASSESSMENT.md` with the host's region, and keep the host's and Postmark's data processing agreements with it.
 4. **Support address, publisher and share page.** Put a monitored address in `GermigoSupportEmail`, the publisher's name in `GermigoPublisherName`, and `<server>/get` in `GermigoShareURL` (the page the share cards' QR code opens). The release check fails while any of them holds its placeholder. Once the app is live, set `APP_STORE_URL` on the server so that page links to it.
-5. **Daycare notices.** On developer.apple.com, turn on Push Notifications for the `ca.germigo.app` identifier, create an APNs key (.p8) and set `APNS_KEY`, `APNS_KEY_ID` and `APNS_TEAM_ID` on the server. For notices by email, add a domain to Postmark (inbound and sender), then set `POSTMARK_TOKEN`, `MAIL_FROM`, `INBOUND_EMAIL_DOMAIN` and `INBOUND_EMAIL_TOKEN` (see the README). Pushes don't reach a sideloaded build: test them with TestFlight.
+5. **Daycare notices.** On developer.apple.com, turn on Push Notifications for the `ca.germigo.app` identifier, create an APNs key (.p8) and set `APNS_KEY`, `APNS_KEY_ID` and `APNS_TEAM_ID` on the server. For notices by email, add a domain to Postmark (inbound and sender), then set `POSTMARK_TOKEN`, `MAIL_FROM`, `INBOUND_EMAIL_DOMAIN` and `INBOUND_EMAIL_TOKEN` (see the README). In the Inbound stream's Settings, set the SpamAssassin threshold: Postmark counts every inbound message it processes toward the monthly volume, before the server's own limit. Pushes don't reach a sideloaded build: test them with TestFlight.
 6. **Online lessons.** Host the lesson file described in `docs/LESSONS.md` and put its https address in `GermigoLessonsURL`. Until then the app shows only its bundled lessons.
 7. **Subscriptions.** In App Store Connect create one subscription group with two products, turn on Family Sharing for both, then attach them to the first version:
    - `ca.germigo.app.pass.yearly`: 1 year, CA$24.99, with a 14-day free introductory offer
@@ -45,8 +45,10 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 9. **Offer codes.** Codes that give the Season Pass are created on the subscription's Offer Codes page. Settings opens Apple's redemption sheet with "Redeem a code".
 10. **App Store Small Business Program.** Enroll before the first sale to pay a 15% commission instead of 30%.
 11. **Secrets for the Release workflow.** `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store Connect API key with the App Manager role).
-12. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`).
+12. **App Store Connect record.** Name, subtitle, description, keywords, screenshots, support URL (`<server>/support`), privacy policy URL (`<server>/privacy`). End the description, in English and in French, with `Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`: guideline 3.1.2 requires the Terms of Use link in the metadata of an app with subscriptions, and a description that lacks it in one language is rejected.
 13. **Name check.** Search the App Store and trademark registers for "Germigo" in the target countries.
+14. **Review demo.** On the production server, create a crew with two or three members and a few shared germs, and a daycare with a group and a recent notice. Put their codes in the review notes below, and record a short video of a daycare notice arriving as a push. Keep them for every review.
+15. **First TestFlight build.** Before submitting, check on a phone: a daycare notice arrives as a push (the signed build must use the production push environment); one phone can join the daycare it created and receive its notice, as the review notes say; Today and the log sheet at the largest text size; and the app on an iPad, where Apple may test an iPhone app.
 
 ## 3. Answers for App Store Connect
 
@@ -67,15 +69,21 @@ If Crew is disabled, the answer is "Data Not Collected".
 
 **Age rating.** Medical or treatment information: infrequent. User-generated content: yes, with the controls listed in section 1. Messaging, chat and advertising: no. Unrestricted web access: no. Expect 13+.
 
-**Review notes.** Suggested text:
+**Review notes.** Replace the bracketed parts, then paste:
 
-> Germigo is a humor app for parents with general health information from public sources. It does not diagnose: the symptom pages only sort the app's catalog for the parent's own logbook, and the result says it is a guess.
-> No account is needed. To test Crew: subscribe in the sandbox, open the Crew tab, start a crew, then join it from a second device with the invite code.
-> Report and Block are in the menu next to each member and each feed item. Reports are reviewed within 24 hours on the server's moderation page.
-> Daycare notices are free: in Crew, tap I run a daycare, create one, then open Invite families for its code. On a second device, tap Join a daycare, enter the code and pick a group. Send a notice from Daycare mode: the second device gets a push. Report is in the notice's menu.
-> Leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases all local data.
-
-Add a link to a short video of the two-device flows (Crew, and a daycare notice arriving as a push): a reviewer with one device cannot see them.
+> Germigo is a humor app for parents who catch the germs their kids bring home from daycare. It offers general health information from public sources and does not diagnose: the symptom pages only sort the app's own catalog for the parent's logbook, the result is labeled as a guess, and "Trouble breathing" leads to help lines instead of a list.
+>
+> No account or login is needed. Everything works offline except Crew and daycare notices.
+>
+> Season Pass: tap any lock, or Settings > Season Pass, and subscribe with a sandbox account. "Restore purchases" is on the same screen. Tips are one-time purchases that unlock nothing.
+>
+> Crew (requires the Season Pass): open the Crew tab, choose "Join a crew" and enter the demo code [DEMO CREW CODE] to see a crew with members, a feed and reactions. "Start a crew" creates a new one. Report and Block are in the menu next to each member and each feed item; reports are reviewed within 24 hours.
+>
+> Daycare notices (free): in the Crew tab, tap "Join a daycare", enter [DEMO DAYCARE CODE] and pick a group to see its notices. To send one, tap "I run a daycare", create a daycare, open Invite families for its code, join it from the same phone with "Join a daycare", then send a notice from Daycare mode: it arrives as a push. A short video of both flows: [VIDEO LINK].
+>
+> Permissions: the camera is used only to take a photo for a family member's sick history or to scan a daycare's code. Photo library access is add-only, to save share cards. Notifications are optional: reminders are created on the device; only daycare notices are pushed.
+>
+> Data: leaving a crew deletes the member's data from the server. Settings > Data and privacy > Delete everything erases the journal on the phone and the crew and daycare data on the server.
 
 ## 4. Open risks
 
@@ -88,6 +96,18 @@ Add a link to a short video of the two-device flows (Crew, and a daycare notice 
 | Moderation duty | Guideline 1.2 expects timely responses. The moderation page at `<server>/admin`, which lists reported members and notices, must be checked daily once Crew is live. |
 | Crew alerts | The radar is refreshed by background fetch, which iOS schedules at its own pace. Only daycare notices are pushed. |
 | Daycare identity | Anyone can sign a daycare up; the terms require the daycare's authorization, but the server does not verify it. A false daycare is removed on report. |
+| Email sender | A notice by email is accepted on its From address, which someone who knows a daycare's private address can forge. Whether to require the SPF or DKIM result is to be decided from the headers of a real Postmark message. The director's address is not confirmed either: replies stop at 20 a day per daycare, and a confirmation step is to be decided. |
+| Large emails | An email heavier than 512 KB, for example with a photo attached, is refused without a reply. To check with a real Postmark message. |
+| Notice notes | The note of a notice sent from the app is free text, without links. The terms forbid naming a child, but nothing checks it, so the policy's promise that notices never name one rests on the daycare. The word filter of names is not applied: it would refuse everyday words such as "retard" in French or "bite" in English. |
+| Daycare list | A daycare's list stops at 600 families, and a director can neither remove a family nor renew the code: someone who has the code can follow the notices, or fill the list. A "new code" action is to be decided. |
+| Season Pass on the server | Crew is reserved to the Season Pass in the app only: the server does not check a purchase. Verifying the App Store transaction needs the developer account. |
+| Shared addresses | Limits are counted per address, and an IPv6 network can present many. Counting IPv6 by network is to be decided once the host is known. |
+| App lock | The journal and its photos open for whoever holds the unlocked phone. An optional Face ID lock is to be decided. |
+| Public repository | While the repository is public, anyone signed in to GitHub can download the workflow artifacts, and the sideload build carries a Season Pass switch. Making it private ends the free macOS build minutes: set a budget first at github.com/settings/billing, under Budgets and alerts, with "Stop usage when budget limit is reached". |
+| Copied text | The doctor's summary and a daycare's private address leave the clipboard after five minutes, but Universal Clipboard still carries them to the user's other devices in the meantime. |
 | Live Activity length | iOS ends a Live Activity after about 8 hours, so it starts only when the window closes within 8 hours and the app is opened. Local notifications and the widget cover the rest of the window. |
 | Siri phrases | App Shortcuts phrases are English only. |
-| Legal text | The privacy policy and terms were not reviewed by a lawyer. |
+| US age laws | Texas requires apps to request the age range Apple shares and to treat the answer as known; Utah and Louisiana follow later. The plan for a user under 18 in those states: the journal stays, and Crew, daycare notices and purchases are off. It uses Apple's Declared Age Range API and waits for the developer account, which its sandbox testing needs. |
+| Legal text | The privacy policy, the terms, the health data policy and `docs/PRIVACY-ASSESSMENT.md` were not reviewed by a lawyer. Open questions for that review: whether the journal kept only on the phone counts as collected health data in Washington, and whether other states' health data laws apply. |
+| Code ownership | The code, the characters and the sounds were made with Claude. Anthropic assigns its rights in them, but purely AI-generated material is not protected by copyright in the United States, and the repository is public. Making it private and filing the Germigo trademark are to be decided. |
+| Apple symbols on shared cards | Three share cards draw SF Symbols (`StoryCards.swift`), which Apple's license reserves to Apple platforms and forbids in logos. Replacing them with Germigo drawings is to be decided. |

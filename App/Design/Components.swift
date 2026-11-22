@@ -36,8 +36,8 @@ struct FaceTile<Face: View>: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 14)
             .padding(.bottom, 16)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         }
         .buttonStyle(PressableStyle())
     }
@@ -290,9 +290,9 @@ struct LockedHistoryRow: View {
                     Text(trCount(count, one: "%lld older entry", other: "%lld older entries"))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.ink)
-                    Text(tr("The whole history comes with the Season Pass."))
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
+                    PassOfferText(reason: .history)
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.accent)
                 }
                 .multilineTextAlignment(.leading)
                 Spacer(minLength: 8)
@@ -300,11 +300,67 @@ struct LockedHistoryRow: View {
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(palette.inkTertiary)
             }
-            .germigoCard(radius: 24, padding: 12)
+            .germigoCard(padding: 12)
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showPaywall) {
-            PaywallView()
+            PaywallView(reason: .history)
+        }
+    }
+}
+
+/// What a lock says: what the Season Pass opens there, then the offer. The same words everywhere.
+struct PassOfferText: View {
+    let reason: PassReason
+
+    var body: some View {
+        Text(reason.gain + " · " + PurchaseManager.shared.offerLabel)
+    }
+}
+
+/// The offer at the end of a locked row: a padlock and the free trial, or the name of the Pass.
+struct PassOfferTag: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "lock.fill")
+            Text(PurchaseManager.shared.shortOfferLabel)
+                .lineLimit(1)
+        }
+        .font(.caption.weight(.bold))
+        .foregroundStyle(palette.accent)
+        .padding(.horizontal, 9)
+        .frame(height: 26)
+        .background(palette.accent.opacity(0.12), in: Capsule())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tr("Needs the Season Pass") + ". " + PurchaseManager.shared.offerLabel)
+    }
+}
+
+/// A line that says what the Season Pass opens there and leads to the offer.
+struct PassOfferLink: View {
+    let reason: PassReason
+    @Environment(\.palette) private var palette
+    @State private var showPaywall = false
+
+    var body: some View {
+        Button {
+            showPaywall = true
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "lock.fill")
+                PassOfferText(reason: reason)
+                    .multilineTextAlignment(.leading)
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.accent)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableStyle())
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: reason)
         }
     }
 }

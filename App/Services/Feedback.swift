@@ -95,6 +95,31 @@ struct JournalBackup: Transferable {
     }
 }
 
+/// Text copied for another app. It leaves the clipboard after five minutes.
+enum Clipboard {
+    static func copy(_ text: String) {
+        UIPasteboard.general.setItems([[UTType.utf8PlainText.identifier: text]],
+                                      options: [.expirationDate: Date().addingTimeInterval(300)])
+    }
+}
+
+/// When to ask for an App Store rating: after a win, once the journal holds two germs, at most every four months.
+enum ReviewAsk {
+    private static let key = "review.lastAskedAt"
+    private static let gap: TimeInterval = 120 * 86_400
+
+    @MainActor
+    static func isDue(now: Date = Date()) -> Bool {
+        guard AppModel.shared.data.logs.count >= 2 else { return false }
+        let last = UserDefaults.standard.double(forKey: key)
+        return last == 0 || now.timeIntervalSince1970 - last > gap
+    }
+
+    static func markAsked(now: Date = Date()) {
+        UserDefaults.standard.set(now.timeIntervalSince1970, forKey: key)
+    }
+}
+
 /// The doctor summary as a letter-size PDF: the summary lines, then each illness's photos, three to a row.
 struct DoctorPacket: Transferable {
     struct Section {

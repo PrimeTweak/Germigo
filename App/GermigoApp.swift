@@ -1,3 +1,4 @@
+import StoreKit
 import SwiftUI
 
 @main
@@ -121,7 +122,7 @@ enum AppTab: Hashable {
 /// The tabs, the sick-mode accessory, Settings, and the log and reward presentations.
 struct MainTabs: View {
     @Environment(AppModel.self) private var model
-    @State private var stagedReward: RewardResult?
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         @Bindable var model = model
@@ -151,18 +152,18 @@ struct MainTabs: View {
         .sheet(isPresented: $model.showSettings) {
             SettingsScreen()
         }
-        .sheet(item: $model.logRequest, onDismiss: presentStagedReward) { request in
+        .sheet(item: $model.logRequest, onDismiss: { model.showStagedReward() }) { request in
             LogSheet(request: request) { result in
-                stagedReward = result
+                model.stagedReward = result
             }
         }
         .fullScreenCover(item: $model.pendingReward) { reward in
             RewardView(reward: reward)
         }
-        .fullScreenCover(item: $model.pendingVictory) { victory in
+        .fullScreenCover(item: $model.pendingVictory, onDismiss: askForReview) { victory in
             VictoryView(victory: victory)
         }
-        .fullScreenCover(item: $model.pendingKidVictory) { victory in
+        .fullScreenCover(item: $model.pendingKidVictory, onDismiss: askForReview) { victory in
             KidVictoryView(victory: victory)
         }
         .sheet(item: $model.pendingMilestone) { event in
@@ -197,16 +198,13 @@ struct MainTabs: View {
         }
     }
 
-    /// Lets Today settle before the reward covers the screen.
-    private func presentStagedReward() {
-        guard let reward = stagedReward else { return }
-        stagedReward = nil
-        SoundPlayer.shared.play(.flap)
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            model.pendingReward = reward
-        }
+    /// Once a win has closed: the moment to ask for an App Store rating, when one is due.
+    private func askForReview() {
+        guard ReviewAsk.isDue() else { return }
+        ReviewAsk.markAsked()
+        requestReview()
     }
+
 }
 
 /// A short confirmation that slides in at the top of the screen.

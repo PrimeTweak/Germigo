@@ -19,6 +19,7 @@ enum IntentRelay {
 struct CaughtItIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "It got me"
     static let isDiscoverable = false
+    static let authenticationPolicy = IntentAuthenticationPolicy.requiresAuthentication
 
     @Parameter(title: "Exposure")
     var exposureID: String
@@ -38,6 +39,7 @@ struct CaughtItIntent: LiveActivityIntent {
 struct StillFineIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Still fine"
     static let isDiscoverable = false
+    static let authenticationPolicy = IntentAuthenticationPolicy.requiresAuthentication
 
     @Parameter(title: "Exposure")
     var exposureID: String

@@ -21,7 +21,7 @@ struct VictoryShareCard: View {
                         .font(.system(size: 26, weight: .black))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                         .rotationEffect(.degrees(8))
                 }
                 .padding(.top, 18)
@@ -43,7 +43,7 @@ struct VictoryShareCard: View {
                         .monospacedDigit()
                 }
                 .padding(16)
-                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 .padding(.horizontal, 28)
                 .padding(.top, 22)
                 Spacer(minLength: 0)
@@ -101,7 +101,7 @@ struct MonthRecapCard: View {
                     }
                     .foregroundStyle(Color(hex: Swatch.chalk))
                     .padding(12)
-                    .background(ink, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .background(ink, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     .padding(.top, 12)
                 }
                 Spacer(minLength: 0)
@@ -127,7 +127,7 @@ struct MonthRecapCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(Color.white.opacity(0.55), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .background(Color.white.opacity(0.55), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
     }
 }
 
@@ -150,7 +150,7 @@ struct KidKnockout: View {
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
-                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(Color(hex: Swatch.coral), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
                         .rotationEffect(.degrees(8))
                         .offset(x: 8, y: -8)
                 }
@@ -177,7 +177,7 @@ struct KidScore: View {
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 12)
-        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .background(Color.white.opacity(0.08), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(tr("%1$@ %2$lld, %3$@ %4$lld", name, wins, germ, 0))
     }

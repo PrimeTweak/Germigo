@@ -22,7 +22,11 @@ const MAX_MEMBERS = 40;
 const MAX_BODY_BYTES = 4096;
 const MAX_EMAIL_BYTES = 512 * 1024;
 const MAX_GROUPS = 12;
+const MAX_SUBSCRIPTIONS = 600;
 const NOTE_LIMIT = 280;
+// A note is a sentence, so a link is a scheme, a www, a .com or an email address in it.
+const NOTE_LINK_PATTERN = /https?:\/\/|www\.|\.com\b|\S@\S/i;
+const CREW_CODE_LENGTH = 8;
 const DAYCARE_CODE_LENGTH = 8;
 const NOTICE_WINDOW = 60 * 24 * 3600 * 1000;
 const PUSH_TOKEN_PATTERN = /^[0-9a-f]{64,200}$/;
@@ -31,8 +35,13 @@ const MINUTE = 60 * 1000;
 const DAY = 24 * 3600 * 1000;
 const MAX_LIMIT_KEYS = 50000;
 const WRITE_DELAY = 250;
+const HEADERS_TIMEOUT = 10 * 1000;
+const REQUEST_TIMEOUT = 30 * 1000;
+const MAX_CONNECTIONS = 1000;
+const PUBLIC_PAGES = new Set(['GET /', 'GET /get', 'GET /privacy', 'GET /terms', 'GET /health-data', 'GET /support']);
 const LIMITS = {
   all: [120, MINUTE],
+  pages: [120, MINUTE],
   join: [10, MINUTE],
   crewsPerDay: [5, DAY],
   events: [12, MINUTE],
@@ -43,6 +52,8 @@ const LIMITS = {
   admin: [20, MINUTE],
   daycaresPerDay: [3, DAY],
   noticesPerDay: [10, DAY],
+  repliesPerDay: [20, DAY],
+  subscriptionsPerDay: [40, DAY],
   daycareUpdates: [20, MINUTE],
   inbound: [60, MINUTE],
 };
@@ -117,6 +128,15 @@ function sameSecret(given, expected) {
   return crypto.timingSafeEqual(left, right);
 }
 
+// The password of an HTTP Basic header, or '' without one. The user name is not checked.
+function basicPassword(req) {
+  const header = req.headers.authorization || '';
+  if (!header.startsWith('Basic ')) return '';
+  const pair = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  const colon = pair.indexOf(':');
+  return colon < 0 ? '' : pair.slice(colon + 1);
+}
+
 function createApp(options = {}) {
   const dataDir = options.dataDir || process.env.DATA_DIR || path.join(__dirname, 'data');
   const dataFile = path.join(dataDir, 'germigo.json');
@@ -126,6 +146,7 @@ function createApp(options = {}) {
   const appStoreURL = options.appStoreURL || process.env.APP_STORE_URL || '';
   const trustedHops = Number(options.trustProxyHops ?? process.env.TRUST_PROXY_HOPS ?? 0) || 0;
   const writeDelay = options.writeDelay ?? WRITE_DELAY;
+  const maxSubscriptions = options.maxSubscriptions ?? MAX_SUBSCRIPTIONS;
   const extraBlocked = (options.blockedWords || process.env.BLOCKED_WORDS || '')
     .split(',').map((word) => normalize(word.trim())).filter(Boolean);
   const clock = options.now || (() => Date.now());
@@ -153,7 +174,7 @@ function createApp(options = {}) {
     writeTimer = null;
     fs.mkdirSync(dataDir, { recursive: true });
     const temp = dataFile + '.tmp';
-    fs.writeFileSync(temp, JSON.stringify(db));
+    fs.writeFileSync(temp, JSON.stringify(db), { mode: 0o600 });
     fs.renameSync(temp, dataFile);
   }
 
@@ -194,6 +215,17 @@ function createApp(options = {}) {
     entry.count += 1;
   }
 
+  // The same counter, as a yes or a no.
+  function allowed(who, bucket) {
+    try {
+      limit(who, bucket);
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError) return false;
+      throw error;
+    }
+  }
+
   function dropMembers(ids) {
     db.members = db.members.filter((member) => !ids.has(member.id));
     db.events = db.events.filter((event) => !ids.has(event.memberID));
@@ -226,7 +258,7 @@ function createApp(options = {}) {
   function newCode() {
     for (;;) {
       let code = '';
-      for (const byte of crypto.randomBytes(6)) code += CODE_ALPHABET[byte % CODE_ALPHABET.length];
+      for (const byte of crypto.randomBytes(CREW_CODE_LENGTH)) code += CODE_ALPHABET[byte % CODE_ALPHABET.length];
       if (!db.crews.some((crew) => crew.code === code)) return code;
     }
   }
@@ -283,6 +315,7 @@ function createApp(options = {}) {
     if (raw === undefined || raw === null) return '';
     const note = String(raw).replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, '').replace(/\n{3,}/g, '\n\n').trim();
     if (note.length > NOTE_LIMIT) throw new ApiError(400, 'note_too_long');
+    if (NOTE_LINK_PATTERN.test(note)) throw new ApiError(400, 'note_rejected');
     return note;
   }
 
@@ -418,7 +451,7 @@ function createApp(options = {}) {
   }
 
   // A notice by email: the private address picks the daycare, only its director's address may send,
-  // and the subject gives the illness and the group. The sender always gets an answer, never a guess.
+  // and the subject gives the illness and the group. The text of the message is never read or kept.
   async function receiveEmail(body) {
     const recipients = [body.OriginalRecipient, body.To, ...(Array.isArray(body.ToFull) ? body.ToFull.map((to) => to.Email) : [])]
       .flatMap((value) => String(value || '').split(','))
@@ -436,10 +469,8 @@ function createApp(options = {}) {
     } else if (parsed.error === 'group') {
       answer = reply('group', lang, daycare.groups.map((group) => group.name).join(', '));
     } else {
-      const text = String(body.StrippedTextReply || body.TextBody || '');
-      const note = text.replace(/\r/g, '').trim().slice(0, NOTE_LIMIT);
       try {
-        const notice = await publish(daycare, parsed.germID, parsed.groupID, cleanNote(note), 'email');
+        const notice = await publish(daycare, parsed.germID, parsed.groupID, '', 'email');
         const illness = illnesses[notice.germID][lang];
         const group = notice.groupID && daycare.groups.find((candidate) => candidate.id === notice.groupID);
         answer = reply('sent', lang, notice.recipients, group ? `${illness} · ${group.name}` : illness);
@@ -448,7 +479,8 @@ function createApp(options = {}) {
         answer = reply('limit', lang);
       }
     }
-    await mailer.send(daycare.email, answer.subject, answer.body);
+    // Replies are capped per daycare, so a forged sender cannot use the server to flood an address.
+    if (allowed(daycare.id, 'repliesPerDay')) await mailer.send(daycare.email, answer.subject, answer.body);
     return { status: parsed.error ? 'unclear' : 'sent' };
   }
 
@@ -557,7 +589,7 @@ function createApp(options = {}) {
 
   function legalPage(kind, lang) {
     const web = legal.web;
-    const title = (kind === 'privacy' ? web.privacyTitle : web.termsTitle)[lang];
+    const title = { privacy: web.privacyTitle, terms: web.termsTitle, health: web.healthTitle }[kind][lang];
     const sections = legal[kind]
       .map((section) => `<h2>${escapeHtml(section.title[lang])}</h2><p>${escapeHtml(section.body[lang])}</p>`)
       .join('');
@@ -584,7 +616,8 @@ function createApp(options = {}) {
     const body = `<h1>${escapeHtml(web.supportTitle[lang])}</h1><p>${escapeHtml(web.supportIntro[lang])}</p>`
       + `<p>${escapeHtml(web.supportDelete[lang])}</p>`;
     const links = `<p><a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a> · `
-      + `<a href="/terms${suffix}">${escapeHtml(web.termsTitle[lang])}</a></p>`;
+      + `<a href="/terms${suffix}">${escapeHtml(web.termsTitle[lang])}</a> · `
+      + `<a href="/health-data${suffix}">${escapeHtml(web.healthTitle[lang])}</a></p>`;
     return page(`Germigo · ${web.supportTitle[lang]}`, lang, body + contactBlock(lang) + links);
   }
 
@@ -600,7 +633,8 @@ function createApp(options = {}) {
       + `<h1>${escapeHtml(web.landingTagline[lang])}</h1><p class="lede">${escapeHtml(web.landingIntro[lang])}</p>`
       + `<ul>${points}</ul>${store}`
       + `<p class="links"><a href="/support${suffix}">${escapeHtml(web.supportTitle[lang])}</a> · `
-      + `<a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a></p>`;
+      + `<a href="/privacy${suffix}">${escapeHtml(web.privacyTitle[lang])}</a> · `
+      + `<a href="/health-data${suffix}">${escapeHtml(web.healthTitle[lang])}</a></p>`;
     const style = '.mark{font-size:44px;font-weight:900;letter-spacing:-2px;margin:8px 0 18px}'
       + '.lede{font-size:19px}ul{padding:0;list-style:none}li{background:#fff;border-radius:16px;padding:14px 16px;margin:8px 0}'
       + '.store{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:99px;background:#1E1A26;color:#F6F1E7;'
@@ -728,8 +762,11 @@ document.getElementById('form').addEventListener('submit', (event) => {
     const ip = clientAddress(req);
 
     if (key === 'GET /health') return json(res, 200, { ok: true });
+    // The public pages have their own counter, so page loads cannot use up the app's.
+    if (PUBLIC_PAGES.has(key)) limit(ip, 'pages');
     if (key === 'GET /privacy') return html(res, legalPage('privacy', language(req, url)));
     if (key === 'GET /terms') return html(res, legalPage('terms', language(req, url)));
+    if (key === 'GET /health-data') return html(res, legalPage('health', language(req, url)));
     if (key === 'GET /support') return html(res, supportPage(language(req, url)));
     if (key === 'GET /' || key === 'GET /get') return html(res, landingPage(language(req, url)));
     if (req.method === 'GET' && url.pathname.startsWith('/d/')) {
@@ -756,7 +793,10 @@ document.getElementById('form').addEventListener('submit', (event) => {
         const open = db.reports.filter((report) => !report.resolved).map((report) => {
           const member = db.members.find((candidate) => candidate.id === report.memberID);
           const crew = db.crews.find((candidate) => candidate.id === report.crewID);
-          return { ...report, memberName: member ? member.name : null, crewName: crew ? crew.name : null };
+          return {
+            memberID: report.memberID, reason: report.reason, at: report.at,
+            memberName: member ? member.name : null, crewName: crew ? crew.name : null,
+          };
         });
         const notices = db.notices.filter((notice) => notice.reports.length > 0 && !notice.reviewed).map((notice) => {
           const daycare = db.daycares.find((candidate) => candidate.id === notice.daycareID);
@@ -859,6 +899,10 @@ document.getElementById('form').addEventListener('submit', (event) => {
       const body = await readBody(req);
       const daycare = daycareByCode(body.code);
       if (!daycare) throw new ApiError(404, 'invalid_code');
+      if (db.subscriptions.filter((candidate) => candidate.daycareID === daycare.id).length >= maxSubscriptions) {
+        throw new ApiError(409, 'daycare_full');
+      }
+      limit(ip, 'subscriptionsPerDay');
       const token = crypto.randomBytes(32).toString('hex');
       const subscription = {
         id: crypto.randomUUID(), daycareID: daycare.id, groupIDs: groupIDsFor(body.groupIDs, daycare),
@@ -872,7 +916,8 @@ document.getElementById('form').addEventListener('submit', (event) => {
 
     if (key === 'POST /v1/inbound-email') {
       limit(ip, 'inbound');
-      if (!inboundToken || !sameSecret(url.searchParams.get('token') || '', inboundToken)) {
+      if (!inboundToken || !sameSecret(basicPassword(req), inboundToken)) {
+        res.setHeader('WWW-Authenticate', 'Basic realm="Germigo"');
         throw new ApiError(401, 'unauthorized');
       }
       return json(res, 200, await receiveEmail(await readBody(req, MAX_EMAIL_BYTES)));
@@ -1064,6 +1109,10 @@ document.getElementById('form').addEventListener('submit', (event) => {
       return json(res, 500, { error: 'server_error' });
     });
   });
+  // Slow clients are dropped early and connections are capped, so they cannot hold the memory.
+  server.headersTimeout = HEADERS_TIMEOUT;
+  server.requestTimeout = REQUEST_TIMEOUT;
+  server.maxConnections = MAX_CONNECTIONS;
   server.flush = flush;
   server.on('close', () => {
     if (writeTimer) flush();

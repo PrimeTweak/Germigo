@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21",
+  "updated": "2026-11-22",
   "web": {
     "privacyTitle": {
       "en": "Privacy Policy",
@@ -74,6 +74,10 @@
     "daycareSteps": {
       "en": "Get the free app, open Crew and tap Join a daycare, then enter this code. Free for families.",
       "fr": "Télécharge l'app gratuite, ouvre Groupe et touche Rejoindre une garderie, puis entre ce code. Gratuit pour les familles."
+    },
+    "healthTitle": {
+      "en": "Consumer Health Data Privacy Policy",
+      "fr": "Politique sur les données de santé des consommateurs"
     }
   },
   "privacy": [
@@ -93,8 +97,8 @@
         "fr": "Qui est responsable"
       },
       "body": {
-        "en": "Germigo is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them through Contact Support in the app's settings or on the App Store page.",
-        "fr": "Germigo est publié par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire avec Contacter le soutien, dans les réglages de l'app, ou depuis la page de l'App Store."
+        "en": "Germigo is published by an independent developer based in Québec, Canada, who is also the person in charge of the protection of personal information. You can reach them at the contact address at the end of this policy, or through Contact support in the app's settings.",
+        "fr": "Germigo est publié par un développeur indépendant établi au Québec, au Canada, qui est aussi la personne responsable de la protection des renseignements personnels. Tu peux lui écrire à l'adresse de contact à la fin de cette politique, ou avec Contacter le soutien, dans les réglages de l'app."
       }
     },
     {
@@ -103,8 +107,8 @@
         "fr": "Ce qui reste sur ton téléphone"
       },
       "body": {
-        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Germigo never uploads it. The developer cannot see it. The camera is used only when you take a photo.",
-        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Germigo ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo."
+        "en": "The germs you log, their dates, severity and symptoms, the photos you add, your kids' first names, your partner's first name, your badges, points and settings. This is stored in protected files on your device. It is included in your device backup if you use one. A backup you make from Settings, photos included, is a file you save where you choose; Germigo never uploads it. The developer cannot see it. The camera is used only when you take a photo or scan a daycare's code.",
+        "fr": "Les microbes que tu notes, leurs dates, leur intensité et leurs symptômes, les photos que tu ajoutes, les prénoms de tes enfants, le prénom de ton partenaire, tes badges, tes points et tes réglages. Le tout est enregistré dans des fichiers protégés sur ton appareil. Il fait partie de la sauvegarde de ton appareil si tu en utilises une. Une copie de sauvegarde faite depuis les réglages, photos comprises, est un fichier que tu enregistres où tu veux; Germigo ne la téléverse jamais. Le développeur ne peut pas le voir. L'appareil photo sert seulement quand tu prends une photo ou scannes le code d'une garderie."
       }
     },
     {
@@ -123,8 +127,8 @@
         "fr": "Avis de garderie"
       },
       "body": {
-        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups, the illness notices it sends with their optional note and, if it sends notices by email, the address it writes from. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has. A notice sent by email passes through an email delivery service, which receives the message and hands it to the server. Only messages from the daycare's own address are used, and the server keeps only the illness and the group read from the subject, and the first 280 characters of the text as the note.",
-        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes, les avis de maladie qu'elle envoie avec leur note facultative et, si elle envoie ses avis par courriel, l'adresse d'où elle écrit. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe. Un avis envoyé par courriel passe par un service d'envoi de courriels, qui reçoit le message et le remet au serveur. Seuls les messages venant de l'adresse de la garderie sont utilisés, et le serveur garde seulement la maladie et le groupe lus dans l'objet, et les 280 premiers caractères du texte comme note."
+        "en": "Daycare notices are optional and free. A daycare that signs up stores its name, the names of its groups, the illness notices it sends with their optional note and, if it sends notices by email, the address it writes from. A parent who joins a daycare stores the groups chosen, the app's language, an anonymous session key and the address Apple gives the phone for notifications. Which of your kids is in which group stays on your phone, and the daycare never sees who joined: it sees only how many families each group has. A notice sent by email passes through an email delivery service located outside Québec, which receives the message and hands it to the server. Only messages from the daycare's own address are used, and the server keeps only the illness and the group read from the subject: the text of the message is not kept.",
+        "fr": "Les avis de garderie sont facultatifs et gratuits. Une garderie qui s'inscrit conserve son nom, le nom de ses groupes, les avis de maladie qu'elle envoie avec leur note facultative et, si elle envoie ses avis par courriel, l'adresse d'où elle écrit. Un parent qui s'abonne à une garderie conserve les groupes choisis, la langue de l'app, une clé de session anonyme et l'adresse qu'Apple donne au téléphone pour les notifications. Lequel de tes enfants est dans quel groupe reste sur ton téléphone, et la garderie ne voit jamais qui s'est abonné : elle voit seulement combien de familles compte chaque groupe. Un avis envoyé par courriel passe par un service d'envoi de courriels situé hors du Québec, qui reçoit le message et le remet au serveur. Seuls les messages venant de l'adresse de la garderie sont utilisés, et le serveur garde seulement la maladie et le groupe lus dans l'objet : le texte du message n'est pas conservé."
       }
     },
     {
@@ -163,8 +167,8 @@
         "fr": "Notifications"
       },
       "body": {
-        "en": "Check-ins, new lessons and crew alerts are created on your phone. Daycare notices are the only exception: they arrive through Apple's push notification service, which needs the address Apple gives your phone. That address is sent only when you join a daycare, is used only for its notices, and is deleted when you leave it.",
-        "fr": "Les rappels, les nouvelles leçons et les alertes de groupe sont créés sur ton téléphone. Les avis de garderie sont la seule exception : ils arrivent par le service de notifications poussées d'Apple, qui a besoin de l'adresse qu'Apple donne à ton téléphone. Cette adresse est envoyée seulement quand tu t'abonnes à une garderie, sert seulement à ses avis et est supprimée quand tu la quittes."
+        "en": "Check-ins, new lessons and crew alerts are created on your phone. Daycare notices are the only exception: they arrive through Apple's push notification service, run outside Québec, which needs the address Apple gives your phone. That address is sent only when you join a daycare, is used only for its notices, and is deleted when you leave it.",
+        "fr": "Les rappels, les nouvelles leçons et les alertes de groupe sont créés sur ton téléphone. Les avis de garderie sont la seule exception : ils arrivent par le service de notifications poussées d'Apple, exploité hors du Québec, qui a besoin de l'adresse qu'Apple donne à ton téléphone. Cette adresse est envoyée seulement quand tu t'abonnes à une garderie, sert seulement à ses avis et est supprimée quand tu la quittes."
       }
     },
     {
@@ -183,8 +187,8 @@
         "fr": "Conservation et suppression"
       },
       "body": {
-        "en": "Your journal stays on your phone until you delete it. Delete everything, in Settings under Data and privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Leaving a daycare deletes your subscription at once, and closing a daycare deletes its groups, its notices and its families' subscriptions. Shared germs and notices older than 13 months, daycares and subscriptions not opened for 13 months, members who have not opened their crew for 13 months and empty crews are removed automatically.",
-        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Quitter une garderie supprime ton abonnement sur-le-champ, et fermer une garderie supprime ses groupes, ses avis et les abonnements de ses familles. Les microbes partagés et les avis de plus de 13 mois, les garderies et les abonnements non ouverts depuis 13 mois, les membres qui n'ont pas ouvert leur groupe depuis 13 mois et les groupes vides sont retirés automatiquement."
+        "en": "Your journal stays on your phone until you delete it. Delete everything, in Settings under Data and privacy, erases it at once. Leaving a crew deletes your name, your reactions and your shared germs from the server right away. Leaving a daycare deletes your subscription at once, and closing a daycare deletes its groups, its notices and its families' subscriptions. Shared germs and notices older than 400 days, daycares and subscriptions not opened for 400 days, members who have not opened their crew for 400 days and empty crews are removed automatically.",
+        "fr": "Ton journal reste sur ton téléphone jusqu'à ce que tu le supprimes. Tout supprimer, dans Réglages sous Données et confidentialité, l'efface sur-le-champ. Quitter un groupe supprime immédiatement du serveur ton nom, tes réactions et tes microbes partagés. Quitter une garderie supprime ton abonnement sur-le-champ, et fermer une garderie supprime ses groupes, ses avis et les abonnements de ses familles. Les microbes partagés et les avis de plus de 400 jours, les garderies et les abonnements non ouverts depuis 400 jours, les membres qui n'ont pas ouvert leur groupe depuis 400 jours et les groupes vides sont retirés automatiquement."
       }
     },
     {
@@ -193,8 +197,8 @@
         "fr": "Tes droits"
       },
       "body": {
-        "en": "You can see, export and back up your journal from Settings, restore it from a backup, correct any entry in the Logbook, and delete everything at any time. For any question or request about your personal information, or to file a complaint, write to the contact address.",
-        "fr": "Tu peux consulter, exporter et sauvegarder ton journal depuis les réglages, le restaurer à partir d'une copie, corriger chaque entrée dans le journal de bord et tout supprimer en tout temps. Pour toute question ou demande sur tes renseignements personnels, ou pour formuler une plainte, écris à l'adresse de contact."
+        "en": "You can see, export and back up your journal from Settings, restore it from a backup, correct any entry in the Logbook, and delete everything at any time. For any question or request about your personal information, or to file a complaint, write to the contact address. You can also file a complaint with the Commission d'accès à l'information du Québec.",
+        "fr": "Tu peux consulter, exporter et sauvegarder ton journal depuis les réglages, le restaurer à partir d'une copie, corriger chaque entrée dans le journal de bord et tout supprimer en tout temps. Pour toute question ou demande sur tes renseignements personnels, ou pour formuler une plainte, écris à l'adresse de contact. Tu peux aussi porter plainte à la Commission d'accès à l'information du Québec."
       }
     },
     {
@@ -287,6 +291,58 @@
       "body": {
         "en": "Your use of the app is also covered by Apple's standard license agreement, linked below. These terms are governed by the laws of Québec, Canada.",
         "fr": "Ton utilisation de l'app est aussi régie par le contrat de licence standard d'Apple, dont le lien figure plus bas. Ces conditions sont régies par les lois du Québec, au Canada."
+      }
+    }
+  ],
+  "health": [
+    {
+      "title": {
+        "en": "Health data collected",
+        "fr": "Données de santé recueillies"
+      },
+      "body": {
+        "en": "Germigo collects one kind of consumer health data: the germs you choose to share with a crew, with the time you shared each one and, for those shared under your crew name, when you got over it. It is used only to count the germ on your crew's radar and, if you turn that on, to show it in your crew's feed. It is never used for ads, profiling or anything else. Your journal, its symptoms, severity and notes, your photos and your kids' names stay on your phone and are not collected.",
+        "fr": "Germigo recueille un seul type de données de santé : les microbes que tu choisis de partager avec un groupe, avec le moment de chaque partage et, pour ceux partagés sous ton nom de groupe, le moment où tu t'en es remis. Ils servent seulement à compter le microbe sur le radar de ton groupe et, si tu l'actives, à l'afficher dans le fil de ton groupe. Ils ne servent jamais à la publicité, au profilage ni à rien d'autre. Ton journal, ses symptômes, son intensité et ses notes, tes photos et les prénoms de tes enfants restent sur ton téléphone et ne sont pas recueillis."
+      }
+    },
+    {
+      "title": {
+        "en": "Where it comes from",
+        "fr": "D'où elles viennent"
+      },
+      "body": {
+        "en": "Only from you, in the app, when you turn on \"Tell\" your crew for a germ you log. It is off until you turn it on.",
+        "fr": "Seulement de toi, dans l'app, quand tu actives « Avertir » ton groupe pour un microbe que tu notes. C'est éteint tant que tu ne l'actives pas."
+      }
+    },
+    {
+      "title": {
+        "en": "Health data shared",
+        "fr": "Données de santé partagées"
+      },
+      "body": {
+        "en": "The same germs: counted on your crew's radar without your name, and shown in your crew's feed under your crew name only if you turn that on.",
+        "fr": "Les mêmes microbes : comptés sur le radar de ton groupe sans ton nom, et affichés dans le fil de ton groupe sous ton nom de groupe seulement si tu l'actives."
+      }
+    },
+    {
+      "title": {
+        "en": "Who it is shared with",
+        "fr": "Avec qui elles sont partagées"
+      },
+      "body": {
+        "en": "The members of your crew. A hosting provider runs the server for the developer and only stores the data on its behalf. Germigo has no affiliates and never sells health data.",
+        "fr": "Les membres de ton groupe. Un hébergeur fait fonctionner le serveur pour le développeur et ne fait que conserver les données pour lui. Germigo n'a pas de sociétés affiliées et ne vend jamais de données de santé."
+      }
+    },
+    {
+      "title": {
+        "en": "Your rights",
+        "fr": "Tes droits"
+      },
+      "body": {
+        "en": "You can confirm whether Germigo collects or shares your health data and see it, with the list of everyone it was shared with: the Crew tab shows it, and you can also write to the contact address. You can withdraw your consent at any time by turning off \"Tell\" your crew or by leaving the crew. Leaving the crew, or Delete everything in Settings, deletes your shared germs from the server at once. Requests sent to the contact address are answered within 45 days. If a request is refused, you can appeal by replying to that answer; the appeal is answered in writing within 45 days.",
+        "fr": "Tu peux confirmer si Germigo recueille ou partage tes données de santé et les consulter, avec la liste de tous ceux avec qui elles ont été partagées : l'onglet Groupe les montre, et tu peux aussi écrire à l'adresse de contact. Tu peux retirer ton consentement en tout temps en désactivant « Avertir » ton groupe ou en quittant le groupe. Quitter le groupe, ou Tout supprimer dans les réglages, supprime sur-le-champ tes microbes partagés du serveur. Les demandes envoyées à l'adresse de contact reçoivent une réponse dans les 45 jours. Si une demande est refusée, tu peux faire appel en répondant à cette réponse; l'appel reçoit une réponse écrite dans les 45 jours."
       }
     }
   ]

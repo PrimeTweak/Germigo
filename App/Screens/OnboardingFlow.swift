@@ -74,7 +74,7 @@ struct OnboardingFlow: View {
                 .frame(minHeight: 44)
             }
             .foregroundStyle(palette.ink)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Spacing.page)
             content()
         }
         .transition(.opacity)
@@ -91,7 +91,6 @@ struct OnboardingFlow: View {
                 VStack(spacing: 0) {
                     Text(tr("Daycare germs are"))
                     Text(tr("coming home."))
-                        .foregroundStyle(palette.accent)
                 }
                 .font(.system(.largeTitle).weight(.bold))
                 .foregroundStyle(palette.ink)
@@ -104,13 +103,13 @@ struct OnboardingFlow: View {
                     .font(.caption)
                     .foregroundStyle(palette.inkTertiary)
             }
-            .padding(.horizontal, 28)
+            .padding(.horizontal, Spacing.page)
             Spacer(minLength: 20)
             Button(tr("Start my season")) {
                 step = .kid
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
-            .padding(.horizontal, 24)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 16)
         }
     }
@@ -157,6 +156,7 @@ struct OnboardingFlow: View {
                         PillLabel(text: tr("Patient zero"), foreground: palette.background, background: palette.ink)
                     }
                     TextField(tr("First name"), text: $kidName)
+                        .characterLimit(AppModel.nameLimit, text: $kidName)
                         .textInputAutocapitalization(.words)
                         .submitLabel(.done)
                         .frame(minHeight: 54)
@@ -169,14 +169,14 @@ struct OnboardingFlow: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 12)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, Spacing.page)
             }
             .scrollDismissesKeyboard(.interactively)
             Button(tr("Next")) {
                 step = .practice
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
-            .padding(.horizontal, 24)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 16)
         }
     }
@@ -186,37 +186,48 @@ struct OnboardingFlow: View {
     private var practicePage: some View {
         VStack(spacing: 0) {
             VStack(spacing: 10) {
-                Text(tr("Sick? Tap this."))
+                Text(practiced ? tr("That's a card.") : tr("Sick? Tap this."))
                     .font(.system(.largeTitle).weight(.bold))
                     .foregroundStyle(palette.ink)
-                Text(tr("When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged."))
+                Text(practiced
+                     ? tr("Every germ you catch becomes one, with points. This one is a sample: nothing was logged.")
+                     : tr("When a germ gets you, tap the tile and pick it. Try it now. Nothing gets logged."))
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
             }
             .multilineTextAlignment(.center)
-            .padding(.horizontal, 28)
+            .padding(.horizontal, Spacing.page)
             .padding(.top, 8)
             Spacer()
             VStack(spacing: 16) {
-                FaceTile(tr("I'm sick")) {
-                    Haptics.thud()
-                    practiced = true
-                } face: {
-                    BuddyView(look: Looks.host, sick: true, lively: true)
+                if practiced, let cold = model.catalog.germ(GermCatalog.commonColdID) {
+                    LivelyCharacter(mood: cold.restMood) {
+                        GermCardView(germ: cold, width: 168, isNew: true)
+                    }
+                    .motionTransition(.scale(scale: 0.3).combined(with: .opacity))
+                } else {
+                    FaceTile(tr("I'm sick")) {
+                        Haptics.success()
+                        SoundPlayer.shared.play(.reveal)
+                        withAnimation(Tempo.pop) {
+                            practiced = true
+                        }
+                    } face: {
+                        BuddyView(look: Looks.host, sick: true, lively: true)
+                    }
+                    .frame(maxWidth: 190)
+                    Label(tr("Tap the tile to try."), systemImage: "hand.tap")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.inkSecondary)
                 }
-                .frame(maxWidth: 190)
-                Label(practiced ? tr("That's it. Nothing was logged.") : tr("Tap the tile to try."),
-                      systemImage: practiced ? "checkmark.circle.fill" : "hand.tap")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(practiced ? palette.accent : palette.inkSecondary)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, Spacing.page)
             Spacer()
             Button(tr("Continue")) {
                 showPaywall = true
             }
             .buttonStyle(PillButtonStyle(kind: .ink))
-            .padding(.horizontal, 24)
+            .padding(.horizontal, Spacing.page)
             .padding(.bottom, 16)
         }
     }
@@ -288,6 +299,8 @@ private struct SplashView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(tr("Germigo. Daycare germs, collected."))
+        .accessibilityAddTraits(.isButton)
+        .accessibilityHint(tr("Tap to continue"))
     }
 
     private func play() async {
