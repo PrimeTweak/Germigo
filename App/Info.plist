@@ -65,11 +65,11 @@
 		<string>fetch</string>
 	</array>
 	<key>GermilyServerURL</key>
-	<string>https://REPLACE-ME.invalid</string>
+	<string>https://germily-production.up.railway.app</string>
 	<key>GermilyShareURL</key>
-	<string>https://REPLACE-ME.invalid/get</string>
+	<string>https://germily-production.up.railway.app/get</string>
 	<key>GermilyLessonsURL</key>
-	<string>https://REPLACE-ME.invalid/lessons.json</string>
+	<string>https://germily-production.up.railway.app/lessons.json</string>
 	<key>GermilySupportEmail</key>
 	<string>REPLACE-ME@example.invalid</string>
 	<key>GermilyPublisherName</key>

@@ -736,6 +736,15 @@ async function load() {
     const data = await api('GET', '/admin/reports');
     const count = data.reports.length + data.notices.length;
     status.textContent = count ? count + ' open report(s).' : 'No open reports.';
+    const check = node('section');
+    check.append(node('h2', 'Connection seen by the server'));
+    const seen = data.connection;
+    for (const [label, value] of [['Socket', seen.socket], ['X-Forwarded-For', seen.forwardedFor], ['X-Real-IP', seen.realIP],
+      ['Forwarded', seen.forwarded], ['X-Envoy-External-Address', seen.envoy], ['TRUST_PROXY_HOPS', String(seen.hops)],
+      ['Address kept for limits', seen.kept], ['Network counted', seen.network]]) {
+      check.append(node('p', label + ': ' + (value === null ? '(none)' : value)));
+    }
+    list.append(check);
     for (const report of data.reports) {
       const card = node('section');
       card.append(node('h2', (report.memberName || 'Removed member') + ' · ' + (report.crewName || 'Removed crew')));
@@ -855,7 +864,13 @@ document.getElementById('form').addEventListener('submit', (event) => {
             illness: illnesses[notice.germID].en, reports: notice.reports.length,
           };
         });
-        return json(res, 200, { reports: open, notices });
+        const header = (name) => (req.headers[name] === undefined ? null : String(req.headers[name]));
+        const connection = {
+          socket: req.socket.remoteAddress || null, forwardedFor: header('x-forwarded-for'), realIP: header('x-real-ip'),
+          forwarded: header('forwarded'), envoy: header('x-envoy-external-address'), hops: trustedHops,
+          kept: clientAddress(req), network: ip,
+        };
+        return json(res, 200, { reports: open, notices, connection });
       }
       const notice = url.pathname.match(/^\/admin\/notices\/([0-9a-f-]{36})\/(remove|clear)$/);
       if (req.method === 'POST' && notice) {
