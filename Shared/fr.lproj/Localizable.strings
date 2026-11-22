@@ -688,6 +688,7 @@
 "Read the Terms of Use" = "Lire les conditions d'utilisation";
 "Ready" = "Prêt";
 "Reason" = "Motif";
+"Recap." = "Le bilan.";
 "Record: %lld" = "Record : %lld";
 "Recovered" = "Guéri";
 "Recovery +%lld" = "Guérison +%lld";
@@ -732,10 +733,10 @@
 "Search an illness" = "Chercher une maladie";
 "Season" = "Saison";
 "Season %lld" = "Saison %lld";
-"Season %lld, wrapped" = "Bilan de la saison %lld";
+"Season %lld recap" = "Bilan de la saison %lld";
 "Season Pass" = "Passe de saison";
+"Season recap" = "Bilan de saison";
 "Season story" = "Récit de la saison";
-"Season wrapped" = "Bilan de saison";
 "Seasons" = "Saisons";
 "Section" = "Section";
 "See my score" = "Voir mon score";
@@ -997,7 +998,6 @@
 "Workdays lost" = "Jours de travail perdus";
 "Worn" = "Porté";
 "Worn on Trophies and on your season recap." = "Affiché dans Trophées et dans ton bilan de saison.";
-"Wrapped." = "Le bilan.";
 "Write to this private address from %@:" = "Écris à cette adresse privée depuis %@ :";
 "Yearly" = "Annuel";
 "Yearly plan" = "Forfait annuel";
@@ -1021,7 +1021,6 @@
 "You're no longer in this crew." = "Tu ne fais plus partie de ce groupe.";
 "You're still clear" = "Rien pour l'instant";
 "Your %@ recap" = "Ton récap du mois : %@";
-"Your %@, wrapped" = "Ton mois en bref : %@";
 "Your address" = "Ton adresse";
 "Your best run yet" = "Ta meilleure série à vie";
 "Your call" = "C'est toi qui décides";
@@ -1047,8 +1046,8 @@
 "Your season in numbers" = "Ta saison en chiffres";
 "Your season in story cards, ready to share." = "Ta saison en cartes à partager.";
 "Your Season Pass is active on this phone." = "Ta Passe de saison est active sur ce téléphone.";
+"Your season recap" = "Le bilan de ta saison";
 "Your season so far" = "Ta saison jusqu'ici";
-"Your season, wrapped" = "Le bilan de ta saison";
 "Your soup needs an approval. It goes through by itself once it's approved." = "Ta soupe doit être approuvée. Elle passe toute seule une fois l'approbation donnée.";
 "Your whole household" = "Toute ta maisonnée";
 "Your window for %@ opens now. Still fine?" = "Ta fenêtre pour %@ s'ouvre maintenant. Ça va encore ?";

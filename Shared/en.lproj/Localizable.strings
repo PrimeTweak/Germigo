@@ -688,6 +688,7 @@
 "Read the Terms of Use" = "Read the Terms of Use";
 "Ready" = "Ready";
 "Reason" = "Reason";
+"Recap." = "Recap.";
 "Record: %lld" = "Record: %lld";
 "Recovered" = "Recovered";
 "Recovery +%lld" = "Recovery +%lld";
@@ -732,10 +733,10 @@
 "Search an illness" = "Search an illness";
 "Season" = "Season";
 "Season %lld" = "Season %lld";
-"Season %lld, wrapped" = "Season %lld, wrapped";
+"Season %lld recap" = "Season %lld recap";
 "Season Pass" = "Season Pass";
+"Season recap" = "Season recap";
 "Season story" = "Season story";
-"Season wrapped" = "Season wrapped";
 "Seasons" = "Seasons";
 "Section" = "Section";
 "See my score" = "See my score";
@@ -997,7 +998,6 @@
 "Workdays lost" = "Workdays lost";
 "Worn" = "Worn";
 "Worn on Trophies and on your season recap." = "Worn on Trophies and on your season recap.";
-"Wrapped." = "Wrapped.";
 "Write to this private address from %@:" = "Write to this private address from %@:";
 "Yearly" = "Yearly";
 "Yearly plan" = "Yearly plan";
@@ -1021,7 +1021,6 @@
 "You're no longer in this crew." = "You're no longer in this crew.";
 "You're still clear" = "You're still clear";
 "Your %@ recap" = "Your %@ recap";
-"Your %@, wrapped" = "Your %@, wrapped";
 "Your address" = "Your address";
 "Your best run yet" = "Your best run yet";
 "Your call" = "Your call";
@@ -1047,8 +1046,8 @@
 "Your season in numbers" = "Your season in numbers";
 "Your season in story cards, ready to share." = "Your season in story cards, ready to share.";
 "Your Season Pass is active on this phone." = "Your Season Pass is active on this phone.";
+"Your season recap" = "Your season recap";
 "Your season so far" = "Your season so far";
-"Your season, wrapped" = "Your season, wrapped";
 "Your soup needs an approval. It goes through by itself once it's approved." = "Your soup needs an approval. It goes through by itself once it's approved.";
 "Your whole household" = "Your whole household";
 "Your window for %@ opens now. Still fine?" = "Your window for %@ opens now. Still fine?";

@@ -64,7 +64,7 @@ struct SeasonScreen: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
-                .accessibilityLabel(tr("Season wrapped"))
+                .accessibilityLabel(tr("Season recap"))
             }
         }
         .fullScreenCover(isPresented: $showWrapped) {
@@ -114,7 +114,7 @@ struct SeasonScreen: View {
                 HStack(spacing: 13) {
                     IconTile(symbol: "sparkles", size: 44)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(revealed ? tr("Season %lld, wrapped", season.number) : tr("Your season so far"))
+                        Text(revealed ? tr("Season %lld recap", season.number) : tr("Your season so far"))
                             .font(.headline)
                             .foregroundStyle(palette.ink)
                         Text(tr("Your season in story cards, ready to share."))

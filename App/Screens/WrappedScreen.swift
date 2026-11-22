@@ -56,7 +56,7 @@ struct WrappedScreen: View {
         .preferredColorScheme(.dark)
         .environment(\.palette, Palette.make(theme: .nightShift, scheme: .dark))
         .sheet(item: $sharing) { item in
-            SharePreviewSheet(title: tr("Season wrapped")) {
+            SharePreviewSheet(title: tr("Season recap")) {
                 card(item, wrap: wrap, stats: stats)
             }
         }

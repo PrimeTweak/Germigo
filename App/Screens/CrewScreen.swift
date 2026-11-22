@@ -652,6 +652,8 @@ private struct FeedRow: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// How many times each sticker was just sent, to replay its flight.
     @State private var flights: [String: Int] = [:]
+    /// The stamp's lettering, following the text size set in iOS up to a cap.
+    @ScaledMetric(relativeTo: .caption2) private var stampSize: CGFloat = 11
 
     private struct Flight {
         var rise: CGFloat = 0
@@ -713,7 +715,7 @@ private struct FeedRow: View {
             .overlay(alignment: .topTrailing) {
                 if event.isWin {
                     Text(verbatim: "K.O.")
-                        .font(.system(size: 11, weight: .black))
+                        .font(.system(size: min(stampSize, 17), weight: .black))
                         .foregroundStyle(Color.white)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 2)

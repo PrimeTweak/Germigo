@@ -288,7 +288,7 @@ struct WrapCard: View {
         switch page {
         case .intro:
             kicker(tr("Season %lld", wrap.season.number))
-            Text(tr("Wrapped."))
+            Text(tr("Recap."))
                 .font(.system(size: 64, weight: .black))
                 .kerning(-2)
             Text(tr("Your daycare year, in germs."))

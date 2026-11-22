@@ -146,7 +146,7 @@ enum NotificationManager {
     static func scheduleWrapped(at date: Date, settings: AppSettings) {
         center.removePendingNotificationRequests(withIdentifiers: [wrappedID])
         guard settings.checkInsOn else { return }
-        addMorning(id: wrappedID, on: date, title: tr("Your season, wrapped"),
+        addMorning(id: wrappedID, on: date, title: tr("Your season recap"),
                    body: tr("The numbers are in. Brace yourself."))
     }
 
@@ -154,7 +154,7 @@ enum NotificationManager {
     static func scheduleMonthRecap(month: String, on day: Date, settings: AppSettings) {
         cancelMonthRecap()
         guard settings.checkInsOn else { return }
-        addMorning(id: monthID, on: day, title: tr("Your %@, wrapped", month), body: tr("Your month recap is ready in Season."))
+        addMorning(id: monthID, on: day, title: tr("Your %@ recap", month), body: tr("Your month recap is ready in Season."))
     }
 
     static func cancelMonthRecap() {

@@ -14,6 +14,8 @@ struct RewardView: View {
     @State private var levelFraction = 0.0
     @State private var confettiStart: Date?
     @State private var showShare = false
+    /// The points figure, following the text size set in iOS up to a cap.
+    @ScaledMetric(relativeTo: .largeTitle) private var pointsSize: CGFloat = 56
 
     private var germ: Germ { reward.germ }
     /// The worst severity gets a softer welcome: no confetti, a word of care.
@@ -102,7 +104,7 @@ struct RewardView: View {
     private var points: some View {
         VStack(spacing: 6) {
             Text(verbatim: "+\(shownPoints)")
-                .font(.system(size: 56, weight: .bold))
+                .font(.system(size: min(pointsSize, 84), weight: .bold))
                 .foregroundStyle(Color(hex: Swatch.irisSoft))
                 .contentTransition(.numericText())
                 .monospacedDigit()

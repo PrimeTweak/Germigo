@@ -10,6 +10,8 @@ struct VictoryView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shown = false
     @State private var showShare = false
+    /// The points figure, following the text size set in iOS up to a cap.
+    @ScaledMetric(relativeTo: .largeTitle) private var pointsSize: CGFloat = 56
 
     private var germ: Germ { victory.germ }
     private var days: Int { victory.log.dayCount() }
@@ -47,7 +49,7 @@ struct VictoryView: View {
                     .padding(.top, 6)
                 Spacer(minLength: 8)
                 Text(verbatim: "+\(victory.points)")
-                    .font(.system(size: 56, weight: .bold))
+                    .font(.system(size: min(pointsSize, 84), weight: .bold))
                     .foregroundStyle(Color(hex: Swatch.irisSoft))
                     .monospacedDigit()
                 Text(tr("Recovery points"))

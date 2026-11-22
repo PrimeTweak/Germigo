@@ -74,7 +74,7 @@ struct MonthRecapCard: View {
                     .font(.system(size: 14, weight: .heavy))
                     .kerning(2)
                     .padding(.top, 50)
-                Text(tr("Your %@, wrapped", recap.monthName))
+                Text(tr("Your %@ recap", recap.monthName))
                     .font(.system(size: 44, weight: .black))
                     .kerning(-1.5)
                     .minimumScaleFactor(0.6)
