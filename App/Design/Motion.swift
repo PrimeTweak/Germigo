@@ -228,6 +228,8 @@ extension View {
 struct ProgressRing: View {
     let fraction: Double
     var lineWidth: CGFloat = 7
+    /// The filled part's color; the theme's accent when nil.
+    var tint: Color?
     @State private var shown = false
     @Environment(\.palette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -238,7 +240,7 @@ struct ProgressRing: View {
                 .stroke(palette.ink.opacity(0.12), lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: shown || reduceMotion ? min(1, max(0, fraction)) : 0)
-                .stroke(palette.accent, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(tint ?? palette.accent, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
         }
         .onAppear {

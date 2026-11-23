@@ -7,6 +7,7 @@ enum Swatch {
     static let ink: UInt32 = 0x15182E
     static let mist: UInt32 = 0xF4F3F9
     static let mistDeep: UInt32 = 0xE8E7F1
+    static let silver: UInt32 = 0xC9C8D8
     static let navy: UInt32 = 0x0E1022
     static let navySurface: UInt32 = 0x1A1D36
     static let navyRaised: UInt32 = 0x262A4A
@@ -80,6 +81,7 @@ enum Swatch {
     static let coralWash: UInt32 = 0xFFF3EF
     static let coralMist: UInt32 = 0xFFE4DC
     static let peach: UInt32 = 0xFFC2A8
+    static let bronze: UInt32 = 0xE9A47F
 
     // Yellows and oranges
     static let hazard: UInt32 = 0xFFC93C

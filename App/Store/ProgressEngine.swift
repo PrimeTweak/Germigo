@@ -12,13 +12,14 @@ enum SkillBranch: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
+    /// One line about what the branch's titles took, shown when a title is opened.
+    var quip: String {
         switch self {
-        case .airways: return tr("Airways")
-        case .gut: return tr("Gut")
-        case .skin: return tr("Skin")
-        case .night: return tr("Night")
-        case .dodge: return tr("Dodge")
+        case .airways: return tr("Your sleeves have seen things.")
+        case .gut: return tr("Somebody had to hold the bucket.")
+        case .skin: return tr("Itchy, scratchy, earned.")
+        case .night: return tr("Logged while the rest of the house slept.")
+        case .dodge: return tr("The germ came home. You stayed standing.")
         }
     }
 
@@ -186,25 +187,26 @@ enum Milestones {
 
 // MARK: - Next goal
 
-/// The closest thing to unlock, shown on the Trophies player card.
+/// The closest title or badge to unlock, shown on the Trophies player card.
 struct Goal: Hashable {
     let title: String
+    let detail: String
+    let symbol: String
+    let tint: UInt32
     let progress: Int
     let target: Int
 
     var fraction: Double { target == 0 ? 0 : min(1, Double(progress) / Double(target)) }
 }
 
+/// The run without a germ belongs to Today, so the next goal is a title or a badge. Ties go to the first one listed.
 enum GoalEngine {
     static func next(data: AppData, catalog: GermCatalog, now: Date) -> Goal? {
         var candidates: [Goal] = []
 
-        if let start = StreakMath.currentStart(data: data) {
-            let current = StreakMath.days(from: start, to: now)
-            if let target = Milestones.next(after: current) {
-                candidates.append(Goal(title: trCount(target, one: "%lld day without a germ", other: "%lld days without a germ"),
-                                       progress: current, target: target))
-            }
+        if data.badges[BadgeCatalog.labRat] == nil, let badge = BadgeCatalog.badge(BadgeCatalog.labRat) {
+            candidates.append(Goal(title: badge.title, detail: badge.detail, symbol: badge.symbol, tint: badge.tint,
+                                   progress: 0, target: 1))
         }
 
         let tally = SkillTree.counts(data: data, catalog: catalog)
@@ -212,17 +214,22 @@ enum GoalEngine {
             let count = tally[branch] ?? 0
             let rank = SkillTree.rank(of: branch, count: count)
             guard rank < branch.targets.count else { continue }
-            candidates.append(Goal(title: branch.titles[rank], progress: count, target: branch.targets[rank]))
+            candidates.append(Goal(title: branch.titles[rank], detail: branch.unit, symbol: branch.symbol, tint: branch.tint,
+                                   progress: count, target: branch.targets[rank]))
         }
 
         let counts = BadgeProgress.counts(data: data, catalog: catalog, now: now)
         for id in ["collector", "half_album", "full_album", BadgeCatalog.dodger, BadgeCatalog.ironParent] where data.badges[id] == nil {
             guard let badge = BadgeCatalog.badge(id), let count = counts[id], count.target > 0 else { continue }
-            candidates.append(Goal(title: badge.title, progress: count.progress, target: count.target))
+            candidates.append(Goal(title: badge.title, detail: badge.detail, symbol: badge.symbol, tint: badge.tint,
+                                   progress: count.progress, target: count.target))
         }
 
-        let open = candidates.filter { $0.progress < $0.target }
-        return open.max { $0.fraction < $1.fraction } ?? open.first
+        var best: Goal?
+        for goal in candidates where goal.progress < goal.target && goal.fraction > (best?.fraction ?? -1) {
+            best = goal
+        }
+        return best
     }
 }
 

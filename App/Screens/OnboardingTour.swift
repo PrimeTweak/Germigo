@@ -268,10 +268,10 @@ struct TourPageView: View {
         let badges = [BadgeCatalog.ironParent, BadgeCatalog.nightShift, "collector", BadgeCatalog.labRat, BadgeCatalog.dodger]
             .compactMap { BadgeCatalog.badge($0) }
         return VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: tr("Germs caught"), trailing: tr("%1$lld of %2$lld", 2, model.catalog.germs.count))
+            SectionHeader(title: tr("Microbe cards"), trailing: tr("%1$lld of %2$lld caught", 2, model.catalog.germs.count))
             HStack(spacing: 8) {
                 ForEach(Array(shelf.enumerated()), id: \.offset) { item in
-                    ShelfTile(germ: item.element.0, count: item.element.1, phase: Double(item.offset) * 0.8)
+                    MicrobeCard(germ: item.element.0, count: item.element.1)
                 }
             }
             .padding(.top, 10)

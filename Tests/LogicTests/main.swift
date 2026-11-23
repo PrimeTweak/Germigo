@@ -248,7 +248,13 @@ do {
     check(Milestones.pending(data: makeData(logs: [makeLog("rhino", from: day(1), to: nil)]), now: day(30)) == nil,
           "no milestone while sick")
 
-    check(GoalEngine.next(data: makeData(), catalog: catalog, now: day(3))?.target == 7, "a new parent aims for a week first")
+    check(GoalEngine.next(data: makeData(), catalog: catalog, now: day(3))?.title == BadgeCatalog.badge(BadgeCatalog.labRat)?.title,
+          "a new parent aims for the first quiz badge")
+    var quizzed = makeData(logs: [makeLog("rhino", from: day(1), to: day(2))])
+    quizzed.badges[BadgeCatalog.labRat] = day(1)
+    let nextGoal = GoalEngine.next(data: quizzed, catalog: catalog, now: day(3))
+    check(nextGoal != nil && nextGoal?.title != BadgeCatalog.badge(BadgeCatalog.labRat)?.title && (nextGoal?.target ?? 0) < 7,
+          "the next goal is a title or a badge, never the run without a germ")
 }
 
 // MARK: - Couple duel and season wrapped
@@ -405,6 +411,10 @@ do {
     let weeks = StatsEngine.sickWeekGerms(data: makeData(logs: [makeLog("rhino", from: day(8), to: day(10))]),
                                           season: season, now: day(20))
     check(weeks == [nil, "rhino", nil], "a germ marks the week it was going on")
+    var lateStart = makeData(logs: [makeLog("rhino", from: day(8), to: day(10))])
+    lateStart.installedAt = day(7)
+    check(StatsEngine.sickWeekGerms(data: lateStart, season: season, now: day(20)) == ["rhino", nil],
+          "the weeks start when the app was installed")
     let twice = makeData(logs: [makeLog("rhino", from: day(2), to: day(4)), makeLog("noro", from: day(9), to: day(10)),
                                 makeLog("rhino", from: day(15), to: day(16))])
     check(StatsEngine.nemesis(data: twice, season: season) == Nemesis(germID: "rhino", count: 2), "the germ caught twice is the nemesis")

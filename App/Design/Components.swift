@@ -411,47 +411,116 @@ struct PodiumPlace: Identifiable {
     var rank: Int?
 }
 
-/// The first three places on steps with the winner in the middle, then the others in rows.
+/// The first three ranks on gold, silver and bronze steps with the winner in the middle, then the others in rows.
+/// Tied places share one step.
 struct Podium: View {
     let places: [PodiumPlace]
     @Environment(\.palette) private var palette
 
-    private static let heights: [CGFloat] = [78, 52, 34]
+    private static let heights: [CGFloat] = [92, 66, 48]
+    private static let colors: [(top: UInt32, bottom: UInt32)] = [(Swatch.goldFoil, Swatch.amber), (Swatch.mist, Swatch.silver),
+                                                                   (Swatch.peach, Swatch.bronze)]
+
+    private struct Ranked: Identifiable {
+        let place: PodiumPlace
+        let rank: Int
+        var id: String { place.id }
+    }
+
+    private var ranked: [Ranked] {
+        places.enumerated().map { Ranked(place: $0.element, rank: $0.element.rank ?? $0.offset + 1) }
+    }
+
+    /// The places of ranks one to three, grouped by rank, in the steps' order: second, first, third.
+    private var steps: [[Ranked]] {
+        var groups: [[Ranked]] = []
+        for item in ranked where item.rank <= 3 {
+            if let last = groups.last?.first, last.rank == item.rank {
+                groups[groups.count - 1].append(item)
+            } else {
+                groups.append([item])
+            }
+        }
+        return [1, 0, 2].filter { $0 < groups.count }.map { groups[$0] }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach([1, 0, 2].filter { $0 < places.count }, id: \.self) { index in
-                    step(places[index], rank: places[index].rank ?? index + 1)
-                        .cascadeIn(index)
+            StepRow(spacing: 8) {
+                ForEach(steps, id: \.first?.id) { group in
+                    step(group)
+                        .layoutValue(key: StepWeight.self, value: CGFloat(group.count))
                 }
             }
-            ForEach(Array(places.enumerated()).dropFirst(3), id: \.element.id) { item in
-                row(item.element, rank: item.element.rank ?? item.offset + 1)
+            .padding(.top, 14)
+            let rest = ranked.filter { $0.rank > 3 }
+            if !rest.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(rest) { item in
+                        row(item.place, rank: item.rank)
+                    }
+                }
+                .padding(.top, 12)
             }
         }
     }
 
-    private func step(_ place: PodiumPlace, rank: Int) -> some View {
-        VStack(spacing: 0) {
-            BuddyView(look: place.look, sick: place.sick, size: rank == 1 ? 62 : 52, leads: rank == 1)
-                .padding(.bottom, 4)
+    private func step(_ group: [Ranked]) -> some View {
+        let rank = group.first?.rank ?? 1
+        let color = Self.colors[rank - 1]
+        return VStack(spacing: 0) {
+            HStack(alignment: .bottom, spacing: 4) {
+                ForEach(group) { item in
+                    BuddyView(look: item.place.look, sick: item.place.sick, size: rank == 1 ? 60 : 52, leads: rank == 1)
+                        .overlay(alignment: .top) {
+                            if rank == 1 {
+                                Image(systemName: "crown.fill")
+                                    .font(.system(size: 17, weight: .bold))
+                                    .foregroundStyle(Color(hex: Swatch.gold))
+                                    .rotationEffect(.degrees(-8))
+                                    .offset(y: -15)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.bottom, 4)
             Text(verbatim: String(rank))
-                .font(.title3.weight(.bold))
-                .foregroundStyle(palette.ink)
+                .font(.title2.weight(.heavy))
+                .foregroundStyle(Color(hex: Swatch.ink).opacity(0.75))
                 .padding(.top, 6)
                 .frame(maxWidth: .infinity, minHeight: Self.heights[rank - 1], alignment: .top)
-                .background(palette.accent.opacity(rank == 1 ? 0.42 : 0.22),
-                            in: UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 8,
-                                                       bottomTrailingRadius: 8, topTrailingRadius: 16))
+                .background(LinearGradient(colors: [Color(hex: color.top), Color(hex: color.bottom)], startPoint: .top, endPoint: .bottom),
+                            in: UnevenRoundedRectangle(topLeadingRadius: 14, bottomLeadingRadius: 6,
+                                                       bottomTrailingRadius: 6, topTrailingRadius: 14))
+            HStack(alignment: .top, spacing: 4) {
+                ForEach(group) { item in
+                    label(item.place)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.top, 8)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(spoken(group, rank: rank))
+    }
+
+    private func spoken(_ group: [Ranked], rank: Int) -> String {
+        let people = group.map { item -> String in
+            var parts: [String] = [item.place.name]
+            if let title = item.place.title { parts.append(title) }
+            parts.append(item.place.detail)
+            return parts.joined(separator: ", ")
+        }
+        return tr("Place %lld", rank) + ": " + people.joined(separator: "; ")
+    }
+
+    /// The name, the title as a dark tag, and the detail. An empty tag keeps the steps level.
+    private func label(_ place: PodiumPlace) -> some View {
+        VStack(spacing: 2) {
             Text(place.name)
                 .font(.callout.weight(.bold))
                 .foregroundStyle(palette.ink)
-                .lineLimit(1)
-                .padding(.top, 8)
-            Text(place.title ?? " ")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(palette.accent)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             Text(place.detail)
@@ -459,9 +528,17 @@ struct Podium: View {
                 .foregroundStyle(palette.inkSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+            Text(place.title ?? " ")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(Color(hex: Swatch.goldFoil))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .padding(.horizontal, 8)
+                .frame(height: 20)
+                .background(Color(hex: Swatch.ink), in: Capsule())
+                .opacity(place.title == nil ? 0 : 1)
+                .padding(.top, 4)
         }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
     }
 
     private func row(_ place: PodiumPlace, rank: Int) -> some View {
@@ -492,8 +569,41 @@ struct Podium: View {
                 .fill(palette.ink.opacity(0.08))
                 .frame(height: 1)
         }
-        .padding(.top, rank == 4 ? 12 : 0)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// How many places a podium step holds, which sets its share of the width.
+private struct StepWeight: LayoutValueKey {
+    static let defaultValue: CGFloat = 1
+}
+
+/// The podium's steps side by side, each as wide as its share, standing on the same ground.
+private struct StepRow: Layout {
+    var spacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let width = proposal.width ?? 340
+        let height = zip(subviews, widths(for: width, subviews: subviews))
+            .map { $0.sizeThatFits(ProposedViewSize(width: $1, height: nil)).height }
+            .max() ?? 0
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var x = bounds.minX
+        for (subview, width) in zip(subviews, widths(for: bounds.width, subviews: subviews)) {
+            let size = subview.sizeThatFits(ProposedViewSize(width: width, height: nil))
+            subview.place(at: CGPoint(x: x, y: bounds.maxY - size.height), anchor: .topLeading,
+                          proposal: ProposedViewSize(width: width, height: size.height))
+            x += width + spacing
+        }
+    }
+
+    private func widths(for width: CGFloat, subviews: Subviews) -> [CGFloat] {
+        let total = subviews.reduce(CGFloat(0)) { $0 + $1[StepWeight.self] }
+        let free = max(0, width - spacing * CGFloat(max(0, subviews.count - 1)))
+        return subviews.map { free * $0[StepWeight.self] / max(total, 1) }
     }
 }
 

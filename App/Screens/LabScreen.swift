@@ -436,39 +436,12 @@ private struct GuideTile: View {
     }
 
     private var card: some View {
-        let shape = RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
-        return Color.clear
-            .aspectRatio(1, contentMode: .fit)
-            .background {
-                if booked {
-                    MugshotWall()
-                } else {
-                    germ.tileTint(palette)
-                }
-            }
+        MicrobeCard(germ: germ, count: booked ? count : 0)
             .overlay {
-                GeometryReader { proxy in
-                    let side = proxy.size.width
-                    GermImage(germ: germ, size: side * (booked ? 0.6 : 0.74))
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .offset(y: booked ? -side * 0.09 : 0)
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if booked {
-                    CatchPlate(count: count)
-                        .padding(.bottom, 7)
-                }
-            }
-            .overlay {
-                Color.white
+                RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
+                    .fill(Color.white)
                     .opacity(flash ? 0.95 : 0)
                     .allowsHitTesting(false)
-            }
-            .clipShape(shape)
-            .overlay {
-                shape.strokeBorder(booked ? palette.ink.opacity(0.12) : germ.deepTint.opacity(palette.isDark ? 0.3 : 0.22),
-                                   lineWidth: 1)
             }
     }
 
@@ -511,6 +484,62 @@ private struct GuideTile: View {
     private func markRevealed() {
         guard !revealed else { return }
         revealedList = revealedList.isEmpty ? germ.id : revealedList + "," + germ.id
+    }
+}
+
+/// A microbe card's picture: the germ in color on its tint, or booked as a mugshot once caught.
+struct MicrobeCard: View {
+    let germ: Germ
+    let count: Int
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        if count > 0 {
+            Mugshot(germ: germ, count: count)
+        } else {
+            GeometryReader { proxy in
+                let side = proxy.size.width
+                let shape = RoundedRectangle(cornerRadius: side * 0.27, style: .continuous)
+                shape
+                    .fill(germ.tileTint(palette))
+                    .overlay {
+                        GermImage(germ: germ, size: side * 0.74)
+                    }
+                    .overlay {
+                        shape.strokeBorder(germ.deepTint.opacity(palette.isDark ? 0.3 : 0.22), lineWidth: 1)
+                    }
+            }
+            .aspectRatio(1, contentMode: .fit)
+        }
+    }
+}
+
+/// A caught germ booked like a mugshot: the height wall, the germ raised a little, its catches tallied on the plate.
+struct Mugshot: View {
+    let germ: Germ
+    let count: Int
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        GeometryReader { proxy in
+            let side = proxy.size.width
+            let shape = RoundedRectangle(cornerRadius: side * 0.27, style: .continuous)
+            ZStack {
+                MugshotWall()
+                GermImage(germ: germ, size: side * 0.6)
+                    .offset(y: -side * 0.09)
+                CatchPlate(count: count)
+                    .scaleEffect(min(1, side / 88), anchor: .bottom)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, side * 0.08)
+            }
+            .clipShape(shape)
+            .overlay {
+                shape.strokeBorder(palette.ink.opacity(0.12), lineWidth: 1)
+            }
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .accessibilityHidden(true)
     }
 }
 

@@ -67,7 +67,7 @@ A germ's rest follows its shelf in the Guide, so the motion says something about
 Germs also have four moods for particular places:
 
 - **Resting**: breath only. The mascot asleep, on a calm Today and in the Guide once the week is done.
-- **Stalking**: tilts ±3° over 2.4 s. A germ watching the household: the suspects, the trophies, the quiz, the germ after you on Today.
+- **Stalking**: tilts ±3° over 2.4 s. A germ watching the household: the suspects, the quiz, the germ after you on Today.
 - **Sick**: shakes and jumps every 3.4 s. The germ on Today while someone is sick, the only germ that jumps.
 - **Dizzy**: circles. A defeated germ on Victory.
 
