@@ -17,6 +17,18 @@ enum Looks {
     static func isOpen(_ look: Int, hasPass: Bool) -> Bool {
         hasPass || free.contains(abs(look) % count)
     }
+
+    /// The looks offered when someone is added: all but the hidden ones, or every look again when none of
+    /// those can be picked, so there is always one.
+    static func shown(hidden: Set<Int>, hasPass: Bool) -> [Int] {
+        let shown = order.filter { !hidden.contains($0) }
+        return shown.contains { isOpen($0, hasPass: hasPass) } ? shown : order
+    }
+
+    /// Whether a look can be hidden and still leave a shown look that can be picked.
+    static func canHide(_ look: Int, hidden: Set<Int>, hasPass: Bool) -> Bool {
+        order.contains { $0 != look && !hidden.contains($0) && isOpen($0, hasPass: hasPass) }
+    }
 }
 
 struct Kid: Codable, Identifiable, Hashable {
@@ -184,9 +196,12 @@ struct AppSettings: Codable, Hashable {
     var wornTitle: String?
     /// Face ID, Touch ID or the passcode before the app opens.
     var appLockOn = false
+    /// Characters left out of the choices when someone is added.
+    var hiddenLooks: Set<Int> = []
 
     enum CodingKeys: String, CodingKey {
         case appearance, theme, soundsOn, checkInsOn, lessonAlertsOn, crewAlertsOn, sideloadPass, wornTitle, appLockOn
+        case hiddenLooks
     }
 }
 
@@ -211,11 +226,9 @@ struct QuizProgress: Codable, Hashable {
     var missed: [String] = []
     var rightTotal = 0
     var mythsRight: [String] = []
-    /// Every question answered right at least once.
-    var rightIDs: [String] = []
 
     enum CodingKeys: String, CodingKey {
-        case round, doneDays, asked, missed, rightTotal, mythsRight, rightIDs
+        case round, doneDays, asked, missed, rightTotal, mythsRight
     }
 }
 
@@ -332,6 +345,7 @@ extension AppSettings {
         sideloadPass = container.value(.sideloadPass, default: false)
         wornTitle = try? container.decodeIfPresent(String.self, forKey: .wornTitle)
         appLockOn = container.value(.appLockOn, default: false)
+        hiddenLooks = container.value(.hiddenLooks, default: Set<Int>())
     }
 }
 
@@ -344,7 +358,6 @@ extension QuizProgress {
         missed = container.value(.missed, default: [String]())
         rightTotal = container.value(.rightTotal, default: 0)
         mythsRight = container.value(.mythsRight, default: [String]())
-        rightIDs = container.value(.rightIDs, default: [String]())
     }
 }
 

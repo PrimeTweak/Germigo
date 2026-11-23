@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// One germ's case file: the health sheet, always open, then the card and the parent's history with it.
+/// One germ's case file: in short, how it travels, what helps and the life of a germ, then its myth, its boss card,
+/// the parent's history with it, when to call and the sources.
 struct GermDetailScreen: View {
     let germ: Germ
     @Environment(AppModel.self) private var model
@@ -9,7 +10,7 @@ struct GermDetailScreen: View {
     @State private var showBossShare = false
     @State private var checkedSigns: Set<Int> = []
     @State private var showsSigns = false
-    @State private var mythAnswer: Bool?
+    @AppStorage(GuideKeys.myths) private var mythsText = ""
 
     private var caught: Int { model.count(of: germ.id) }
     private var finish: GermCardView.Finish { model.cardFinish(for: germ) }
@@ -18,18 +19,20 @@ struct GermDetailScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 GermHero(germ: germ, finish: finish, caught: caught)
-                doctorBanner
-                aboutSection
+                inShort
                 symptomsSection
-                timeline
                 spreadSection
                 helps
-                quickFacts
+                lifeOfAGerm
                 mythSection
-                deepDive
                 bossSection
                 history
+                VStack(alignment: .leading, spacing: 10) {
+                    SectionHeader(title: tr("Good to know"))
+                    doctorBanner
+                }
                 sources
+                HealthLineNote()
                 Text(HealthNotice.text)
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
@@ -65,13 +68,12 @@ struct GermDetailScreen: View {
         }
     }
 
-    @ViewBuilder
-    private var aboutSection: some View {
-        if let about = germ.about {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: tr("What it is"))
-                HStack(alignment: .top, spacing: 13) {
-                    IconTile(symbol: "microbe.fill", size: 36)
+    /// What it is, when it shows up and how long it lasts, in one card.
+    private var inShort: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: tr("In short"))
+            VStack(alignment: .leading, spacing: 14) {
+                if let about = germ.about {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(about.value)
                             .font(.body)
@@ -85,9 +87,35 @@ struct GermDetailScreen: View {
                         }
                     }
                 }
-                .germilyCard()
+                HStack(alignment: .bottom, spacing: 12) {
+                    timelineEnd(tr("Shows up"), germ.showsUp.value, alignment: .leading)
+                    Capsule()
+                        .fill(LinearGradient(colors: [palette.accent.opacity(0.3), palette.accent],
+                                             startPoint: .leading, endPoint: .trailing))
+                        .frame(minWidth: 32, maxWidth: .infinity)
+                        .frame(height: 6)
+                        .padding(.bottom, 8)
+                        .accessibilityHidden(true)
+                    timelineEnd(tr("Lasts"), germ.lasts.value, alignment: .trailing)
+                }
+                .accessibilityElement(children: .combine)
             }
+            .germilyCard()
         }
+    }
+
+    private func timelineEnd(_ title: String, _ value: String, alignment: HorizontalAlignment) -> some View {
+        VStack(alignment: alignment, spacing: 1) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(palette.inkSecondary)
+            Text(value)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(alignment == .trailing ? .trailing : .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: 136, alignment: alignment == .trailing ? .trailing : .leading)
     }
 
     @ViewBuilder
@@ -137,68 +165,16 @@ struct GermDetailScreen: View {
         .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
     }
 
-    /// Exposure, first symptoms and length, from the timings in the notes.
-    private var timeline: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: tr("Timeline"))
-            VStack(alignment: .leading, spacing: 12) {
-                TimelineTrack(split: TimelineTrack.split)
-                HStack(alignment: .top, spacing: 0) {
-                    timelineLabel(tr("Exposed"), tr("Day 0"), alignment: .leading)
-                        .frame(width: TimelineTrack.split, alignment: .leading)
-                    timelineLabel(tr("Symptoms start"), germ.showsUp.value, alignment: .leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    timelineLabel(tr("Lasts"), germ.lasts.value, alignment: .trailing)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                }
-                Divider()
-                HStack(spacing: 16) {
-                    HStack(spacing: 6) {
-                        IncubationStripes()
-                            .frame(width: 18, height: 8)
-                            .clipShape(Capsule())
-                        Text(tr("Incubating, no symptoms yet"))
-                    }
-                    HStack(spacing: 6) {
-                        Capsule()
-                            .fill(palette.accent)
-                            .frame(width: 18, height: 8)
-                        Text(tr("Sick"))
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(palette.inkSecondary)
-            }
-            .germilyCard()
-        }
-    }
-
-    private func timelineLabel(_ title: String, _ value: String, alignment: HorizontalAlignment) -> some View {
-        VStack(alignment: alignment, spacing: 1) {
-            Text(title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(palette.ink)
-            Text(value)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .multilineTextAlignment(alignment == .trailing ? .trailing : .leading)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.trailing, alignment == .leading ? 6 : 0)
-    }
-
+    /// How it travels, one way per line.
     @ViewBuilder
     private var spreadSection: some View {
         if !germ.spreads.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: tr("How it spreads"))
-                VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: tr("How it travels"))
+                VStack(alignment: .leading, spacing: 14) {
                     ForEach(Array(germ.spreads.enumerated()), id: \.offset) { item in
-                        if item.offset > 0 {
-                            Divider()
-                        }
                         HStack(alignment: .top, spacing: 13) {
-                            IconTile(symbol: item.element.icon)
+                            IconTile(symbol: item.element.icon, size: 32, tint: palette.accent)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(item.element.title.value)
                                     .font(.callout.weight(.semibold))
@@ -211,20 +187,18 @@ struct GermDetailScreen: View {
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
+                            .padding(.top, 5)
                         }
-                        .padding(.vertical, 12)
+                        .accessibilityElement(children: .combine)
                     }
                     if let note = germ.spreadNote {
-                        Divider()
                         Text(note.value)
                             .font(.subheadline)
                             .foregroundStyle(palette.inkSecondary)
                             .fixedSize(horizontal: false, vertical: true)
-                            .padding(.vertical, 12)
                     }
                 }
-                .padding(.horizontal, 16)
-                .germilyCard(padding: 0)
+                .padding(.horizontal, 4)
             }
         }
     }
@@ -257,35 +231,75 @@ struct GermDetailScreen: View {
         }
     }
 
-    private var quickFacts: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: tr("Quick facts"))
-            VStack(alignment: .leading, spacing: 0) {
-                ForEach(Array(germ.facts.enumerated()), id: \.offset) { item in
-                    if item.offset > 0 {
-                        Divider()
-                    }
-                    HStack(alignment: .top, spacing: 13) {
-                        IconTile(symbol: item.element.icon)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.element.label.value)
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                            Text(item.element.value.value)
-                                .font(.callout)
-                                .foregroundStyle(palette.ink)
-                                .fixedSize(horizontal: false, vertical: true)
+    /// The facts as big colored cards, the first across, the next two side by side, then the deep dive.
+    private var lifeOfAGerm: some View {
+        let facts = germ.facts
+        return VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: tr("Life of a germ"))
+            if let first = facts.first {
+                factCard(first, tone: 0, large: true)
+            }
+            if facts.count > 1 {
+                Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+                    ForEach(Array(stride(from: 1, to: facts.count, by: 2)), id: \.self) { start in
+                        GridRow {
+                            factCard(facts[start], tone: start, large: false)
+                            if start + 1 < facts.count {
+                                factCard(facts[start + 1], tone: start + 1, large: false)
+                            } else {
+                                Color.clear
+                                    .gridCellUnsizedAxes([.horizontal, .vertical])
+                            }
                         }
                     }
-                    .padding(.vertical, 12)
                 }
             }
-            .padding(.horizontal, 16)
-            .germilyCard(padding: 0)
+            ForEach(Array(germ.deepDive.enumerated()), id: \.offset) { item in
+                VStack(alignment: .leading, spacing: 6) {
+                    Label(tr("Did you know?"), systemImage: "lightbulb.fill")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(palette.accent)
+                    Text(item.element.value)
+                        .font(.callout)
+                        .foregroundStyle(palette.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .germilyCard()
+                .accessibilityElement(children: .combine)
+            }
         }
     }
 
-    /// The "when to call" advice, right under the hero: one row that opens on the signs to go down.
+    /// The three soft colors the fact cards take turns with.
+    private static let factTones: [UInt32] = [Swatch.lilac, Swatch.gold, Swatch.sky]
+
+    private func factCard(_ fact: GermFact, tone: Int, large: Bool) -> some View {
+        let color = Color(hex: Self.factTones[tone % Self.factTones.count])
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: fact.icon)
+                    .font(.footnote.weight(.semibold))
+                    .accessibilityHidden(true)
+                Text(fact.label.value)
+                    .font(.footnote.weight(.semibold))
+                    .multilineTextAlignment(.leading)
+            }
+            .foregroundStyle(palette.inkSecondary)
+            Text(fact.value.value)
+                .font(large ? .title3.weight(.bold) : .headline)
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(color.opacity(palette.isDark ? 0.22 : 0.2),
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The "when to call" advice: one row that opens on the signs to go down.
     private var doctorBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button {
@@ -463,26 +477,27 @@ struct GermDetailScreen: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// One claim to judge, answered from the germ's own notes.
+    /// One claim to judge, answered from the germ's own notes. The answer joins the myth busters.
     private var mythSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let right = MythAnswers(mythsText).right(germ.id)
+        return VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: tr("Myth or fact?"))
             VStack(alignment: .leading, spacing: 12) {
                 Text(germ.myth.claim.value)
                     .font(.headline)
                     .foregroundStyle(palette.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                if let answer = mythAnswer {
-                    let right = answer == germ.myth.isTrue
+                    .padding(.trailing, right == nil ? 0 : 70)
+                if let right {
                     Label {
                         Text(right ? tr("Right!") : tr("Not quite."))
                             .foregroundStyle(palette.ink)
                     } icon: {
                         Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(right ? palette.accent : palette.accent)
+                            .foregroundStyle(palette.accent)
                     }
                     .font(.subheadline.weight(.bold))
-                    Text((germ.myth.isTrue ? tr("Fact.") : tr("Myth.")) + " " + germ.myth.explanation.value)
+                    Text(germ.myth.explanation.value)
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -499,32 +514,27 @@ struct GermDetailScreen: View {
                     }
                 }
             }
-            .germilyCard()
-        }
-    }
-
-    private func answer(_ value: Bool) {
-        if value == germ.myth.isTrue { Haptics.success() } else { Haptics.tap() }
-        withAnimation(Tempo.quick) {
-            mythAnswer = value
-        }
-    }
-
-    @ViewBuilder
-    private var deepDive: some View {
-        if !germ.deepDive.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                SectionHeader(title: tr("Deep dive"))
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(Array(germ.deepDive.enumerated()), id: \.offset) { item in
-                        Text(item.element.value)
-                            .font(.callout)
-                            .foregroundStyle(palette.ink)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.1),
+                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                if right != nil {
+                    MythStamp(isTrue: germ.myth.isTrue)
+                        .padding(12)
+                        .motionTransition(.scale)
                 }
-                .germilyCard()
             }
+        }
+    }
+
+    private func answer(_ fact: Bool) {
+        let right = fact == germ.myth.isTrue
+        if right { Haptics.success() } else { Haptics.tap() }
+        var answers = MythAnswers(mythsText)
+        answers.record(germ.id, right: right)
+        withAnimation(Tempo.pop) {
+            mythsText = answers.text
         }
     }
 
@@ -604,71 +614,6 @@ struct SourceList: View {
         }
         .padding(.horizontal, 16)
         .germilyCard(padding: 0)
-    }
-}
-
-/// The exposure-to-recovery bar: striped while incubating, coral while sick.
-private struct TimelineTrack: View {
-    static let split: CGFloat = 92
-    let split: CGFloat
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        ZStack(alignment: .leading) {
-            HStack(spacing: 0) {
-                IncubationStripes()
-                    .frame(width: split)
-                LinearGradient(colors: [palette.accent, palette.accent.opacity(0.35)],
-                               startPoint: .leading, endPoint: .trailing)
-            }
-            .frame(height: 12)
-            .clipShape(Capsule())
-            .padding(.horizontal, 8)
-            HStack(spacing: 0) {
-                dot(palette.ink)
-                Color.clear
-                    .frame(width: max(0, split - 22))
-                dot(palette.accent)
-                Spacer(minLength: 0)
-                dot(palette.inkTertiary)
-            }
-        }
-        .frame(height: 22)
-        .accessibilityHidden(true)
-    }
-
-    private func dot(_ color: Color) -> some View {
-        Circle()
-            .fill(color)
-            .frame(width: 22, height: 22)
-            .overlay {
-                Circle().stroke(palette.surface, lineWidth: 4)
-            }
-    }
-}
-
-/// Diagonal stripes for the time a germ incubates without symptoms.
-private struct IncubationStripes: View {
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        let base = palette.ink.opacity(0.08)
-        let stripe = palette.ink.opacity(0.2)
-        Canvas { context, size in
-            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(base))
-            var x = -size.height
-            while x < size.width {
-                var path = Path()
-                path.move(to: CGPoint(x: x, y: size.height))
-                path.addLine(to: CGPoint(x: x + size.height, y: 0))
-                path.addLine(to: CGPoint(x: x + size.height + 3, y: 0))
-                path.addLine(to: CGPoint(x: x + 3, y: size.height))
-                path.closeSubpath()
-                context.fill(path, with: .color(stripe))
-                x += 8
-            }
-        }
-        .accessibilityHidden(true)
     }
 }
 

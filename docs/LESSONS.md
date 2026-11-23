@@ -35,7 +35,7 @@ UTF-8 JSON, served over https with status 200, under 1 MB. Every lesson needs En
 ```
 
 - `id`: unique, never reused, never the id of a bundled lesson. Changing it makes the lesson new again.
-- `icon`: an SF Symbol name, optional.
+- `icon`: an SF Symbol name, shown beside the title; optional, a graduation cap when left out.
 - `released`: `yyyy-MM-dd`.
 - Keep lessons in the file after their week; removing one removes it from every phone at the next download.
 

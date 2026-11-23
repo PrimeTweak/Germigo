@@ -859,6 +859,12 @@ private struct PersonEditSheet: View {
         model.isLookOpen(look) || Buddy.index(look) == original
     }
 
+    /// The looks in the picker: the ones Settings shows, plus the person's own even if it is hidden.
+    private var offered: [Int] {
+        let shown = Set(model.shownLooks)
+        return Looks.order.filter { shown.contains($0) || $0 == original }
+    }
+
     /// Who the sheet can take out of the household: a kid, or a partner already added.
     private var removable: String? {
         switch member {
@@ -884,8 +890,9 @@ private struct PersonEditSheet: View {
                         .frame(height: 54)
                         .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     label(tr("Character"))
-                    looks(Looks.order.filter(canKeep), locked: false)
-                    if !model.hasPass {
+                    looks(offered.filter(canKeep), locked: false)
+                    let locked = offered.filter { !canKeep($0) }
+                    if !locked.isEmpty {
                         HStack {
                             Text(tr("With the Season Pass"))
                                 .font(.footnote.weight(.semibold))
@@ -896,7 +903,7 @@ private struct PersonEditSheet: View {
                         .padding(.horizontal, 4)
                         .padding(.top, 22)
                         .padding(.bottom, 10)
-                        looks(Looks.order.filter { !canKeep($0) }, locked: true)
+                        looks(locked, locked: true)
                     }
                     if let removable {
                         Button(tr("Remove %@", removable)) {

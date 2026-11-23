@@ -320,9 +320,6 @@ do {
           "a right answer is recorded")
     _ = QuizEngine.answer(plan[2].answer, to: plan[2], progress: &progress, day: today, bankSize: bank.count)
     check(progress.rightTotal == 2 && progress.doneDays == [today], "the day is done after three answers")
-    check(progress.rightIDs == [plan[1].id, plan[2].id], "right answers are remembered by question")
-    let alphaIDs = bank.filter { $0.germ.id == "alpha" }.map { $0.id }
-    check(QuizEngine.studied(bank: bank, rightIDs: alphaIDs) == ["alpha"], "a germ with every question right is studied")
     check(QuizEngine.plan(progress: progress, bank: bank, day: today).map { $0.id } == plan.map { $0.id },
           "a finished day keeps its questions")
 
@@ -753,6 +750,16 @@ do {
     check(Looks.showcase.allSatisfy { !Looks.free.contains($0) }, "the offer shows looks the Pass opens")
     check((0..<Looks.count).allSatisfy { Liveliness.household($0, sick: true, leads: false) != .resting },
           "every look has a sick routine")
+    check(Looks.shown(hidden: [6, 10], hasPass: false) == Looks.order.filter { $0 != 6 && $0 != 10 },
+          "hidden looks leave the choices")
+    check(Looks.shown(hidden: Looks.free, hasPass: false) == Looks.order,
+          "with every open look hidden, all of them come back")
+    check(Looks.shown(hidden: Looks.free, hasPass: true) == Looks.order.filter { !Looks.free.contains($0) },
+          "with the Season Pass, the Pass looks are enough")
+    check(!Looks.canHide(0, hidden: [6, 7], hasPass: false) && Looks.canHide(10, hidden: [6, 7], hasPass: false),
+          "the last look that can be picked stays shown")
+    let hiddenSettings = try? JSONDecoder().decode(AppSettings.self, from: Data(#"{"hiddenLooks":[9,12]}"#.utf8))
+    check(hiddenSettings?.hiddenLooks == [9, 12] && hiddenSettings?.theme == .agar, "hidden looks are saved with the settings")
 }
 
 // The Season Pass offer: each door has its own words, and the trial reminder goes out two days before the payment.

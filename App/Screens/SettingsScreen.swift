@@ -695,6 +695,21 @@ private struct LookCard: View {
             .buttonStyle(.plain)
             Divider()
                 .padding(.leading, 44)
+            NavigationLink {
+                CharactersScreen()
+            } label: {
+                let hidden = model.data.settings.hiddenLooks.count
+                row(tr("Characters"), value: tr("%1$lld of %2$lld shown", Looks.count - hidden, Looks.count)) {
+                    RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
+                        .fill(palette.ink.opacity(0.07))
+                        .overlay {
+                            BuddyView(look: model.data.hostLook, size: 24)
+                        }
+                }
+            }
+            .buttonStyle(.plain)
+            Divider()
+                .padding(.leading, 44)
             VStack(alignment: .leading, spacing: 10) {
                 Text(tr("Appearance"))
                     .font(.body)

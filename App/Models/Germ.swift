@@ -150,6 +150,12 @@ struct GermSpread: Codable, Hashable {
     let detail: LocalizedText?
 }
 
+/// A list of words in English and in French.
+struct LocalizedWords: Codable, Hashable {
+    let en: [String]
+    let fr: [String]
+}
+
 /// One collectible germ with its health notes.
 struct Germ: Codable, Identifiable, Hashable {
     let id: String
@@ -191,8 +197,17 @@ struct Germ: Codable, Identifiable, Hashable {
     var microbe: Microbe?
     /// The Canadian Paediatric Society's page for parents, in English and French.
     var canadaSource: BilingualReference?
+    /// Other names parents use for the illness, such as "gastro" or "picotte". Names only, never symptoms.
+    var searchWords: LocalizedWords?
 
     var assetName: String { "germ-" + id }
+
+    /// True when the search text is in one of its names, in either language.
+    func matches(_ needle: String) -> Bool {
+        let names = [illness.en, illness.fr, name, scientific.en, scientific.fr]
+            + (searchWords?.en ?? []) + (searchWords?.fr ?? [])
+        return names.contains { $0.localizedStandardContains(needle) }
+    }
 
     var kidReference: GermReference? {
         sources.first { $0.url == kidSource }
@@ -233,6 +248,12 @@ struct Article: Codable, Identifiable, Hashable {
     let sources: [GermReference]
     /// Set on lessons from the online file; bundled ones have none.
     let releasedOn: Date?
+
+    /// About how long it takes to read, at 200 words a minute.
+    var minutes: Int {
+        let words = ([summary] + paragraphs).reduce(0) { $0 + $1.value.split(whereSeparator: \.isWhitespace).count }
+        return max(1, Int((Double(words) / 200).rounded(.up)))
+    }
 }
 
 /// One step of the boss fight, told with the case file's own timings.

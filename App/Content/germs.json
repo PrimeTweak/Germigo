@@ -15,6 +15,15 @@
       "en": "Rhinovirus and friends",
       "fr": "Rhinovirus et compagnie"
     },
+    "searchWords": {
+      "en": [
+        "common cold",
+        "head cold"
+      ],
+      "fr": [
+        "rhume de cerveau"
+      ]
+    },
     "rarity": "common",
     "tintLight": "#F2FFD9",
     "tintDeep": "#C6EC86",
@@ -635,6 +644,14 @@
       "en": "Acute bronchitis",
       "fr": "Bronchite aiguë"
     },
+    "searchWords": {
+      "en": [
+        "bronchitis"
+      ],
+      "fr": [
+        "bronchite"
+      ]
+    },
     "rarity": "common",
     "tintLight": "#F4F6E6",
     "tintDeep": "#D3DC9C",
@@ -850,6 +867,14 @@
       "en": "Laryngitis",
       "fr": "Laryngite"
     },
+    "searchWords": {
+      "en": [
+        "laryngitis"
+      ],
+      "fr": [
+        "laryngite"
+      ]
+    },
     "rarity": "uncommon",
     "tintLight": "#F6F4FC",
     "tintDeep": "#DCD4F1",
@@ -1049,6 +1074,14 @@
     "scientific": {
       "en": "Acute sinusitis",
       "fr": "Sinusite aiguë"
+    },
+    "searchWords": {
+      "en": [
+        "sinusitis"
+      ],
+      "fr": [
+        "sinusite"
+      ]
     },
     "rarity": "uncommon",
     "tintLight": "#F9ECF6",
@@ -1275,6 +1308,19 @@
     "scientific": {
       "en": "Norovirus",
       "fr": "Norovirus"
+    },
+    "searchWords": {
+      "en": [
+        "stomach flu",
+        "gastro",
+        "gastroenteritis",
+        "tummy bug"
+      ],
+      "fr": [
+        "gastro",
+        "gastro-entérite",
+        "grippe intestinale"
+      ]
     },
     "rarity": "uncommon",
     "tintLight": "#F4EDFF",
@@ -1560,6 +1606,16 @@
       "en": "Conjunctivitis",
       "fr": "Conjonctivite"
     },
+    "searchWords": {
+      "en": [
+        "pinkeye",
+        "conjunctivitis"
+      ],
+      "fr": [
+        "conjonctivite",
+        "conjo"
+      ]
+    },
     "rarity": "uncommon",
     "tintLight": "#FFF0F8",
     "tintDeep": "#FFC4E1",
@@ -1803,6 +1859,16 @@
     "scientific": {
       "en": "SARS-CoV-2",
       "fr": "SARS-CoV-2"
+    },
+    "searchWords": {
+      "en": [
+        "covid",
+        "coronavirus"
+      ],
+      "fr": [
+        "covid",
+        "coronavirus"
+      ]
     },
     "rarity": "uncommon",
     "tintLight": "#FBE1E5",
@@ -2095,6 +2161,16 @@
       "en": "Respiratory syncytial virus",
       "fr": "Virus respiratoire syncytial"
     },
+    "searchWords": {
+      "en": [
+        "RSV",
+        "bronchiolitis"
+      ],
+      "fr": [
+        "VRS",
+        "bronchiolite"
+      ]
+    },
     "rarity": "uncommon",
     "tintLight": "#E9F4FE",
     "tintDeep": "#A7D5FA",
@@ -2366,6 +2442,16 @@
       "en": "Group A Streptococcus",
       "fr": "Streptocoque du groupe A"
     },
+    "searchWords": {
+      "en": [
+        "strep A",
+        "scarlet fever"
+      ],
+      "fr": [
+        "streptocoque",
+        "scarlatine"
+      ]
+    },
     "rarity": "rare",
     "tintLight": "#FFF4E0",
     "tintDeep": "#FFD196",
@@ -2613,6 +2699,15 @@
     "scientific": {
       "en": "Influenza A or B",
       "fr": "Influenza A ou B"
+    },
+    "searchWords": {
+      "en": [
+        "influenza"
+      ],
+      "fr": [
+        "grippe",
+        "influenza"
+      ]
     },
     "rarity": "rare",
     "tintLight": "#FFEFEA",
@@ -2898,6 +2993,14 @@
       "en": "Human adenovirus",
       "fr": "Adénovirus humain"
     },
+    "searchWords": {
+      "en": [
+        "adeno"
+      ],
+      "fr": [
+        "adéno"
+      ]
+    },
     "rarity": "rare",
     "tintLight": "#EBEDFE",
     "tintDeep": "#B0B8F9",
@@ -3152,6 +3255,15 @@
       "en": "Human metapneumovirus",
       "fr": "Métapneumovirus humain"
     },
+    "searchWords": {
+      "en": [
+        "HMPV",
+        "metapneumovirus"
+      ],
+      "fr": [
+        "métapneumovirus"
+      ]
+    },
     "rarity": "rare",
     "tintLight": "#E6F9F1",
     "tintDeep": "#9BE6C6",
@@ -3397,6 +3509,15 @@
     "scientific": {
       "en": "Human parainfluenza virus",
       "fr": "Virus parainfluenza humain"
+    },
+    "searchWords": {
+      "en": [
+        "croup"
+      ],
+      "fr": [
+        "croup",
+        "laryngite striduleuse"
+      ]
     },
     "rarity": "rare",
     "tintLight": "#E7F4F5",
@@ -3910,6 +4031,17 @@
       "en": "Coxsackievirus",
       "fr": "Virus Coxsackie"
     },
+    "searchWords": {
+      "en": [
+        "HFMD",
+        "hand foot and mouth",
+        "coxsackie"
+      ],
+      "fr": [
+        "pieds mains bouche",
+        "coxsackie"
+      ]
+    },
     "rarity": "rare",
     "tintLight": "#E7FBF8",
     "tintDeep": "#A6EADF",
@@ -4175,6 +4307,16 @@
     "scientific": {
       "en": "Parvovirus B19",
       "fr": "Parvovirus B19"
+    },
+    "searchWords": {
+      "en": [
+        "slapped cheek",
+        "parvovirus"
+      ],
+      "fr": [
+        "cinquième maladie",
+        "parvovirus"
+      ]
     },
     "rarity": "epic",
     "tintLight": "#FFF8F3",
@@ -4450,6 +4592,16 @@
       "en": "Pediculus humanus capitis",
       "fr": "Pediculus humanus capitis"
     },
+    "searchWords": {
+      "en": [
+        "lice",
+        "nits"
+      ],
+      "fr": [
+        "poux",
+        "lentes"
+      ]
+    },
     "rarity": "uncommon",
     "tintLight": "#F7F0E9",
     "tintDeep": "#DFC2A6",
@@ -4691,6 +4843,16 @@
       "en": "Enterobius vermicularis",
       "fr": "Enterobius vermicularis"
     },
+    "searchWords": {
+      "en": [
+        "threadworms",
+        "worms"
+      ],
+      "fr": [
+        "vers",
+        "oxyurose"
+      ]
+    },
     "rarity": "rare",
     "tintLight": "#FEF5F8",
     "tintDeep": "#FAD9E3",
@@ -4904,6 +5066,14 @@
     "scientific": {
       "en": "Staph or strep skin infection",
       "fr": "Infection de la peau à staphylocoque ou à streptocoque"
+    },
+    "searchWords": {
+      "en": [
+        "school sores"
+      ],
+      "fr": [
+        "impétigo"
+      ]
     },
     "rarity": "epic",
     "tintLight": "#FDF4E3",
@@ -5146,6 +5316,15 @@
     "scientific": {
       "en": "Tinea, a skin fungus",
       "fr": "Tinea, un champignon de la peau"
+    },
+    "searchWords": {
+      "en": [
+        "tinea"
+      ],
+      "fr": [
+        "teigne",
+        "dermatophytose"
+      ]
     },
     "rarity": "epic",
     "tintLight": "#F7ECE7",
@@ -5393,6 +5572,14 @@
     "scientific": {
       "en": "Bordetella pertussis",
       "fr": "Bordetella pertussis"
+    },
+    "searchWords": {
+      "en": [
+        "pertussis"
+      ],
+      "fr": [
+        "coqueluche"
+      ]
     },
     "rarity": "legendary",
     "tintLight": "#E7EDFF",
@@ -5666,6 +5853,16 @@
     "scientific": {
       "en": "Varicella-zoster virus",
       "fr": "Virus varicelle-zona"
+    },
+    "searchWords": {
+      "en": [
+        "chicken pox",
+        "varicella"
+      ],
+      "fr": [
+        "picotte",
+        "varicelle"
+      ]
     },
     "rarity": "legendary",
     "tintLight": "#FFF1F5",

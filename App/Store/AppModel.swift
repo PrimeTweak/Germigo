@@ -334,10 +334,15 @@ final class AppModel {
         Looks.isOpen(look, hasPass: hasPass)
     }
 
-    /// The first open look nobody in the household has yet, so a new kid does not start as a twin.
+    /// The looks offered when someone is added, in picker order; Settings can hide the others.
+    var shownLooks: [Int] {
+        Looks.shown(hidden: data.settings.hiddenLooks, hasPass: hasPass)
+    }
+
+    /// The first open, shown look nobody in the household has yet, so a new kid does not start as a twin.
     var nextKidLook: Int {
         let taken = Set((data.kids.map { $0.colorIndex } + [data.hostLook, data.partnerLook]).map { abs($0) % Looks.count })
-        let open = Looks.order.filter(isLookOpen)
+        let open = shownLooks.filter(isLookOpen)
         return open.first { !taken.contains($0) } ?? open[data.kids.count % open.count]
     }
 
@@ -495,11 +500,6 @@ final class AppModel {
         if recovered, let germ = catalog.germ(active.germID) {
             pendingVictory = Victory(log: data.logs[index], germ: germ, points: RewardEngine.recoveryPoints)
         }
-    }
-
-    /// Germs whose quiz questions were all answered right at least once.
-    var studiedGermIDs: Set<String> {
-        QuizEngine.studied(bank: quizBank, rightIDs: data.quiz.rightIDs)
     }
 
     /// Last month in numbers, for the recap card in Season.

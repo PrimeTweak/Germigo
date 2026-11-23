@@ -156,6 +156,11 @@ def check_content():
             localized(canada.get("url"), f"germs.json {gid}.canadaSource.url")
             if not all(str(url).startswith("https://") for url in (canada.get("url") or {}).values()):
                 fail(f"germs.json {gid}: canadaSource urls must be https")
+        words = germ.get("searchWords")
+        if words is not None and not all(
+                isinstance(words.get(language), list) and words[language]
+                and all(isinstance(word, str) and word.strip() for word in words[language]) for language in ("en", "fr")):
+            fail(f"germs.json {gid}: searchWords needs en and fr lists of words")
         for key in ("showsUp", "lasts"):
             for language, text in (germ.get(key) or {}).items():
                 if len(str(text)) > TILE_TEXT_LIMIT:

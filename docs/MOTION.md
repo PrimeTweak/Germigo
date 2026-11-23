@@ -127,7 +127,8 @@ In a group (the couch, a row of suspects, the podium), accents are spread evenly
 | Someone gets sick | The art swaps with a 0.4 s shake, then the sick routine starts | Thud | None |
 | Someone gets better | A hop of joy of 16 pt with sparkles, then the healthy accent | Success | None |
 | A photo is saved | Pops into the album | Success | None |
-| A germ is caught in the Guide | Its color fills in and it pops | Tap | Reveal |
+| A germ is caught in the Guide | A camera flash, then its mugshot with the tally plate | Tap | Reveal |
+| A myth is answered | Its stamp lands, Myth or Fact | Success if right, tap if not | None |
 | A badge, a level or a milestone | The reward screen, with confetti | Success | Badge |
 | A boss is defeated | Victory: the germ goes dizzy, with confetti | Success | Badge |
 | A number changes | Rolls to its value | None | None |

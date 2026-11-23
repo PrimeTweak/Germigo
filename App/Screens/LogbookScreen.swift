@@ -131,14 +131,7 @@ struct LogbookScreen: View {
                         .padding(.horizontal, 4)
                 }
                 if all.isEmpty {
-                    if filter == nil {
-                        empty
-                    } else {
-                        Text(tr("Nothing logged yet."))
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                            .germilyCard()
-                    }
+                    empty
                 }
                 ForEach(Array(months(shown).enumerated()), id: \.element.id) { item in
                     Text(monthTitle(item.element.start))
@@ -221,14 +214,28 @@ struct LogbookScreen: View {
         .padding(.bottom, 4)
     }
 
-    /// The first screen of the logbook: what lands in it, and a way to add a kid's past germ.
+    /// The same empty page for everyone and for each person, whose character peeks out of the book.
+    /// The way to add a past germ shows where a kid's germ can go.
     private var empty: some View {
-        VStack(spacing: 6) {
+        let addsKid: Bool = {
+            switch filter {
+            case nil: !model.data.kids.isEmpty
+            case .kid: true
+            case .me, .partner: false
+            }
+        }()
+        return VStack(spacing: 6) {
             Image("record-logbook")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 140, height: 140)
                 .shadow(color: Color(hex: Swatch.iris).opacity(0.18), radius: 10, y: 8)
+                .overlay(alignment: .bottomTrailing) {
+                    if let filter {
+                        BuddyView(look: model.look(of: filter), sick: model.isSick(filter), size: 62, leads: true)
+                            .offset(x: 34, y: 4)
+                    }
+                }
                 .padding(.bottom, 6)
                 .accessibilityHidden(true)
             Text(tr("Nothing in here yet"))
@@ -241,11 +248,12 @@ struct LogbookScreen: View {
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
                 .padding(.top, 8)
-            if !model.data.kids.isEmpty {
+            if addsKid {
                 Button {
                     addsKidGerm = true
                 } label: {
                     Label(tr("Add a kid's germ"), systemImage: "plus")
+                        .padding(.horizontal, 24)
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink, height: 50))
                 .fixedSize()

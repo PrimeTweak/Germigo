@@ -73,22 +73,23 @@ private struct HoloPreview: View {
 }
 
 /// Where the Guide remembers what it has already shown: the weekly unmasking, the caught germs
-/// revealed, and the answer to the myth of the week.
+/// booked, and every myth answered.
 enum GuideKeys {
     static let revealedWeek = "lab.revealedWeek"
     static let revealedGerms = "guide.revealedGerms"
-    static let mythWeek = "guide.mythWeek"
-    static let mythAnswer = "guide.mythAnswer"
+    static let myths = "guide.myths"
 }
 
-/// The Guide tab: a search over illnesses and lessons, the daily quiz, what is new this week,
-/// every illness shelved by part of the body, the lessons, then the help lines.
+/// The Guide tab: a search over illnesses, myths and lessons, what is new this week, the daily quiz,
+/// the microbe cards shelved by part of the body, the myths, the lessons, then the help lines.
 struct LabScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @ScaledMetric(relativeTo: .footnote) private var tileWidth: CGFloat = 88
     @State private var showQuiz = false
     @State private var query = ""
+    @State private var mythStart: MythStart?
+    @AppStorage(GuideKeys.myths) private var mythsText = ""
 
     private var needle: String {
         query.trimmingCharacters(in: .whitespaces)
@@ -115,7 +116,7 @@ struct LabScreen: View {
             .background(CharacterWash(tint: TabWash.lab))
             .navigationTitle(tr("Guide"))
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
-                        prompt: tr("Search an illness or a lesson"))
+                        prompt: tr("Search an illness, a myth or a lesson"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()
@@ -133,33 +134,33 @@ struct LabScreen: View {
             .fullScreenCover(isPresented: $showQuiz) {
                 QuizScreen()
             }
+            .fullScreenCover(item: $mythStart) { start in
+                MythDeckScreen(start: start.id)
+            }
         }
     }
 
     @ViewBuilder
     private var home: some View {
         let germs = model.catalog.germs
-        let studied = model.studiedGermIDs
-        QuizBanner(showQuiz: $showQuiz)
         SectionHeader(title: tr("This week"))
         WeekShelf()
-        SectionHeader(title: tr("Illnesses"),
+        QuizBanner(showQuiz: $showQuiz)
+        SectionHeader(title: tr("Microbe cards"),
                       trailing: tr("%1$lld of %2$lld caught", model.caughtGermIDs.count, germs.count))
-        if let sample = germs.first {
-            GuideLegend(sample: sample)
-        }
         ForEach(GuideShelf.allCases) { shelf in
-            shelfRow(shelf, germs: shelf.germs(in: germs), studied: studied)
+            shelfRow(shelf, germs: shelf.germs(in: germs))
         }
         if !model.hasPass {
             HoloPreview()
         }
+        mythBusters(germs)
         lessons
         extras
     }
 
     /// One shelf: its name and count, which open the whole shelf, then its tiles in a row to swipe.
-    private func shelfRow(_ shelf: GuideShelf, germs: [Germ], studied: Set<String>) -> some View {
+    private func shelfRow(_ shelf: GuideShelf, germs: [Germ]) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             NavigationLink(value: shelf) {
                 HStack(spacing: 4) {
@@ -185,7 +186,7 @@ struct LabScreen: View {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(germs) { germ in
                         NavigationLink(value: germ) {
-                            GuideTile(germ: germ, count: model.count(of: germ.id), studied: studied.contains(germ.id))
+                            GuideTile(germ: germ, count: model.count(of: germ.id))
                                 .frame(width: min(tileWidth, 128))
                         }
                         .buttonStyle(.plain)
@@ -200,38 +201,67 @@ struct LabScreen: View {
         .padding(.top, 2)
     }
 
+    /// Every myth in a row, and the way into the deck at the first one not answered.
+    @ViewBuilder
+    private func mythBusters(_ germs: [Germ]) -> some View {
+        if !germs.isEmpty {
+            seeAllHeader(tr("Myth busters")) {
+                Button {
+                    let answers = MythAnswers(mythsText)
+                    let first = germs.first { answers.right($0.id) == nil } ?? germs[0]
+                    mythStart = MythStart(id: first.id)
+                } label: {
+                    seeAllLabel(count: germs.count)
+                }
+            }
+            MythShelf(germs: germs) { id in
+                mythStart = MythStart(id: id)
+            }
+        }
+    }
+
     /// The next three lessons to read, and the way to all of them.
     @ViewBuilder
     private var lessons: some View {
         let all = model.lessonsToRead()
         if !all.isEmpty {
-            HStack(alignment: .firstTextBaseline) {
-                Text(tr("Lessons"))
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                Spacer()
+            seeAllHeader(tr("Understand")) {
                 NavigationLink {
                     LessonsScreen()
                 } label: {
-                    HStack(spacing: 4) {
-                        Text(tr("See all %lld", all.count))
-                            .font(.subheadline)
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
-                            .accessibilityHidden(true)
-                    }
-                    .foregroundStyle(palette.inkSecondary)
-                    .hitTarget(height: 20)
+                    seeAllLabel(count: all.count)
                 }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 4)
-            .padding(.top, 8)
             LessonCard(articles: Array(all.prefix(3)))
         }
     }
 
-    /// What is worth having at hand: the help lines.
+    private func seeAllHeader<Action: View>(_ title: String, @ViewBuilder link: () -> Action) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.ink)
+            Spacer()
+            link()
+                .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 8)
+    }
+
+    private func seeAllLabel(count: Int) -> some View {
+        HStack(spacing: 4) {
+            Text(tr("See all %lld", count))
+                .font(.subheadline)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .accessibilityHidden(true)
+        }
+        .foregroundStyle(palette.inkSecondary)
+        .hitTarget(height: 20)
+    }
+
+    /// What is worth having at hand: the help lines, and who to ask when unsure.
     @ViewBuilder
     private var extras: some View {
         SectionHeader(title: tr("Good to have"))
@@ -258,18 +288,18 @@ struct LabScreen: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 14)
         .germilyCard(padding: 0)
+        HealthLineNote()
     }
 
-    /// What the search finds, among the illnesses and the lessons.
+    /// What the search finds: illnesses by any of their names, myths by their claim, lessons by title or summary.
     @ViewBuilder
     private var results: some View {
-        let germs = model.catalog.germs.filter { germ in
-            [germ.illness.value, germ.name, germ.scientific.value].contains { $0.localizedStandardContains(needle) }
-        }
+        let germs = model.catalog.germs.filter { $0.matches(needle) }
+        let myths = model.catalog.germs.filter { $0.myth.claim.value.localizedStandardContains(needle) }
         let found = model.catalog.articles.filter { article in
             article.title.value.localizedStandardContains(needle) || article.summary.value.localizedStandardContains(needle)
         }
-        if germs.isEmpty && found.isEmpty {
+        if germs.isEmpty && myths.isEmpty && found.isEmpty {
             Text(tr("Nothing matches your search."))
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
@@ -277,11 +307,17 @@ struct LabScreen: View {
                 .padding(.vertical, 12)
         }
         if !germs.isEmpty {
-            SectionHeader(title: tr("Illnesses"))
+            SectionHeader(title: tr("Microbe cards"))
             GuideGrid(germs: germs)
         }
+        if !myths.isEmpty {
+            SectionHeader(title: tr("Myth busters"))
+            MythShelf(germs: myths) { id in
+                mythStart = MythStart(id: id)
+            }
+        }
         if !found.isEmpty {
-            SectionHeader(title: tr("Lessons"))
+            SectionHeader(title: tr("Understand"))
             LessonCard(articles: found)
         }
     }
@@ -294,13 +330,10 @@ struct ShelfScreen: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        let germs = model.catalog.germs
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if let sample = germs.first {
-                    GuideLegend(sample: sample)
-                }
-                GuideGrid(germs: shelf.germs(in: germs))
+                GuideGrid(germs: shelf.germs(in: model.catalog.germs))
+                HealthLineNote()
                 Text(HealthNotice.text)
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
@@ -317,38 +350,9 @@ struct ShelfScreen: View {
 }
 
 extension Germ {
-    /// The quiet tint behind a caught germ: its pale tint by day, a deep wash of it by night.
+    /// The quiet tint behind a germ: its pale tint by day, a deep wash of it by night.
     func tileTint(_ palette: Palette) -> Color {
         palette.isDark ? deepTint.opacity(0.3) : lightTint
-    }
-}
-
-/// What the three looks of a tile mean. Each tile says its own state to VoiceOver.
-private struct GuideLegend: View {
-    let sample: Germ
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        ChipRows(spacing: 12) {
-            entry(tr("Not met yet"), known: false, tinted: false)
-            entry(tr("Studied in the quiz"), known: true, tinted: false)
-            entry(tr("Caught"), known: true, tinted: true)
-        }
-        .padding(.horizontal, 4)
-        .accessibilityHidden(true)
-    }
-
-    private func entry(_ title: String, known: Bool, tinted: Bool) -> some View {
-        HStack(spacing: 6) {
-            GermImage(germ: sample, size: 18, silhouette: !known)
-                .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.24 : 0.16))
-                .frame(width: 24, height: 24)
-                .background(tinted ? sample.tileTint(palette) : palette.surface,
-                            in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
-            Text(title)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-        }
     }
 }
 
@@ -359,12 +363,11 @@ private struct GuideGrid: View {
     @ScaledMetric(relativeTo: .footnote) private var tileWidth: CGFloat = 88
 
     var body: some View {
-        let studied = model.studiedGermIDs
         let column = GridItem(.adaptive(minimum: min(tileWidth, 128)), spacing: 12, alignment: .top)
         LazyVGrid(columns: [column], alignment: .leading, spacing: 18) {
             ForEach(germs) { germ in
                 NavigationLink(value: germ) {
-                    GuideTile(germ: germ, count: model.count(of: germ.id), studied: studied.contains(germ.id))
+                    GuideTile(germ: germ, count: model.count(of: germ.id))
                 }
                 .buttonStyle(.plain)
             }
@@ -373,50 +376,32 @@ private struct GuideGrid: View {
     }
 }
 
-/// One illness in the Guide: a gray shape until it is met, in color once studied in the quiz,
-/// on its tint with a badge once caught. A caught germ pops out of the gray the first time it is seen.
+/// One microbe card: in color on its tint, and booked like a mugshot once caught, with the catches
+/// tallied on its plate. The first time a caught germ is seen, a camera flash books it.
 private struct GuideTile: View {
     let germ: Germ
     let count: Int
-    let studied: Bool
     @Environment(\.palette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(GuideKeys.revealedGerms) private var revealedList = ""
     @State private var onScreen = false
-    /// True while a caught germ waits under its gray shape for its reveal.
+    /// True while a caught germ waits on its plain card for its booking.
     @State private var masked = false
+    @State private var flash = false
 
     /// Set once any tile hears from its scroll view, which tells an unseen tile from a silent scroll view.
     private static var visibilityReported = false
-    /// One chime for germs revealed together.
+    /// One chime for germs booked together.
     private static var lastChime = Date.distantPast
 
     private var caught: Bool { count > 0 }
     private var revealed: Bool { revealedList.split(separator: ",").contains { $0 == germ.id } }
     private var pending: Bool { caught && !revealed }
-    private var tinted: Bool { caught && !masked }
-    private var known: Bool { studied || tinted }
+    private var booked: Bool { caught && !masked }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
-                .fill(tinted ? germ.tileTint(palette) : palette.surface)
-                .aspectRatio(1, contentMode: .fit)
-                .overlay {
-                    GeometryReader { proxy in
-                        GermImage(germ: germ, size: proxy.size.width * 0.76, silhouette: !known)
-                            .foregroundStyle(palette.ink.opacity(palette.isDark ? 0.2 : 0.13))
-                            .scaleEffect(masked ? 0.8 : 1)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                }
-                .overlay(alignment: .topTrailing) {
-                    if tinted {
-                        badge
-                            .offset(x: 8, y: -8)
-                            .motionTransition(.scale)
-                    }
-                }
+            card
             Text(germ.illness.value)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(palette.ink)
@@ -433,7 +418,8 @@ private struct GuideTile: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityValue(caught ? tr("Caught") : (studied ? tr("Studied in the quiz") : tr("Not met yet")))
+        .accessibilityValue(caught ? trCount(count, one: "Caught %lld time", other: "Caught %lld times")
+                                   : tr("Not caught yet"))
         .onAppear {
             if pending && !reduceMotion { masked = true }
         }
@@ -449,27 +435,44 @@ private struct GuideTile: View {
         }
     }
 
-    /// A check for one catch, the count from the second one on, ringed in the page color.
-    private var badge: some View {
-        Group {
-            if count > 1 {
-                Text(verbatim: "×\(count)")
-                    .font(.caption.weight(.bold))
-                    .monospacedDigit()
-                    .padding(.horizontal, 7)
-            } else {
-                Image(systemName: "checkmark")
-                    .font(.caption2.weight(.heavy))
+    private var card: some View {
+        let shape = RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
+        return Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .background {
+                if booked {
+                    MugshotWall()
+                } else {
+                    germ.tileTint(palette)
+                }
             }
-        }
-        .foregroundStyle(palette.onAccent)
-        .frame(minWidth: 24, minHeight: 24)
-        .background(palette.accent, in: Capsule())
-        .padding(3)
-        .background(palette.background, in: Capsule())
+            .overlay {
+                GeometryReader { proxy in
+                    let side = proxy.size.width
+                    GermImage(germ: germ, size: side * (booked ? 0.6 : 0.74))
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .offset(y: booked ? -side * 0.09 : 0)
+                }
+            }
+            .overlay(alignment: .bottom) {
+                if booked {
+                    CatchPlate(count: count)
+                        .padding(.bottom, 7)
+                }
+            }
+            .overlay {
+                Color.white
+                    .opacity(flash ? 0.95 : 0)
+                    .allowsHitTesting(false)
+            }
+            .clipShape(shape)
+            .overlay {
+                shape.strokeBorder(booked ? palette.ink.opacity(0.12) : germ.deepTint.opacity(palette.isDark ? 0.3 : 0.22),
+                                   lineWidth: 1)
+            }
     }
 
-    /// The first time a caught germ is seen: a moment under its gray shape, then it pops out on its tint.
+    /// The first time a caught germ is seen: a moment on its plain card, then a camera flash and its mugshot.
     private func reveal() async {
         guard pending, onScreen else { return }
         guard !reduceMotion else {
@@ -480,18 +483,21 @@ private struct GuideTile: View {
         try? await Task.sleep(nanoseconds: 600_000_000)
         guard !Task.isCancelled else { return }
         markRevealed()
-        withAnimation(Tempo.pop) {
-            masked = false
-        }
+        flash = true
+        masked = false
         Haptics.tap()
         if Date().timeIntervalSince(Self.lastChime) > 1 {
             Self.lastChime = Date()
             SoundPlayer.shared.play(.reveal)
         }
+        try? await Task.sleep(nanoseconds: 70_000_000)
+        withAnimation(Tempo.settle) {
+            flash = false
+        }
     }
 
-    /// A caught germ never stays gray: left unseen for a few seconds, it takes its colors back and keeps
-    /// its reveal for later. When no scroll view reports at all, the reveal is spent instead.
+    /// A caught germ never waits long: left unseen for a few seconds, it gets its mugshot and keeps
+    /// its booking for later. When no scroll view reports at all, the booking is spent instead.
     private func release() async {
         guard masked else { return }
         try? await Task.sleep(nanoseconds: 3_000_000_000)
@@ -508,7 +514,78 @@ private struct GuideTile: View {
     }
 }
 
-/// The daily quiz as a banner: the mascot, the streak, what the quiz pays and the way in.
+/// The wall behind a mugshot: chalk with the height lines, marked 4, 3 and 2.
+private struct MugshotWall: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let ground = palette.isDark ? Color(hex: Swatch.navyRaised) : Color(hex: Swatch.chalk)
+        let ink = palette.isDark ? Color(hex: Swatch.frost) : Color(hex: Swatch.ink)
+        Canvas { context, size in
+            for (index, mark) in ["4", "3", "2"].enumerated() {
+                let y = size.height * (0.17 + 0.18 * CGFloat(index))
+                var line = Path()
+                line.move(to: CGPoint(x: 0, y: y))
+                line.addLine(to: CGPoint(x: size.width, y: y))
+                context.stroke(line, with: .color(ink.opacity(0.13)), lineWidth: 1)
+                let label = context.resolve(Text(verbatim: mark)
+                    .font(.system(size: max(6, size.width * 0.08), weight: .semibold, design: .rounded))
+                    .foregroundStyle(ink.opacity(0.32)))
+                context.draw(label, at: CGPoint(x: size.width * 0.07, y: y - 1), anchor: .bottomLeading)
+            }
+        }
+        .background(ground)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The booking plate under a mugshot: one stick per catch, the fifth crossing the four, then the number.
+private struct CatchPlate: View {
+    let count: Int
+
+    var body: some View {
+        Group {
+            if count > 5 {
+                Text(verbatim: "×\(count)")
+                    .font(.system(size: 12, weight: .heavy, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(Color.white)
+            } else {
+                TallyMarks(count: count)
+            }
+        }
+        .frame(minWidth: 34, minHeight: 17)
+        .padding(.horizontal, 5)
+        .background(Color(hex: Swatch.night), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+        .accessibilityHidden(true)
+    }
+}
+
+/// Up to four sticks, struck through in gold at five.
+private struct TallyMarks: View {
+    let count: Int
+
+    var body: some View {
+        let sticks = min(count, 4)
+        HStack(spacing: 3) {
+            ForEach(0..<sticks, id: \.self) { _ in
+                Capsule()
+                    .fill(Color.white)
+                    .frame(width: 2.2, height: 11)
+            }
+        }
+        .overlay {
+            if count >= 5 {
+                Capsule()
+                    .fill(Color(hex: Swatch.goldFoil))
+                    .frame(width: CGFloat(sticks) * 5.2 + 6, height: 2.2)
+                    .rotationEffect(.degrees(-24))
+            }
+        }
+    }
+}
+
+/// The daily quiz as a slim bar: the mascot, what today's quiz holds, the streak and the way in.
 private struct QuizBanner: View {
     @Binding var showQuiz: Bool
     @Environment(AppModel.self) private var model
@@ -523,34 +600,30 @@ private struct QuizBanner: View {
         let answers = model.quizAnswers()
         let done = model.quizDone()
         let rightToday = zip(plan, answers).filter { $0.0.answer == $0.1 }.count
-        let points = (done ? rightToday : plan.count) * RewardEngine.quizAnswerPoints
         let streak = model.labStreak()
         HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 1) {
                 Text(done ? tr("Done for today") : tr("Daily quiz"))
-                    .font(.title3.weight(.bold))
+                    .font(.headline)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
-                        .font(.caption.weight(.bold))
-                    Text(trCount(streak, one: "%lld day", other: "%lld days") + " · " + tr("+%lld pts", points))
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-                .opacity(0.92)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(trCount(streak, one: "Quiz streak: %lld day", other: "Quiz streak: %lld days")
-                                    + ", " + tr("+%lld pts", points))
-                if done {
-                    note(tr("%1$lld of %2$lld right. A new quiz tomorrow.", rightToday, plan.count))
-                } else if model.onSickLeave {
-                    note(tr("Sick leave: your streak waits for you."))
-                }
+                Text(detail(plan: plan.count, rightToday: rightToday, done: done))
+                    .font(.footnote)
+                    .monospacedDigit()
+                    .opacity(0.92)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
+            HStack(spacing: 3) {
+                Image(systemName: "flame.fill")
+                    .font(.caption.weight(.bold))
+                Text(verbatim: "\(streak)")
+                    .font(.subheadline.weight(.bold))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(Color(hex: Swatch.goldFoil))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(trCount(streak, one: "Quiz streak: %lld day", other: "Quiz streak: %lld days"))
             if !done {
                 Button {
                     showQuiz = true
@@ -558,18 +631,19 @@ private struct QuizBanner: View {
                     Text(answers.isEmpty ? tr("Start") : tr("Keep going"))
                         .font(.callout.weight(.bold))
                         .foregroundStyle(ground)
-                        .padding(.horizontal, 18)
-                        .frame(height: 44)
+                        .padding(.horizontal, 16)
+                        .frame(height: 38)
                         .background(Color.white, in: Capsule())
+                        .hitTarget(height: 38)
                 }
                 .buttonStyle(PressableStyle())
             }
         }
         .foregroundStyle(Color.white)
-        .padding(.leading, 80)
-        .padding(.trailing, 12)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
+        .padding(.leading, 66)
+        .padding(.trailing, 10)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, minHeight: 62, alignment: .leading)
         .background(ground, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay(alignment: .topLeading) {
             LivelyCharacter(mood: done ? .resting : .stalking, phase: 1.3) {
@@ -577,41 +651,50 @@ private struct QuizBanner: View {
                     .resizable()
                     .scaledToFit()
             }
-            .frame(width: 70, height: 70)
+            .frame(width: 56, height: 56)
             .rotationEffect(.degrees(-7))
             .shadow(color: Color.black.opacity(0.25), radius: 6, x: 0, y: 6)
-            .offset(x: 8, y: -12)
+            .offset(x: 6, y: -8)
             .accessibilityHidden(true)
         }
-        .padding(.top, 12)
+        .padding(.top, 6)
         .animation(Tempo.quick, value: answers.count)
     }
 
-    private func note(_ text: String) -> some View {
-        Text(text)
-            .font(.footnote)
-            .opacity(0.92)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, 2)
+    private func detail(plan: Int, rightToday: Int, done: Bool) -> String {
+        if done { return tr("%1$lld of %2$lld right. A new quiz tomorrow.", rightToday, plan) }
+        if model.onSickLeave { return tr("Sick leave: your streak waits for you.") }
+        return trCount(plan, one: "%lld question", other: "%lld questions") + " · "
+            + tr("+%lld pts", plan * RewardEngine.quizAnswerPoints)
     }
 }
 
-/// What is new this week, side by side: the germ of the week, a myth to judge, a lesson to open.
+/// What is new this week, side by side: a myth to judge, a lesson to open, the germ of the week.
 private struct WeekShelf: View {
     private static let mythAnchor = "myth"
 
     @Environment(AppModel.self) private var model
     @ScaledMetric(relativeTo: .headline) private var cardWidth: CGFloat = 186
-    @AppStorage(GuideKeys.mythWeek) private var answeredWeek = -1
+    @AppStorage(GuideKeys.myths) private var mythsText = ""
 
     var body: some View {
         let now = Date()
         let week = QuizEngine.weekIndex(now)
         let germs = model.catalog.germs
         let width = min(cardWidth, 260)
+        let answers = MythAnswers(mythsText)
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 10) {
+                    if let germ = QuizEngine.mythOfTheWeek(germs, now: now) {
+                        WeekMythCard(germ: germ)
+                            .frame(width: answers.right(germ.id) != nil ? width * 1.45 : width)
+                            .id(Self.mythAnchor)
+                    }
+                    if let article = model.lessonsToRead(now: now).first, !model.data.readArticles.contains(article.id) {
+                        WeekLessonCard(article: article)
+                            .frame(width: width)
+                    }
                     if let germ = QuizEngine.germOfTheWeek(germs, now: now) {
                         NavigationLink(value: germ) {
                             WeekGermCard(germ: germ, week: week)
@@ -619,24 +702,15 @@ private struct WeekShelf: View {
                         }
                         .buttonStyle(PressableStyle())
                     }
-                    if let germ = QuizEngine.mythOfTheWeek(germs, now: now) {
-                        WeekMythCard(germ: germ, week: week)
-                            .frame(width: answeredWeek == week ? width * 1.45 : width)
-                            .id(Self.mythAnchor)
-                    }
-                    if let article = model.lessonsToRead(now: now).first, !model.data.readArticles.contains(article.id) {
-                        WeekLessonCard(article: article)
-                            .frame(width: width)
-                    }
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }
             .contentMargins(.horizontal, 20, for: .scrollContent)
             .scrollIndicators(.hidden)
             .padding(.horizontal, -20)
-            .onChange(of: answeredWeek) {
+            .onChange(of: mythsText) {
                 withAnimation(Tempo.quick) {
-                    proxy.scrollTo(Self.mythAnchor, anchor: .center)
+                    proxy.scrollTo(Self.mythAnchor, anchor: .leading)
                 }
             }
         }
@@ -711,16 +785,15 @@ private struct WeekGermCard: View {
     }
 }
 
-/// One claim a week to judge on the spot. The answer stays up until the next claim.
+/// One claim a week to judge on the spot. Its answer joins the myth busters and keeps its stamp.
 private struct WeekMythCard: View {
     let germ: Germ
-    let week: Int
     @Environment(\.palette) private var palette
-    @AppStorage(GuideKeys.mythWeek) private var answeredWeek = -1
-    @AppStorage(GuideKeys.mythAnswer) private var answeredFact = false
+    @AppStorage(GuideKeys.myths) private var mythsText = ""
 
+    /// What was answered, worked out from whether it was right.
     private var answer: Bool? {
-        answeredWeek == week ? answeredFact : nil
+        MythAnswers(mythsText).right(germ.id).map { $0 == germ.myth.isTrue }
     }
 
     var body: some View {
@@ -752,16 +825,20 @@ private struct WeekMythCard: View {
 
     private func verdict(_ answer: Bool) -> some View {
         let right = answer == germ.myth.isTrue
-        return VStack(alignment: .leading, spacing: 4) {
-            Label {
-                Text(right ? tr("Right!") : tr("Not quite."))
-                    .foregroundStyle(palette.ink)
-            } icon: {
-                Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(palette.accent)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .center) {
+                Label {
+                    Text(right ? tr("Right!") : tr("Not quite."))
+                        .foregroundStyle(palette.ink)
+                } icon: {
+                    Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(palette.accent)
+                }
+                .font(.subheadline.weight(.bold))
+                Spacer(minLength: 6)
+                MythStamp(isTrue: germ.myth.isTrue)
             }
-            .font(.subheadline.weight(.bold))
-            Text((germ.myth.isTrue ? tr("Fact.") : tr("Myth.")) + " " + germ.myth.explanation.value)
+            Text(germ.myth.explanation.value)
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
                 .multilineTextAlignment(.leading)
@@ -772,10 +849,12 @@ private struct WeekMythCard: View {
 
     private func choice(_ title: String, value: Bool) -> some View {
         Button {
-            if value == germ.myth.isTrue { Haptics.success() } else { Haptics.tap() }
+            let right = value == germ.myth.isTrue
+            if right { Haptics.success() } else { Haptics.tap() }
+            var answers = MythAnswers(mythsText)
+            answers.record(germ.id, right: right)
             withAnimation(Tempo.quick) {
-                answeredFact = value
-                answeredWeek = week
+                mythsText = answers.text
             }
         } label: {
             Text(title)
@@ -854,3 +933,4 @@ private struct WeekLessonCard: View {
         .padding(.top, 8)
     }
 }
+

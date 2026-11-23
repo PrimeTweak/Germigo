@@ -306,3 +306,124 @@ private struct ThemePreview: View {
         .accessibilityHidden(true)
     }
 }
+
+/// Every character, to keep in or leave out of the choices when someone is added.
+struct CharactersScreen: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var nudges: [Int: Int] = [:]
+    @State private var blocked = false
+
+    private var hidden: Set<Int> { model.data.settings.hiddenLooks }
+
+    var body: some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top), count: 4)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                CollectionHead(open: Looks.order.filter { !hidden.contains($0) }.count, total: Looks.count,
+                               note: tr("Shown when you add someone. Tap one to hide it or bring it back."))
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(Looks.order, id: \.self) { look in
+                        cell(look)
+                    }
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    if blocked {
+                        Text(tr("At least one character you can pick stays shown."))
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(palette.accent)
+                            .transition(.opacity)
+                    }
+                    Text(tr("A character someone already has stays theirs, even hidden."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 4)
+                Button(tr("Show all")) {
+                    Haptics.tap()
+                    withAnimation(Tempo.quick) {
+                        blocked = false
+                        model.updateSettings { $0.hiddenLooks = [] }
+                    }
+                }
+                .buttonStyle(PillButtonStyle(kind: .ghost, height: 50))
+                .disabled(hidden.isEmpty)
+            }
+            .padding(.horizontal, Spacing.page)
+            .padding(.top, 10)
+            .padding(.bottom, 28)
+        }
+        .background(palette.background.ignoresSafeArea())
+        .navigationTitle(tr("Characters"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func cell(_ look: Int) -> some View {
+        let shown = !hidden.contains(look)
+        let open = model.isLookOpen(look)
+        let name = tr("Character %lld", look + 1)
+        return Button {
+            toggle(look)
+        } label: {
+            VStack(spacing: 6) {
+                Circle()
+                    .fill(Buddy.tint(look).opacity(palette.isDark ? 0.24 : 0.34))
+                    .aspectRatio(1, contentMode: .fit)
+                    .overlay {
+                        BuddyView(look: look, size: 50)
+                    }
+                    .saturation(shown ? 1 : 0)
+                    .opacity(shown ? 1 : 0.45)
+                    .overlay(alignment: .bottomTrailing) {
+                        if !open {
+                            Image(systemName: "lock.fill")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(Color.white)
+                                .frame(width: 20, height: 20)
+                                .background(shown ? palette.accent : palette.inkTertiary, in: Circle())
+                                .overlay {
+                                    Circle().stroke(palette.background, lineWidth: 2)
+                                }
+                        }
+                    }
+                HStack(spacing: 3) {
+                    Image(systemName: shown ? "checkmark" : "eye.slash")
+                        .font(.caption2.weight(.bold))
+                        .symbolEffect(.wiggle, value: nudges[look, default: 0])
+                    Text(shown ? tr("Shown") : tr("Hidden"))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(shown ? palette.accent : palette.inkTertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(open ? name : name + ", " + tr("Needs the Season Pass"))
+        .accessibilityValue(shown ? tr("Shown") : tr("Hidden"))
+        .accessibilityHint(shown ? tr("Hides it from the choices.") : tr("Brings it back to the choices."))
+    }
+
+    /// Hides or brings back a look; the last look that can be picked stays and wiggles instead.
+    private func toggle(_ look: Int) {
+        Haptics.tap()
+        if hidden.contains(look) {
+            withAnimation(Tempo.quick) {
+                blocked = false
+                model.updateSettings { $0.hiddenLooks.remove(look) }
+            }
+        } else if Looks.canHide(look, hidden: hidden, hasPass: model.hasPass) {
+            withAnimation(Tempo.quick) {
+                model.updateSettings { $0.hiddenLooks.insert(look) }
+            }
+        } else {
+            nudges[look, default: 0] += 1
+            withAnimation(Tempo.quick) {
+                blocked = true
+            }
+        }
+    }
+}

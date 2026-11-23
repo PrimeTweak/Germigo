@@ -79,13 +79,14 @@ struct LessonRow: View {
         let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
         let openWeek = LessonEngine.isOpenToAll(article, now: now)
         return HStack(spacing: 12) {
+            IconTile(symbol: article.icon, size: 36, tint: locked ? nil : palette.accent)
             VStack(alignment: .leading, spacing: 2) {
                 Text(article.title.value)
-                    .font(.body)
+                    .font(.body.weight(.semibold))
                     .foregroundStyle(locked ? palette.inkSecondary : palette.ink)
                     .multilineTextAlignment(.leading)
                 Text(locked ? trCount(remaining, one: "%lld more right answer", other: "%lld more right answers")
-                            : article.summary.value)
+                            : tr("%lld min read", article.minutes))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .lineLimit(2)
@@ -109,10 +110,9 @@ struct LessonRow: View {
                     .symbolEffect(.wiggle, value: nudges)
                     .accessibilityHidden(true)
             } else if !model.data.readArticles.contains(article.id) {
-                Circle()
-                    .fill(palette.accent)
-                    .frame(width: 8, height: 8)
-                    .accessibilityLabel(tr("New"))
+                PillLabel(text: tr("New"), foreground: palette.onAccent, background: palette.accent)
+            } else {
+                RowChevron()
             }
         }
         .padding(.vertical, 12)
@@ -145,6 +145,7 @@ struct ArticleScreen: View {
                     SectionHeader(title: tr("Sources"))
                     SourceList(references: article.sources)
                 }
+                HealthLineNote()
                 Text(HealthNotice.text)
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)
