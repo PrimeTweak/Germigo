@@ -24,14 +24,15 @@ func makeLog(_ germID: String, from start: Date, to end: Date?, sufferer: Suffer
             points: 80, bonuses: bonuses, sufferer: sufferer, kidIllnessID: nil)
 }
 
-func makeGerm(_ id: String, rarity: Rarity, family: GermFamily = .airways, lasts: Int? = 10) -> Germ {
+func makeGerm(_ id: String, rarity: Rarity, family: GermFamily = .airways, lasts: Int? = 10, myths: Int = 1) -> Germ {
     let text = LocalizedText(en: id, fr: id)
     return Germ(id: id, number: 1, name: id, illness: text, phrase: text, scientific: text, rarity: rarity,
                 tintLight: "#FFFFFF", tintDeep: "#000000", quickPick: true, incubationMinHours: 24,
                 incubationMaxHours: 72, showsUp: text, lasts: text, facts: [], tips: [], doctor: text,
                 deepDive: [], sources: [], family: family, lastsUpToDays: lasts, doctorLead: text, doctorSigns: [text],
                 doctorNote: nil, boss: GermBoss(attack: text, weakness: text),
-                myth: GermMyth(claim: text, isTrue: true, explanation: text), kidSource: nil)
+                myths: (1...myths).map { GermMyth(id: "\(id)-\($0)", claim: text, isTrue: true, explanation: text, source: "") },
+                kidSource: nil)
 }
 
 func makeData(logs: [SickLog] = [], illnesses: [KidIllness] = []) -> AppData {
@@ -361,8 +362,25 @@ do {
     check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.labRat),
           "a finished quiz earns the Lab Rat badge")
     learner.quiz.mythsRight = quizGerms.map { $0.id }
+    check(!RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.mythBuster),
+          "the Myth Buster badge counts myths, not germs")
+    learner.quiz.mythsRight = quizCatalog.myths.map { $0.id }
     check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.mythBuster),
           "every myth right earns the Myth Buster badge")
+
+    let twoMyths = [makeGerm("golf", rarity: .common, myths: 2), makeGerm("hotel", rarity: .common, myths: 2)]
+    check(GermCatalog(germs: twoMyths, articles: []).myths.map { $0.id } == ["golf-1", "hotel-1", "golf-2", "hotel-2"],
+          "the myths take turns: every germ's first one, then every germ's second one")
+    let mythBank = QuizEngine.bank(twoMyths).filter { $0.kind == .myth }
+    check(mythBank.map { $0.id } == ["myth-golf-1", "myth-golf-2", "myth-hotel-1", "myth-hotel-2"], "every myth is a quiz question")
+    var busted = QuizProgress()
+    QuizEngine.start(&busted, plan: [mythBank[1]], day: today)
+    _ = QuizEngine.answer(mythBank[1].answer, to: mythBank[1], progress: &busted, day: today, bankSize: mythBank.count)
+    check(busted.mythsRight == ["golf-2"], "a right myth answer counts that myth")
+    var stale = QuizProgress()
+    stale.missed = ["myth-gone", mythBank[2].id]
+    check(QuizEngine.plan(progress: stale, bank: mythBank, day: tomorrow).first?.id == mythBank[2].id,
+          "a missed question no longer in the bank gives way to the next missed one")
 
     let saved = """
     {"quiz":{"doneDays":["2026-10-04"],"rightTotal":7}}
@@ -509,11 +527,12 @@ do {
           "a new germ comes on Monday")
     check((0..<10).allSatisfy { QuizEngine.germOfTheWeek(pool, now: day(4 + 7 * $0))?.id != GermCatalog.mysteryID },
           "the mystery germ is never the germ of the week")
-    check(QuizEngine.mythOfTheWeek(pool, now: monday)?.id == QuizEngine.mythOfTheWeek(pool, now: day(10))?.id,
+    let myths = GermCatalog(germs: pool, articles: []).myths
+    check(QuizEngine.mythOfTheWeek(myths, germs: pool, now: monday)?.id == QuizEngine.mythOfTheWeek(myths, germs: pool, now: day(10))?.id,
           "the myth of the week holds from Monday to Sunday")
     check((0..<10).allSatisfy { week in
         let now = day(4 + 7 * week)
-        return QuizEngine.mythOfTheWeek(pool, now: now)?.id != QuizEngine.germOfTheWeek(pool, now: now)?.id
+        return QuizEngine.mythOfTheWeek(myths, germs: pool, now: now)?.germ.id != QuizEngine.germOfTheWeek(pool, now: now)?.id
     }, "the myth of the week belongs to another germ than the germ of the week")
 }
 
@@ -594,13 +613,15 @@ do {
                 sources: [], releasedOn: nil)
     }
     func lesson(_ id: String, _ released: String) -> FeedLesson {
-        FeedLesson(id: id, icon: nil, released: released, title: text, summary: text, paragraphs: [], sources: [])
+        FeedLesson(id: id, icon: nil, released: released, title: text, summary: text, paragraphs: [], sources: [],
+                   reviewedOn: "2026-09-30")
     }
     let merged = LessonEngine.merge(bundled: bundled, feed: [lesson("late", "2026-10-15"), lesson("early", "2026-10-08"),
                                                              lesson("b5", "2026-10-01"), lesson("bad", "soon")])
     check(merged.map { $0.id } == ["b0", "b5", "b25", "early", "late"],
           "online lessons follow the bundled ones in release order, without duplicates or bad dates")
     check(merged.suffix(2).map { $0.unlockAtAnswers } == [30, 35], "each online lesson sits one step above the last")
+    check(merged.last?.reviewedOn == "2026-09-30", "an online lesson keeps its review day")
 
     let shelf = GermCatalog(germs: [], articles: bundled,
                             feed: [lesson("early", "2026-10-08"), lesson("late", "2026-10-15")], now: day(10))

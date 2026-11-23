@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Requests every source link shown in the app and reports the ones that do not answer.
+"""Requests every source link of the app's content and of the lesson files, and reports the ones that do not answer.
 Usage: python3 tools/check_links.py. Informational in CI. A site that refuses scripts
 (401, 403 or 429) is listed as blocked, not verified, and does not fail the run."""
 import json
@@ -22,6 +22,12 @@ def collect():
                 links.setdefault(source["url"], f"{name}: {entry['id']}")
             for url in (entry.get("canadaSource") or {}).get("url", {}).values():
                 links.setdefault(url, f"{name}: {entry['id']} (Canada)")
+    for name in ("server/lessons.json", "server/drafts/lessons.json"):
+        path = ROOT / name
+        if path.is_file():
+            for lesson in json.loads(path.read_text(encoding="utf-8")).get("lessons", []):
+                for source in lesson.get("sources", []):
+                    links.setdefault(source["url"], f"{name}: {lesson['id']}")
     for url in EXTRA:
         links.setdefault(url, "legal screen")
     return links

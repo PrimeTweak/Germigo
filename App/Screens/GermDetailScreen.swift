@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// One germ's case file: in short, how it travels, what helps and the life of a germ, then its myth, its boss card,
+/// One germ's case file: in short, how it travels, what helps and the life of a germ, then its myths, its boss card,
 /// the parent's history with it, when to call and the sources.
 struct GermDetailScreen: View {
     let germ: Germ
@@ -477,62 +477,68 @@ struct GermDetailScreen: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// One claim to judge, answered from the germ's own notes. The answer joins the myth busters.
+    /// The germ's claims to judge, answered from its own notes. Each answer joins the myth busters.
     private var mythSection: some View {
-        let right = MythAnswers(mythsText).right(germ.id)
+        let answers = MythAnswers(mythsText)
         return VStack(alignment: .leading, spacing: 10) {
             SectionHeader(title: tr("Myth or fact?"))
-            VStack(alignment: .leading, spacing: 12) {
-                Text(germ.myth.claim.value)
-                    .font(.headline)
-                    .foregroundStyle(palette.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.trailing, right == nil ? 0 : 70)
-                if let right {
-                    Label {
-                        Text(right ? tr("Right!") : tr("Not quite."))
-                            .foregroundStyle(palette.ink)
-                    } icon: {
-                        Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(palette.accent)
-                    }
-                    .font(.subheadline.weight(.bold))
-                    Text(germ.myth.explanation.value)
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else {
-                    HStack(spacing: 10) {
-                        Button(tr("Myth")) {
-                            answer(false)
-                        }
-                        .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
-                        Button(tr("Fact")) {
-                            answer(true)
-                        }
-                        .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
-                    }
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.1),
-                        in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
-            .overlay(alignment: .topTrailing) {
-                if right != nil {
-                    MythStamp(isTrue: germ.myth.isTrue)
-                        .padding(12)
-                        .motionTransition(.scale)
-                }
+            ForEach(germ.mythCards) { myth in
+                mythCard(myth, right: answers.right(myth.id))
             }
         }
     }
 
-    private func answer(_ fact: Bool) {
-        let right = fact == germ.myth.isTrue
+    private func mythCard(_ myth: Myth, right: Bool?) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(myth.claim)
+                .font(.headline)
+                .foregroundStyle(palette.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.trailing, right == nil ? 0 : 70)
+            if let right {
+                Label {
+                    Text(right ? tr("Right!") : tr("Not quite."))
+                        .foregroundStyle(palette.ink)
+                } icon: {
+                    Image(systemName: right ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(palette.accent)
+                }
+                .font(.subheadline.weight(.bold))
+                Text(myth.explanation)
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                HStack(spacing: 10) {
+                    Button(tr("Myth")) {
+                        answer(myth, fact: false)
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ghost, height: 46))
+                    Button(tr("Fact")) {
+                        answer(myth, fact: true)
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.1),
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .overlay(alignment: .topTrailing) {
+            if right != nil {
+                MythStamp(isTrue: myth.isTrue)
+                    .padding(12)
+                    .motionTransition(.scale)
+            }
+        }
+    }
+
+    private func answer(_ myth: Myth, fact: Bool) {
+        let right = fact == myth.isTrue
         if right { Haptics.success() } else { Haptics.tap() }
         var answers = MythAnswers(mythsText)
-        answers.record(germ.id, right: right)
+        answers.record(myth.id, right: right)
         withAnimation(Tempo.pop) {
             mythsText = answers.text
         }
@@ -578,18 +584,31 @@ struct GermDetailScreen: View {
         if !germ.sources.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(title: tr("Sources"))
-                SourceList(references: germ.sources)
+                SourceList(references: germ.sources, reviewedOn: germ.reviewedOn)
             }
         }
     }
 }
 
-/// Tappable references for a germ or an article.
+/// Tappable references for a germ or an article, and the month a health professional reviewed it.
 struct SourceList: View {
     let references: [GermReference]
+    var reviewedOn: String?
     @Environment(\.palette) private var palette
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            list
+            if let text = reviewedOn, let day = LessonEngine.calendarDay(text) {
+                Label(tr("Reviewed %@", day.formatted(.dateTime.month(.abbreviated).year())), systemImage: "checkmark.seal")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .padding(.horizontal, 4)
+            }
+        }
+    }
+
+    private var list: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Array(references.enumerated()), id: \.offset) { item in
                 if item.offset > 0 {

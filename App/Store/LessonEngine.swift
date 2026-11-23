@@ -10,6 +10,8 @@ struct FeedLesson: Codable, Hashable {
     let summary: LocalizedText
     let paragraphs: [LocalizedText]
     let sources: [GermReference]
+    /// The day a health professional approved it, written `yyyy-MM-dd`; the server serves no lesson without one.
+    let reviewedOn: String?
 }
 
 /// The online lesson file.
@@ -32,8 +34,8 @@ enum LessonEngine {
         return now.timeIntervalSince(lastCheck) >= checkGap || now < lastCheck
     }
 
-    /// Midnight of the release day in the phone's time zone.
-    static func releaseDay(_ text: String, calendar: Calendar = .current) -> Date? {
+    /// Midnight of a day written `yyyy-MM-dd`, in the phone's time zone.
+    static func calendarDay(_ text: String, calendar: Calendar = .current) -> Date? {
         let parts = text.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
         return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
@@ -44,7 +46,7 @@ enum LessonEngine {
         var seen = Set(bundled.map { $0.id })
         var top = bundled.map { $0.unlockAtAnswers }.max() ?? 0
         let dated = feed.compactMap { lesson -> (lesson: FeedLesson, day: Date)? in
-            guard let day = releaseDay(lesson.released, calendar: calendar) else { return nil }
+            guard let day = calendarDay(lesson.released, calendar: calendar) else { return nil }
             return (lesson, day)
         }
         .sorted { ($0.day, $0.lesson.id) < ($1.day, $1.lesson.id) }
@@ -55,7 +57,7 @@ enum LessonEngine {
             let lesson = item.lesson
             merged.append(Article(id: lesson.id, icon: lesson.icon ?? "graduationcap", unlockAtAnswers: top,
                                   title: lesson.title, summary: lesson.summary, paragraphs: lesson.paragraphs,
-                                  sources: lesson.sources, releasedOn: item.day))
+                                  sources: lesson.sources, releasedOn: item.day, reviewedOn: lesson.reviewedOn))
         }
         return merged
     }

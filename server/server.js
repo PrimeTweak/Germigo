@@ -43,6 +43,13 @@ const HEADERS_TIMEOUT = 10 * 1000;
 const REQUEST_TIMEOUT = 30 * 1000;
 const MAX_CONNECTIONS = 1000;
 const MAX_LESSONS_BYTES = 1_000_000;
+
+// A lesson a health professional approved on a given day, backed by https sources only.
+function isReviewedLesson(lesson) {
+  const sources = lesson && Array.isArray(lesson.sources) ? lesson.sources : [];
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(lesson && lesson.reviewedOn))
+    && sources.length > 0 && sources.every((source) => /^https:\/\//.test(String(source && source.url)));
+}
 const PUBLIC_PAGES = new Set(['GET /', 'GET /get', 'GET /privacy', 'GET /terms', 'GET /health-data', 'GET /support', 'GET /lessons.json']);
 const LIMITS = {
   all: [120, MINUTE],
@@ -1142,13 +1149,20 @@ document.getElementById('form').addEventListener('submit', (event) => {
   };
 
   // The online lesson file, read once at start; a changed file arrives with the next deploy.
+  // Only lessons with a review day and https sources go out.
   function loadLessons(file) {
     try {
-      const body = fs.readFileSync(file);
-      if (body.length > MAX_LESSONS_BYTES || !Array.isArray(JSON.parse(body.toString('utf8')).lessons)) {
+      const raw = fs.readFileSync(file);
+      const list = raw.length <= MAX_LESSONS_BYTES ? JSON.parse(raw.toString('utf8')).lessons : null;
+      if (!Array.isArray(list)) {
         console.error(`lessons: ${file} is over 1 MB or has no lessons list; not served`);
         return null;
       }
+      const kept = list.filter(isReviewedLesson);
+      if (kept.length < list.length) {
+        console.error(`lessons: ${list.length - kept.length} lesson(s) without a review day or https sources; not served`);
+      }
+      const body = Buffer.from(JSON.stringify({ lessons: kept }));
       return { body, etag: '"' + crypto.createHash('sha256').update(body).digest('hex').slice(0, 32) + '"' };
     } catch (error) {
       if (error.code !== 'ENOENT') console.error(`lessons: ${file} does not read; not served`);

@@ -391,6 +391,27 @@ async function main() {
   assert.equal((await fetch(`http://127.0.0.1:${bare.address().port}/lessons.json`)).status, 404);
   await new Promise((resolve) => bare.close(resolve));
 
+  // A lesson goes out only with a review day and https sources
+  const lessonText = { en: 'Text', fr: 'Texte' };
+  const lessonOf = (id, extra) => ({ id, released: '2026-12-07', title: lessonText, summary: lessonText,
+    paragraphs: [lessonText], sources: [{ name: 'CDC', url: 'https://www.cdc.gov/' }], ...extra });
+  const reviewFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'germily-review-')), 'lessons.json');
+  fs.writeFileSync(reviewFile, JSON.stringify({ lessons: [
+    lessonOf('approved', { reviewedOn: '2026-11-20' }), lessonOf('draft', {}),
+    lessonOf('plain', { reviewedOn: '2026-11-20', sources: [{ name: 'Blog', url: 'http://example.org/' }] }),
+  ] }));
+  const reviewed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-reviewed-')),
+    lessonsFile: reviewFile });
+  await new Promise((resolve) => reviewed.listen(0, resolve));
+  const feed = await (await fetch(`http://127.0.0.1:${reviewed.address().port}/lessons.json`)).json();
+  assert.deepEqual(feed.lessons.map((lesson) => lesson.id), ['approved']);
+  await new Promise((resolve) => reviewed.close(resolve));
+
+  // The lesson drafts in the repository read and carry no review day yet
+  const drafts = JSON.parse(fs.readFileSync(path.join(__dirname, 'drafts', 'lessons.json'), 'utf8')).lessons;
+  assert.ok(Array.isArray(drafts));
+  assert.ok(drafts.every((lesson) => !lesson.reviewedOn && !lesson.released));
+
   // Small changes are grouped into one write; membership changes are written at once
   const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germily-slow-'));
   const slow = createApp({ ...options, dataDir: slowDir, writeDelay: 60000 });

@@ -135,17 +135,34 @@
         "fr": "Le temps. Et 20 secondes de savon pour épargner les autres."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Antibiotics knock out a cold.",
-        "fr": "Les antibiotiques viennent à bout d'un rhume."
+    "myths": [
+      {
+        "id": "rhino-1",
+        "claim": {
+          "en": "Antibiotics knock out a cold.",
+          "fr": "Les antibiotiques viennent à bout d'un rhume."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "A cold is a virus, so antibiotics do nothing. It clears on its own, usually within 7 to 10 days.",
+          "fr": "Le rhume est un virus : les antibiotiques n'y font rien. Il passe tout seul, en général en 7 à 10 jours."
+        },
+        "source": "https://www.cdc.gov/common-cold/treatment/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "A cold is a virus, so antibiotics do nothing. It clears on its own, usually within 7 to 10 days.",
-        "fr": "Le rhume est un virus : les antibiotiques n'y font rien. Il passe tout seul, en général en 7 à 10 jours."
+      {
+        "id": "rhino-2",
+        "claim": {
+          "en": "You catch a cold from being cold.",
+          "fr": "On attrape le rhume parce qu'on a froid."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "A cold comes from a virus, not from chilly weather. More than 200 viruses can cause one, any time of year.",
+          "fr": "Le rhume vient d'un virus, pas du froid. Plus de 200 virus peuvent le causer, à n'importe quel moment de l'année."
+        },
+        "source": "https://www.cdc.gov/common-cold/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "More than 200 viruses cause colds, and rhinoviruses lead the pack. That is why you can catch one after another all winter: each one is a new opponent.",
@@ -407,17 +424,34 @@
         "fr": "Sommeil, liquides et savon."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Resting while sick is just being lazy.",
-        "fr": "Se reposer quand on est malade, c'est de la paresse."
+    "myths": [
+      {
+        "id": "mystery-1",
+        "claim": {
+          "en": "Resting while sick is just being lazy.",
+          "fr": "Se reposer quand on est malade, c'est de la paresse."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Sleep is the treatment. Stay home until you have been fever-free for 24 hours and are improving.",
+          "fr": "Le sommeil, c'est le traitement. Reste à la maison jusqu'à 24 h sans fièvre et en amélioration."
+        },
+        "source": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Sleep is the treatment. Stay home until you have been fever-free for 24 hours and are improving.",
-        "fr": "Le sommeil, c'est le traitement. Reste à la maison jusqu'à 24 h sans fièvre et en amélioration."
+      {
+        "id": "mystery-2",
+        "claim": {
+          "en": "You can go back out the minute the fever breaks.",
+          "fr": "On peut ressortir dès que la fièvre tombe."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Wait until you've gone 24 hours without a fever, and without fever medicine, and you feel better overall.",
+          "fr": "Attends 24 heures sans fièvre, sans médicament contre la fièvre, et que tu te sentes mieux dans l'ensemble."
+        },
+        "source": "https://www.cdc.gov/respiratory-viruses/prevention/precautions-when-sick.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "More than 200 viruses can cause a cold, so most everyday infections never get a name.",
@@ -589,17 +623,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Honey is a fine cough soother for a baby.",
-        "fr": "Le miel est un bon remède contre la toux pour un bébé."
+    "myths": [
+      {
+        "id": "lingerer-1",
+        "claim": {
+          "en": "Honey is a fine cough soother for a baby.",
+          "fr": "Le miel est un bon remède contre la toux pour un bébé."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Never give honey to a baby under 1. For older kids and adults, hot lemon and honey can soothe a cough.",
+          "fr": "Jamais de miel avant 1 an. Pour les plus vieux et les adultes, citron chaud et miel peuvent calmer la toux."
+        },
+        "source": "https://www.nhs.uk/conditions/cough/"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Never give honey to a baby under 1. For older kids and adults, hot lemon and honey can soothe a cough.",
-        "fr": "Jamais de miel avant 1 an. Pour les plus vieux et les adultes, citron chaud et miel peuvent calmer la toux."
+      {
+        "id": "lingerer-2",
+        "claim": {
+          "en": "A normal cough is gone within a week.",
+          "fr": "Une toux normale disparaît en une semaine."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "After a cold or the flu, most coughs clear up on their own within 3 to 4 weeks.",
+          "fr": "Après un rhume ou la grippe, la plupart des toux passent toutes seules en 3 à 4 semaines."
+        },
+        "source": "https://www.nhs.uk/conditions/cough/"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Most coughs clear up on their own within 3 to 4 weeks. One that lasts longer is called persistent and deserves a check-up.",
@@ -760,17 +811,34 @@
         "fr": "Repos, liquides et humidificateur propre."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "A chest cold needs antibiotics.",
-        "fr": "Une bronchite a besoin d'antibiotiques."
+    "myths": [
+      {
+        "id": "chesty-1",
+        "claim": {
+          "en": "A chest cold needs antibiotics.",
+          "fr": "Une bronchite a besoin d'antibiotiques."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Antibiotics won't help a chest cold. It almost always gets better on its own, in less than 3 weeks.",
+          "fr": "Les antibiotiques n'aident pas une bronchite. Elle guérit presque toujours toute seule, en moins de 3 semaines."
+        },
+        "source": "https://www.cdc.gov/acute-bronchitis/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Antibiotics won't help a chest cold. It almost always gets better on its own, in less than 3 weeks.",
-        "fr": "Les antibiotiques n'aident pas une bronchite. Elle guérit presque toujours toute seule, en moins de 3 semaines."
+      {
+        "id": "chesty-2",
+        "claim": {
+          "en": "A chest cold is usually caused by bacteria.",
+          "fr": "Une bronchite est en général causée par une bactérie."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "A virus is behind it most of the time. That's why antibiotics won't help it heal.",
+          "fr": "C'est un virus, la plupart du temps. C'est pour ça que les antibiotiques ne l'aident pas à guérir."
+        },
+        "source": "https://www.cdc.gov/acute-bronchitis/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "A chest cold happens when the airways of the lungs swell and make mucus. That is what makes you cough.",
@@ -980,17 +1048,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Whispering rests a lost voice.",
-        "fr": "Chuchoter repose une voix éteinte."
+    "myths": [
+      {
+        "id": "whisper-1",
+        "claim": {
+          "en": "Whispering rests a lost voice.",
+          "fr": "Chuchoter repose une voix éteinte."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Whispering strains the voice too. Talk as little as you can and drink plenty.",
+          "fr": "Chuchoter fatigue aussi la voix. Parle le moins possible et bois beaucoup."
+        },
+        "source": "https://www.nhs.uk/conditions/laryngitis/"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Whispering strains the voice too. Talk as little as you can and drink plenty.",
-        "fr": "Chuchoter fatigue aussi la voix. Parle le moins possible et bois beaucoup."
+      {
+        "id": "whisper-2",
+        "claim": {
+          "en": "A lost voice usually comes back within 1 to 2 weeks.",
+          "fr": "Une voix éteinte revient en général en 1 à 2 semaines."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Laryngitis often comes with a cold or the flu and clears up on its own. Rest your voice meanwhile.",
+          "fr": "La laryngite arrive souvent avec un rhume ou la grippe et passe toute seule. Repose ta voix d'ici là."
+        },
+        "source": "https://www.nhs.uk/conditions/laryngitis/"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "It usually comes with a cold or the flu, and clears up on its own within 1 to 2 weeks.",
@@ -1191,17 +1276,34 @@
         "fr": "Une compresse chaude et un vaporisateur salin."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Most sinus infections clear up without antibiotics.",
-        "fr": "La plupart des sinusites guérissent sans antibiotiques."
+    "myths": [
+      {
+        "id": "pressure-1",
+        "claim": {
+          "en": "Most sinus infections clear up without antibiotics.",
+          "fr": "La plupart des sinusites guérissent sans antibiotiques."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Most are caused by viruses, which antibiotics don't touch. A warm compress and saline spray help meanwhile.",
+          "fr": "La plupart viennent de virus, que les antibiotiques ne touchent pas. Compresse chaude et vaporisateur salin aident en attendant."
+        },
+        "source": "https://www.cdc.gov/sinus-infection/about/index.html"
       },
-      "isTrue": true,
-      "explanation": {
-        "en": "Most are caused by viruses, which antibiotics don't touch. A warm compress and saline spray help meanwhile.",
-        "fr": "La plupart viennent de virus, que les antibiotiques ne touchent pas. Compresse chaude et vaporisateur salin aident en attendant."
+      {
+        "id": "pressure-2",
+        "claim": {
+          "en": "Your sinuses are tucked inside your nose.",
+          "fr": "Les sinus sont cachés à l'intérieur du nez."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "They're air-filled pockets in the face. An infection starts when fluid builds up in them and germs grow.",
+          "fr": "Ce sont des poches d'air dans le visage. L'infection commence quand du liquide s'y accumule et que des microbes y poussent."
+        },
+        "source": "https://www.cdc.gov/sinus-infection/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Your sinuses are air-filled pockets in the face. A sinus infection starts when fluid builds up in them.",
@@ -1434,17 +1536,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Hand sanitizer is enough against the stomach bug.",
-        "fr": "Le gel désinfectant suffit contre la gastro."
+    "myths": [
+      {
+        "id": "noro-1",
+        "claim": {
+          "en": "Hand sanitizer is enough against the stomach bug.",
+          "fr": "Le gel désinfectant suffit contre la gastro."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Sanitizer barely works on norovirus. Wash with soap and water for 20 seconds.",
+          "fr": "Le gel fonctionne à peine contre le norovirus. Lave-toi les mains à l'eau et au savon pendant 20 secondes."
+        },
+        "source": "https://www.cdc.gov/norovirus/prevention/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Sanitizer barely works on norovirus. Wash with soap and water for 20 seconds.",
-        "fr": "Le gel fonctionne à peine contre le norovirus. Lave-toi les mains à l'eau et au savon pendant 20 secondes."
+      {
+        "id": "noro-2",
+        "claim": {
+          "en": "Once the vomiting stops, you can't spread it.",
+          "fr": "Une fois que les vomissements arrêtent, on ne le transmet plus."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "You can still spread norovirus for 2 weeks or more after you feel better. Keep washing with soap.",
+          "fr": "On peut transmettre le norovirus 2 semaines ou plus après s'être senti mieux. Continue de te laver les mains au savon."
+        },
+        "source": "https://www.cdc.gov/norovirus/causes/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Norovirus is absurdly contagious: a few viral particles are enough to make you sick, and a sick person sheds billions.",
@@ -1725,17 +1844,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "All pink eye needs antibiotic drops.",
-        "fr": "Toutes les conjonctivites demandent des gouttes antibiotiques."
+    "myths": [
+      {
+        "id": "pinky-1",
+        "claim": {
+          "en": "All pink eye needs antibiotic drops.",
+          "fr": "Toutes les conjonctivites demandent des gouttes antibiotiques."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Antibiotics don't work on the viral kind, which usually clears in 7 to 14 days. Only some bacterial cases need drops or ointment.",
+          "fr": "Les antibiotiques n'agissent pas sur la forme virale, qui passe en général en 7 à 14 jours. Seuls certains cas bactériens demandent des gouttes ou un onguent."
+        },
+        "source": "https://www.cdc.gov/conjunctivitis/treatment/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Antibiotics don't work on the viral kind, which usually clears in 7 to 14 days. Only some bacterial cases need drops or ointment.",
-        "fr": "Les antibiotiques n'agissent pas sur la forme virale, qui passe en général en 7 à 14 jours. Seuls certains cas bactériens demandent des gouttes ou un onguent."
+      {
+        "id": "pinky-2",
+        "claim": {
+          "en": "Allergies can cause pink eye too.",
+          "fr": "Les allergies peuvent aussi causer une conjonctivite."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Viruses, bacteria and allergies can all cause it. The viral and bacterial kinds are the very contagious ones.",
+          "fr": "Les virus, les bactéries et les allergies peuvent tous la causer. Ce sont les formes virale et bactérienne qui sont très contagieuses."
+        },
+        "source": "https://www.cdc.gov/conjunctivitis/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Pink eye is an inflamed conjunctiva, the thin clear layer over the white of the eye. Viruses, bacteria and allergies can all cause it.",
@@ -1986,17 +2122,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "One negative home test means it's not COVID.",
-        "fr": "Un test maison négatif veut dire que ce n'est pas la COVID."
+    "myths": [
+      {
+        "id": "rona-1",
+        "claim": {
+          "en": "One negative home test means it's not COVID.",
+          "fr": "Un test maison négatif veut dire que ce n'est pas la COVID."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "A negative home test doesn't rule it out. Test again 48 hours later.",
+          "fr": "Un test maison négatif n'écarte rien. Refais un test 48 heures plus tard."
+        },
+        "source": "https://www.cdc.gov/covid/testing/self-testing.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "A negative home test doesn't rule it out. Test again 48 hours later.",
-        "fr": "Un test maison négatif n'écarte rien. Refais un test 48 heures plus tard."
+      {
+        "id": "rona-2",
+        "claim": {
+          "en": "COVID symptoms show up the day after you catch it.",
+          "fr": "Les symptômes de la COVID apparaissent le lendemain."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "They can start anywhere from 2 to 14 days after exposure. That's why it's so hard to know who gave it to you.",
+          "fr": "Ils peuvent commencer de 2 à 14 jours après l'exposition. C'est pour ça qu'on sait rarement qui nous l'a donnée."
+        },
+        "source": "https://www.cdc.gov/covid/signs-symptoms/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Symptoms can show up anywhere from 2 to 14 days after exposure, which makes it hard to know who gave it to you.",
@@ -2282,17 +2435,34 @@
         "fr": "Mains propres et surfaces nettoyées. Il tient des heures sur les tables."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Once you've had RSV, you're immune for life.",
-        "fr": "Une fois qu'on a eu le VRS, on est immunisé à vie."
+    "myths": [
+      {
+        "id": "arsy-1",
+        "claim": {
+          "en": "Once you've had RSV, you're immune for life.",
+          "fr": "Une fois qu'on a eu le VRS, on est immunisé à vie."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Repeat infections happen throughout life. In adults it usually feels like a cold.",
+          "fr": "Les réinfections arrivent tout au long de la vie. Chez l'adulte, il ressemble souvent à un rhume."
+        },
+        "source": "https://www.cdc.gov/rsv/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Repeat infections happen throughout life. In adults it usually feels like a cold.",
-        "fr": "Les réinfections arrivent tout au long de la vie. Chez l'adulte, il ressemble souvent à un rhume."
+      {
+        "id": "arsy-2",
+        "claim": {
+          "en": "Most kids have had RSV by age 2.",
+          "fr": "La plupart des enfants ont eu le VRS avant 2 ans."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Almost all children catch it by their second birthday. In babies, it can inflame the small airways of the lungs.",
+          "fr": "Presque tous les enfants l'attrapent avant leur deuxième anniversaire. Chez les bébés, il peut enflammer les petites voies respiratoires des poumons."
+        },
+        "source": "https://www.cdc.gov/rsv/infants-young-children/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Most children have had RSV by the time they turn 2. In babies it can cause bronchiolitis, an inflammation of the small airways in the lungs.",
@@ -2552,17 +2722,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Strep is one of the few daycare germs antibiotics can treat.",
-        "fr": "Le strepto est un des rares microbes de garderie que les antibiotiques soignent."
+    "myths": [
+      {
+        "id": "strep-1",
+        "claim": {
+          "en": "Strep is one of the few daycare germs antibiotics can treat.",
+          "fr": "Le strepto est un des rares microbes de garderie que les antibiotiques soignent."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Strep is caused by a bacterium. A swab confirms it, and antibiotics shorten the illness and stop the spread.",
+          "fr": "Le strepto est une bactérie. Un prélèvement le confirme, et les antibiotiques raccourcissent la maladie et freinent la contagion."
+        },
+        "source": "https://www.cdc.gov/group-a-strep/about/strep-throat.html"
       },
-      "isTrue": true,
-      "explanation": {
-        "en": "Strep is caused by a bacterium. A swab confirms it, and antibiotics shorten the illness and stop the spread.",
-        "fr": "Le strepto est une bactérie. Un prélèvement le confirme, et les antibiotiques raccourcissent la maladie et freinent la contagion."
+      {
+        "id": "strep-2",
+        "claim": {
+          "en": "A throat swab can tell strep from a regular sore throat.",
+          "fr": "Un prélèvement de gorge distingue le strepto d'un mal de gorge ordinaire."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "A rapid test on the swab gives an answer fast. Sometimes a lab culture follows to be sure.",
+          "fr": "Un test rapide sur le prélèvement donne une réponse vite. Parfois, une culture en laboratoire suit pour confirmer."
+        },
+        "source": "https://www.cdc.gov/group-a-strep/testing/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Unlike most sore throats, strep is caused by a bacterium. It is one of the few daycare souvenirs that antibiotics can actually treat.",
@@ -2829,17 +3016,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "You can spread the flu before you feel sick.",
-        "fr": "On peut transmettre la grippe avant de se sentir malade."
+    "myths": [
+      {
+        "id": "flu-1",
+        "claim": {
+          "en": "You can spread the flu before you feel sick.",
+          "fr": "On peut transmettre la grippe avant de se sentir malade."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Starting one day before you feel anything. By the time you know, the household already has it.",
+          "fr": "Dès la veille des premiers symptômes. Quand tu le sais, la maisonnée l'a déjà."
+        },
+        "source": "https://www.cdc.gov/flu/spread/index.html"
       },
-      "isTrue": true,
-      "explanation": {
-        "en": "Starting one day before you feel anything. By the time you know, the household already has it.",
-        "fr": "Dès la veille des premiers symptômes. Quand tu le sais, la maisonnée l'a déjà."
+      {
+        "id": "flu-2",
+        "claim": {
+          "en": "The flu shot is the same every year.",
+          "fr": "Le vaccin contre la grippe est le même chaque année."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Flu viruses keep changing, so flu vaccines are updated every year.",
+          "fr": "Les virus de la grippe changent sans arrêt, alors les vaccins contre la grippe sont mis à jour chaque année."
+        },
+        "source": "https://www.cdc.gov/flu/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Flu viruses keep changing, which is why the vaccine is updated every year.",
@@ -2862,6 +3066,10 @@
       {
         "name": "CDC: Treatment of Flu",
         "url": "https://www.cdc.gov/flu/treatment/index.html"
+      },
+      {
+        "name": "CDC: How Flu Spreads",
+        "url": "https://www.cdc.gov/flu/spread/index.html"
       }
     ],
     "lastsUpToDays": 14,
@@ -3115,17 +3323,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Any household disinfectant wipes out adenovirus.",
-        "fr": "N'importe quel désinfectant ménager élimine l'adénovirus."
+    "myths": [
+      {
+        "id": "addy-1",
+        "claim": {
+          "en": "Any household disinfectant wipes out adenovirus.",
+          "fr": "N'importe quel désinfectant ménager élimine l'adénovirus."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Adenoviruses resist many common disinfectants and stay infectious for hours on surfaces.",
+          "fr": "Les adénovirus résistent à bien des désinfectants courants et restent infectieux des heures sur les surfaces."
+        },
+        "source": "https://www.cdc.gov/adenovirus/hcp/clinical-overview/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Adenoviruses resist many common disinfectants and stay infectious for hours on surfaces.",
-        "fr": "Les adénovirus résistent à bien des désinfectants courants et restent infectieux des heures sur les surfaces."
+      {
+        "id": "addy-2",
+        "claim": {
+          "en": "Adenovirus only causes colds.",
+          "fr": "L'adénovirus ne cause que des rhumes."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Depending on the type, it can also cause pink eye, a sore throat or a stomach bug.",
+          "fr": "Selon le type, il peut aussi causer une conjonctivite, un mal de gorge ou une gastro."
+        },
+        "source": "https://www.cdc.gov/adenovirus/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Adenoviruses come in many types. Depending on the type, they go for the nose and throat, the eyes or the gut.",
@@ -3379,17 +3604,34 @@
         "fr": "Repos, liquides, patience. Tousse dans ton coude."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "hMPV is a brand-new virus.",
-        "fr": "Le métapneumovirus est un tout nouveau virus."
+    "myths": [
+      {
+        "id": "meta-1",
+        "claim": {
+          "en": "hMPV is a brand-new virus.",
+          "fr": "Le métapneumovirus est un tout nouveau virus."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It was identified in 2001, but stored blood samples show it was already circulating in 1958.",
+          "fr": "Il a été identifié en 2001, mais des échantillons de sang conservés montrent qu'il circulait déjà en 1958."
+        },
+        "source": "https://www.ncbi.nlm.nih.gov/books/NBK560910/"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It was identified in 2001, but stored blood samples show it was already circulating in 1958.",
-        "fr": "Il a été identifié en 2001, mais des échantillons de sang conservés montrent qu'il circulait déjà en 1958."
+      {
+        "id": "meta-2",
+        "claim": {
+          "en": "hMPV is a cousin of the flu virus.",
+          "fr": "Le métapneumovirus est un cousin du virus de la grippe."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It belongs to the same virus family as RSV. Discovered in 2001, it's most common from winter through spring.",
+          "fr": "Il fait partie de la même famille de virus que le VRS. Découvert en 2001, il est surtout présent de l'hiver au printemps."
+        },
+        "source": "https://www.cdc.gov/human-metapneumovirus/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "hMPV was first identified in 2001 in the Netherlands, but stored blood samples show it was already circulating there in 1958.",
@@ -3626,17 +3868,34 @@
         "fr": "Le temps. Les antibiotiques n'y font rien."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Parainfluenza is a kind of flu.",
-        "fr": "Le parainfluenza est une sorte de grippe."
+    "myths": [
+      {
+        "id": "para-1",
+        "claim": {
+          "en": "Parainfluenza is a kind of flu.",
+          "fr": "Le parainfluenza est une sorte de grippe."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Despite the name, it is a separate virus family. In adults it is usually a mild cold.",
+          "fr": "Malgré son nom, c'est une famille de virus à part. Chez l'adulte, c'est en général un rhume léger."
+        },
+        "source": "https://www.cdc.gov/parainfluenza/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Despite the name, it is a separate virus family. In adults it is usually a mild cold.",
-        "fr": "Malgré son nom, c'est une famille de virus à part. Chez l'adulte, c'est en général un rhume léger."
+      {
+        "id": "para-2",
+        "claim": {
+          "en": "Parainfluenza can cause croup's barking cough.",
+          "fr": "Le parainfluenza peut causer la toux aboyante du croup."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "In young kids, it's a classic cause of croup. Adults who catch the same virus usually get a mild cold.",
+          "fr": "Chez les jeunes enfants, c'est une cause classique du croup. Un adulte qui attrape le même virus a en général un petit rhume."
+        },
+        "source": "https://www.cdc.gov/parainfluenza/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Despite the name, parainfluenza is not the flu. It is a separate family with four types, and types 1 and 2 are the classic cause of croup.",
@@ -3892,17 +4151,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Rotavirus is usually milder in adults than in kids.",
-        "fr": "Le rotavirus est souvent plus léger chez l'adulte que chez l'enfant."
+    "myths": [
+      {
+        "id": "rota-1",
+        "claim": {
+          "en": "Rotavirus is usually milder in adults than in kids.",
+          "fr": "Le rotavirus est souvent plus léger chez l'adulte que chez l'enfant."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Adults tend to have milder symptoms. Dehydration is still the thing to watch for.",
+          "fr": "Les adultes ont en général des symptômes plus légers. La déshydratation reste à surveiller."
+        },
+        "source": "https://www.cdc.gov/rotavirus/about/index.html"
       },
-      "isTrue": true,
-      "explanation": {
-        "en": "Adults tend to have milder symptoms. Dehydration is still the thing to watch for.",
-        "fr": "Les adultes ont en général des symptômes plus légers. La déshydratation reste à surveiller."
+      {
+        "id": "rota-2",
+        "claim": {
+          "en": "There's a vaccine that protects babies from rotavirus.",
+          "fr": "Il existe un vaccin qui protège les bébés contre le rotavirus."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Vaccinated kids are less likely to get sick. Neither the vaccine nor an infection gives full protection, though.",
+          "fr": "Les enfants vaccinés tombent moins souvent malades. Mais ni le vaccin ni une infection ne protègent complètement."
+        },
+        "source": "https://www.cdc.gov/rotavirus/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Rota means wheel in Latin: under an electron microscope the virus looks like a tiny wheel with spokes.",
@@ -4149,17 +4425,34 @@
         "fr": "Continue de boire, et laisse les cloques tranquilles."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Hand, foot and mouth comes from farm animals.",
-        "fr": "La maladie pieds-mains-bouche vient des animaux de ferme."
+    "myths": [
+      {
+        "id": "coxy-1",
+        "claim": {
+          "en": "Hand, foot and mouth comes from farm animals.",
+          "fr": "La maladie pieds-mains-bouche vient des animaux de ferme."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It has nothing to do with foot-and-mouth disease in livestock. Different virus, different species.",
+          "fr": "Aucun rapport avec la fièvre aphteuse des animaux de ferme. Autre virus, autres espèces."
+        },
+        "source": "https://www.cdc.gov/hand-foot-mouth/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It has nothing to do with foot-and-mouth disease in livestock. Different virus, different species.",
-        "fr": "Aucun rapport avec la fièvre aphteuse des animaux de ferme. Autre virus, autres espèces."
+      {
+        "id": "coxy-2",
+        "claim": {
+          "en": "Hand, foot and mouth can spread through diapers for weeks.",
+          "fr": "Pieds-mains-bouche peut se transmettre par les couches pendant des semaines."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "The virus stays in poop for days or weeks after the illness. Wash your hands after every diaper change.",
+          "fr": "Le virus reste dans les selles des jours, voire des semaines après la maladie. Lave-toi les mains après chaque couche."
+        },
+        "source": "https://www.cdc.gov/hand-foot-mouth/causes/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "It has nothing to do with foot-and-mouth disease in farm animals. Different virus, different species.",
@@ -4426,17 +4719,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "With fifth disease, you're most contagious once the rash shows.",
-        "fr": "Avec la cinquième maladie, on est le plus contagieux une fois l'éruption sortie."
+    "myths": [
+      {
+        "id": "slappy-1",
+        "claim": {
+          "en": "With fifth disease, you're most contagious once the rash shows.",
+          "fr": "Avec la cinquième maladie, on est le plus contagieux une fois l'éruption sortie."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "By the time the slapped-cheek rash appears, the contagious phase is already over.",
+          "fr": "Quand les joues rouges apparaissent, la phase contagieuse est déjà finie."
+        },
+        "source": "https://www.cdc.gov/parvovirus-b19/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "By the time the slapped-cheek rash appears, the contagious phase is already over.",
-        "fr": "Quand les joues rouges apparaissent, la phase contagieuse est déjà finie."
+      {
+        "id": "slappy-2",
+        "claim": {
+          "en": "Adults with fifth disease often get sore joints.",
+          "fr": "Les adultes qui ont la cinquième maladie ont souvent mal aux articulations."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Joint pain is more common in adults than in kids. It usually lasts 1 to 3 weeks.",
+          "fr": "La douleur aux articulations est plus fréquente chez l'adulte que chez l'enfant. Elle dure en général 1 à 3 semaines."
+        },
+        "source": "https://www.cdc.gov/parvovirus-b19/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "It is called fifth disease because it was fifth on a historical list of common childhood rash illnesses.",
@@ -4704,17 +5014,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Lice prefer dirty hair.",
-        "fr": "Les poux préfèrent les cheveux sales."
+    "myths": [
+      {
+        "id": "lousy-1",
+        "claim": {
+          "en": "Lice prefer dirty hair.",
+          "fr": "Les poux préfèrent les cheveux sales."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Clean or not, lice don't care. They crawl from head to head; they can't jump or fly.",
+          "fr": "Propres ou pas, les poux s'en fichent. Ils rampent d'une tête à l'autre; ils ne sautent pas et ne volent pas."
+        },
+        "source": "https://www.cdc.gov/lice/about/head-lice.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Clean or not, lice don't care. They crawl from head to head; they can't jump or fly.",
-        "fr": "Propres ou pas, les poux s'en fichent. Ils rampent d'une tête à l'autre; ils ne sautent pas et ne volent pas."
+      {
+        "id": "lousy-2",
+        "claim": {
+          "en": "Head lice can jump from head to head.",
+          "fr": "Les poux peuvent sauter d'une tête à l'autre."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "They can't jump or fly. They crawl, mostly during head-to-head contact.",
+          "fr": "Ils ne sautent pas et ne volent pas. Ils rampent, surtout lors d'un contact tête contre tête."
+        },
+        "source": "https://www.cdc.gov/lice/about/head-lice.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "A louse lives about 30 days on a head and dies within two days off it.",
@@ -4927,8 +5254,8 @@
       }
     ],
     "doctor": {
-      "en": "See a health professional or a pharmacist for treatment. It is usually two doses of medicine, two weeks apart.",
-      "fr": "Consulte un professionnel de la santé ou un pharmacien pour le traitement. C'est en général deux doses de médicament, à deux semaines d'intervalle."
+      "en": "See a health professional or a pharmacist for treatment. It often covers the whole household.",
+      "fr": "Consulte un professionnel de la santé ou un pharmacien pour le traitement. Il vise souvent toute la maisonnée."
     },
     "doctorLead": {
       "en": "See a health professional or a pharmacist:",
@@ -4936,8 +5263,8 @@
     },
     "doctorSigns": [
       {
-        "en": "For treatment, usually two doses of medicine, two weeks apart",
-        "fr": "Pour le traitement, en général deux doses de médicament à deux semaines d'intervalle"
+        "en": "For treatment, which often covers the whole household",
+        "fr": "Pour le traitement, qui vise souvent toute la maisonnée"
       }
     ],
     "boss": {
@@ -4950,17 +5277,34 @@
         "fr": "Douche le matin, lavage à l'eau chaude, ongles courts."
       }
     },
-    "myth": {
-      "claim": {
-        "en": "Shaking out the sheets gets rid of pinworm eggs.",
-        "fr": "Secouer les draps élimine les œufs d'oxyures."
+    "myths": [
+      {
+        "id": "wiggles-1",
+        "claim": {
+          "en": "Shaking out the sheets gets rid of pinworm eggs.",
+          "fr": "Secouer les draps élimine les œufs d'oxyures."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "Don't shake them: wash bedding and pajamas in hot water instead. The eggs are too small to see.",
+          "fr": "Ne les secoue pas : lave plutôt la literie et les pyjamas à l'eau chaude. Les œufs sont trop petits pour être vus."
+        },
+        "source": "https://www.cdc.gov/pinworm/prevention/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "Don't shake them: wash bedding and pajamas in hot water instead. The eggs are too small to see.",
-        "fr": "Ne les secoue pas : lave plutôt la literie et les pyjamas à l'eau chaude. Les œufs sont trop petits pour être vus."
+      {
+        "id": "wiggles-2",
+        "claim": {
+          "en": "Pinworm eggs die within a few hours.",
+          "fr": "Les œufs d'oxyures meurent en quelques heures."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "They can survive 2 to 3 weeks on surfaces. That's why short nails and clean hands matter.",
+          "fr": "Ils peuvent survivre 2 à 3 semaines sur les surfaces. C'est pour ça que les ongles courts et les mains propres comptent."
+        },
+        "source": "https://www.cdc.gov/pinworm/prevention/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Pinworm is the most common worm infection in the United States, and school-age and preschool kids are its favorite hosts.",
@@ -5181,17 +5525,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Impetigo clears up by itself, no treatment needed.",
-        "fr": "L'impétigo guérit tout seul, sans traitement."
+    "myths": [
+      {
+        "id": "crusty-1",
+        "claim": {
+          "en": "Impetigo clears up by itself, no treatment needed.",
+          "fr": "L'impétigo guérit tout seul, sans traitement."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It usually needs antibiotics, as a cream or pills. Keep the sores covered meanwhile.",
+          "fr": "Il demande en général des antibiotiques, en crème ou en comprimés. Garde les plaies couvertes en attendant."
+        },
+        "source": "https://www.nhs.uk/conditions/impetigo/"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It usually needs antibiotics, as a cream or pills. Keep the sores covered meanwhile.",
-        "fr": "Il demande en général des antibiotiques, en crème ou en comprimés. Garde les plaies couvertes en attendant."
+      {
+        "id": "crusty-2",
+        "claim": {
+          "en": "Impetigo is most common in kids aged 2 to 5.",
+          "fr": "L'impétigo est le plus fréquent chez les enfants de 2 à 5 ans."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Close contact spreads it, which is why daycare groups know it well. Broken skin makes it easier to catch.",
+          "fr": "Le contact rapproché le transmet, et les groupes de garderie le connaissent bien. Une peau abîmée le facilite."
+        },
+        "source": "https://www.cdc.gov/group-a-strep/about/impetigo.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "Broken skin is the way in: an infection or an injury that breaks the skin raises the risk.",
@@ -5434,17 +5795,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Ringworm is caused by a worm.",
-        "fr": "La teigne est causée par un ver."
+    "myths": [
+      {
+        "id": "ringo-1",
+        "claim": {
+          "en": "Ringworm is caused by a worm.",
+          "fr": "La teigne est causée par un ver."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It's a fungus. The ring forms because it grows outward while the middle heals.",
+          "fr": "C'est un champignon. L'anneau se forme parce qu'il pousse vers l'extérieur pendant que le centre guérit."
+        },
+        "source": "https://www.cdc.gov/ringworm/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It's a fungus. The ring forms because it grows outward while the middle heals.",
-        "fr": "C'est un champignon. L'anneau se forme parce qu'il pousse vers l'extérieur pendant que le centre guérit."
+      {
+        "id": "ringo-2",
+        "claim": {
+          "en": "The fungus behind ringworm also causes athlete's foot.",
+          "fr": "Le champignon de la teigne cause aussi le pied d'athlète."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "The same fungi cause ringworm, athlete's foot and jock itch. The name only depends on where it lands.",
+          "fr": "Les mêmes champignons causent la teigne, le pied d'athlète et la teigne de l'aine. Le nom dépend seulement de l'endroit touché."
+        },
+        "source": "https://www.cdc.gov/ringworm/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "The same fungi that cause ringworm also cause athlete's foot and jock itch. The name only describes where it lands.",
@@ -5693,17 +6071,34 @@
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "Having had whooping cough protects you for life.",
-        "fr": "Avoir eu la coqueluche protège pour la vie."
+    "myths": [
+      {
+        "id": "whoopy-1",
+        "claim": {
+          "en": "Having had whooping cough protects you for life.",
+          "fr": "Avoir eu la coqueluche protège pour la vie."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It doesn't, which is why vaccination is recommended at every age.",
+          "fr": "Non. Voilà pourquoi la vaccination est recommandée à tout âge."
+        },
+        "source": "https://www.cdc.gov/pertussis/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It doesn't, which is why vaccination is recommended at every age.",
-        "fr": "Non. Voilà pourquoi la vaccination est recommandée à tout âge."
+      {
+        "id": "whoopy-2",
+        "claim": {
+          "en": "Whooping cough starts like an ordinary cold.",
+          "fr": "La coqueluche commence comme un rhume ordinaire."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "Runny nose, mild cough. The coughing fits come 1 to 2 weeks later.",
+          "fr": "Nez qui coule, petite toux. Les quintes de toux arrivent 1 à 2 semaines plus tard."
+        },
+        "source": "https://www.cdc.gov/pertussis/signs-symptoms/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "It starts like an ordinary cold. One to two weeks later the coughing fits begin, sometimes ending with the high-pitched whoop that gave it its name.",
@@ -5899,8 +6294,8 @@
           "fr": "Vaccin"
         },
         "value": {
-          "en": "Two doses protect very well",
-          "fr": "Deux doses protègent très bien"
+          "en": "Protects very well",
+          "fr": "Protège très bien"
         }
       },
       {
@@ -5975,22 +6370,39 @@
         "fr": "Tempête de boutons : des cloques qui piquent partout."
       },
       "weakness": {
-        "en": "Two vaccine doses. Short nails, no aspirin.",
-        "fr": "Deux doses de vaccin. Ongles courts, pas d'aspirine."
+        "en": "The vaccine. Short nails, no aspirin.",
+        "fr": "Le vaccin. Ongles courts, pas d'aspirine."
       },
       "weaknessQuiz": true
     },
-    "myth": {
-      "claim": {
-        "en": "After chickenpox, the virus leaves for good.",
-        "fr": "Après la varicelle, le virus part pour de bon."
+    "myths": [
+      {
+        "id": "poxy-1",
+        "claim": {
+          "en": "After chickenpox, the virus leaves for good.",
+          "fr": "Après la varicelle, le virus part pour de bon."
+        },
+        "isTrue": false,
+        "explanation": {
+          "en": "It sleeps in nerve cells and can wake up decades later as shingles.",
+          "fr": "Il dort dans les cellules nerveuses et peut se réveiller des décennies plus tard sous forme de zona."
+        },
+        "source": "https://www.cdc.gov/chickenpox/about/index.html"
       },
-      "isTrue": false,
-      "explanation": {
-        "en": "It sleeps in nerve cells and can wake up decades later as shingles.",
-        "fr": "Il dort dans les cellules nerveuses et peut se réveiller des décennies plus tard sous forme de zona."
+      {
+        "id": "poxy-2",
+        "claim": {
+          "en": "Chickenpox is contagious before the rash shows.",
+          "fr": "La varicelle est contagieuse avant l'apparition des boutons."
+        },
+        "isTrue": true,
+        "explanation": {
+          "en": "It spreads from 1 to 2 days before the rash until every blister has crusted.",
+          "fr": "Elle se transmet de 1 à 2 jours avant l'éruption jusqu'à ce que toutes les cloques aient formé une croûte."
+        },
+        "source": "https://www.cdc.gov/chickenpox/about/index.html"
       }
-    },
+    ],
     "deepDive": [
       {
         "en": "After chickenpox, the virus never leaves. It sleeps in nerve cells and can wake up decades later as shingles.",

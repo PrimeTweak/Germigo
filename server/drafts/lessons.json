@@ -1,0 +1,292 @@
+{
+  "lessons": [
+    {
+      "id": "snot",
+      "icon": "nose.fill",
+      "title": {
+        "en": "Snot, decoded",
+        "fr": "La morve, décodée"
+      },
+      "summary": {
+        "en": "Clear, yellow, then green: what the color says, and what it doesn't.",
+        "fr": "Claire, jaune, puis verte : ce que la couleur dit, et ce qu'elle ne dit pas."
+      },
+      "paragraphs": [
+        {
+          "en": "When a cold virus first lands in the nose, the nose makes clear mucus. It's a rinse: it helps wash the virus out of the nose and sinuses.",
+          "fr": "Quand un virus du rhume arrive dans le nez, le nez fabrique du mucus clair. C'est un rinçage : il aide à évacuer le virus du nez et des sinus."
+        },
+        {
+          "en": "After two or three days, the immune system fights back, and the mucus turns white or yellow. Later, as the bacteria that normally live in the nose grow back, it can turn green.",
+          "fr": "Après deux ou trois jours, le système immunitaire riposte, et le mucus devient blanc ou jaune. Plus tard, quand les bactéries qui vivent normalement dans le nez repoussent, il peut virer au vert."
+        },
+        {
+          "en": "All of this is a normal part of a cold. Antibiotics don't work on the viruses behind colds, even when the mucus is thick, yellow or green.",
+          "fr": "Tout ça fait partie d'un rhume normal. Les antibiotiques n'agissent pas sur les virus du rhume, même quand le mucus est épais, jaune ou vert."
+        },
+        {
+          "en": "So the color is a progress report, not a diagnosis. How long it lasts and how you feel tell you more, and the cold's case file lists when to call.",
+          "fr": "La couleur, c'est donc un bulletin de progrès, pas un diagnostic. La durée et comment tu te sens en disent plus, et la fiche du rhume dit quand appeler."
+        }
+      ],
+      "sources": [
+        {
+          "name": "CDC: Are antibiotics needed for my child's runny nose?",
+          "url": "https://www.cdc.gov/antibiotic-use/media/pdfs/Runny-Nose-508.pdf"
+        },
+        {
+          "name": "CDC: About Common Cold",
+          "url": "https://www.cdc.gov/common-cold/about/index.html"
+        }
+      ]
+    },
+    {
+      "id": "incubation",
+      "icon": "hourglass",
+      "title": {
+        "en": "The incubation period, explained",
+        "fr": "L'incubation, expliquée"
+      },
+      "summary": {
+        "en": "Why you get sick a day, three days or two weeks after the germ moved in.",
+        "fr": "Pourquoi on tombe malade un jour, trois jours ou deux semaines après l'arrivée du microbe."
+      },
+      "paragraphs": [
+        {
+          "en": "The incubation period is the time between catching a germ and the first symptoms. You feel fine, but the germ is already settling in.",
+          "fr": "L'incubation, c'est le temps entre le moment où on attrape un microbe et les premiers symptômes. Tu te sens bien, mais le microbe est déjà en train de s'installer."
+        },
+        {
+          "en": "Every germ has its own pace. The stomach bug can hit 12 to 48 hours after contact. A cold shows up 1 to 3 days later, the flu 1 to 4 days, RSV 4 to 6 days.",
+          "fr": "Chaque microbe a son rythme. La gastro peut frapper 12 à 48 heures après le contact. Un rhume se montre 1 à 3 jours plus tard, la grippe 1 à 4 jours, le VRS 4 à 6 jours."
+        },
+        {
+          "en": "Others take their time. COVID-19 can take 2 to 14 days, and chickenpox 10 to 21 days. That's why it's so hard to know who gave it to you.",
+          "fr": "D'autres prennent leur temps. La COVID-19 peut prendre de 2 à 14 jours, et la varicelle de 10 à 21 jours. C'est pour ça qu'on sait rarement qui nous l'a donné."
+        },
+        {
+          "en": "And germs don't always wait for symptoms to move on. The flu can spread starting the day before you feel anything, and chickenpox 1 to 2 days before the rash.",
+          "fr": "Et les microbes n'attendent pas toujours les symptômes pour passer au suivant. La grippe peut se transmettre dès la veille des premiers symptômes, et la varicelle de 1 à 2 jours avant l'éruption."
+        }
+      ],
+      "sources": [
+        {
+          "name": "CDC: About Norovirus",
+          "url": "https://www.cdc.gov/norovirus/about/index.html"
+        },
+        {
+          "name": "Mayo Clinic: Common cold",
+          "url": "https://www.mayoclinic.org/diseases-conditions/common-cold/symptoms-causes/syc-20351605"
+        },
+        {
+          "name": "CDC: How Flu Spreads",
+          "url": "https://www.cdc.gov/flu/spread/index.html"
+        },
+        {
+          "name": "CDC: RSV symptoms and care",
+          "url": "https://www.cdc.gov/rsv/symptoms/index.html"
+        },
+        {
+          "name": "CDC: Symptoms of COVID-19",
+          "url": "https://www.cdc.gov/covid/signs-symptoms/index.html"
+        },
+        {
+          "name": "CDC: About Chickenpox",
+          "url": "https://www.cdc.gov/chickenpox/about/index.html"
+        }
+      ]
+    },
+    {
+      "id": "germ-route",
+      "icon": "house.fill",
+      "title": {
+        "en": "How germs travel through a house",
+        "fr": "Le trajet d'un microbe dans la maison"
+      },
+      "summary": {
+        "en": "Droplets, hands, toys and doorknobs: the routes, and where soap cuts them off.",
+        "fr": "Gouttelettes, mains, jouets et poignées : les chemins, et où le savon les coupe."
+      },
+      "paragraphs": [
+        {
+          "en": "Most cold and flu viruses travel in droplets from coughs, sneezes and talking. They land in the eyes, nose or mouth of whoever is close by, which at home is everyone.",
+          "fr": "La plupart des virus du rhume et de la grippe voyagent dans les gouttelettes de toux, d'éternuements et de paroles. Elles se posent dans les yeux, le nez ou la bouche de qui est proche, et à la maison, c'est tout le monde."
+        },
+        {
+          "en": "The other route is hands. A germ goes from a nose to a hand, to a doorknob or a toy, then to the next hand, which rubs an eye. RSV can survive for many hours on hard surfaces like tables and crib rails.",
+          "fr": "L'autre chemin, ce sont les mains. Un microbe passe d'un nez à une main, à une poignée ou à un jouet, puis à la main suivante, qui se frotte un œil. Le VRS peut survivre plusieurs heures sur les surfaces dures comme les tables et les barreaux de lit."
+        },
+        {
+          "en": "The stomach bug plays rough. It only takes a few norovirus particles to make someone sick, and it spreads through hands, food and surfaces splashed by vomit or diarrhea.",
+          "fr": "La gastro, elle, joue dur. Il suffit de quelques particules de norovirus pour rendre quelqu'un malade, et il passe par les mains, la nourriture et les surfaces éclaboussées de vomi ou de diarrhée."
+        },
+        {
+          "en": "Soap is where the route ends. Scrub for at least 20 seconds, especially after the toilet, a diaper or a nose. Soap and water beat hand sanitizer in most situations, and norovirus barely notices sanitizer.",
+          "fr": "C'est au savon que le trajet s'arrête. Frotte au moins 20 secondes, surtout après la toilette, une couche ou un nez. L'eau et le savon battent le gel désinfectant dans la plupart des cas, et le norovirus remarque à peine le gel."
+        }
+      ],
+      "sources": [
+        {
+          "name": "CDC: How Norovirus Spreads",
+          "url": "https://www.cdc.gov/norovirus/causes/index.html"
+        },
+        {
+          "name": "CDC: How to Prevent Norovirus",
+          "url": "https://www.cdc.gov/norovirus/prevention/index.html"
+        },
+        {
+          "name": "CDC: About Handwashing",
+          "url": "https://www.cdc.gov/clean-hands/about/index.html"
+        },
+        {
+          "name": "CDC: How RSV spreads",
+          "url": "https://www.cdc.gov/rsv/causes/index.html"
+        },
+        {
+          "name": "CDC: How Flu Spreads",
+          "url": "https://www.cdc.gov/flu/spread/index.html"
+        }
+      ]
+    },
+    {
+      "id": "immune",
+      "icon": "shield.lefthalf.filled",
+      "title": {
+        "en": "Your immune system in 3 minutes",
+        "fr": "Ton système immunitaire en 3 minutes"
+      },
+      "summary": {
+        "en": "Fever, snot and antibodies: what your body is up to during a cold.",
+        "fr": "Fièvre, morve et anticorps : ce que ton corps fabrique pendant un rhume."
+      },
+      "paragraphs": [
+        {
+          "en": "You're born with a first line of defense that reacts to any intruder. Inflammation is part of it, and so is fever, an important part of the body's defense against infection.",
+          "fr": "Tu nais avec une première ligne de défense qui réagit à n'importe quel intrus. L'inflammation en fait partie, tout comme la fièvre, un élément important de la défense du corps contre les infections."
+        },
+        {
+          "en": "Then comes the part that learns. Your body builds a defense against that specific germ: antibodies that latch on to it and make it easier for immune cells to destroy.",
+          "fr": "Ensuite vient la partie qui apprend. Ton corps bâtit une défense contre ce microbe précis : des anticorps qui s'y accrochent et aident les cellules immunitaires à le détruire."
+        },
+        {
+          "en": "Some of those cells keep a memory, so the next meeting with the same germ goes faster. The catch: more than 200 viruses cause colds, and each new one starts from scratch.",
+          "fr": "Certaines de ces cellules gardent un souvenir, alors la prochaine rencontre avec le même microbe va plus vite. Le hic : plus de 200 virus causent le rhume, et chaque nouveau repart de zéro."
+        },
+        {
+          "en": "Babies are born with antibodies from their mother, which fade between 6 and 12 months. Around then, many start daycare and meet everything for the first time. Now you know why.",
+          "fr": "Les bébés naissent avec des anticorps de leur mère, qui disparaissent entre 6 et 12 mois. C'est à peu près l'âge où plusieurs commencent la garderie et rencontrent tout pour la première fois. Maintenant, tu sais pourquoi."
+        }
+      ],
+      "sources": [
+        {
+          "name": "MedlinePlus: Immune response",
+          "url": "https://medlineplus.gov/ency/article/000821.htm"
+        },
+        {
+          "name": "MedlinePlus: Fever",
+          "url": "https://medlineplus.gov/ency/article/003090.htm"
+        },
+        {
+          "name": "CDC: About Common Cold",
+          "url": "https://www.cdc.gov/common-cold/about/index.html"
+        }
+      ]
+    },
+    {
+      "id": "vaccines",
+      "icon": "syringe.fill",
+      "title": {
+        "en": "Which daycare germs have a vaccine",
+        "fr": "Quels microbes de garderie ont un vaccin"
+      },
+      "summary": {
+        "en": "Flu, COVID-19, rotavirus, chickenpox, whooping cough: how a vaccine works, and where to check yours.",
+        "fr": "Grippe, COVID-19, rotavirus, varicelle, coqueluche : comment un vaccin fonctionne, et où vérifier les tiens."
+      },
+      "paragraphs": [
+        {
+          "en": "A vaccine shows your immune system a dead or weakened virus, or a piece of one, so it builds a memory without you having to catch the illness first. Next time, it reacts faster.",
+          "fr": "Un vaccin montre à ton système immunitaire un virus mort ou affaibli, ou un morceau de virus, pour qu'il se fasse une mémoire sans que tu aies à attraper la maladie. La fois suivante, il réagit plus vite."
+        },
+        {
+          "en": "Among the germs in the Guide, the flu, COVID-19, rotavirus, chickenpox and whooping cough all have one. Flu viruses keep changing, which is why flu vaccines are updated every year.",
+          "fr": "Parmi les microbes du Guide, la grippe, la COVID-19, le rotavirus, la varicelle et la coqueluche en ont tous un. Les virus de la grippe changent sans arrêt, c'est pour ça que les vaccins contre la grippe sont mis à jour chaque année."
+        },
+        {
+          "en": "Vaccinated kids are less likely to get sick with rotavirus, though neither the vaccine nor a past infection gives full protection. Since vaccination began in the US, chickenpox cases have dropped by more than 97%.",
+          "fr": "Les enfants vaccinés tombent moins souvent malades du rotavirus, même si ni le vaccin ni une infection passée ne protègent complètement. Depuis le début de la vaccination aux États-Unis, les cas de varicelle ont baissé de plus de 97 %."
+        },
+        {
+          "en": "Who gets which vaccine, and when, depends on where you live and changes over time. In Canada, each province and territory has its own schedule. Your health professional or pharmacist can tell you what applies to your family.",
+          "fr": "Qui reçoit quel vaccin, et quand, dépend de l'endroit où tu vis et change avec le temps. Au Canada, chaque province et territoire a son propre calendrier. Ton professionnel de la santé ou ton pharmacien peut te dire ce qui s'applique à ta famille."
+        }
+      ],
+      "sources": [
+        {
+          "name": "MedlinePlus: Immune response",
+          "url": "https://medlineplus.gov/ency/article/000821.htm"
+        },
+        {
+          "name": "CDC: About Influenza",
+          "url": "https://www.cdc.gov/flu/about/index.html"
+        },
+        {
+          "name": "CDC: About Rotavirus",
+          "url": "https://www.cdc.gov/rotavirus/about/index.html"
+        },
+        {
+          "name": "CDC: About Chickenpox",
+          "url": "https://www.cdc.gov/chickenpox/about/index.html"
+        },
+        {
+          "name": "Canada.ca: COVID-19 vaccines",
+          "url": "https://www.canada.ca/en/public-health/services/diseases/coronavirus-disease-covid-19/vaccines.html"
+        },
+        {
+          "name": "Canada.ca: Routine vaccination schedules for infants and children",
+          "url": "https://www.canada.ca/en/public-health/services/provincial-territorial-immunization-information/provincial-territorial-routine-vaccination-programs-infants-children.html"
+        }
+      ]
+    },
+    {
+      "id": "elbow",
+      "icon": "wind",
+      "title": {
+        "en": "Why your elbow beats your hands",
+        "fr": "Pourquoi ton coude bat tes mains"
+      },
+      "summary": {
+        "en": "Coughs and sneezes: the tissue, the elbow, and the hands that touch everything.",
+        "fr": "Toux et éternuements : le mouchoir, le coude, et les mains qui touchent à tout."
+      },
+      "paragraphs": [
+        {
+          "en": "Coughing, sneezing and even talking send germs flying. Covering up, along with clean hands, can help slow the spread of the flu, RSV, whooping cough and COVID-19.",
+          "fr": "Tousser, éternuer et même parler font voler les microbes. Se couvrir, en plus d'avoir les mains propres, peut aider à freiner la grippe, le VRS, la coqueluche et la COVID-19."
+        },
+        {
+          "en": "First choice: a tissue over your mouth and nose. Then straight in the trash, and wash your hands right away.",
+          "fr": "Premier choix : un mouchoir sur la bouche et le nez. Ensuite, directement à la poubelle, et lave-toi les mains tout de suite."
+        },
+        {
+          "en": "No tissue? Use your elbow or upper sleeve, not your hands. Hands are the ones that open doors, pass toys and wipe noses, so whatever lands on them gets a free ride.",
+          "fr": "Pas de mouchoir ? Utilise ton coude ou le haut de ta manche, pas tes mains. Ce sont les mains qui ouvrent les portes, passent les jouets et mouchent les nez : ce qui atterrit dessus voyage gratuitement."
+        },
+        {
+          "en": "Germs also spread when you touch a surface others have touched, then your face. That's why clean hands finish the job the elbow started.",
+          "fr": "Les microbes passent aussi quand tu touches une surface que d'autres ont touchée, puis ton visage. C'est pour ça que des mains propres finissent le travail commencé par le coude."
+        }
+      ],
+      "sources": [
+        {
+          "name": "CDC: Coughing and Sneezing",
+          "url": "https://www.cdc.gov/hygiene/about/coughing-and-sneezing.html"
+        },
+        {
+          "name": "CDC: About Handwashing",
+          "url": "https://www.cdc.gov/clean-hands/about/index.html"
+        }
+      ]
+    }
+  ]
+}

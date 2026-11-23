@@ -19,6 +19,8 @@ struct QuizQuestion: Identifiable, Hashable {
     let prompt: String
     let options: [String]
     let answer: Int
+    /// The claim a myth question asks about.
+    var myth: GermMyth?
 }
 
 /// A generator that gives the same sequence for the same seed, so a day's quiz stays put.
@@ -56,13 +58,15 @@ enum QuizEngine {
         return hash
     }
 
-    /// Every question the notes allow: a myth and a boss per germ, the timings given in numbers,
+    /// Every question the notes allow: each myth, a boss per germ, the timings given in numbers,
     /// the microbe behind it, and the signs and weaknesses flagged as naming the germ alone.
     static func bank(_ germs: [Germ]) -> [QuizQuestion] {
         var questions: [QuizQuestion] = []
         for germ in germs {
-            questions.append(QuizQuestion(id: "myth-" + germ.id, kind: .myth, germ: germ, prompt: germ.myth.claim.value,
-                                          options: [tr("Myth"), tr("Fact")], answer: germ.myth.isTrue ? 1 : 0))
+            for myth in germ.myths {
+                questions.append(QuizQuestion(id: "myth-" + myth.id, kind: .myth, germ: germ, prompt: myth.claim.value,
+                                              options: [tr("Myth"), tr("Fact")], answer: myth.isTrue ? 1 : 0, myth: myth))
+            }
             if let question = choice(id: "who-" + germ.id, kind: .whoAmI, germ: germ, prompt: germ.boss.attack.value,
                                      pool: germs, text: { $0.illness.value }) {
                 questions.append(question)
@@ -130,7 +134,7 @@ enum QuizEngine {
             return round.questionIDs.compactMap { id in bank.first { $0.id == id } }
         }
         var picked: [QuizQuestion] = []
-        if let id = progress.missed.first, let question = bank.first(where: { $0.id == id }) {
+        if let question = progress.missed.lazy.compactMap({ id in bank.first { $0.id == id } }).first {
             picked.append(question)
         }
         var fresh = bank.filter { question in
@@ -176,8 +180,8 @@ enum QuizEngine {
         progress.missed.removeAll { $0 == question.id }
         if right {
             progress.rightTotal += 1
-            if question.kind == .myth && !progress.mythsRight.contains(question.germ.id) {
-                progress.mythsRight.append(question.germ.id)
+            if let myth = question.myth, !progress.mythsRight.contains(myth.id) {
+                progress.mythsRight.append(myth.id)
             }
         } else {
             progress.missed.append(question.id)
@@ -235,19 +239,22 @@ enum QuizEngine {
 
     /// The germ the Guide puts forward for the week; the mystery germ never is.
     static func germOfTheWeek(_ germs: [Germ], now: Date) -> Germ? {
-        weekPick(germs, now: now, halfway: false)
-    }
-
-    /// The germ whose myth is played this week: half an album away from the germ of the week,
-    /// so the two differ as soon as the album holds two germs.
-    static func mythOfTheWeek(_ germs: [Germ], now: Date) -> Germ? {
-        weekPick(germs, now: now, halfway: true)
-    }
-
-    private static func weekPick(_ germs: [Germ], now: Date, halfway: Bool) -> Germ? {
         let pool = germs.filter { $0.id != GermCatalog.mysteryID }
         guard !pool.isEmpty else { return nil }
-        let index = (weekIndex(now) + (halfway ? pool.count / 2 : 0)) % pool.count
-        return pool[(index + pool.count) % pool.count]
+        return pool[turn(now, count: pool.count)]
+    }
+
+    /// The myth played this week, taking every myth in turn; a myth about the germ of the week gives way to the next one.
+    static func mythOfTheWeek(_ myths: [Myth], germs: [Germ], now: Date) -> Myth? {
+        guard !myths.isEmpty else { return nil }
+        let germ = germOfTheWeek(germs, now: now)?.id
+        let start = turn(now, count: myths.count)
+        let order = Array(myths[start...]) + Array(myths[..<start])
+        return order.first { $0.germ.id != germ } ?? order[0]
+    }
+
+    /// This week's place in a list of a given size, from 0.
+    private static func turn(_ now: Date, count: Int) -> Int {
+        (weekIndex(now) % count + count) % count
     }
 }

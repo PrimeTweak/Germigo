@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The myths answered, in the order they were answered: the germ's id and whether the answer was right.
+/// The myths answered, in the order they were answered: the myth's id and whether the answer was right.
 struct MythAnswers {
     private(set) var entries: [(id: String, right: Bool)]
 
@@ -61,15 +61,15 @@ struct MythStamp: View {
 
 /// A myth on the Guide's shelf: the claim on the germ's tint, with its stamp once answered.
 struct MythTile: View {
-    let germ: Germ
+    let myth: Myth
     let answered: Bool
     @Environment(\.palette) private var palette
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            GermImage(germ: germ, size: 40)
+            GermImage(germ: myth.germ, size: 40)
                 .frame(width: 44, height: 44, alignment: .leading)
-            Text(germ.myth.claim.value)
+            Text(myth.claim)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.leading)
@@ -79,10 +79,10 @@ struct MythTile: View {
         .padding(12)
         .frame(width: 150, alignment: .topLeading)
         .frame(minHeight: 166, maxHeight: .infinity, alignment: .topLeading)
-        .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .background(myth.germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
         .overlay(alignment: .topTrailing) {
             if answered {
-                MythStamp(isTrue: germ.myth.isTrue)
+                MythStamp(isTrue: myth.isTrue)
                     .padding(10)
             } else {
                 Text(verbatim: "?")
@@ -100,7 +100,7 @@ struct MythTile: View {
 
 /// The myths in a row on the Guide, and the way into the deck.
 struct MythShelf: View {
-    let germs: [Germ]
+    let myths: [Myth]
     let open: (String) -> Void
     @AppStorage(GuideKeys.myths) private var answersText = ""
 
@@ -108,11 +108,11 @@ struct MythShelf: View {
         let answers = MythAnswers(answersText)
         ScrollView(.horizontal) {
             HStack(alignment: .top, spacing: 10) {
-                ForEach(germs) { germ in
+                ForEach(myths) { myth in
                     Button {
-                        open(germ.id)
+                        open(myth.id)
                     } label: {
-                        MythTile(germ: germ, answered: answers.right(germ.id) != nil)
+                        MythTile(myth: myth, answered: answers.right(myth.id) != nil)
                     }
                     .buttonStyle(PressableStyle())
                 }
@@ -133,26 +133,26 @@ struct MythDeckScreen: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(GuideKeys.myths) private var answersText = ""
     @State private var currentID: String
-    @State private var sharing: Germ?
+    @State private var sharing: Myth?
 
     init(start: String) {
         _currentID = State(initialValue: start)
     }
 
-    private var germs: [Germ] { model.catalog.germs }
+    private var myths: [Myth] { model.catalog.myths }
 
     var body: some View {
         let answers = MythAnswers(answersText)
-        let index = germs.firstIndex { $0.id == currentID } ?? 0
+        let index = myths.firstIndex { $0.id == currentID } ?? 0
         NavigationStack {
             VStack(spacing: 20) {
-                if index < germs.count {
-                    let germ = germs[index]
-                    let right = answers.right(germ.id)
-                    card(germ, right: right)
-                        .id(germ.id)
+                if index < myths.count {
+                    let myth = myths[index]
+                    let right = answers.right(myth.id)
+                    card(myth, right: right)
+                        .id(myth.id)
                         .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
-                    actions(germ, right: right, streak: answers.streak)
+                    actions(myth, right: right, streak: answers.streak)
                 }
             }
             .padding(.horizontal, Spacing.page)
@@ -171,47 +171,47 @@ struct MythDeckScreen: View {
                     .accessibilityLabel(tr("Close"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Text(tr("%1$lld of %2$lld", index + 1, germs.count))
+                    Text(tr("%1$lld of %2$lld", index + 1, myths.count))
                         .font(.subheadline.weight(.semibold).monospacedDigit())
                         .foregroundStyle(palette.inkSecondary)
                 }
             }
-            .sheet(item: $sharing) { germ in
+            .sheet(item: $sharing) { myth in
                 SharePreviewSheet(title: tr("Myth busters")) {
-                    MythShareCard(germ: germ)
+                    MythShareCard(myth: myth)
                 }
             }
         }
     }
 
-    private func card(_ germ: Germ, right: Bool?) -> some View {
+    private func card(_ myth: Myth, right: Bool?) -> some View {
         let shape = RoundedRectangle(cornerRadius: 34, style: .continuous)
         return VStack(spacing: 12) {
             if right != nil {
-                MythStamp(isTrue: germ.myth.isTrue, large: true)
+                MythStamp(isTrue: myth.isTrue, large: true)
                     .transition(reduceMotion ? .opacity : .scale(scale: 1.8).combined(with: .opacity))
                     .padding(.top, 8)
             } else {
-                LivelyCharacter(mood: germ.restMood, touch: nil) {
-                    GermImage(germ: germ, size: 140)
+                LivelyCharacter(mood: myth.germ.restMood, touch: nil) {
+                    GermImage(germ: myth.germ, size: 140)
                 }
                 .frame(width: 150, height: 150)
             }
             Text(tr("Myth or fact?"))
                 .font(.subheadline.weight(.bold))
                 .foregroundStyle(palette.accent)
-            Text(germ.myth.claim.value)
+            Text(myth.claim)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if right != nil {
-                Text(germ.myth.explanation.value)
+                Text(myth.explanation)
                     .font(.body)
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                if let source = germ.sources.first, let url = source.link {
+                if let source = myth.reference, let url = source.link {
                     Link(destination: url) {
                         Label(source.name, systemImage: "info.circle")
                             .font(.footnote.weight(.semibold))
@@ -242,18 +242,18 @@ struct MythDeckScreen: View {
     }
 
     @ViewBuilder
-    private func actions(_ germ: Germ, right: Bool?, streak: Int) -> some View {
+    private func actions(_ myth: Myth, right: Bool?, streak: Int) -> some View {
         if let right {
             VStack(spacing: 10) {
                 HStack(spacing: 10) {
                     Button {
-                        sharing = germ
+                        sharing = myth
                     } label: {
                         Label(tr("Share"), systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(PillButtonStyle(kind: .ghost))
                     Button(tr("Next myth")) {
-                        next(after: germ)
+                        next(after: myth)
                     }
                     .buttonStyle(PillButtonStyle(kind: .ink))
                 }
@@ -265,10 +265,10 @@ struct MythDeckScreen: View {
         } else {
             HStack(spacing: 10) {
                 verdictButton(tr("Myth"), color: Swatch.coralInk) {
-                    answer(germ, fact: false)
+                    answer(myth, fact: false)
                 }
                 verdictButton(tr("Fact"), color: Swatch.greenInk) {
-                    answer(germ, fact: true)
+                    answer(myth, fact: true)
                 }
             }
         }
@@ -285,22 +285,22 @@ struct MythDeckScreen: View {
         .buttonStyle(PressableStyle())
     }
 
-    private func answer(_ germ: Germ, fact: Bool) {
-        let right = fact == germ.myth.isTrue
+    private func answer(_ myth: Myth, fact: Bool) {
+        let right = fact == myth.isTrue
         if right { Haptics.success() } else { Haptics.tap() }
         var answers = MythAnswers(answersText)
-        answers.record(germ.id, right: right)
+        answers.record(myth.id, right: right)
         withAnimation(reduceMotion ? nil : Tempo.pop) {
             answersText = answers.text
         }
     }
 
     /// The next myth not answered yet, after this one; when all are answered, simply the next one.
-    private func next(after germ: Germ) {
+    private func next(after myth: Myth) {
         let answers = MythAnswers(answersText)
-        let index = germs.firstIndex { $0.id == germ.id } ?? 0
-        let order = Array(germs[(index + 1)...]) + Array(germs[..<index])
-        let target = order.first { answers.right($0.id) == nil } ?? order.first ?? germ
+        let index = myths.firstIndex { $0.id == myth.id } ?? 0
+        let order = Array(myths[(index + 1)...]) + Array(myths[..<index])
+        let target = order.first { answers.right($0.id) == nil } ?? order.first ?? myth
         withAnimation(reduceMotion ? nil : Tempo.quick) {
             currentID = target.id
         }
@@ -309,22 +309,22 @@ struct MythDeckScreen: View {
 
 /// A busted myth, sized for stories: the stamp, the claim and the answer.
 struct MythShareCard: View {
-    let germ: Germ
+    let myth: Myth
 
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color(hex: Swatch.plum), Color(hex: Swatch.plumDeep)], startPoint: .top, endPoint: .bottom)
-            RadialGradient(colors: [germ.deepTint.opacity(0.55), Color.clear], center: UnitPoint(x: 0.5, y: 0.3),
+            RadialGradient(colors: [myth.germ.deepTint.opacity(0.55), Color.clear], center: UnitPoint(x: 0.5, y: 0.3),
                            startRadius: 0, endRadius: 260)
             VStack(spacing: 18) {
-                GermImage(germ: germ, size: 130)
+                GermImage(germ: myth.germ, size: 130)
                     .padding(.top, 50)
-                MythStamp(isTrue: germ.myth.isTrue, large: true)
-                Text(germ.myth.claim.value)
+                MythStamp(isTrue: myth.isTrue, large: true)
+                Text(myth.claim)
                     .font(.system(size: 26, weight: .heavy))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(germ.myth.explanation.value)
+                Text(myth.explanation)
                     .font(.system(size: 17, weight: .medium))
                     .multilineTextAlignment(.center)
                     .opacity(0.8)

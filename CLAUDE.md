@@ -14,7 +14,7 @@ No Swift compiler runs outside the Build IPA workflow. When Swift changed, say t
 
 ## Rules
 
-- Everything in the repository is in English: code, comments, string keys, docs. French lives only in the strings files and the content files (`App/Content/*.json`, `server/legal.json`, `server/illnesses.json`, `server/text.json`).
+- Everything in the repository is in English: code, comments, string keys, docs. French lives only in the strings files and the content files (`App/Content/*.json`, `server/legal.json`, `server/illnesses.json`, `server/text.json`, `server/lessons.json`, `server/drafts/lessons.json`).
 - Comments describe what the code does, impersonally and in plain words, in three lines at most. A comment that no longer matches its code is rewritten or removed.
 - No dead code: nothing unused, nothing never called, nothing commented out, nothing kept for later.
 - No leftover logs, probes or debug output. The server logs only errors and its start.
@@ -25,7 +25,7 @@ No Swift compiler runs outside the Build IPA workflow. When Swift changed, say t
 - User-facing text goes through `tr()` or `trCount()`. The key is the English text, and both `Localizable.strings` files get the line.
 - `server/legal.json` and `App/Content/legal.json` are the same file, byte for byte.
 - Data that leaves the phone is reflected in `legal.json`, `App/PrivacyInfo.xcprivacy` and `docs/APP-STORE.md` in the same change.
-- Health content is general information with a linked source. No diagnosis, no dosing.
+- Health content is general information with a linked source. No diagnosis, no dosing. `check_repo.py` holds the content rule's checks; `reviewedOn` is set only on the day a health professional approves the text.
 - Never commit secrets. Keys and `.env` files stay out of the repository.
 - `.github/workflows/` changes only when the owner requests it.
 

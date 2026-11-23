@@ -128,10 +128,28 @@ struct GermBoss: Codable, Hashable {
     }
 }
 
+/// One claim to judge, with the address of the germ source that settles it.
 struct GermMyth: Codable, Hashable {
+    let id: String
     let claim: LocalizedText
     let isTrue: Bool
     let explanation: LocalizedText
+    let source: String
+}
+
+/// A myth with the germ it belongs to, as the deck, the quiz and the shelves show it.
+struct Myth: Identifiable, Hashable {
+    let germ: Germ
+    let note: GermMyth
+
+    var id: String { note.id }
+    var claim: String { note.claim.value }
+    var explanation: String { note.explanation.value }
+    var isTrue: Bool { note.isTrue }
+    var reference: GermReference? { germ.sources.first { $0.url == note.source } }
+
+    static func == (lhs: Myth, rhs: Myth) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 struct GermSymptom: Codable, Hashable {
@@ -184,7 +202,7 @@ struct Germ: Codable, Identifiable, Hashable {
     let doctorSigns: [LocalizedText]
     let doctorNote: LocalizedText?
     let boss: GermBoss
-    let myth: GermMyth
+    let myths: [GermMyth]
     /// One of the sources that also covers children.
     let kidSource: String?
     /// The health sheet: what it is, what it feels like, how it travels.
@@ -199,8 +217,12 @@ struct Germ: Codable, Identifiable, Hashable {
     var canadaSource: BilingualReference?
     /// Other names parents use for the illness, such as "gastro" or "picotte". Names only, never symptoms.
     var searchWords: LocalizedWords?
+    /// The day a health professional approved the case file, written `yyyy-MM-dd`.
+    var reviewedOn: String?
 
     var assetName: String { "germ-" + id }
+
+    var mythCards: [Myth] { myths.map { Myth(germ: self, note: $0) } }
 
     /// True when the search text is in one of its names, in either language.
     func matches(_ needle: String) -> Bool {
@@ -248,6 +270,8 @@ struct Article: Codable, Identifiable, Hashable {
     let sources: [GermReference]
     /// Set on lessons from the online file; bundled ones have none.
     let releasedOn: Date?
+    /// The day a health professional approved the lesson, written `yyyy-MM-dd`.
+    var reviewedOn: String?
 
     /// About how long it takes to read, at 200 words a minute.
     var minutes: Int {

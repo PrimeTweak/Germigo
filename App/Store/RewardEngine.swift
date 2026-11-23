@@ -114,7 +114,7 @@ enum RewardEngine {
         if data.kidIllnesses.filter({ $0.outcome == .dodged }).count >= 3 { earned.insert(BadgeCatalog.dodger) }
         if StreakMath.record(data: data, now: now) >= 30 { earned.insert(BadgeCatalog.ironParent) }
         if !data.quiz.doneDays.isEmpty { earned.insert(BadgeCatalog.labRat) }
-        if !catalog.germs.isEmpty && Set(data.quiz.mythsRight).isSuperset(of: catalog.germs.map { $0.id }) {
+        if !catalog.myths.isEmpty && Set(data.quiz.mythsRight).isSuperset(of: catalog.myths.map { $0.id }) {
             earned.insert(BadgeCatalog.mythBuster)
         }
         if !catalog.articles.isEmpty && Set(data.readArticles).isSuperset(of: catalog.articles.map { $0.id }) {

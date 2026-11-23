@@ -247,7 +247,7 @@ enum BadgeProgress {
     static func counts(data: AppData, catalog: GermCatalog, now: Date) -> [String: BadgeCount] {
         let distinct = Set(data.logs.map { $0.germID }).count
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
-        let germIDs = Set(catalog.germs.map { $0.id })
+        let mythIDs = Set(catalog.myths.map { $0.id })
         let articleIDs = Set(catalog.articles.map { $0.id })
         let tricks = Set(MascotTrick.allCases.map { $0.rawValue })
         let calendar = Calendar.current
@@ -263,8 +263,8 @@ enum BadgeProgress {
             BadgeCatalog.dodger: BadgeCount(progress: dodged, target: 3),
             "rough_month": BadgeCount(progress: perMonth.values.max() ?? 0, target: 3),
             BadgeCatalog.ironParent: BadgeCount(progress: StreakMath.record(data: data, now: now), target: 30),
-            BadgeCatalog.mythBuster: BadgeCount(progress: Set(data.quiz.mythsRight).intersection(germIDs).count,
-                                                target: germIDs.count),
+            BadgeCatalog.mythBuster: BadgeCount(progress: Set(data.quiz.mythsRight).intersection(mythIDs).count,
+                                                target: mythIDs.count),
             BadgeCatalog.professor: BadgeCount(progress: Set(data.readArticles).intersection(articleIDs).count,
                                                target: articleIDs.count),
             BadgeCatalog.ticklish: BadgeCount(progress: Set(data.mascotTricks).intersection(tricks).count, target: tricks.count)

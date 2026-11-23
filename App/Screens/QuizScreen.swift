@@ -278,12 +278,12 @@ struct QuizScreen: View {
                     .font(.title2.weight(.bold))
                     .foregroundStyle(lastRight ? palette.accent : palette.ink)
             }
-            if question.kind == .myth {
+            if let myth = question.myth {
                 Text(question.prompt)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(palette.inkSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(germ.myth.explanation.value)
+                Text(myth.explanation.value)
                     .font(.body)
                     .foregroundStyle(palette.ink)
                     .fixedSize(horizontal: false, vertical: true)

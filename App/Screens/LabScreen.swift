@@ -154,7 +154,7 @@ struct LabScreen: View {
         if !model.hasPass {
             HoloPreview()
         }
-        mythBusters(germs)
+        mythBusters(model.catalog.myths)
         lessons
         extras
     }
@@ -203,18 +203,18 @@ struct LabScreen: View {
 
     /// Every myth in a row, and the way into the deck at the first one not answered.
     @ViewBuilder
-    private func mythBusters(_ germs: [Germ]) -> some View {
-        if !germs.isEmpty {
+    private func mythBusters(_ myths: [Myth]) -> some View {
+        if !myths.isEmpty {
             seeAllHeader(tr("Myth busters")) {
                 Button {
                     let answers = MythAnswers(mythsText)
-                    let first = germs.first { answers.right($0.id) == nil } ?? germs[0]
+                    let first = myths.first { answers.right($0.id) == nil } ?? myths[0]
                     mythStart = MythStart(id: first.id)
                 } label: {
-                    seeAllLabel(count: germs.count)
+                    seeAllLabel(count: myths.count)
                 }
             }
-            MythShelf(germs: germs) { id in
+            MythShelf(myths: myths) { id in
                 mythStart = MythStart(id: id)
             }
         }
@@ -295,7 +295,7 @@ struct LabScreen: View {
     @ViewBuilder
     private var results: some View {
         let germs = model.catalog.germs.filter { $0.matches(needle) }
-        let myths = model.catalog.germs.filter { $0.myth.claim.value.localizedStandardContains(needle) }
+        let myths = model.catalog.myths.filter { $0.claim.localizedStandardContains(needle) }
         let found = model.catalog.articles.filter { article in
             article.title.value.localizedStandardContains(needle) || article.summary.value.localizedStandardContains(needle)
         }
@@ -312,7 +312,7 @@ struct LabScreen: View {
         }
         if !myths.isEmpty {
             SectionHeader(title: tr("Myth busters"))
-            MythShelf(germs: myths) { id in
+            MythShelf(myths: myths) { id in
                 mythStart = MythStart(id: id)
             }
         }
@@ -715,9 +715,9 @@ private struct WeekShelf: View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 10) {
-                    if let germ = QuizEngine.mythOfTheWeek(germs, now: now) {
-                        WeekMythCard(germ: germ)
-                            .frame(width: answers.right(germ.id) != nil ? width * 1.45 : width)
+                    if let myth = QuizEngine.mythOfTheWeek(model.catalog.myths, germs: germs, now: now) {
+                        WeekMythCard(myth: myth)
+                            .frame(width: answers.right(myth.id) != nil ? width * 1.45 : width)
                             .id(Self.mythAnchor)
                     }
                     if let article = model.lessonsToRead(now: now).first, !model.data.readArticles.contains(article.id) {
@@ -816,13 +816,13 @@ private struct WeekGermCard: View {
 
 /// One claim a week to judge on the spot. Its answer joins the myth busters and keeps its stamp.
 private struct WeekMythCard: View {
-    let germ: Germ
+    let myth: Myth
     @Environment(\.palette) private var palette
     @AppStorage(GuideKeys.myths) private var mythsText = ""
 
     /// What was answered, worked out from whether it was right.
     private var answer: Bool? {
-        MythAnswers(mythsText).right(germ.id).map { $0 == germ.myth.isTrue }
+        MythAnswers(mythsText).right(myth.id).map { $0 == myth.isTrue }
     }
 
     var body: some View {
@@ -830,7 +830,7 @@ private struct WeekMythCard: View {
             Text(tr("Myth or fact?"))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(palette.accent)
-            Text(germ.myth.claim.value)
+            Text(myth.claim)
                 .font(.callout.weight(.bold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.leading)
@@ -853,7 +853,7 @@ private struct WeekMythCard: View {
     }
 
     private func verdict(_ answer: Bool) -> some View {
-        let right = answer == germ.myth.isTrue
+        let right = answer == myth.isTrue
         return VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .center) {
                 Label {
@@ -865,9 +865,9 @@ private struct WeekMythCard: View {
                 }
                 .font(.subheadline.weight(.bold))
                 Spacer(minLength: 6)
-                MythStamp(isTrue: germ.myth.isTrue)
+                MythStamp(isTrue: myth.isTrue)
             }
-            Text(germ.myth.explanation.value)
+            Text(myth.explanation)
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
                 .multilineTextAlignment(.leading)
@@ -878,10 +878,10 @@ private struct WeekMythCard: View {
 
     private func choice(_ title: String, value: Bool) -> some View {
         Button {
-            let right = value == germ.myth.isTrue
+            let right = value == myth.isTrue
             if right { Haptics.success() } else { Haptics.tap() }
             var answers = MythAnswers(mythsText)
-            answers.record(germ.id, right: right)
+            answers.record(myth.id, right: right)
             withAnimation(Tempo.quick) {
                 mythsText = answers.text
             }

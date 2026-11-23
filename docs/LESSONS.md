@@ -21,6 +21,7 @@ UTF-8 JSON, served over https with status 200, under 1 MB. Every lesson needs En
       "id": "stomach-bug",
       "icon": "drop.fill",
       "released": "2026-11-30",
+      "reviewedOn": "2026-11-20",
       "title": { "en": "Stomach bug, minus the panic", "fr": "La gastro, sans paniquer" },
       "summary": { "en": "What to do in the first 24 hours, and when to call.", "fr": "Quoi faire les premières 24 heures, et quand appeler." },
       "paragraphs": [
@@ -37,8 +38,13 @@ UTF-8 JSON, served over https with status 200, under 1 MB. Every lesson needs En
 - `id`: unique, never reused, never the id of a bundled lesson. Changing it makes the lesson new again.
 - `icon`: an SF Symbol name, shown beside the title; optional, a graduation cap when left out.
 - `released`: `yyyy-MM-dd`.
+- `reviewedOn`: `yyyy-MM-dd`, the day a health professional approved the lesson. The server leaves out any lesson without one, or with a source that is not https, and the app shows the month under the sources.
 - Keep lessons in the file after their week; removing one removes it from every phone at the next download.
 
 ## Hosting
 
 The crew server serves `server/lessons.json` at `/lessons.json`, with an `ETag`. Put `<server>/lessons.json` in `GermilyLessonsURL`. To publish, edit the file and push: the host redeploys, and the server reads the file when it starts. A file over 1 MB, or without a `lessons` list, is not served, and the app keeps its copy.
+
+## Drafts and review
+
+Lessons are written in `server/drafts/lessons.json`, in the same format without `released` or `reviewedOn`; the server never serves that file. `check_repo.py` applies the content rule to drafts too (see `README.md`). Once a health professional approves a batch, each lesson moves to `server/lessons.json` with its `reviewedOn` and a `released` day, one week apart.

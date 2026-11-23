@@ -2,6 +2,7 @@
 """Checks that the repository is complete and consistent before a build.
 Usage: python3 tools/check_repo.py [--release]. With --release, placeholders that must be
 replaced before an App Store upload also fail the check."""
+import datetime
 import json
 import pathlib
 import plistlib
@@ -12,11 +13,28 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RELEASE = "--release" in sys.argv
 errors = []
+notes = []
 SPEC = re.compile(r"%(?:\d+\$)?(?:lld|@|d|f)")
 STRING_LINE = re.compile(r'^"((?:[^"\\]|\\.)*)"\s*=\s*"((?:[^"\\]|\\.)*)";\s*$')
 
 # Longest "Shows up" or "Lasts" text a timeline column of a germ page is given.
 TILE_TEXT_LIMIT = 30
+
+# Publishers whose pages may back a health text; a subdomain counts as its publisher.
+TRUSTED_SOURCES = ("canada.ca", "quebec.ca", "inspq.qc.ca", "cps.ca", "cdc.gov", "nhs.uk", "medlineplus.gov",
+                   "aap.org", "healthychildren.org", "mayoclinic.org", "ncbi.nlm.nih.gov", "hse.ie", "asm.org", "ucl.ac.uk")
+# Words that would turn a health text into dosing advice.
+DOSING = re.compile(r"\b(?:mg|ml|doses?|dosage|dosing|posologie|give (?:your|the) (?:child|kid|baby)|"
+                    r"donne(?:-lui| à ton enfant| à ton bébé))\b", re.I)
+NUMBER = re.compile(r"\d+(?:[.,]\d+)?")
+THOUSANDS = re.compile(r"(?<=\d)[,\s\u00a0\u202f](?=\d{3}\b)")
+# A Fahrenheit conversion given only in English, beside its Celsius figure.
+FAHRENHEIT = re.compile(r"\d+(?:[.,]\d+)?\s*°F")
+MYTH_CLAIM_LIMIT = 90
+MYTH_EXPLANATION_LIMIT = 200
+# A review older than this is flagged as due for a new one.
+REVIEW_MAX_DAYS = 730
+DAY = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 REQUIRED = [
     "project.yml", ".gitignore", ".github/workflows/build-ipa.yml", ".github/workflows/release.yml",
@@ -142,11 +160,20 @@ def check_content():
         boss = germ.get("boss") or {}
         localized(boss.get("attack"), f"germs.json {gid}.boss.attack")
         localized(boss.get("weakness"), f"germs.json {gid}.boss.weakness")
-        myth = germ.get("myth") or {}
-        localized(myth.get("claim"), f"germs.json {gid}.myth.claim")
-        localized(myth.get("explanation"), f"germs.json {gid}.myth.explanation")
-        if not isinstance(myth.get("isTrue"), bool):
-            fail(f"germs.json {gid}: myth.isTrue must be true or false")
+        myths = germ.get("myths")
+        if not isinstance(myths, list) or not myths:
+            fail(f"germs.json {gid}: needs a list of myths")
+        urls = [source.get("url") for source in germ.get("sources", [])]
+        for index, myth in enumerate(myths or []):
+            where = f"germs.json {gid}.myths[{index}]"
+            if not re.fullmatch(rf"{gid}-\d+", str(myth.get("id", ""))):
+                fail(f"{where}: id must be {gid}- then a number")
+            localized(myth.get("claim"), f"{where}.claim")
+            localized(myth.get("explanation"), f"{where}.explanation")
+            if not isinstance(myth.get("isTrue"), bool):
+                fail(f"{where}: isTrue must be true or false")
+            if myth.get("source") not in urls:
+                fail(f"{where}: source must be the url of one of the germ's sources")
         kid = germ.get("kidSource")
         if kid is not None and kid not in [source.get("url") for source in germ.get("sources", [])]:
             fail(f"germs.json {gid}: kidSource must be one of the germ's sources")
@@ -223,6 +250,145 @@ def check_content():
         fail("server/server.js: GERM_IDS must match the ids in germs.json")
     check_illnesses(germs)
     return germs
+
+
+def texts(value, path=""):
+    """Every text in English and French inside a piece of content, with where it sits."""
+    if isinstance(value, dict):
+        if set(value) & {"en", "fr"} and all(isinstance(item, str) for item in value.values()):
+            yield path, value
+            return
+        for key, item in value.items():
+            yield from texts(item, f"{path}.{key}" if path else key)
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from texts(item, f"{path}[{index}]")
+
+
+def numbers(text):
+    return {item.replace(",", ".") for item in NUMBER.findall(THOUSANDS.sub("", FAHRENHEIT.sub("", text)))}
+
+
+def check_texts(content, where):
+    """The content rule, line by line: both languages, the same figures in each, and no dosing words."""
+    for path, value in texts(content):
+        place = f"{where}.{path}" if path else where
+        if not value.get("en", "").strip() or not value.get("fr", "").strip():
+            fail(f"{place}: needs non-empty en and fr text")
+            continue
+        if path.endswith("url"):
+            continue
+        if numbers(value["en"]) != numbers(value["fr"]):
+            fail(f"{place}: en and fr give different figures ({sorted(numbers(value['en']))} vs {sorted(numbers(value['fr']))})")
+        for language in ("en", "fr"):
+            found = DOSING.search(value[language])
+            if found:
+                fail(f"{place}.{language}: {found.group(0)!r} reads as dosing advice; say what it is, never how much to take")
+
+
+def trusted(url):
+    host = re.sub(r"^https://([^/]+).*$", r"\1", url).lower()
+    return any(host == name or host.endswith("." + name) for name in TRUSTED_SOURCES)
+
+
+def check_trusted(urls, where):
+    for url in urls:
+        if not trusted(url):
+            fail(f"{where}: {url} is not from a recognized health publisher (TRUSTED_SOURCES)")
+
+
+def check_review(value, where, required):
+    """The day a health professional approved the text, yyyy-mm-dd."""
+    if value is None:
+        if required:
+            fail(f"{where}: needs reviewedOn, the day a health professional approved it (yyyy-mm-dd)")
+        return False
+    try:
+        day = datetime.date.fromisoformat(value) if DAY.fullmatch(str(value)) else None
+    except ValueError:
+        day = None
+    if day is None:
+        fail(f"{where}: reviewedOn must be a real day written yyyy-mm-dd")
+    elif day > datetime.date.today():
+        fail(f"{where}: reviewedOn is in the future")
+    elif (datetime.date.today() - day).days > REVIEW_MAX_DAYS:
+        notes.append(f"{where}: reviewed on {value}, more than 2 years ago; due for a new review")
+    return True
+
+
+def check_lesson(lesson, where, live):
+    if not lesson.get("id"):
+        fail(f"{where}: needs an id")
+    localized(lesson.get("title"), f"{where}.title")
+    localized(lesson.get("summary"), f"{where}.summary")
+    if not lesson.get("paragraphs"):
+        fail(f"{where}: needs paragraphs")
+    check_sources(lesson.get("sources"), where)
+    if live:
+        released = str(lesson.get("released", ""))
+        try:
+            datetime.date.fromisoformat(released) if DAY.fullmatch(released) else fail(f"{where}: released must be yyyy-mm-dd")
+        except ValueError:
+            fail(f"{where}: released must be a real day")
+    elif "released" in lesson or "reviewedOn" in lesson:
+        fail(f"{where}: a draft gets its release and review days when it moves to server/lessons.json")
+    check_review(lesson.get("reviewedOn"), where, required=live)
+
+
+def check_editorial(germs):
+    """The content rule for the Guide: sourced, reviewed, bilingual, no dosing, myths short and unique.
+    It covers the bundled germs and lessons, the online lesson file and its drafts."""
+    articles = read_json("App/Content/articles.json") or []
+    live = (read_json("server/lessons.json") or {}).get("lessons", [])
+    drafts_file = ROOT / "server/drafts/lessons.json"
+    drafts = (read_json("server/drafts/lessons.json") or {}).get("lessons", []) if drafts_file.is_file() else []
+    unreviewed = 0
+    claims = {"en": set(), "fr": set()}
+    myth_ids = set()
+    for germ in germs:
+        gid = germ.get("id", "?")
+        where = f"germs.json {gid}"
+        check_texts(germ, where)
+        canada = germ.get("canadaSource") or {}
+        check_trusted([source.get("url", "") for source in germ.get("sources", [])]
+                      + list((canada.get("url") or {}).values()), where)
+        for index, myth in enumerate(germ.get("myths") or []):
+            place = f"{where}.myths[{index}]"
+            if myth.get("id") in myth_ids:
+                fail(f"{place}: id {myth.get('id')} is used twice")
+            myth_ids.add(myth.get("id"))
+            for language in ("en", "fr"):
+                claim = (myth.get("claim") or {}).get(language, "")
+                explanation = (myth.get("explanation") or {}).get(language, "")
+                if len(claim) > MYTH_CLAIM_LIMIT:
+                    fail(f"{place}.claim.{language}: {len(claim)} characters, over {MYTH_CLAIM_LIMIT}")
+                if len(explanation) > MYTH_EXPLANATION_LIMIT:
+                    fail(f"{place}.explanation.{language}: {len(explanation)} characters, over {MYTH_EXPLANATION_LIMIT}")
+                key = re.sub(r"[^\w]+", " ", claim.lower()).strip()
+                if key in claims[language]:
+                    fail(f"{place}.claim.{language}: the same myth appears twice")
+                claims[language].add(key)
+        if not check_review(germ.get("reviewedOn"), where, required=RELEASE):
+            unreviewed += 1
+    for article in articles:
+        where = f"articles.json {article.get('id', '?')}"
+        check_texts(article, where)
+        check_trusted([source.get("url", "") for source in article.get("sources", [])], where)
+        if not check_review(article.get("reviewedOn"), where, required=RELEASE):
+            unreviewed += 1
+    for name, lessons, is_live in (("server/lessons.json", live, True), ("server/drafts/lessons.json", drafts, False)):
+        for lesson in lessons:
+            where = f"{name} {lesson.get('id', '?')}"
+            check_lesson(lesson, where, is_live)
+            check_texts(lesson, where)
+            check_trusted([source.get("url", "") for source in lesson.get("sources", [])], where)
+    ids = [item.get("id") for item in articles + live + drafts]
+    for duplicate in sorted({item for item in ids if ids.count(item) > 1}):
+        fail(f"lessons: id {duplicate!r} is used more than once across articles.json, server/lessons.json and its drafts")
+    if unreviewed:
+        notes.append(f"{unreviewed} germs and bundled lessons have no reviewedOn yet; --release requires it")
+    if drafts:
+        notes.append(f"{len(drafts)} lessons await health review in server/drafts/lessons.json")
 
 
 def check_illnesses(germs):
@@ -395,6 +561,7 @@ def main():
     check_files()
     check_plists()
     germs = check_content()
+    check_editorial(germs)
     check_assets(germs)
     check_strings()
     if errors:
@@ -403,6 +570,8 @@ def main():
             print("  - " + message)
         sys.exit(1)
     print("check_repo: OK" + (" (release)" if RELEASE else ""))
+    for message in notes:
+        print("  note: " + message)
 
 
 if __name__ == "__main__":

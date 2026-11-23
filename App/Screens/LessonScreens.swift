@@ -143,7 +143,7 @@ struct ArticleScreen: View {
                 }
                 if !article.sources.isEmpty {
                     SectionHeader(title: tr("Sources"))
-                    SourceList(references: article.sources)
+                    SourceList(references: article.sources, reviewedOn: article.reviewedOn)
                 }
                 HealthLineNote()
                 Text(HealthNotice.text)
