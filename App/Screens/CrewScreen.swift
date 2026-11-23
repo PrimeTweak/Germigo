@@ -198,17 +198,117 @@ private struct CrewTeaser: View {
     }
 }
 
-/// Creates a crew or joins one with an invite code.
+/// How to start in a crew: join one with a code, or start one.
+private enum CrewJoinMode: String, Identifiable {
+    case join
+    case create
+
+    var id: String { rawValue }
+}
+
+/// The way into a crew: what a crew is for, and the two ways in, each opening its own sheet.
 private struct CrewJoinView: View {
-    private enum Mode: Hashable {
-        case create
-        case join
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var mode: CrewJoinMode?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                DaycareSection()
+                SectionHeader(title: tr("Crew"))
+                VStack(spacing: 6) {
+                    faces
+                        .padding(.bottom, 4)
+                    Text(tr("Your parent crew"))
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("A private group with the parents you know. See what's going around, and send soup when a family goes down."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(spacing: 10) {
+                        choice(.join, symbol: "key.fill", title: tr("Join a crew"), detail: tr("I have a code"))
+                        choice(.create, symbol: "flag.fill", title: tr("Start a crew"), detail: tr("Invite the others"))
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 16)
+                .frame(maxWidth: .infinity)
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+                Label(tr("Private · invite only"), systemImage: "lock.fill")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, Spacing.page)
+            .padding(.bottom, 28)
+        }
+        .sheet(item: $mode) { mode in
+            CrewJoinSheet(mode: mode)
+        }
     }
 
+    /// The parent among four others, leaning in like a group photo.
+    private var faces: some View {
+        let seats: [(look: Int, size: CGFloat, turn: Double, drop: CGFloat)] = [
+            (1, 50, -8, 6), (2, 56, -3, 0), (model.data.hostLook, 64, 0, -4), (3, 56, 4, 0), (4, 50, 9, 6)
+        ]
+        return HStack(alignment: .bottom, spacing: -10) {
+            ForEach(Array(seats.enumerated()), id: \.offset) { item in
+                BuddyView(look: item.element.look, size: item.element.size)
+                    .rotationEffect(.degrees(item.element.turn))
+                    .offset(y: item.element.drop)
+            }
+        }
+        .frame(height: 74)
+        .accessibilityHidden(true)
+    }
+
+    private func choice(_ choice: CrewJoinMode, symbol: String, title: String, detail: String) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
+        let sky = Color(hex: Swatch.skyLight)
+        return Button {
+            mode = choice
+        } label: {
+            VStack(spacing: 2) {
+                Image(systemName: symbol)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(Color(hex: palette.isDark ? Swatch.skyLight : Swatch.azureInk))
+                    .frame(width: 48, height: 48)
+                    .background(sky.opacity(palette.isDark ? 0.24 : 0.42), in: Circle())
+                    .padding(.bottom, 8)
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(palette.ink)
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(palette.background, in: shape)
+            .overlay(shape.strokeBorder(sky.opacity(0.6), lineWidth: 1.5))
+            .contentShape(shape)
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Joining with an invite code, or starting a crew with its emblem and name. Both ask for the name shown
+/// to the crew and the rules, then send only that.
+private struct CrewJoinSheet: View {
+    let mode: CrewJoinMode
     @Environment(AppModel.self) private var model
     @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
-    @State private var mode = Mode.join
+    @Environment(\.dismiss) private var dismiss
     @State private var displayName = ""
     @State private var crewName = ""
     @State private var code = ""
@@ -221,91 +321,66 @@ private struct CrewJoinView: View {
         let nameOK = displayName.trimmingCharacters(in: .whitespaces).count >= 2
         let detailOK = mode == .create
             ? crewName.trimmingCharacters(in: .whitespaces).count >= 2
-            : code.trimmingCharacters(in: .whitespaces).count == CrewStore.codeLength
+            : code.count == CrewStore.codeLength
         return nameOK && detailOK && accepted && !crew.isLoading && !submitting
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                DaycareSection()
-                SectionHeader(title: tr("Crew"))
-                Picker(tr("Mode"), selection: $mode) {
-                    Text(tr("Join a crew")).tag(Mode.join)
-                    Text(tr("Start a crew")).tag(Mode.create)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                VStack(spacing: 0) {
-                    field(tr("Your name in the crew"), text: $displayName, limit: 20)
-                    Divider()
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 10) {
                     if mode == .create {
+                        preview
+                        emblemPicker
                         field(tr("Crew name"), text: $crewName, limit: 24)
                     } else {
-                        TextField(tr("Invite code"), text: $code)
-                            .textInputAutocapitalization(.characters)
-                            .autocorrectionDisabled()
-                            .font(.body.monospaced())
-                            .frame(minHeight: 54)
-                            .onChange(of: code) { _, newValue in
-                                if newValue.count > CrewStore.codeLength { code = String(newValue.prefix(CrewStore.codeLength)) }
-                            }
+                        codeCard
                     }
-                }
-                .padding(.horizontal, 16)
-                .germilyCard(padding: 0)
-                if mode == .create {
-                    emblemPicker
-                }
-                Toggle(isOn: $accepted) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(tr("I agree to the crew rules"))
-                            .font(.callout.weight(.semibold))
+                    field(tr("Your name in the crew"), text: $displayName, limit: 20)
+                    rules
+                    if let message = crew.errorMessage {
+                        Text(message)
+                            .font(.footnote.weight(.semibold))
                             .foregroundStyle(palette.ink)
-                        Text(tr("Be kind. No offensive names, no harassment. Offenders are removed."))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
+                            .padding(.horizontal, 4)
                     }
-                }
-                .tint(palette.accent)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .germilyCard(padding: 0)
-                VStack(alignment: .leading, spacing: 8) {
-                    Button(tr("Read the Terms of Use")) {
-                        legal = .terms
+                    Button {
+                        submit()
+                    } label: {
+                        if crew.isLoading || submitting {
+                            ProgressView()
+                        } else {
+                            Text(mode == .create ? tr("Start the crew") : tr("Join the crew"))
+                        }
                     }
-                    Button(tr("Read the health data policy")) {
-                        legal = .health
-                    }
-                }
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(palette.ink)
-                .padding(.horizontal, 4)
-                if let message = crew.errorMessage {
-                    Text(message)
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(palette.ink)
+                    .buttonStyle(PillButtonStyle(kind: .ink))
+                    .disabled(!canSubmit)
+                    .padding(.top, 6)
+                    Text(tr("Crews are private and invite only. The server stores your crew name, the name you pick here and the germs you choose to share. Nothing else leaves your phone."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkTertiary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                         .padding(.horizontal, 4)
                 }
-                Button {
-                    submit()
-                } label: {
-                    if crew.isLoading {
-                        ProgressView()
-                    } else {
-                        Text(mode == .create ? tr("Start the crew") : tr("Join the crew"))
-                    }
-                }
-                .buttonStyle(PillButtonStyle(kind: .ink))
-                .disabled(!canSubmit)
-                Text(tr("Crews are private and invite only. The server stores your crew name, the name you pick here and the germs you choose to share. Nothing else leaves your phone."))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkTertiary)
-                    .padding(.horizontal, 4)
+                .padding(.horizontal, Spacing.page)
+                .padding(.top, 4)
+                .padding(.bottom, 28)
             }
-            .padding(.horizontal, Spacing.page)
-            .padding(.bottom, 28)
+            .scrollDismissesKeyboard(.interactively)
+            .background(palette.background.ignoresSafeArea())
+            .navigationTitle(mode == .create ? tr("Start a crew") : tr("Join a crew"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(tr("Cancel"))
+                }
+            }
         }
         .onAppear {
             if displayName.isEmpty { displayName = model.data.profileName }
@@ -317,17 +392,108 @@ private struct CrewJoinView: View {
         }
     }
 
-    private func field(_ title: String, text: Binding<String>, limit: Int) -> some View {
-        TextField(title, text: text)
-            .textInputAutocapitalization(.words)
-            .frame(minHeight: 54)
-            .onChange(of: text.wrappedValue) { _, newValue in
-                if newValue.count > limit { text.wrappedValue = String(newValue.prefix(limit)) }
+    /// The eight boxes of the invite code, with the system's paste button for a code received by text.
+    private var codeCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(tr("Invite code"))
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkSecondary)
+                Spacer(minLength: 8)
+                PasteButton(payloadType: String.self) { strings in
+                    code = CodeBoxes.clean(strings.first ?? "")
+                }
+                .labelStyle(.titleAndIcon)
+                .buttonBorderShape(.capsule)
+                .controlSize(.small)
+                .tint(palette.accent)
             }
+            CodeBoxes(code: $code)
+        }
+        .padding(14)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+    }
+
+    /// The crew's card as the others will see it, while its emblem and name are picked.
+    private var preview: some View {
+        HStack(spacing: 14) {
+            Image(systemName: CrewEmblem.symbol(emblem))
+                .font(.title2)
+                .foregroundStyle(Color.white)
+                .frame(width: 54, height: 54)
+                .background(LinearGradient(colors: [Color(hex: Swatch.coralLight), Color(hex: Swatch.coralDeep)],
+                                           startPoint: .top, endPoint: .bottom),
+                            in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(crewName.isEmpty ? tr("Crew name") : crewName)
+                    .font(.headline)
+                    .foregroundStyle(crewName.isEmpty ? palette.inkTertiary : palette.ink)
+                    .lineLimit(1)
+                Text(tr("Just you, for now"))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
+                .strokeBorder(Color(hex: Swatch.skyLight).opacity(0.6), lineWidth: 1.5)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private func field(_ title: String, text: Binding<String>, limit: Int) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.inkSecondary)
+            TextField(title, text: text, prompt: Text(""))
+                .textInputAutocapitalization(.words)
+                .font(.body)
+                .foregroundStyle(palette.ink)
+                .frame(minHeight: 30)
+                .onChange(of: text.wrappedValue) { _, newValue in
+                    if newValue.count > limit { text.wrappedValue = String(newValue.prefix(limit)) }
+                }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+    }
+
+    private var rules: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Toggle(isOn: $accepted) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("I agree to the crew rules"))
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Be kind. No offensive names, no harassment. Offenders are removed."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+            }
+            .tint(palette.accent)
+            Divider()
+            HStack(spacing: 18) {
+                Button(tr("Terms of Use")) {
+                    legal = .terms
+                }
+                Button(tr("Health data policy")) {
+                    legal = .health
+                }
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(palette.accent)
+        }
+        .padding(14)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
     }
 
     private var emblemPicker: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             ForEach(Array(CrewEmblem.symbols.enumerated()), id: \.offset) { item in
                 Button {
                     emblem = item.offset
@@ -356,12 +522,66 @@ private struct CrewJoinView: View {
             if mode == .create {
                 joined = await crew.create(name: crewName.trimmingCharacters(in: .whitespaces), displayName: name, emblem: emblem)
             } else {
-                joined = await crew.join(code: code.trimmingCharacters(in: .whitespaces), displayName: name)
+                joined = await crew.join(code: code, displayName: name)
             }
             submitting = false
-            if joined, model.data.settings.crewAlertsOn {
-                await model.enableReminders()
+            if joined {
+                if model.data.settings.crewAlertsOn {
+                    await model.enableReminders()
+                }
+                dismiss()
             }
+        }
+    }
+}
+
+/// The invite code as eight boxes over a hidden field: letters and digits only, in capitals.
+private struct CodeBoxes: View {
+    @Binding var code: String
+    @FocusState private var focused: Bool
+    @Environment(\.palette) private var palette
+
+    static func clean(_ text: String) -> String {
+        String(text.uppercased().filter { $0.isASCII && ($0.isLetter || $0.isNumber) }.prefix(CrewStore.codeLength))
+    }
+
+    var body: some View {
+        let characters = Array(code)
+        ZStack {
+            TextField(tr("Invite code"), text: $code)
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+                .keyboardType(.asciiCapable)
+                .focused($focused)
+                .foregroundStyle(.clear)
+                .tint(.clear)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            HStack(spacing: 6) {
+                ForEach(0..<CrewStore.codeLength, id: \.self) { index in
+                    let current = focused && index == min(characters.count, CrewStore.codeLength - 1)
+                    Text(index < characters.count ? String(characters[index]) : " ")
+                        .font(.title3.monospaced().weight(.bold))
+                        .foregroundStyle(palette.ink)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 46)
+                        .background(palette.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .strokeBorder(current ? palette.accent : palette.ink.opacity(0.12), lineWidth: current ? 2.5 : 1.5)
+                        }
+                }
+            }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+        .frame(height: 46)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            focused = true
+        }
+        .onChange(of: code) { _, value in
+            let cleaned = Self.clean(value)
+            if cleaned != value { code = cleaned }
         }
     }
 }

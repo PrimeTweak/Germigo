@@ -329,11 +329,16 @@ final class AppModel {
         commit()
     }
 
-    /// The first look no kid has yet, so a new kid does not start as a twin.
+    /// Without the Season Pass, only the free looks can be picked.
+    func isLookOpen(_ look: Int) -> Bool {
+        Looks.isOpen(look, hasPass: hasPass)
+    }
+
+    /// The first open look nobody in the household has yet, so a new kid does not start as a twin.
     var nextKidLook: Int {
-        let taken = Set(data.kids.map { abs($0.colorIndex) % Looks.count })
-        return (0..<Looks.count).first { !taken.contains($0) && $0 != data.hostLook && $0 != data.partnerLook }
-            ?? data.kids.count % Looks.count
+        let taken = Set((data.kids.map { $0.colorIndex } + [data.hostLook, data.partnerLook]).map { abs($0) % Looks.count })
+        let open = Looks.order.filter(isLookOpen)
+        return open.first { !taken.contains($0) } ?? open[data.kids.count % open.count]
     }
 
     func saveKid(_ kid: Kid) {

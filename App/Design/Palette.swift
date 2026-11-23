@@ -14,6 +14,8 @@ struct Palette {
     let accent: Color
     /// Text and icons on an accent fill.
     let onAccent: Color
+    /// The theme's soft color, washed behind the character on Today.
+    let wash: Color
     let isDark: Bool
 
     static func make(theme: Theme, scheme: ColorScheme, contrast: ColorSchemeContrast = .standard) -> Palette {
@@ -25,13 +27,14 @@ struct Palette {
                            surfaceAlt: Color(hex: Swatch.navyRaised), ink: ink,
                            inkSecondary: ink.opacity(strong ? 0.88 : 0.72), inkTertiary: ink.opacity(strong ? 0.78 : 0.6),
                            hairline: ink.opacity(strong ? 0.24 : 0.1),
-                           accent: Color(hex: tone.nightAccent), onAccent: Color(hex: Swatch.navy), isDark: true)
+                           accent: Color(hex: tone.nightAccent), onAccent: Color(hex: Swatch.navy),
+                           wash: Color(hex: tone.nightAccent), isDark: true)
         }
         let ink = Color(hex: Swatch.ink)
         return Palette(background: tone.ground, surface: tone.surface, surfaceAlt: tone.surfaceAlt, ink: ink,
                        inkSecondary: ink.opacity(strong ? 0.84 : 0.72), inkTertiary: ink.opacity(strong ? 0.78 : 0.64),
                        hairline: ink.opacity(strong ? 0.22 : 0.1),
-                       accent: Color(hex: tone.accent), onAccent: .white, isDark: false)
+                       accent: Color(hex: tone.accent), onAccent: .white, wash: Color(hex: tone.nightAccent), isDark: false)
     }
 }
 

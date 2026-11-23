@@ -2,11 +2,21 @@ import Foundation
 
 /// The eight household characters, by index. Kids take the first ones in the order they are added.
 enum Looks {
-    static let count = 8
+    static let count = 20
     static let host = 6
     static let partner = 7
     /// The look that wears a crown.
     static let crown = 3
+    /// The looks open without the Season Pass: the ones the app hands out first.
+    static let free: Set<Int> = [0, host, partner]
+    /// The picker's order: the free looks, then the Pass's, the newest first.
+    static let order = [0, 6, 7, 10, 8, 9, 15, 11, 16, 12, 13, 17, 18, 19, 14, 1, 2, 3, 4, 5]
+    /// Three of the Pass's looks, to show what it opens.
+    static let showcase = [8, 10, 9]
+
+    static func isOpen(_ look: Int, hasPass: Bool) -> Bool {
+        hasPass || free.contains(abs(look) % count)
+    }
 }
 
 struct Kid: Codable, Identifiable, Hashable {

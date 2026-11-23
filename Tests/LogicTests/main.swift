@@ -743,6 +743,18 @@ do {
           "Ticklish keeps its name secret until it is earned")
 }
 
+// Characters: three looks are free, the Season Pass opens the others, and each look has a sick routine.
+do {
+    check(Looks.order.count == Looks.count && Set(Looks.order) == Set(0..<Looks.count), "the picker lists every look once")
+    check(Looks.free == [0, Looks.host, Looks.partner], "the free looks are the ones handed out first")
+    check(Looks.order.prefix(Looks.free.count).allSatisfy { Looks.free.contains($0) }, "the free looks come first in the picker")
+    check(!Looks.isOpen(10, hasPass: false) && Looks.isOpen(10, hasPass: true), "a Pass look opens with the Season Pass")
+    check(Looks.isOpen(Looks.host + Looks.count, hasPass: false), "a look number past the count wraps around")
+    check(Looks.showcase.allSatisfy { !Looks.free.contains($0) }, "the offer shows looks the Pass opens")
+    check((0..<Looks.count).allSatisfy { Liveliness.household($0, sick: true, leads: false) != .resting },
+          "every look has a sick routine")
+}
+
 // The Season Pass offer: each door has its own words, and the trial reminder goes out two days before the payment.
 do {
     let doors = PassReason.allCases

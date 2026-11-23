@@ -172,8 +172,7 @@ struct DoctorSummaryScreen: View {
                     .scrollIndicators(.hidden)
                     .accessibilityLabel(tr("Who"))
                 }
-                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()),
-                              asPaper: true)
+                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date())
                     .id(current)
                     .transition(.opacity)
             }
@@ -187,7 +186,8 @@ struct DoctorSummaryScreen: View {
     }
 }
 
-/// One person's illnesses, with dates, signs and photos, and the ways to show or send them to a doctor.
+/// The page a doctor receives for one person: their illnesses since a date, with signs and photos,
+/// and the ways to send it.
 struct HealthHistory: View {
     private struct Line: Identifiable {
         let id: UUID
@@ -198,27 +198,17 @@ struct HealthHistory: View {
         let photos: [PatientPhoto]
         let start: Date
         let ongoing: Bool
-        /// Each day of the illness up to today, at midnight.
-        let days: [Date]
-        let link: PhotoLink
     }
 
     let person: Person
-    /// The oldest illness shown; nil shows everything.
-    let since: Date?
-    /// The page the doctor receives, with the ways to send it. Otherwise each illness lists its days,
-    /// with a way to add their photos, and the newest illness starts open.
-    var asPaper = false
+    /// The oldest illness shown.
+    let since: Date
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var door: PassReason?
-    /// Illnesses opened or closed against their default.
-    @State private var toggled: Set<UUID> = []
-    @State private var seed: PhotoSeed?
-    @State private var focus: PhotoFocus?
 
     private func kept(_ date: Date) -> Bool {
-        since.map { date >= $0 } ?? true
+        date >= since
     }
 
     private func day(_ date: Date) -> String {
@@ -227,14 +217,6 @@ struct HealthHistory: View {
 
     private func illnessName(_ germID: String) -> String {
         model.catalog.germ(germID)?.illness.value ?? germID
-    }
-
-    private func sickDays(from start: Date, to end: Date) -> [Date] {
-        let calendar = Calendar.current
-        let first = calendar.startOfDay(for: start)
-        let last = calendar.startOfDay(for: min(end, Date()))
-        let count = max(0, calendar.dateComponents([.day], from: first, to: last).day ?? 0)
-        return (0...count).compactMap { calendar.date(byAdding: .day, value: $0, to: first) }
     }
 
     private func signs(_ ids: [String]) -> String? {
@@ -256,8 +238,7 @@ struct HealthHistory: View {
                     return Line(id: log.id, title: illnessName(log.germID), dates: dates,
                                 length: trCount(log.dayCount(), one: "%lld day", other: "%lld days"),
                                 signs: signs(log.symptoms), photos: photos.filter { $0.logID == log.id },
-                                start: log.startedAt, ongoing: log.endedAt == nil,
-                                days: sickDays(from: log.startedAt, to: log.endedAt ?? Date()), link: .log(log.id))
+                                start: log.startedAt, ongoing: log.endedAt == nil)
                 }
         case .kid(let id):
             let now = Date()
@@ -274,11 +255,9 @@ struct HealthHistory: View {
                     } else if going {
                         dates = tr("Since %@", day(illness.startedAt))
                     }
-                    let end = illness.endedAt ?? (going ? now : DayEngine.kidEnd(illness, catalog: model.catalog, now: now))
                     return Line(id: illness.id, title: illnessName(illness.germID), dates: dates, length: length,
                                 signs: signs(illness.symptoms), photos: photos.filter { $0.illnessID == illness.id },
-                                start: illness.startedAt, ongoing: going,
-                                days: sickDays(from: illness.startedAt, to: end), link: .illness(illness.id))
+                                start: illness.startedAt, ongoing: going)
                 }
         }
     }
@@ -302,16 +281,11 @@ struct HealthHistory: View {
     }
 
     private var heading: String {
-        since == nil ? tr("%@ · history", model.name(for: person)) : tr("%@ · last 6 months", model.name(for: person))
+        tr("%@ · last 6 months", model.name(for: person))
     }
 
     private var emptyLine: String {
-        since == nil ? tr("Nothing logged yet.") : tr("Nothing logged in the last 6 months.")
-    }
-
-    private func counts(_ lines: [Line], photos: Int) -> String {
-        trCount(lines.count, one: "%lld illness", other: "%lld illnesses") + ", "
-            + trCount(photos, one: "%lld photo", other: "%lld photos")
+        tr("Nothing logged in the last 6 months.")
     }
 
     private func summaryRows(_ lines: [Line]) -> [String] {
@@ -342,215 +316,23 @@ struct HealthHistory: View {
         let all = lines
         let found = all.filter { model.isShown($0.start, ongoing: $0.ongoing) }
         let others = otherPhotos(found)
-        let photoCount = found.reduce(others.count) { $0 + $1.photos.count }
-        let shown = (found.flatMap { $0.photos } + others).sorted { $0.takenAt < $1.takenAt }
-        let opening = found.first(where: { $0.ongoing })?.id ?? found.first?.id
         VStack(alignment: .leading, spacing: 14) {
-            if asPaper {
-                paper(found, others: others)
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text(heading)
-                        .font(.headline)
-                        .foregroundStyle(palette.ink)
-                    Text(counts(found, photos: photoCount))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .padding(.bottom, 6)
-                    if found.isEmpty {
-                        Text(emptyLine)
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                            .padding(.vertical, 8)
-                    }
-                    ForEach(Array(found.enumerated()), id: \.element.id) { item in
-                        dayLineView(item.element, open: (item.element.id == opening) != toggled.contains(item.element.id))
-                            .cascadeIn(item.offset)
-                    }
-                    if !others.isEmpty {
-                        Divider()
-                        Text(tr("Other photos"))
-                            .font(.callout.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                            .padding(.top, 12)
-                        PhotoRow(photos: others, side: 56)
-                            .padding(.top, 8)
-                            .padding(.bottom, 12)
-                    }
-                    if !caughtAtHome.isEmpty {
-                        Text(tr("Also caught at home:"))
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                            .padding(.top, 8)
-                        ForEach(caughtAtHome, id: \.self) { item in
-                            Text(item)
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .germilyCard()
-            }
+            paper(found, others: others)
             if all.count > found.count {
                 LockedHistoryRow(count: all.count - found.count)
             }
-            if asPaper {
-                paperActions(found, others: others)
-            } else {
-                Text(tr("Dates and germs as you logged them. Germily adds no diagnosis."))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-                    .padding(.horizontal, 4)
-                if !shown.isEmpty || model.hasPass {
-                    HStack(spacing: 10) {
-                        if let first = shown.first {
-                            Button {
-                                focus = PhotoFocus(ids: shown.map { $0.id }, start: first.id)
-                            } label: {
-                                Label(tr("Show photos"), systemImage: "photo.stack")
-                            }
-                            .buttonStyle(PillButtonStyle(kind: .ink))
-                        }
-                        if model.hasPass {
-                            ShareLink(item: packet(found, others: others), preview: SharePreview(tr("For the doctor"))) {
-                                Label(tr("Share"), systemImage: "square.and.arrow.up")
-                            }
-                            .buttonStyle(PillButtonStyle(kind: shown.isEmpty ? .ink : .ghost))
-                        }
-                    }
-                }
-                if model.hasPass {
-                    ShareLink(item: summaryRows(found).joined(separator: "\n")) {
-                        Text(tr("Share as text"))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(palette.inkSecondary)
-                            .frame(maxWidth: .infinity)
-                            .frame(minHeight: 44)
-                    }
-                } else {
-                    Button {
-                        door = .doctor
-                    } label: {
-                        Label(tr("Share for the doctor"), systemImage: "lock.fill")
-                    }
-                    .buttonStyle(PillButtonStyle(kind: .ghost))
-                    offerLine
-                }
-            }
+            paperActions(found, others: others)
         }
         .sheet(item: $door) { reason in
             PaywallView(reason: reason)
         }
-        .sheet(item: $seed) { seed in
-            AddPhotoSheet(seed: seed)
-        }
-        .fullScreenCover(item: $focus) { focus in
-            PhotoViewer(focus: focus)
-        }
-    }
-
-    /// An illness with a row per day; closed, it shows only its dates and how many photos it holds.
-    private func dayLineView(_ line: Line, open: Bool) -> some View {
-        let span = ([line.dates] + [line.length].compactMap { $0 }).joined(separator: " · ")
-        let calendar = Calendar.current
-        let loose = line.photos.filter { photo in !line.days.contains { calendar.isDate(photo.takenAt, inSameDayAs: $0) } }
-        return VStack(alignment: .leading, spacing: 2) {
-            Divider()
-                .padding(.bottom, 10)
-            Button {
-                withAnimation(Tempo.quick) {
-                    if toggled.contains(line.id) {
-                        toggled.remove(line.id)
-                    } else {
-                        toggled.insert(line.id)
-                    }
-                }
-            } label: {
-                HStack(alignment: open ? .firstTextBaseline : .center) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(line.title)
-                            .font(.callout.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                        if !open {
-                            Text(span)
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                        }
-                    }
-                    Spacer(minLength: 8)
-                    if open {
-                        Text(span)
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                            .multilineTextAlignment(.trailing)
-                    } else {
-                        Text(line.photos.isEmpty ? tr("No photos")
-                                                 : trCount(line.photos.count, one: "%lld photo", other: "%lld photos"))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                        Image(systemName: "chevron.right")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(palette.inkTertiary)
-                    }
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityValue(open ? tr("Expanded") : tr("Collapsed"))
-            if open {
-                if let signs = line.signs {
-                    Text(signs)
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .padding(.bottom, 4)
-                }
-                ForEach(Array(line.days.enumerated()), id: \.element) { item in
-                    dayRow(line, day: item.element, number: item.offset + 1)
-                }
-                if !loose.isEmpty {
-                    HStack(spacing: 10) {
-                        Text(tr("Other days"))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(palette.ink)
-                            .frame(width: 92, alignment: .leading)
-                        PhotoRow(photos: loose.sorted { $0.takenAt < $1.takenAt }, side: 50)
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-        }
-        .padding(.bottom, 12)
-        .accessibilityElement(children: .contain)
-    }
-
-    private func dayRow(_ line: Line, day: Date, number: Int) -> some View {
-        let calendar = Calendar.current
-        let today = calendar.isDateInToday(day)
-        let shots = line.photos.filter { calendar.isDate($0.takenAt, inSameDayAs: day) }.sorted { $0.takenAt < $1.takenAt }
-        return HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(tr("Day %lld", number))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                Text(today ? tr("Today") : day.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-                    .font(today ? .caption.weight(.semibold) : .caption)
-                    .foregroundStyle(today ? palette.accent : palette.inkSecondary)
-            }
-            .frame(width: 92, alignment: .leading)
-            PhotoRow(photos: shots, side: 50) {
-                addPhoto(line, on: day, today: today)
-            }
-        }
-        .padding(.vertical, 4)
-        .accessibilityElement(children: .contain)
     }
 
     /// The page the doctor receives, drawn as a sheet of paper: who, which months, each illness and its photos.
     private func paper(_ found: [Line], others: [PatientPhoto]) -> some View {
         let ink = Color(hex: Swatch.ink)
         let soft = ink.opacity(0.72)
-        let from = since ?? found.last?.start ?? Date()
+        let from = since
         let period = tr("%1$@ to %2$@", day(from), Date().formatted(.dateTime.month(.abbreviated).day().year()))
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
@@ -696,16 +478,6 @@ struct HealthHistory: View {
             .font(.footnote.weight(.semibold))
             .foregroundStyle(palette.accent)
             .frame(maxWidth: .infinity)
-    }
-
-    /// A new photo for this person on that day of the illness: now for today, midday for a past day.
-    private func addPhoto(_ line: Line, on day: Date, today: Bool) {
-        guard model.hasPass else {
-            door = .photos
-            return
-        }
-        let moment = today ? Date() : Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
-        seed = PhotoSeed(person: person, takenAt: moment, link: line.link)
     }
 }
 

@@ -12,7 +12,7 @@ How things move in Germily. The characters carry the life of the app; the interf
 
 ## Characters
 
-Three kinds of characters move: the household (eight looks), the germs (the cards and the mascot) and the props (the run bar's runner and chaser, the record keepers on Family).
+Three kinds of characters move: the household (twenty looks), the germs (the cards and the mascot) and the props (the run bar's runner and chaser, the record keepers on Family).
 
 A moving character has three layers:
 
@@ -36,6 +36,8 @@ Amplitudes below are in points for a 70-point character and scale with its size,
 | 7 | Cap | Hop | One jump of 10 pt, 0.5 s |
 
 The cap is the only healthy character that hops at rest.
+
+Looks 8 to 19 move like the look eight places before them: look 8 (Dino) like Curl, look 9 (Bunny) like Buns, and so on. Their sick art carries the same kit as that look, so the routine always fits the face.
 
 ### Household, sick: one routine per look
 
@@ -92,6 +94,7 @@ Finding all ten tricks, dizzy counted on its own, earns the secret Ticklish badg
 ### Props
 
 - Runner and chaser: a two-frame run cycle, 0.22 s per frame, on the run bar only.
+- Soap at the end of the run bar: its three bubbles bob 1.2 pt, each on its own beat.
 - Record keepers (album, doctor's file, logbook): still. They wiggle once when something new lands in them, as soon as Family is back on screen.
 - The soup of the tip jar: breath and its steam.
 

@@ -91,4 +91,18 @@ enum Swatch {
     static let tangerine: UInt32 = 0xFFA33A
     static let holoYellow: UInt32 = 0xFFE678
     static let holoGreen: UInt32 = 0xC8FF78
+
+    // Household characters added with the Season Pass
+    static let seafoam: UInt32 = 0xA8EBC0
+    static let orchid: UInt32 = 0xE7C3FF
+    static let blush: UInt32 = 0xFFD3EA
+    static let apricot: UInt32 = 0xFFC891
+    static let tan: UInt32 = 0xE3BC97
+    static let custard: UInt32 = 0xFFE2B0
+    static let cocoa: UInt32 = 0xC79A78
+    static let caramel: UInt32 = 0xE8C391
+    static let heather: UInt32 = 0xD8D0EE
+    static let papaya: UInt32 = 0xFFB892
+    static let rosehip: UInt32 = 0xFFADAD
+    static let kiwi: UInt32 = 0xB9F29A
 }

@@ -10,8 +10,6 @@ struct TodayScreen: View {
     @State private var exposurePage = 0
     @State private var pageHeight: CGFloat = 0
 
-    private var mascotTint: Color { Color(hex: Swatch.irisSoft) }
-
     var body: some View {
         let exposures = model.openExposures
         let index = min(max(0, exposurePage), max(0, exposures.count - 1))
@@ -107,7 +105,7 @@ struct TodayScreen: View {
     private func washTint(exposures: [KidIllness], index: Int) -> Color {
         if let germ = model.activeGerm { return germ.deepTint }
         if index < exposures.count, let germ = model.catalog.germ(exposures[index].germID) { return germ.deepTint }
-        return mascotTint
+        return palette.wash
     }
 }
 
@@ -244,7 +242,7 @@ private struct StageActions: View {
     }
 }
 
-/// Nobody is sick: the mascot sleeps on the counter, ready to play, and the streak runs toward its flag.
+/// Nobody is sick: the mascot sleeps on the counter, ready to play, and the streak runs toward its soap.
 private struct CalmStage: View {
     let side: CGFloat
     @Binding var flow: SymptomFlow?
@@ -740,15 +738,19 @@ private struct DayDot: View {
     }
 }
 
-/// The streak as a run: a track that fills up to a flag, a runner on it and a germ on its heels.
-/// The flag is the best run to beat; once beaten, it turns gold and marks the next milestone.
+/// The streak as a run: a lane that fills up to a bar of soap, a runner on it and a germ on its heels.
+/// The soap is the best run to beat; once beaten, it turns gold and marks the next milestone.
 private struct RunTrack: View {
     let goal: RunGoal
     @Environment(\.palette) private var palette
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let stride = 0.22
-    private static let flagRoom: CGFloat = 30
+    /// Room before the start line, where the chaser waits.
+    private static let runUp: CGFloat = 64
+    /// Room after the finish, for the soap.
+    private static let soapRoom: CGFloat = 50
+    private static let laneHeight: CGFloat = 18
 
     private var caption: String {
         if goal.isBest {
@@ -764,16 +766,21 @@ private struct RunTrack: View {
         Color(hex: palette.isDark ? Swatch.goldFoil : Swatch.goldInk)
     }
 
+    /// One dot per day on short runs, one per week on long ones.
+    private var ticks: [Int] {
+        let step = goal.target <= 14 ? 1 : 7
+        return Array(Swift.stride(from: step, to: goal.target, by: step))
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             GeometryReader { proxy in
-                let span = max(0, proxy.size.width - Self.flagRoom)
                 TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion)) { timeline in
-                    course(span: span, time: reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate)
+                    course(width: proxy.size.width, time: reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate)
                 }
             }
-            .frame(height: 52)
-            .frame(maxWidth: 308)
+            .frame(height: 66)
+            .frame(maxWidth: 332)
             Text(caption)
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(goal.isBest ? gold : palette.accent)
@@ -783,73 +790,171 @@ private struct RunTrack: View {
         .accessibilityLabel(caption)
     }
 
-    /// The track, the flag and the two runners at a given moment of their stride.
-    private func course(span: CGFloat, time: Double) -> some View {
-        let reach = span * CGFloat(goal.share)
+    /// The lane, the soap and the two runners at a given moment of their stride.
+    private func course(width: CGFloat, time: Double) -> some View {
+        let span = max(0, width - Self.runUp - Self.soapRoom)
+        let reach = Self.runUp + span * CGFloat(goal.share)
         let beat = time / Self.stride
         let frame = Int(beat) % 2 == 0 ? "1" : "2"
         let hop: CGFloat = reduceMotion ? 0 : CGFloat(abs(sin(beat * Double.pi))) * 4
         let puff = CGFloat((beat / 2).truncatingRemainder(dividingBy: 1))
         return ZStack(alignment: .bottomLeading) {
-            Capsule()
-                .fill(palette.ink.opacity(0.09))
-                .frame(width: span, height: 10)
-            Capsule()
-                .fill(LinearGradient(colors: [palette.accent.opacity(0.5), palette.accent], startPoint: .leading, endPoint: .trailing))
-                .frame(width: reach, height: 10)
-            flag
-                .offset(x: span + 4)
+            lane(width: max(0, width - 24), span: span)
+                .offset(y: -8)
+            SoapBar(target: goal.target, best: goal.isBest, time: time)
+                .offset(x: width - 52)
             if !reduceMotion {
                 Circle()
                     .fill(palette.ink.opacity(0.22 * Double(1 - puff)))
                     .frame(width: 6, height: 6)
-                    .offset(x: reach - 30 - puff * 10, y: -10 - puff * 5)
+                    .offset(x: reach - 30 - puff * 10, y: -18 - puff * 5)
             }
             Image("run-chaser-" + frame)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 34, height: 34)
-                .offset(x: reach - 66, y: -6 - (4 - hop))
+                .offset(x: reach - 66, y: -19 - (4 - hop))
             Image("run-runner-" + frame)
                 .resizable()
                 .scaledToFit()
                 .frame(width: 46, height: 46)
-                .offset(x: reach - 23, y: -5 - hop)
+                .offset(x: reach - 23, y: -18 - hop)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
         .animation(Tempo.settle, value: goal.days)
     }
 
-    /// The flag at the end of the track, with the number of days it stands for.
-    private var flag: some View {
-        HStack(alignment: .top, spacing: 0) {
+    /// The lane in the theme's color: the start line, the days run so far, and a dot per day to go.
+    private func lane(width: CGFloat, span: CGFloat) -> some View {
+        let done = span * CGFloat(goal.share)
+        return ZStack(alignment: .leading) {
             Capsule()
-                .fill(palette.ink)
-                .frame(width: 2.5, height: 28)
-            VStack(alignment: .leading, spacing: 1) {
-                Pennant()
-                    .fill(goal.isBest ? Color(hex: Swatch.gold) : palette.accent)
-                    .frame(width: 14, height: 10)
-                    .padding(.top, 2)
-                Text(verbatim: String(goal.target))
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                    .fixedSize()
-                    .padding(.leading, 3)
+                .fill(palette.accent.opacity(palette.isDark ? 0.24 : 0.13)
+                    .shadow(.inner(color: palette.accent.opacity(0.3), radius: 1.5, y: 1.5)))
+            LaneLine()
+                .stroke(Color.white.opacity(palette.isDark ? 0.4 : 0.9), style: StrokeStyle(lineWidth: 2, dash: [7, 6]))
+                .frame(width: max(0, width - Self.runUp - 10), height: 2)
+                .offset(x: Self.runUp)
+            UnevenRoundedRectangle(cornerRadii: .init(bottomTrailing: Self.laneHeight / 2, topTrailing: Self.laneHeight / 2))
+                .fill(LinearGradient(colors: [palette.accent.opacity(0.6), palette.accent], startPoint: .leading, endPoint: .trailing))
+                .overlay(alignment: .top) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.4))
+                        .frame(height: 4)
+                        .padding(.horizontal, 5)
+                        .padding(.top, 3)
+                }
+                .frame(width: done)
+                .offset(x: Self.runUp)
+            ForEach(ticks, id: \.self) { day in
+                Circle()
+                    .fill(day <= goal.days ? Color.white : palette.accent.opacity(0.4))
+                    .frame(width: 6, height: 6)
+                    .offset(x: Self.runUp + span * CGFloat(day) / CGFloat(goal.target) - 3)
             }
+            StartLine()
+                .frame(width: 5, height: 26)
+                .offset(x: Self.runUp - 2.5)
+        }
+        .frame(width: width, height: Self.laneHeight)
+    }
+}
+
+/// The dashed line painted down the middle of the lane.
+private struct LaneLine: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        return path
+    }
+}
+
+/// The striped bar where every run starts.
+private struct StartLine: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(0..<6, id: \.self) { index in
+                Rectangle()
+                    .fill(index.isMultiple(of: 2) ? palette.ink : Color.white)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 2))
+        .overlay {
+            RoundedRectangle(cornerRadius: 2)
+                .strokeBorder(palette.ink.opacity(0.3), lineWidth: 1)
         }
     }
 }
 
-/// The small triangle of the flag.
-private struct Pennant: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.closeSubpath()
-        return path
+/// The finish: a bar of soap with the number of days on it, suds on top and bubbles rising.
+/// It turns gold while the run is the best one.
+private struct SoapBar: View {
+    let target: Int
+    let best: Bool
+    /// Seconds that drive the bubbles; zero keeps them still.
+    let time: Double
+    @Environment(\.palette) private var palette
+
+    private static let outline = Color(hex: Swatch.ink)
+    private static let suds: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(9, 19, 5), (15.5, 15.5, 5.6), (22, 18.5, 4.2)]
+    private static let bubbles: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(31, 10, 3.6), (39, 4.5, 2.4), (24, 5, 2)]
+
+    var body: some View {
+        let top = best ? Color(hex: Swatch.goldFoil) : palette.accent
+        Canvas { context, _ in
+            for (index, bubble) in Self.bubbles.enumerated() {
+                let rise = CGFloat(sin(time * 2 + Double(index) * 2.1)) * 1.2
+                let rect = CGRect(x: bubble.x - bubble.r, y: bubble.y - bubble.r + rise, width: bubble.r * 2, height: bubble.r * 2)
+                context.fill(Path(ellipseIn: rect), with: .color(Color(hex: Swatch.skyPale).opacity(0.85)))
+                context.stroke(Path(ellipseIn: rect), with: .color(Self.outline), lineWidth: 1.2)
+                let gleam = max(0.7, bubble.r * 0.28)
+                context.fill(Path(ellipseIn: CGRect(x: bubble.x - bubble.r * 0.35 - gleam, y: bubble.y - bubble.r * 0.38 - gleam + rise,
+                                                    width: gleam * 2, height: gleam * 2)), with: .color(.white))
+            }
+            let side = Path(roundedRect: CGRect(x: 3, y: 24, width: 45, height: 24), cornerRadius: 11)
+            context.fill(side, with: .color(.white))
+            context.fill(side, with: .color(best ? Color(hex: Swatch.amber) : top.opacity(0.7)))
+            context.stroke(side, with: .color(Self.outline), lineWidth: 1.8)
+            let face = Path(roundedRect: CGRect(x: 3, y: 19, width: 45, height: 23), cornerRadius: 10.5)
+            context.fill(face, with: .color(.white))
+            context.fill(face, with: .linearGradient(Gradient(colors: best ? [Color(hex: Swatch.cream), top] : [top.opacity(0.16), top.opacity(0.4)]),
+                                                     startPoint: CGPoint(x: 0, y: 19), endPoint: CGPoint(x: 0, y: 42)))
+            context.stroke(face, with: .color(Self.outline), lineWidth: 1.8)
+            var gloss = Path()
+            gloss.move(to: CGPoint(x: 33, y: 23.5))
+            gloss.addLine(to: CGPoint(x: 41, y: 23.5))
+            context.stroke(gloss, with: .color(.white.opacity(0.95)), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+            for foam in Self.suds {
+                context.stroke(Path(ellipseIn: CGRect(x: foam.x - foam.r, y: foam.y - foam.r, width: foam.r * 2, height: foam.r * 2)),
+                               with: .color(Self.outline), lineWidth: 2.6)
+            }
+            for foam in Self.suds {
+                context.fill(Path(ellipseIn: CGRect(x: foam.x - foam.r, y: foam.y - foam.r, width: foam.r * 2, height: foam.r * 2)),
+                             with: .color(.white))
+            }
+            if best {
+                var spark = Path()
+                spark.addLines([CGPoint(x: 47, y: 20), CGPoint(x: 48.5, y: 23.2), CGPoint(x: 51.7, y: 24.7), CGPoint(x: 48.5, y: 26.2),
+                                CGPoint(x: 47, y: 29.4), CGPoint(x: 45.5, y: 26.2), CGPoint(x: 42.3, y: 24.7), CGPoint(x: 45.5, y: 23.2)])
+                spark.closeSubpath()
+                context.fill(spark, with: .color(Color(hex: Swatch.hazard)))
+                context.stroke(spark, with: .color(Self.outline), lineWidth: 1)
+            }
+        }
+        .frame(width: 52, height: 50)
+        .overlay(alignment: .topLeading) {
+            Text(verbatim: String(target))
+                .font(.system(size: 14, weight: .heavy))
+                .monospacedDigit()
+                .foregroundStyle(best ? Color(hex: Swatch.goldInk) : (palette.isDark ? Self.outline : palette.accent))
+                .shadow(color: .white.opacity(0.85), radius: 0, y: 0.8)
+                .fixedSize()
+                .frame(width: 45, height: 23)
+                .offset(x: 3, y: 21)
+        }
     }
 }
 

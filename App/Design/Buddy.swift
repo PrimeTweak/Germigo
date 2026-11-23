@@ -1,10 +1,13 @@
 import SwiftUI
 
-/// The household's characters: eight looks, each drawn healthy and sick.
+/// The household's characters: twenty looks, each drawn healthy and sick.
 enum Buddy {
     private static let tints: [UInt32] = [
         Swatch.skyLight, Swatch.pinkLight, Swatch.aqua, Swatch.butter,
-        Swatch.peach, Swatch.lavender, Swatch.periwinkle, Swatch.limePale
+        Swatch.peach, Swatch.lavender, Swatch.periwinkle, Swatch.limePale,
+        Swatch.seafoam, Swatch.orchid, Swatch.blush, Swatch.apricot,
+        Swatch.tan, Swatch.custard, Swatch.cocoa, Swatch.caramel,
+        Swatch.heather, Swatch.papaya, Swatch.rosehip, Swatch.kiwi
     ]
 
     static func index(_ look: Int) -> Int {

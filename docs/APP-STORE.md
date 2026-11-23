@@ -13,7 +13,7 @@ Guideline numbers refer to the App Review Guidelines: https://developer.apple.co
 | 1.2 User-generated content: filter | Crew, display, daycare and group names are filtered server-side; notice notes refuse links and insults | `server/server.js` (`cleanName`, `hasBlockedWord`) |
 | 1.2: report | Report menu on every member, feed item and daycare notice; two reporters hide a name until reviewed, a reported notice leaves the reporter's phone | `CrewScreen.swift`, `DaycareScreens.swift`, `server/server.js` |
 | 1.2: block | Block hides a member and their posts on the device; leaving a daycare stops its notices | `CrewStore.block`, `DaycareStore.leave` |
-| 1.2: terms with no tolerance for abuse | Rules must be accepted before creating or joining a crew, and before signing a daycare up | `CrewJoinView`, `DaycareSetupSheet`, `legal.json` |
+| 1.2: terms with no tolerance for abuse | Rules must be accepted before creating or joining a crew, and before signing a daycare up | `CrewJoinSheet`, `DaycareSetupSheet`, `legal.json` |
 | 1.2: published contact | Support address in Settings, legal screens and Crew | `GermilySupportEmail` |
 | 1.4.1 Medical information | General information only, sources linked on every card, "not medical advice" on each screen, no diagnosis or dosing | `germs.json`, `GermDetailScreen.swift` |
 | 2.1 Completeness | No placeholder may ship: `check_repo.py --release` fails on them | `tools/check_repo.py` |

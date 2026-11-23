@@ -1,53 +1,295 @@
 import SwiftUI
 
-/// Every logged germ, editable, and what each kid brought home.
+/// One illness in the household's history: a germ a parent logged, or one a kid brought home.
+enum LogbookEntry: Identifiable {
+    case log(SickLog)
+    case illness(KidIllness)
+
+    var id: UUID {
+        switch self {
+        case .log(let log): log.id
+        case .illness(let illness): illness.id
+        }
+    }
+
+    var startedAt: Date {
+        switch self {
+        case .log(let log): log.startedAt
+        case .illness(let illness): illness.startedAt
+        }
+    }
+
+    var germID: String {
+        switch self {
+        case .log(let log): log.germID
+        case .illness(let illness): illness.germID
+        }
+    }
+
+    /// What deleting it asks, then what goes with it.
+    var deleteTitle: String {
+        switch self {
+        case .log: tr("Delete this log?")
+        case .illness: tr("Delete this entry?")
+        }
+    }
+
+    var deleteMessage: String {
+        switch self {
+        case .log: tr("Its points leave your total and your streak is counted again without it.")
+        case .illness: tr("Its countdown and reminders go with it.")
+        }
+    }
+}
+
+extension AppModel {
+    /// The household's illnesses, newest first: everyone's, or one person's.
+    func logbook(for person: Person?) -> [LogbookEntry] {
+        let logs = data.logs.filter { log in
+            switch person {
+            case nil: true
+            case .me: log.sufferer.includesMe
+            case .partner: log.sufferer.includesPartner
+            case .kid: false
+            }
+        }
+        let illnesses = data.kidIllnesses.filter { illness in
+            switch person {
+            case nil: true
+            case .kid(let id): illness.kidID == id
+            case .me, .partner: false
+            }
+        }
+        return (logs.map(LogbookEntry.log) + illnesses.map(LogbookEntry.illness)).sorted { $0.startedAt > $1.startedAt }
+    }
+
+    func isGoingOn(_ entry: LogbookEntry) -> Bool {
+        switch entry {
+        case .log(let log): log.isActive
+        case .illness(let illness): DayEngine.isGoingOn(illness, catalog: catalog, now: Date())
+        }
+    }
+
+    /// Who was sick: the kid, or the parents named in the log.
+    func whoHad(_ entry: LogbookEntry) -> (look: Int, name: String, person: Person) {
+        switch entry {
+        case .log(let log):
+            let person: Person = log.sufferer == .partner ? .partner : .me
+            return (look(of: person), name(of: log.sufferer), person)
+        case .illness(let illness):
+            let person = Person.kid(illness.kidID)
+            return (look(of: person), name(for: person), person)
+        }
+    }
+
+    func outcomeLabel(_ outcome: ExposureOutcome) -> String {
+        switch outcome {
+        case .open: tr("You're still clear")
+        case .caught: tr("You caught it")
+        case .dodged: tr("You dodged it")
+        case .expired: tr("Window passed")
+        }
+    }
+}
+
+/// The household's one history, grouped by month, with a chip per person to narrow it.
 struct LogbookScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var editing: SickLog?
-    @State private var pendingDelete: SickLog?
-    @State private var showsKids = false
+    @State private var filter: Person?
+    @State private var opened: EntryRef?
+    @State private var pendingDelete: LogbookEntry?
+    @State private var addsKidGerm = false
 
-    private var logs: [SickLog] {
-        model.data.logs.sorted { $0.startedAt > $1.startedAt }
+    /// The person to show first; nil shows the whole household.
+    init(person: Person? = nil) {
+        _filter = State(initialValue: person)
     }
 
-    private var mine: some View {
-        let shown = logs.filter { model.isShown($0.startedAt, ongoing: $0.isActive) }
-        return ScrollView {
-            LazyVStack(spacing: 8) {
-                if logs.isEmpty {
-                    Text(tr("No germs logged yet. It won't last."))
+    private struct EntryRef: Identifiable {
+        let id: UUID
+    }
+
+    private struct Month: Identifiable {
+        let start: Date
+        var entries: [LogbookEntry]
+        var id: Date { start }
+    }
+
+    var body: some View {
+        let all = model.logbook(for: filter)
+        let shown = all.filter { model.isShown($0.startedAt, ongoing: model.isGoingOn($0)) }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 8) {
+                if model.people.count > 1 {
+                    chips
+                }
+                if !shown.isEmpty {
+                    Text(trCount(all.count, one: "%lld germ", other: "%lld germs"))
                         .font(.subheadline)
                         .foregroundStyle(palette.inkSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .germilyCard()
+                        .padding(.horizontal, 4)
                 }
-                ForEach(Array(shown.enumerated()), id: \.element.id) { item in
-                    card(item.element)
-                        .cascadeIn(min(item.offset, 8))
+                if all.isEmpty {
+                    if filter == nil {
+                        empty
+                    } else {
+                        Text(tr("Nothing logged yet."))
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .germilyCard()
+                    }
                 }
-                if shown.count < logs.count {
-                    LockedHistoryRow(count: logs.count - shown.count)
+                ForEach(Array(months(shown).enumerated()), id: \.element.id) { item in
+                    Text(monthTitle(item.element.start))
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(palette.ink)
+                        .padding(.horizontal, 4)
+                        .padding(.top, 14)
+                    VStack(spacing: 0) {
+                        ForEach(Array(item.element.entries.enumerated()), id: \.element.id) { row in
+                            if row.offset > 0 {
+                                Divider()
+                                    .padding(.leading, 66)
+                            }
+                            entryRow(row.element)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .germilyCard(padding: 0)
+                    .cascadeIn(min(item.offset, 8))
+                }
+                if shown.count < all.count {
+                    LockedHistoryRow(count: all.count - shown.count)
                 }
             }
             .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
+            .animation(Tempo.quick, value: filter)
+        }
+        .background(CharacterWash(tint: Color(hex: Swatch.lilac)))
+        .navigationTitle(tr("Logbook"))
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if !model.data.kids.isEmpty {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        addsKidGerm = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel(tr("Add a kid's germ"))
+                }
+            }
+        }
+        .sheet(item: $opened) { ref in
+            LogbookEntrySheet(id: ref.id)
+        }
+        .sheet(isPresented: $addsKidGerm) {
+            KidIllnessSheet()
+        }
+        .confirmationDialog(pendingDelete?.deleteTitle ?? "", isPresented: deleteBinding, titleVisibility: .visible) {
+            Button(tr("Delete"), role: .destructive) {
+                if let entry = pendingDelete { model.deleteEntry(entry) }
+                pendingDelete = nil
+            }
+            Button(tr("Cancel"), role: .cancel) {
+                pendingDelete = nil
+            }
+        } message: {
+            Text(pendingDelete?.deleteMessage ?? "")
         }
     }
 
-    private func card(_ log: SickLog) -> some View {
-        HStack(spacing: 4) {
+    private var chips: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                ChoiceChip(title: tr("Everyone"), selected: filter == nil) {
+                    filter = nil
+                }
+                ForEach(model.people, id: \.self) { person in
+                    PersonChip(look: model.look(of: person), sick: model.isSick(person), name: model.name(for: person),
+                               selected: filter == person) {
+                        filter = person
+                    }
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+        .scrollClipDisabled()
+        .accessibilityLabel(tr("Who"))
+        .padding(.bottom, 4)
+    }
+
+    /// The first screen of the logbook: what lands in it, and a way to add a kid's past germ.
+    private var empty: some View {
+        VStack(spacing: 6) {
+            Image("record-logbook")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 140, height: 140)
+                .shadow(color: Color(hex: Swatch.iris).opacity(0.18), radius: 10, y: 8)
+                .padding(.bottom, 6)
+                .accessibilityHidden(true)
+            Text(tr("Nothing in here yet"))
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.ink)
+            Text(tr("No germs logged yet. It won't last."))
+                .font(.subheadline)
+                .foregroundStyle(palette.inkSecondary)
+            Text(tr("Every germ you log on Today, yours or a kid's, lands here."))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.top, 8)
+            if !model.data.kids.isEmpty {
+                Button {
+                    addsKidGerm = true
+                } label: {
+                    Label(tr("Add a kid's germ"), systemImage: "plus")
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink, height: 50))
+                .fixedSize()
+                .padding(.top, 14)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+        .padding(.top, 28)
+    }
+
+    private func entryRow(_ entry: LogbookEntry) -> some View {
+        let germ = model.catalog.germ(entry.germID)
+        let who = model.whoHad(entry)
+        return HStack(spacing: 4) {
             Button {
-                editing = log
+                opened = EntryRef(id: entry.id)
             } label: {
-                row(log)
-                    .contentShape(Rectangle())
+                HStack(spacing: 16) {
+                    GermTile(germ: germ, look: who.look, side: 50)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(germ?.illness.value ?? entry.germID)
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(palette.ink)
+                            Text(who.name)
+                                .font(.subheadline)
+                                .foregroundStyle(palette.inkSecondary)
+                                .lineLimit(1)
+                        }
+                        Text(detail(entry))
+                            .font(.footnote)
+                            .foregroundStyle(palette.inkSecondary)
+                    }
+                    Spacer(minLength: 4)
+                    trailing(entry)
+                }
+                .padding(.vertical, 12)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             Menu {
                 Button(role: .destructive) {
-                    pendingDelete = log
+                    pendingDelete = entry
                 } label: {
                     Label(tr("Delete"), systemImage: "trash")
                 }
@@ -60,46 +302,47 @@ struct LogbookScreen: View {
             }
             .accessibilityLabel(tr("More"))
         }
-        .germilyCard(padding: 12)
     }
 
-    var body: some View {
-        VStack(spacing: 0) {
-            Picker(tr("Section"), selection: $showsKids) {
-                Text(tr("Mine")).tag(false)
-                Text(tr("Kids")).tag(true)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
-            if showsKids {
-                ScrollView {
-                    KidsGermsView()
-                        .padding(.horizontal, Spacing.page)
-                        .padding(.bottom, 28)
-                }
+    private func detail(_ entry: LogbookEntry) -> String {
+        let date = entry.startedAt.formatted(date: .abbreviated, time: .omitted)
+        switch entry {
+        case .log(let log):
+            return date + " · " + trCount(log.dayCount(), one: "%lld day", other: "%lld days") + " · " + model.sourceName(log.source)
+        case .illness(let illness):
+            return date + " · " + model.outcomeLabel(illness.outcome)
+        }
+    }
+
+    @ViewBuilder
+    private func trailing(_ entry: LogbookEntry) -> some View {
+        if model.isGoingOn(entry) {
+            PillLabel(text: tr("Now"), foreground: palette.onAccent, background: palette.accent)
+        } else if case .log(let log) = entry {
+            Text(tr("+%lld pts", log.points))
+                .font(.footnote.monospacedDigit())
+                .foregroundStyle(palette.inkSecondary)
+        }
+    }
+
+    private func months(_ entries: [LogbookEntry]) -> [Month] {
+        let calendar = Calendar.current
+        var months: [Month] = []
+        for entry in entries {
+            let start = calendar.dateInterval(of: .month, for: entry.startedAt)?.start ?? entry.startedAt
+            if let last = months.last, last.start == start {
+                months[months.count - 1].entries.append(entry)
             } else {
-                mine
+                months.append(Month(start: start, entries: [entry]))
             }
         }
-        .background(palette.background.ignoresSafeArea())
-        .navigationTitle(tr("Logbook"))
-        .navigationBarTitleDisplayMode(.inline)
-        .sheet(item: $editing) { log in
-            LogEditSheet(log: log)
-        }
-        .confirmationDialog(tr("Delete this log?"), isPresented: deleteBinding, titleVisibility: .visible) {
-            Button(tr("Delete"), role: .destructive) {
-                if let log = pendingDelete { model.deleteLog(log.id) }
-                pendingDelete = nil
-            }
-            Button(tr("Cancel"), role: .cancel) {
-                pendingDelete = nil
-            }
-        } message: {
-            Text(tr("Its points leave your total and your streak is counted again without it."))
-        }
+        return months
+    }
+
+    private func monthTitle(_ start: Date) -> String {
+        let sameYear = Calendar.current.isDate(start, equalTo: Date(), toGranularity: .year)
+        let title = sameYear ? start.formatted(.dateTime.month(.wide)) : start.formatted(.dateTime.month(.wide).year())
+        return title.capitalized(with: Locale.current)
     }
 
     private var deleteBinding: Binding<Bool> {
@@ -107,34 +350,297 @@ struct LogbookScreen: View {
             if !shown { pendingDelete = nil }
         })
     }
+}
 
-    private func row(_ log: SickLog) -> some View {
-        let germ = model.catalog.germ(log.germID)
-        return HStack(spacing: 12) {
+extension AppModel {
+    func deleteEntry(_ entry: LogbookEntry) {
+        switch entry {
+        case .log(let log): deleteLog(log.id)
+        case .illness(let illness): deleteKidIllness(illness.id)
+        }
+    }
+}
+
+/// A germ on its tinted tile, with the character of whoever had it on the corner.
+struct GermTile: View {
+    let germ: Germ?
+    let look: Int
+    var side: CGFloat = 50
+    var sick = false
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        ZStack {
             if let germ {
-                GermImage(germ: germ, size: 34)
-                    .frame(width: 44, height: 44)
-                    .background(germ.tileTint(palette), in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(germ?.illness.value ?? log.germID)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(palette.ink)
-                Text(log.startedAt.formatted(date: .abbreviated, time: .omitted) + " · "
-                     + trCount(log.dayCount(), one: "%lld day", other: "%lld days") + " · "
-                     + model.sourceName(log.source))
-                    .font(.footnote)
-                    .foregroundStyle(palette.inkSecondary)
-            }
-            Spacer(minLength: 4)
-            if log.isActive {
-                PillLabel(text: tr("Now"), foreground: palette.onAccent, background: palette.accent)
-            } else {
-                Text(tr("+%lld pts", log.points))
-                    .font(.footnote.monospacedDigit())
-                    .foregroundStyle(palette.inkSecondary)
+                GermImage(germ: germ, size: side * 0.76)
             }
         }
+        .frame(width: side, height: side)
+        .background(germ?.tileTint(palette) ?? palette.surfaceAlt,
+                    in: RoundedRectangle(cornerRadius: side * 0.3, style: .continuous))
+        .overlay(alignment: .bottomTrailing) {
+            BuddyView(look: look, sick: sick, size: side * 0.44)
+                .frame(width: side * 0.58, height: side * 0.58)
+                .background(palette.background, in: Circle())
+                .shadow(color: .black.opacity(0.14), radius: 1.5, y: 1)
+                .offset(x: side * 0.16, y: side * 0.14)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// One illness opened from the logbook: who and when, its days with their photos, its signs,
+/// the germ's page, and ways to fix or delete it.
+private struct LogbookEntrySheet: View {
+    let id: UUID
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
+    @State private var editing: SickLog?
+    @State private var confirmDelete = false
+
+    private var entry: LogbookEntry? {
+        if let log = model.data.logs.first(where: { $0.id == id }) { return .log(log) }
+        return model.data.kidIllnesses.first { $0.id == id }.map(LogbookEntry.illness)
+    }
+
+    var body: some View {
+        let current = entry
+        let germ = current.flatMap { model.catalog.germ($0.germID) }
+        NavigationStack {
+            ScrollView {
+                if let current {
+                    content(current, germ: germ)
+                        .padding(.horizontal, Spacing.page)
+                        .padding(.bottom, 28)
+                }
+            }
+            .background(palette.background.ignoresSafeArea())
+            .navigationTitle(germ?.illness.value ?? "")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(tr("Close"))
+                }
+                if case .log(let log) = current {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            editing = log
+                        } label: {
+                            Image(systemName: "pencil")
+                        }
+                        .accessibilityLabel(tr("Edit log"))
+                    }
+                }
+            }
+            .sheet(item: $editing) { log in
+                LogEditSheet(log: log)
+            }
+            .confirmationDialog(current?.deleteTitle ?? "", isPresented: $confirmDelete, titleVisibility: .visible) {
+                Button(tr("Delete"), role: .destructive) {
+                    if let current { model.deleteEntry(current) }
+                    dismiss()
+                }
+                Button(tr("Cancel"), role: .cancel) {}
+            } message: {
+                Text(current?.deleteMessage ?? "")
+            }
+            .onChange(of: current == nil) { _, gone in
+                if gone { dismiss() }
+            }
+        }
+    }
+
+    private func content(_ entry: LogbookEntry, germ: Germ?) -> some View {
+        let who = model.whoHad(entry)
+        return VStack(alignment: .leading, spacing: 14) {
+            VStack(spacing: 4) {
+                GermTile(germ: germ, look: who.look, side: 112, sick: model.isGoingOn(entry))
+                    .padding(.bottom, 12)
+                Text(who.name)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(summary(entry))
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
+            IllnessDays(entry: entry, person: who.person)
+            VStack(spacing: 0) {
+                if let germ {
+                    NavigationLink {
+                        GermDetailScreen(germ: germ)
+                    } label: {
+                        SettingsRow(symbol: "book.closed.fill", title: tr("About this germ")) {
+                            Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(palette.inkTertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    Divider()
+                        .padding(.leading, 44)
+                }
+                Button {
+                    confirmDelete = true
+                } label: {
+                    SettingsRow(symbol: "trash", title: tr("Delete"), tint: .red) {}
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 14)
+            .germilyCard(padding: 0)
+            Text(tr("Dates and germs as you logged them. Germily adds no diagnosis."))
+                .font(.footnote)
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.horizontal, 4)
+        }
+    }
+
+    private func summary(_ entry: LogbookEntry) -> String {
+        let day = { (date: Date) in date.formatted(.dateTime.month(.abbreviated).day()) }
+        switch entry {
+        case .log(let log):
+            let dates = log.endedAt.map { tr("%1$@ to %2$@", day(log.startedAt), day($0)) } ?? tr("Since %@", day(log.startedAt))
+            return dates + " · " + trCount(log.dayCount(), one: "%lld day", other: "%lld days")
+        case .illness(let illness):
+            let dates = illness.endedAt.map { tr("%1$@ to %2$@", day(illness.startedAt), day($0)) }
+                ?? tr("Started %@", day(illness.startedAt))
+            return dates + " · " + model.outcomeLabel(illness.outcome)
+        }
+    }
+}
+
+/// The signs ticked for an illness, then a row per day with its photos and a way to add one.
+private struct IllnessDays: View {
+    let entry: LogbookEntry
+    /// Whose photos new ones are filed under.
+    let person: Person
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @State private var seed: PhotoSeed?
+    @State private var door: PassReason?
+
+    private var range: (start: Date, end: Date, link: PhotoLink, symptoms: [String]) {
+        switch entry {
+        case .log(let log):
+            return (log.startedAt, log.endedAt ?? Date(), .log(log.id), log.symptoms)
+        case .illness(let illness):
+            let now = Date()
+            let going = model.isGoingOn(entry)
+            let end = illness.endedAt ?? (going ? now : DayEngine.kidEnd(illness, catalog: model.catalog, now: now))
+            return (illness.startedAt, end, .illness(illness.id), illness.symptoms)
+        }
+    }
+
+    private var photos: [PatientPhoto] {
+        model.data.photos.filter { photo in
+            switch entry {
+            case .log(let log): photo.logID == log.id
+            case .illness(let illness): photo.illnessID == illness.id
+            }
+        }
+        .sorted { $0.takenAt < $1.takenAt }
+    }
+
+    /// Each day of the illness up to today, at midnight.
+    private var days: [Date] {
+        let calendar = Calendar.current
+        let first = calendar.startOfDay(for: range.start)
+        let last = calendar.startOfDay(for: min(range.end, Date()))
+        let count = max(0, calendar.dateComponents([.day], from: first, to: last).day ?? 0)
+        return (0...count).compactMap { calendar.date(byAdding: .day, value: $0, to: first) }
+    }
+
+    var body: some View {
+        let calendar = Calendar.current
+        let days = days
+        let photos = photos
+        let signs = Symptom.ordered(Set(range.symptoms))
+        let loose = photos.filter { photo in !days.contains { calendar.isDate(photo.takenAt, inSameDayAs: $0) } }
+        VStack(alignment: .leading, spacing: 8) {
+            if !signs.isEmpty {
+                Text(tr("Signs"))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                    .padding(.horizontal, 4)
+                ChipRows {
+                    ForEach(signs) { sign in
+                        Text(sign.title)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                            .padding(.horizontal, 14)
+                            .frame(height: 36)
+                            .background(palette.ink.opacity(0.07), in: Capsule())
+                    }
+                }
+                .padding(.bottom, 6)
+            }
+            Text(tr("Days"))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(palette.ink)
+                .padding(.horizontal, 4)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(days.enumerated()), id: \.element) { item in
+                    dayRow(item.element, number: item.offset + 1,
+                           shots: photos.filter { calendar.isDate($0.takenAt, inSameDayAs: item.element) })
+                }
+                if !loose.isEmpty {
+                    HStack(spacing: 10) {
+                        Text(tr("Other days"))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                            .frame(width: 92, alignment: .leading)
+                        PhotoRow(photos: loose, side: 50)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .germilyCard(padding: 12)
+        }
+        .sheet(item: $seed) { seed in
+            AddPhotoSheet(seed: seed)
+        }
+        .sheet(item: $door) { reason in
+            PaywallView(reason: reason)
+        }
+    }
+
+    private func dayRow(_ day: Date, number: Int, shots: [PatientPhoto]) -> some View {
+        let today = Calendar.current.isDateInToday(day)
+        return HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(tr("Day %lld", number))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Text(today ? tr("Today") : day.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
+                    .font(today ? .caption.weight(.semibold) : .caption)
+                    .foregroundStyle(today ? palette.accent : palette.inkSecondary)
+            }
+            .frame(width: 92, alignment: .leading)
+            PhotoRow(photos: shots, side: 50) {
+                addPhoto(on: day, today: today)
+            }
+        }
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .contain)
+    }
+
+    /// A new photo for that day of the illness: now for today, midday for a past day.
+    private func addPhoto(on day: Date, today: Bool) {
+        guard model.hasPass else {
+            door = .photos
+            return
+        }
+        let moment = today ? Date() : Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
+        seed = PhotoSeed(person: person, takenAt: moment, link: range.link)
     }
 }
 
@@ -220,115 +726,6 @@ private struct LogEditSheet: View {
                     .tint(palette.ink)
                 }
             }
-        }
-    }
-}
-
-/// What each kid has had, which also drives the incubation countdowns.
-private struct KidsGermsView: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.palette) private var palette
-    @State private var showSheet = false
-    @State private var pendingDelete: KidIllness?
-
-    private var illnesses: [KidIllness] {
-        model.data.kidIllnesses.sorted { $0.startedAt > $1.startedAt }
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Button {
-                showSheet = true
-            } label: {
-                Label(tr("Add a kid's germ"), systemImage: "plus")
-            }
-            .buttonStyle(PillButtonStyle(kind: .ink, height: 46))
-            if illnesses.isEmpty {
-                Text(tr("When a kid gets sick, add it here. Germily starts your incubation countdown and remembers who brought what home."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .padding(.horizontal, 4)
-            }
-            let shown = illnesses.filter { model.isShown($0.startedAt, ongoing: DayEngine.isGoingOn($0, catalog: model.catalog, now: Date())) }
-            ForEach(Array(shown.enumerated()), id: \.element.id) { item in
-                row(item.element)
-                    .cascadeIn(min(item.offset, 8))
-            }
-            if shown.count < illnesses.count {
-                LockedHistoryRow(count: illnesses.count - shown.count)
-            }
-        }
-        .sheet(isPresented: $showSheet) {
-            KidIllnessSheet()
-        }
-        .confirmationDialog(tr("Delete this entry?"), isPresented: deleteBinding, titleVisibility: .visible) {
-            Button(tr("Delete"), role: .destructive) {
-                if let illness = pendingDelete { model.deleteKidIllness(illness.id) }
-                pendingDelete = nil
-            }
-            Button(tr("Cancel"), role: .cancel) {
-                pendingDelete = nil
-            }
-        } message: {
-            Text(tr("Its countdown and reminders go with it."))
-        }
-    }
-
-    private var deleteBinding: Binding<Bool> {
-        Binding(get: { pendingDelete != nil }, set: { shown in
-            if !shown { pendingDelete = nil }
-        })
-    }
-
-    @ViewBuilder
-    private func row(_ illness: KidIllness) -> some View {
-        if let germ = model.catalog.germ(illness.germID) {
-            let kid = model.kid(illness.kidID)
-            HStack(spacing: 12) {
-                NavigationLink {
-                    GermDetailScreen(germ: germ)
-                } label: {
-                    HStack(spacing: 12) {
-                        BuddyBadge(look: kid?.colorIndex ?? 0, size: 42)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text((kid?.name ?? tr("Your kid")) + " · " + germ.illness.value)
-                                .font(.callout.weight(.semibold))
-                                .foregroundStyle(palette.ink)
-                                .multilineTextAlignment(.leading)
-                            Text(illness.startedAt.formatted(date: .abbreviated, time: .omitted) + " · " + outcomeLabel(illness.outcome))
-                                .font(.footnote)
-                                .foregroundStyle(palette.inkSecondary)
-                        }
-                        Spacer(minLength: 4)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                Menu {
-                    Button(role: .destructive) {
-                        pendingDelete = illness
-                    } label: {
-                        Label(tr("Delete"), systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.body.weight(.bold))
-                        .foregroundStyle(palette.inkSecondary)
-                        .frame(width: 40, height: 40)
-                        .hitTarget(width: 40, height: 40)
-                }
-                .accessibilityLabel(tr("More"))
-            }
-            .germilyCard(padding: 12)
-        }
-    }
-
-    private func outcomeLabel(_ outcome: ExposureOutcome) -> String {
-        switch outcome {
-        case .open: return tr("You're still clear")
-        case .caught: return tr("You caught it")
-        case .dodged: return tr("You dodged it")
-        case .expired: return tr("Window passed")
         }
     }
 }

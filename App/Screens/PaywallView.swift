@@ -203,6 +203,7 @@ struct PaywallView: View {
             Text(tr("Everything in the Season Pass"))
                 .font(.headline)
             benefit("person.2.fill", tr("Your whole household"), tr("Your partner, the couple duel and every kid"))
+            benefit("face.smiling.inverse", tr("Every character"), tr("Dinos, unicorns, wizards and more for the family"))
             benefit("calendar", tr("The whole history"), tr("Past weeks, photos and the file for the doctor"))
             benefit("chart.bar.fill", tr("Your season in numbers"), tr("Top supplier, germs by month and the longest chain"))
             if AppConfig.crewEnabled {
@@ -469,6 +470,12 @@ private struct PassArt: View {
                 picture("sticker-tissue", side: 46)
                 picture("sticker-soup", side: 58)
                 picture("sticker-tea", side: 46)
+            }
+        case .characters:
+            HStack(alignment: .bottom, spacing: -14) {
+                BuddyView(look: Looks.showcase[0], size: 46, lively: true)
+                BuddyView(look: Looks.showcase[1], size: 58, leads: true, pokes: true)
+                BuddyView(look: Looks.showcase[2], size: 46, lively: true)
             }
         case .looks:
             HStack(spacing: -8) {

@@ -299,7 +299,20 @@ def mascot_faces():
     return faces
 
 
+def look_count():
+    """Looks.count, read from AppData.swift: each look needs its healthy and sick image."""
+    match = re.search(r"enum Looks \{\s*static let count = (\d+)", (ROOT / "App/Models/AppData.swift").read_text())
+    return int(match.group(1)) if match else 0
+
+
 def check_assets(germs):
+    count = look_count()
+    if not count:
+        fail("App/Models/AppData.swift: Looks.count not found")
+    for look in range(count):
+        for state in ("well", "sick"):
+            if not imageset_ok("App/Assets.xcassets", f"buddy-{look}-{state}"):
+                fail(f"App/Assets.xcassets: missing image buddy-{look}-{state}")
     for germ in germs:
         for catalog in ("App/Assets.xcassets", "Widgets/Assets.xcassets"):
             if not imageset_ok(catalog, f"germ-{germ.get('id')}"):

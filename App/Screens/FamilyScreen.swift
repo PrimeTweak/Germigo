@@ -42,6 +42,8 @@ struct FamilyScreen: View {
     @Environment(\.palette) private var palette
     @State private var editing: FamilyMember?
     @State private var door: PassReason?
+    @State private var choosing = false
+    @State private var seatChoice: SeatChoice?
 
     var body: some View {
         let everyone = model.people
@@ -65,10 +67,8 @@ struct FamilyScreen: View {
                     RecordTiles(door: $door)
                         .padding(.top, 4)
                         .cascadeIn(people.count)
-                    FamilyCouch {
-                        editing = .partner
-                    }
-                    .cascadeIn(people.count + 1)
+                    FamilyCouch(takeSeat: takeSeat)
+                        .cascadeIn(people.count + 1)
                     footnote
                 }
                 .padding(.horizontal, Spacing.page)
@@ -78,19 +78,6 @@ struct FamilyScreen: View {
             .background(CharacterWash(tint: TabWash.family))
             .navigationTitle(tr("Family"))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        if model.canAddKid {
-                            editing = .newKid
-                        } else {
-                            door = .household
-                        }
-                    } label: {
-                        Image(systemName: model.canAddKid ? "plus" : "lock.fill")
-                    }
-                    .accessibilityLabel(tr("Add a kid"))
-                }
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()
                 }
@@ -104,11 +91,44 @@ struct FamilyScreen: View {
             .sheet(item: $door) { reason in
                 PaywallView(reason: reason)
             }
+            .sheet(isPresented: $choosing, onDismiss: openChoice) {
+                CouchChooser { choice in
+                    seatChoice = choice
+                    choosing = false
+                }
+            }
         }
     }
 
     private func status(of person: Person) -> PersonStatus {
         FamilyStatus.status(of: person, model: model)
+    }
+
+    /// The free seat asks who is joining, unless the partner is already there and only a kid can be.
+    private func takeSeat() {
+        if model.data.partnerName == nil {
+            choosing = true
+        } else {
+            seatChoice = .kid
+            openChoice()
+        }
+    }
+
+    /// Opens the sheet for the one picked, once the chooser has closed.
+    private func openChoice() {
+        switch seatChoice {
+        case .kid:
+            if model.canAddKid {
+                editing = .newKid
+            } else {
+                door = .household
+            }
+        case .partner:
+            editing = .partner
+        case nil:
+            break
+        }
+        seatChoice = nil
     }
 
     /// What the tab keeps private, and what the Season Pass adds for those without it.
@@ -343,16 +363,15 @@ struct CouchBackdrop: View {
     }
 }
 
-/// The household on the couch, a line that follows who is sick, and a free seat while the partner is missing.
+/// The household on the couch, a line that follows who is sick, and a free seat to add someone.
 private struct FamilyCouch: View {
-    let addPartner: () -> Void
+    let takeSeat: () -> Void
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
 
     var body: some View {
         let people = model.people
-        let missingPartner = model.data.partnerName == nil
-        let seats = CouchSeats(count: people.count + (missingPartner ? 1 : 0))
+        let seats = CouchSeats(count: people.count + 1)
         VStack(spacing: 3) {
             ZStack {
                 CouchBackdrop()
@@ -363,23 +382,21 @@ private struct FamilyCouch: View {
                               phase: Double(item.offset) * CharacterPose.accentCycle / Double(max(1, people.count)))
                         .position(seats.center(of: item.offset))
                 }
-                if missingPartner {
-                    Button(action: addPartner) {
-                        Image(systemName: "plus")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(palette.ink.opacity(0.62))
-                            .frame(width: seats.head * 0.79, height: seats.head * 0.79)
-                            .background(.white.opacity(0.3), in: Circle())
-                            .overlay {
-                                Circle()
-                                    .strokeBorder(palette.ink.opacity(0.45), style: StrokeStyle(lineWidth: 2.5, dash: [5, 5]))
-                            }
-                            .contentShape(Circle())
-                    }
-                    .buttonStyle(PressableStyle())
-                    .accessibilityLabel(tr("Add your partner"))
-                    .position(seats.center(of: people.count))
+                Button(action: takeSeat) {
+                    Image(systemName: "plus")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(palette.ink.opacity(0.62))
+                        .frame(width: seats.head * 0.79, height: seats.head * 0.79)
+                        .background(.white.opacity(0.3), in: Circle())
+                        .overlay {
+                            Circle()
+                                .strokeBorder(palette.ink.opacity(0.45), style: StrokeStyle(lineWidth: 2.5, dash: [5, 5]))
+                        }
+                        .contentShape(Circle())
                 }
+                .buttonStyle(PressableStyle())
+                .accessibilityLabel(tr("Add someone"))
+                .position(seats.center(of: people.count))
             }
             .frame(width: CouchSeats.width, height: CouchSeats.height)
             .accessibilityElement(children: .contain)
@@ -388,12 +405,10 @@ private struct FamilyCouch: View {
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.center)
                 .padding(.top, 6)
-            if missingPartner {
-                Text(tr("One seat saved for your partner."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .multilineTextAlignment(.center)
-            }
+            Text(tr("Room for one more. Tap the seat."))
+                .font(.subheadline)
+                .foregroundStyle(palette.inkSecondary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 18)
@@ -413,6 +428,100 @@ private struct FamilyCouch: View {
             return sick.count == people.count ? tr("Everyone's down. Send soup.") : tr("%lld down. Hold the line.", sick.count)
         }
         return sick[0] == .me ? tr("You're down. Hold the line.") : tr("%@ is down. Hold the line.", model.name(for: sick[0]))
+    }
+}
+
+/// Who takes the free seat on the couch.
+private enum SeatChoice {
+    case kid
+    case partner
+}
+
+/// The free seat's question: a kid or the partner. A second kid without the Season Pass shows its lock.
+private struct CouchChooser: View {
+    let pick: (SeatChoice) -> Void
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 18) {
+                HStack(alignment: .top, spacing: 12) {
+                    card(look: model.nextKidLook, title: tr("A kid"),
+                         detail: model.canAddKid ? tr("Their own file, and what they bring home") : PurchaseManager.shared.shortOfferLabel,
+                         locked: !model.canAddKid) {
+                        pick(.kid)
+                    }
+                    card(look: model.data.partnerLook, title: tr("Your partner"), detail: tr("Opens the couple duel"), locked: false) {
+                        pick(.partner)
+                    }
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            .padding(.horizontal, Spacing.page)
+            .padding(.top, 8)
+            .frame(maxHeight: .infinity, alignment: .top)
+            .background(palette.background.ignoresSafeArea())
+            .navigationTitle(tr("Who's joining the couch?"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .accessibilityLabel(tr("Cancel"))
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func card(look: Int, title: String, detail: String, locked: Bool, action: @escaping () -> Void) -> some View {
+        let shape = RoundedRectangle(cornerRadius: Radius.large, style: .continuous)
+        let tint = Buddy.tint(look)
+        return Button(action: action) {
+            VStack(spacing: 4) {
+                BuddyView(look: look, size: 74)
+                    .frame(width: 96, height: 96)
+                    .background(tint.opacity(palette.isDark ? 0.4 : 0.7), in: Circle())
+                    .padding(.bottom, 6)
+                Text(title)
+                    .font(.headline)
+                    .foregroundStyle(palette.ink)
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 18)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .background {
+                shape
+                    .fill(palette.background)
+                    .overlay(shape.fill(tint.opacity(palette.isDark ? 0.18 : 0.26)))
+            }
+            .overlay(shape.strokeBorder(tint.opacity(0.7), lineWidth: 1.5))
+            .overlay(alignment: .topTrailing) {
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(palette.accent)
+                        .padding(12)
+                        .accessibilityLabel(tr("Needs the Season Pass"))
+                }
+            }
+            .contentShape(shape)
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -589,7 +698,7 @@ private struct PersonFileScreen: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
                 numbers
-                HealthHistory(person: person, since: nil)
+                history
             }
             .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
@@ -614,6 +723,59 @@ private struct PersonFileScreen: View {
         .onChange(of: model.people) { _, people in
             if !people.contains(person) { dismiss() }
         }
+    }
+
+    /// One line for this person's illnesses: the logbook holds them, opened on this person.
+    private var history: some View {
+        let entries = model.logbook(for: person)
+        let latest = entries.first.flatMap { model.catalog.germ($0.germID) }
+        return NavigationLink {
+            LogbookScreen(person: person)
+        } label: {
+            HStack(spacing: 14) {
+                HStack(spacing: -14) {
+                    ForEach(Array(entries.prefix(3).enumerated()), id: \.element.id) { item in
+                        let germ = model.catalog.germ(item.element.germID)
+                        ZStack {
+                            if let germ {
+                                GermImage(germ: germ, size: 30)
+                            }
+                        }
+                        .frame(width: 40, height: 40)
+                        .background(germ?.tileTint(palette) ?? palette.surfaceAlt,
+                                    in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                                .stroke(palette.surface, lineWidth: 2.5)
+                        }
+                        .zIndex(Double(3 - item.offset))
+                    }
+                    if entries.isEmpty {
+                        Image("record-logbook")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                    }
+                }
+                .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("History"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(latest.map { trCount(entries.count, one: "%lld germ", other: "%lld germs") + " · " + tr("Last: %@", $0.illness.value) }
+                         ?? tr("Nothing logged yet."))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(palette.inkTertiary)
+            }
+            .germilyCard(padding: 14)
+            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
     }
 
     /// Up to three numbers about this person, from the journal.
@@ -671,6 +833,9 @@ private struct PersonEditSheet: View {
     @State private var showsSick = false
     @State private var confirmRemove = false
     @State private var didPrefill = false
+    @State private var door: PassReason?
+    /// The look the person had when the sheet opened; it stays theirs even if the Season Pass has ended.
+    @State private var original: Int?
 
     private var trimmed: String {
         name.trimmingCharacters(in: .whitespaces)
@@ -688,6 +853,10 @@ private struct PersonEditSheet: View {
     /// Only the parent may stay without a name.
     private var canSave: Bool {
         member == .me || !trimmed.isEmpty
+    }
+
+    private func canKeep(_ look: Int) -> Bool {
+        model.isLookOpen(look) || Buddy.index(look) == original
     }
 
     /// Who the sheet can take out of the household: a kid, or a partner already added.
@@ -715,10 +884,19 @@ private struct PersonEditSheet: View {
                         .frame(height: 54)
                         .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                     label(tr("Character"))
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
-                        ForEach(0..<Looks.count, id: \.self) { index in
-                            choice(index)
+                    looks(Looks.order.filter(canKeep), locked: false)
+                    if !model.hasPass {
+                        HStack {
+                            Text(tr("With the Season Pass"))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(palette.inkSecondary)
+                            Spacer(minLength: 8)
+                            PassOfferTag()
                         }
+                        .padding(.horizontal, 4)
+                        .padding(.top, 22)
+                        .padding(.bottom, 10)
+                        looks(Looks.order.filter { !canKeep($0) }, locked: true)
                     }
                     if let removable {
                         Button(tr("Remove %@", removable)) {
@@ -765,6 +943,9 @@ private struct PersonEditSheet: View {
                 }
             }
             .onAppear(perform: prefill)
+            .sheet(item: $door) { reason in
+                PaywallView(reason: reason)
+            }
         }
     }
 
@@ -785,6 +966,9 @@ private struct PersonEditSheet: View {
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
                 .accessibilityHidden(true)
+            if !canKeep(look) {
+                PassOfferLink(reason: .characters)
+            }
         }
         .padding(.top, 12)
         .animation(Tempo.pop, value: look)
@@ -799,7 +983,16 @@ private struct PersonEditSheet: View {
             .padding(.bottom, 8)
     }
 
-    private func choice(_ index: Int) -> some View {
+    private func looks(_ indices: [Int], locked: Bool) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
+            ForEach(indices, id: \.self) { index in
+                choice(index, locked: locked)
+            }
+        }
+    }
+
+    /// A look to try. A locked one still shows large above; saving it opens the Season Pass.
+    private func choice(_ index: Int, locked: Bool) -> some View {
         let isOn = Buddy.index(look) == index
         return Button {
             Haptics.tap()
@@ -819,11 +1012,21 @@ private struct PersonEditSheet: View {
                         .strokeBorder(isOn ? palette.ink : Color.clear, lineWidth: 3)
                         .padding(-5)
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    if locked {
+                        Image(systemName: "lock.fill")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(palette.onAccent)
+                            .frame(width: 22, height: 22)
+                            .background(palette.accent, in: Circle())
+                            .overlay(Circle().stroke(palette.background, lineWidth: 2.5))
+                    }
+                }
                 .padding(5)
                 .scaleEffect(isOn ? 1.06 : 1)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(tr("Character %lld", index + 1))
+        .accessibilityLabel(locked ? tr("Character %lld", index + 1) + ", " + tr("Needs the Season Pass") : tr("Character %lld", index + 1))
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
@@ -843,10 +1046,15 @@ private struct PersonEditSheet: View {
             name = model.data.partnerName ?? ""
             look = model.data.partnerLook
         }
+        if member != .newKid { original = Buddy.index(look) }
     }
 
     private func save() {
         guard canSave else { return }
+        guard canKeep(look) else {
+            door = .characters
+            return
+        }
         switch member {
         case .kid(let kid):
             var updated = kid

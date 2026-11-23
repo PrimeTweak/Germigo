@@ -10,6 +10,7 @@ enum PassReason: String, Identifiable, CaseIterable {
     case stats
     case crew
     case looks
+    case characters
     case holo
 
     var id: String { rawValue }
@@ -25,6 +26,7 @@ enum PassReason: String, Identifiable, CaseIterable {
         case .stats: tr("See who brings the most home.")
         case .crew: tr("Know what's going around.")
         case .looks: tr("Make Germily yours.")
+        case .characters: tr("Pick from every character.")
         case .holo: tr("Turn your cards holo.")
         }
     }
@@ -40,6 +42,7 @@ enum PassReason: String, Identifiable, CaseIterable {
         case .stats: tr("The family league, your top supplier and the season in numbers.")
         case .crew: tr("Daycare Crew is an outbreak radar for your group.")
         case .looks: tr("Every theme, every icon and the incubation widget.")
+        case .characters: tr("%lld more characters for the family, each with its own sick face.", Looks.count - Looks.free.count)
         case .holo: tr("Catch a germ three times and its card goes holo.")
         }
     }
@@ -55,6 +58,7 @@ enum PassReason: String, Identifiable, CaseIterable {
         case .stats: tr("Your season in numbers")
         case .crew: tr("The outbreak radar")
         case .looks: tr("Every theme and icon")
+        case .characters: tr("Every character")
         case .holo: tr("Holo cards")
         }
     }
