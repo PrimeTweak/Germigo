@@ -478,6 +478,12 @@ do {
                       illnessID: nil, isLastDay: false).id, "a germ shared by the couple gives two cards")
 
     check(DayEngine.entries(on: day(21), data: data, catalog: catalog, now: day(20)).isEmpty, "a future day is empty")
+    let daysSeason = Season.containing(day(0), firstUse: day(0))
+    check(DayEngine.loggedDays(in: daysSeason, data: data, catalog: catalog, now: day(20)) == 5,
+          "the season counts each day someone was sick once")
+    check(DayEngine.loggedDays(in: daysSeason, person: .me, data: data, catalog: catalog, now: day(20)) == 3
+            && DayEngine.loggedDays(in: daysSeason, person: .kid(kidID), data: data, catalog: catalog, now: day(20)) == 5,
+          "a person's count keeps only their own sick days")
     check(DayEngine.firstDay(data: data) == Calendar.current.startOfDay(for: day(0)), "the first day is the install day")
     data.logs.append(makeLog("rhino", from: day(-3), to: day(-1)))
     check(DayEngine.firstDay(data: data) == Calendar.current.startOfDay(for: day(-3)), "or an older entry")
@@ -620,35 +626,62 @@ do {
                                                              lesson("b5", "2026-10-01"), lesson("bad", "soon")])
     check(merged.map { $0.id } == ["b0", "b5", "b25", "early", "late"],
           "online lessons follow the bundled ones in release order, without duplicates or bad dates")
-    check(merged.suffix(2).map { $0.unlockAtAnswers } == [30, 35], "each online lesson sits one step above the last")
+    check(merged.suffix(2).allSatisfy { $0.needsPass } && !merged.prefix(3).contains { $0.needsPass },
+          "online lessons need the Season Pass, bundled ones climb the ladder")
     check(merged.last?.reviewedOn == "2026-09-30", "an online lesson keeps its review day")
 
     let shelf = GermCatalog(germs: [], articles: bundled,
                             feed: [lesson("early", "2026-10-08"), lesson("late", "2026-10-15")], now: day(10))
     check(shelf.articles.map { $0.id } == ["b0", "b5", "b25", "early"], "a lesson shows from its release day")
     check(shelf.upcoming.map { $0.id } == ["late"], "a lesson waits for its release day")
-    check(LessonEngine.readingOrder(shelf.articles, data: makeData(), now: day(10)).map { $0.id } == ["early", "b0", "b5", "b25"],
-          "this week's lesson leads the reading order, then the open one, then the locked ones")
+    check(LessonEngine.readingOrder(shelf.articles, data: makeData(), hasPass: true, now: day(10)).map { $0.id }
+            == ["early", "b0", "b5", "b25"], "with the Pass, this week's lesson leads the reading order")
+    check(LessonEngine.readingOrder(shelf.articles, data: makeData(), hasPass: false, now: day(10)).map { $0.id }
+            == ["b0", "b5", "b25", "early"], "without the Pass, the open lesson leads and the new one waits with the locked ones")
     var reader = makeData()
     reader.readArticles = ["b0", "early"]
-    check(LessonEngine.readingOrder(shelf.articles, data: reader, now: day(10)).map { $0.id } == ["b5", "b25", "b0", "early"],
-          "lessons already read go last")
+    check(LessonEngine.readingOrder(shelf.articles, data: reader, hasPass: false, now: day(10)).map { $0.id }
+            == ["b5", "b25", "b0", "early"], "lessons already read go last")
 
-    if let early = shelf.articles.last {
+    if let early = shelf.articles.last, let second = shelf.articles.first(where: { $0.id == "b5" }) {
         var data = makeData()
-        check(LessonEngine.isUnlocked(early, data: data, now: day(7)), "a new lesson is open to everyone on its release day")
-        check(LessonEngine.daysLeft(early, now: day(7)) == 7, "the open week counts the release day")
-        check(LessonEngine.daysLeft(early, now: day(13)) == 1, "the last open day shows one day left")
-        check(LessonEngine.isUnlocked(early, data: data, now: day(13)), "a new lesson is still open on its seventh day")
-        check(!LessonEngine.isUnlocked(early, data: data, now: day(14)), "after its week a lesson waits for right answers")
+        check(LessonEngine.isNew(early, now: day(7)) && LessonEngine.isNew(early, now: day(13)), "a lesson is new for its first 7 days")
+        check(!LessonEngine.isNew(early, now: day(14)) && !LessonEngine.isNew(second, now: day(10)), "after its week, or bundled, a lesson is not new")
+        check(!LessonEngine.isUnlocked(early, data: data, hasPass: false), "an online lesson waits for the Season Pass")
+        check(LessonEngine.isUnlocked(early, data: data, hasPass: true), "the Season Pass opens an online lesson")
         data.quiz.rightTotal = 30
-        check(LessonEngine.isUnlocked(early, data: data, now: day(14)), "right answers open a lesson after its week")
+        check(!LessonEngine.isUnlocked(early, data: data, hasPass: false), "right answers do not open an online lesson")
+        check(LessonEngine.isUnlocked(second, data: data, hasPass: false), "right answers open a bundled lesson")
         data.quiz.rightTotal = 0
         data.readArticles = [early.id]
-        check(LessonEngine.isUnlocked(early, data: data, now: day(40)), "a lesson read once stays open")
+        check(LessonEngine.isUnlocked(early, data: data, hasPass: false), "a lesson read once stays open")
     } else {
         check(false, "the released online lesson is in the catalog")
     }
+}
+
+// Going around: the newest recent report for the country, with only the germs the app knows.
+do {
+    let text = LocalizedText(en: "a", fr: "a")
+    let source = GermReference(name: "FluWatch+", url: "https://www.canada.ca/fluwatch")
+    func report(_ id: String, _ region: String, _ published: String, _ germs: [String]) -> GoingAroundReport {
+        GoingAroundReport(id: id, region: region, week: "2026-10-01", published: published, headline: text,
+                          germs: germs.map { GoingAroundGerm(germID: $0, trend: .rising, line: text) },
+                          source: source, approvedOn: "2026-10-02")
+    }
+    let reports = [report("old", "CA", "2026-10-02", ["flu"]), report("new", "CA", "2026-10-09", ["flu", "ghost"]),
+                   report("us", "US", "2026-10-09", ["flu"]), report("future", "CA", "2026-10-30", ["flu"])]
+    let known: Set<String> = ["flu"]
+    let shown = GoingAroundEngine.current(reports, region: "CA", known: known, now: day(10))
+    check(shown?.id == "new", "the newest report already published leads")
+    check(shown?.germs.map { $0.germID } == ["flu"], "a germ the app does not know is left out")
+    check(GoingAroundEngine.current(reports, region: "US", known: known, now: day(10))?.id == "us", "each country has its own report")
+    check(GoingAroundEngine.current(reports, region: "CA", known: known, now: day(70)) == nil, "a report over five weeks old is not shown")
+    check(GoingAroundEngine.current(reports, region: "CA", known: [], now: day(10)) == nil, "a report without a known germ is not shown")
+    check(GoingAroundEngine.region(for: "US") == "US" && GoingAroundEngine.region(for: "CA") == "CA",
+          "a phone in Canada or the US reads its own country's report")
+    check(GoingAroundEngine.region(for: "FR") == nil && GoingAroundEngine.region(for: nil) == nil,
+          "a phone elsewhere gets no report")
 }
 
 // Motion: each look has its own accent and sick routine, only the cap hops at rest, germs move by shelf,
@@ -778,7 +811,6 @@ do {
     check(Looks.order.prefix(Looks.free.count).allSatisfy { Looks.free.contains($0) }, "the free looks come first in the picker")
     check(!Looks.isOpen(10, hasPass: false) && Looks.isOpen(10, hasPass: true), "a Pass look opens with the Season Pass")
     check(Looks.isOpen(Looks.host + Looks.count, hasPass: false), "a look number past the count wraps around")
-    check(Looks.showcase.allSatisfy { !Looks.free.contains($0) }, "the offer shows looks the Pass opens")
     check((0..<Looks.count).allSatisfy { Liveliness.household($0, sick: true, leads: false) != .resting },
           "every look has a sick routine")
     check(Looks.shown(hidden: [6, 10], hasPass: false) == Looks.order.filter { $0 != 6 && $0 != 10 },
@@ -793,10 +825,10 @@ do {
     check(hiddenSettings?.hiddenLooks == [9, 12] && hiddenSettings?.theme == .agar, "hidden looks are saved with the settings")
 }
 
-// The Season Pass offer: each door has its own words, and the trial reminder goes out two days before the payment.
+// The Season Pass offer: each door has its own line, and the trial reminder goes out two days before the payment.
 do {
     let doors = PassReason.allCases
-    check(Set(doors.map { $0.headline }).count == doors.count, "each door to the Season Pass has its own headline")
+    check(Set(doors.map { $0.detail }).count == doors.count, "each door to the Season Pass has its own line")
     check(doors.allSatisfy { !$0.detail.isEmpty && !$0.gain.isEmpty }, "each door says what it gives")
     check(TrialPlan(days: 7).reminderDay == 5, "a 7-day trial reminds on day 5")
     check(TrialPlan(days: 14).reminderDay == 12, "a 14-day trial reminds on day 12")
@@ -822,6 +854,42 @@ do {
     check(GermReference(name: "Source", url: "https://example.org/page").link != nil, "an https source opens")
     check(GermReference(name: "Source", url: "http://example.org/page").link == nil, "a plain http source does not open")
     check(GermReference(name: "Source", url: "tel:911").link == nil, "a source cannot start a call")
+}
+
+// MARK: - Person file
+
+do {
+    let kid = Kid(name: "Lou", colorIndex: 0)
+    let catalog = GermCatalog(germs: [makeGerm("noro", rarity: .common, lasts: 3), makeGerm("rhino", rarity: .common, lasts: 10)],
+                              articles: [])
+    var data = makeData(illnesses: [
+        KidIllness(kidID: kid.id, germID: "noro", startedAt: day(0), watching: false, outcome: .caught),
+        KidIllness(kidID: kid.id, germID: "rhino", startedAt: day(10), watching: false, outcome: .dodged, endedAt: day(14)),
+        KidIllness(kidID: kid.id, germID: "rhino", startedAt: day(30), watching: false, outcome: .open),
+    ])
+    data.kids = [kid]
+    let now = day(31)
+    let list = PersonFileEngine.illnesses(of: .kid(kid.id), data: data, catalog: catalog, now: now)
+    check(list.map { $0.germID } == ["rhino", "rhino", "noro"], "a person's illnesses come newest first")
+    check(list[0].goingOn && list[0].days == 2, "an illness going on counts its days up to today")
+    check(list[1].days == 5 && list[1].dodged, "an illness marked over counts to its last day, and keeps its dodge")
+    if case .gotYou? = list[2].note {} else { check(false, "a kid's illness the parent caught says it got them") }
+    check(list[2].days == 3, "a kid's illness with no end lasts its germ's usual length")
+    let season = Season(number: 1, start: Calendar.current.startOfDay(for: day(0)), end: day(365))
+    let sick = PersonFileEngine.sickDays(list, in: season)
+    check(sick.count == 10, "the season counts each sick day once")
+    let months = PersonFileEngine.monthTotals(sick, season: season)
+    check(months[0] == 9 && months[1] == 1, "sick days fall in their month of the season")
+    check(PersonFileEngine.comingBack(list).map { $0.germID } == ["rhino", "noro"], "the germ that came most often comes first")
+    check(PersonFileEngine.usualDays(list) == 4, "the usual length leaves out the illness going on")
+
+    var parent = data
+    parent.logs = [SickLog(germID: "rhino", source: .kid(kid.id), severity: 3, startedAt: day(12), endedAt: day(15),
+                           points: 80, bonuses: [], sufferer: .me, kidIllnessID: nil)]
+    let mine = PersonFileEngine.illnesses(of: .me, data: parent, catalog: catalog, now: now)
+    if case .from(.kid(kid.id))? = mine.first?.note {} else { check(false, "a parent's germ says which kid it came from") }
+    check(PersonFileEngine.illnesses(of: .partner, data: parent, catalog: catalog, now: now).isEmpty,
+          "the partner's file leaves out the parent's germs")
 }
 
 if failures == 0 {

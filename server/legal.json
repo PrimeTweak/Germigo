@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-22",
+  "updated": "2026-11-23",
   "web": {
     "privacyTitle": {
       "en": "Privacy Policy",
@@ -147,8 +147,8 @@
         "fr": "Leçons"
       },
       "body": {
-        "en": "New lessons come from a file that Germily downloads from a web host. Like any web page, the host sees your phone's IP address when the file is downloaded. Nothing about you or your journal is sent.",
-        "fr": "Les nouvelles leçons viennent d'un fichier que Germily télécharge chez un hébergeur web. Comme pour n'importe quelle page web, l'hébergeur voit l'adresse IP de ton téléphone pendant le téléchargement. Rien sur toi ni sur ton journal n'est envoyé."
+        "en": "New lessons and the weekly summary of what's going around come from a file that Germily downloads from a web host. Like any web page, the host sees your phone's IP address when the file is downloaded. Nothing about you or your journal is sent.",
+        "fr": "Les nouvelles leçons et le résumé hebdomadaire de ce qui circule viennent d'un fichier que Germily télécharge chez un hébergeur web. Comme pour n'importe quelle page web, l'hébergeur voit l'adresse IP de ton téléphone pendant le téléchargement. Rien sur toi ni sur ton journal n'est envoyé."
       }
     },
     {

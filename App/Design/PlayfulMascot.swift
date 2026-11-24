@@ -76,6 +76,14 @@ struct PlayfulMascot: View {
             }
         }
         .frame(width: side, height: side)
+        .overlay(alignment: .top) {
+            if model.data.mascotTricks.isEmpty {
+                WhisperBubble(text: tr("Psst… poke me."))
+                    .offset(y: -side * 0.3)
+                    .transition(.opacity)
+            }
+        }
+        .animation(Tempo.quick, value: model.data.mascotTricks.isEmpty)
         .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 0)
             .onChanged { changed($0) }

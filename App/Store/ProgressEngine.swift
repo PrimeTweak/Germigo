@@ -219,7 +219,7 @@ enum GoalEngine {
         }
 
         let counts = BadgeProgress.counts(data: data, catalog: catalog, now: now)
-        for id in ["collector", "half_album", "full_album", BadgeCatalog.dodger, BadgeCatalog.ironParent] where data.badges[id] == nil {
+        for id in ["collector", "half_album", "full_album", BadgeCatalog.dodger] where data.badges[id] == nil {
             guard let badge = BadgeCatalog.badge(id), let count = counts[id], count.target > 0 else { continue }
             candidates.append(Goal(title: badge.title, detail: badge.detail, symbol: badge.symbol, tint: badge.tint,
                                    progress: count.progress, target: count.target))

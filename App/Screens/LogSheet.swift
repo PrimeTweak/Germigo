@@ -418,7 +418,7 @@ struct LogForm: View {
                 }
                 .padding(.bottom, 10)
             }
-            if model.hasPass, let partner = model.data.partnerName {
+            if let partner = model.data.partnerName {
                 Divider()
                 HStack(spacing: 12) {
                     IconTile(symbol: "person.2.fill")
@@ -481,7 +481,7 @@ struct LogForm: View {
     private func prefill() {
         guard !didPrefill else { return }
         didPrefill = true
-        sufferer = model.hasPass && model.data.partnerName != nil ? request.sufferer : .me
+        sufferer = model.data.partnerName != nil ? request.sufferer : .me
         if let picked = request.germID {
             germID = picked
             if let illness = suggestion, illness.germID == picked {

@@ -21,8 +21,12 @@ struct AlbumScreen: View {
     @State private var person: Person?
     @State private var seed: PhotoSeed?
     @State private var focus: PhotoFocus?
-    @State private var showPaywall = false
     @State private var width: CGFloat = 0
+
+    /// Opens on one person's photos, or on everyone's.
+    init(person: Person? = nil) {
+        _person = State(initialValue: person)
+    }
 
     private var visible: [PatientPhoto] {
         model.data.photos
@@ -59,7 +63,8 @@ struct AlbumScreen: View {
                     }
                 }
                 if hidden > 0 {
-                    LockedHistoryRow(count: hidden)
+                    LockedHistoryRow(reason: .photos,
+                                     title: trCount(hidden, one: "%lld older photo", other: "%lld older photos"))
                 }
             }
             .padding(.horizontal, Spacing.page)
@@ -81,9 +86,6 @@ struct AlbumScreen: View {
         }
         .sheet(item: $seed) { seed in
             AddPhotoSheet(seed: seed)
-        }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView(reason: .photos)
         }
         .fullScreenCover(item: $focus) { focus in
             PhotoViewer(focus: focus)
@@ -237,10 +239,6 @@ struct AlbumScreen: View {
 
     /// New photo for the person filtered on, else for whoever is sick today, else for the parent.
     private func add() {
-        guard model.hasPass else {
-            showPaywall = true
-            return
-        }
         let now = Date()
         let who = person ?? model.people.first { model.photoLink(for: $0, on: now) != .unlinked } ?? .me
         seed = PhotoSeed(person: who, takenAt: now, link: model.photoLink(for: who, on: now))

@@ -75,6 +75,8 @@ final class AppModel {
 
     private(set) var data: AppData
     private(set) var catalog: GermCatalog
+    /// The weekly "Going around" reports from the online Guide file.
+    private(set) var goingAroundReports: [GoingAroundReport]
     let household = HouseholdGuide.load()
     var pendingReward: RewardResult?
     /// The reward of a log made in a sheet; it shows once that sheet has closed.
@@ -90,17 +92,22 @@ final class AppModel {
     var pendingMilestone: MilestoneEvent?
     /// A short confirmation shown at the top of the screen.
     var toast: String?
+    /// A mascot trick just found, shown with the clue to the next one.
+    var trickFound: MascotTrick?
+    /// The free trial's offer after the first illness.
+    var showTrialOffer = false
 
     /// False while the journal file exists but cannot be read; nothing is saved over it then.
     @ObservationIgnored private var journalAvailable = true
-    /// The last copy of the online lesson file.
-    @ObservationIgnored private var lessonFeed: [FeedLesson]
+    /// The last copy of the online Guide file.
+    @ObservationIgnored private var lessonFeed: LessonFeed
     @ObservationIgnored private var saveFailureReported = false
 
     init() {
         let feed = LessonFeedClient.cached()
         lessonFeed = feed
-        catalog = GermCatalog.load(feed: feed)
+        goingAroundReports = feed.goingAround ?? []
+        catalog = GermCatalog.load(feed: feed.lessons)
         data = AppData()
         loadJournal()
     }
@@ -253,20 +260,26 @@ final class AppModel {
         return hasPass || hasBadge(badge)
     }
 
-    /// Open with enough right answers, during the lesson's first week, or once read.
-    func isArticleUnlocked(_ article: Article, now: Date = Date()) -> Bool {
-        LessonEngine.isUnlocked(article, data: data, now: now)
+    /// Open once read, with the Season Pass for an online lesson, with right answers for a bundled one.
+    func isArticleUnlocked(_ article: Article) -> Bool {
+        LessonEngine.isUnlocked(article, data: data, hasPass: hasPass)
     }
 
-    /// Lessons in their first week, open to everyone, newest first.
+    /// Online lessons in their first week, newest first.
     func lessonsThisWeek(now: Date = Date()) -> [Article] {
-        catalog.articles.filter { LessonEngine.isOpenToAll($0, now: now) }
+        catalog.articles.filter { LessonEngine.isNew($0, now: now) }
             .sorted { ($0.releasedOn ?? now) > ($1.releasedOn ?? now) }
     }
 
     /// Every lesson, the next one to read first.
     func lessonsToRead(now: Date = Date()) -> [Article] {
-        LessonEngine.readingOrder(catalog.articles, data: data, now: now)
+        LessonEngine.readingOrder(catalog.articles, data: data, hasPass: hasPass, now: now)
+    }
+
+    /// The report for the phone's country, Canada or the US, while it is recent.
+    func goingAround(now: Date = Date()) -> GoingAroundReport? {
+        guard let region = GoingAroundEngine.region(for: Locale.current.region?.identifier) else { return nil }
+        return GoingAroundEngine.current(goingAroundReports, region: region, known: Set(catalog.germs.map { $0.id }), now: now)
     }
 
     /// The first day a free journal shows; nil with the Season Pass, which shows every day.
@@ -274,6 +287,14 @@ final class AppModel {
         guard !hasPass else { return nil }
         let calendar = Calendar.current
         return calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: Date()))
+    }
+
+    /// What a lock row says the free week leaves out: the season's sick days, or the older entries
+    /// when the season has none yet.
+    func lockedHistoryTitle(for person: Person?, hidden: Int, now: Date = Date()) -> String {
+        let days = DayEngine.loggedDays(in: season, person: person, data: data, catalog: catalog, now: now)
+        return days > 0 ? trCount(days, one: "%lld day logged this season", other: "%lld days logged this season")
+                        : trCount(hidden, one: "%lld older entry", other: "%lld older entries")
     }
 
     /// Entries on or after the first day the journal shows, plus anything still going on.
@@ -437,9 +458,9 @@ final class AppModel {
         return QuizOutcome(right: right, newBadges: fresh)
     }
 
-    /// The lesson that opens next, and how many right answers it still needs.
+    /// The bundled lesson that opens next, and how many right answers it still needs.
     var nextLesson: (article: Article, remaining: Int)? {
-        guard let article = catalog.articles.first(where: { !isArticleUnlocked($0) }) else { return nil }
+        guard let article = catalog.articles.first(where: { !$0.needsPass && !isArticleUnlocked($0) }) else { return nil }
         return (article, article.unlockAtAnswers - data.quiz.rightTotal)
     }
 
@@ -513,7 +534,10 @@ final class AppModel {
         data.mascotTricks.append(trick.rawValue)
         let fresh = awardBadges(now: now)
         commit()
-        guard let badge = fresh.first else { return }
+        guard let badge = fresh.first else {
+            trickFound = trick
+            return
+        }
         Haptics.success()
         SoundPlayer.shared.play(.badge)
         toast = tr("New badge: %@", badge.title)
@@ -700,7 +724,7 @@ final class AppModel {
     /// Runs when the app comes to the foreground.
     func refresh(now: Date = Date()) {
         if !journalAvailable { loadJournal() }
-        catalog = catalog.updated(feed: lessonFeed, now: now)
+        catalog = catalog.updated(feed: lessonFeed.lessons, now: now)
         var changed = false
         for index in data.kidIllnesses.indices where data.kidIllnesses[index].outcome == .open {
             let illness = data.kidIllnesses[index]
@@ -775,6 +799,17 @@ final class AppModel {
         }
     }
 
+    /// Offers the free trial once, after the first illness, when the trial is on offer and nothing else is showing.
+    func offerTrialIfDue() {
+        guard data.onboardingDone, !data.trialOffered, !hasPass, PurchaseManager.shared.trialDays != nil,
+              !data.logs.isEmpty || !data.kidIllnesses.isEmpty,
+              pendingReward == nil, pendingVictory == nil, pendingKidVictory == nil, pendingMilestone == nil,
+              logRequest == nil else { return }
+        data.trialOffered = true
+        commit()
+        showTrialOffer = true
+    }
+
     /// Shows the reward staged by a sheet that just closed.
     func showStagedReward() {
         guard let reward = stagedReward else { return }
@@ -816,6 +851,7 @@ final class AppModel {
 
     func passDidChange() {
         publishSnapshot()
+        syncLessonReminders()
     }
 
     func eraseEverything() {
@@ -835,7 +871,9 @@ final class AppModel {
         showSettings = false
         pendingMilestone = nil
         toast = nil
+        trickFound = nil
         pendingKidVictory = nil
+        showTrialOffer = false
         selectedTab = .today
         publishSnapshot()
     }
@@ -877,20 +915,21 @@ final class AppModel {
         return fresh
     }
 
-    /// Reads the online lesson file, then announces the lessons still to come.
+    /// Reads the online Guide file, then announces the lessons still to come.
     func refreshLessons() async {
-        let previous = lessonFeed.map { $0.id }
+        let previous = lessonFeed.lessons.map { $0.id }
         if let feed = await LessonFeedClient.fetch() {
             lessonFeed = feed
+            goingAroundReports = feed.goingAround ?? []
         }
-        catalog = catalog.updated(feed: lessonFeed)
+        catalog = catalog.updated(feed: lessonFeed.lessons)
         syncLessonReminders(dropping: previous)
     }
 
     /// Replaces the lesson announcements; `dropping` also clears lessons no longer in the file.
     private func syncLessonReminders(dropping previous: [String] = []) {
-        let known = Array(Set(previous + lessonFeed.map { $0.id }))
-        NotificationManager.scheduleLessons(catalog.upcoming, known: known, settings: data.settings)
+        let known = Array(Set(previous + lessonFeed.lessons.map { $0.id }))
+        NotificationManager.scheduleLessons(catalog.upcoming, known: known, settings: data.settings, hasPass: hasPass)
     }
 
     private func rescheduleNotifications() {

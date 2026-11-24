@@ -396,21 +396,33 @@ async function main() {
   const lessonOf = (id, extra) => ({ id, released: '2026-12-07', title: lessonText, summary: lessonText,
     paragraphs: [lessonText], sources: [{ name: 'CDC', url: 'https://www.cdc.gov/' }], ...extra });
   const reviewFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'germily-review-')), 'lessons.json');
+  const reportOf = (id, extra) => ({ id, region: 'CA', week: '2026-11-15', published: '2026-11-20', headline: lessonText,
+    germs: [{ germID: 'flu', trend: 'rising', line: lessonText }],
+    source: { name: 'FluWatch+', url: 'https://www.canada.ca/' }, ...extra });
   fs.writeFileSync(reviewFile, JSON.stringify({ lessons: [
     lessonOf('approved', { reviewedOn: '2026-11-20' }), lessonOf('draft', {}),
     lessonOf('plain', { reviewedOn: '2026-11-20', sources: [{ name: 'Blog', url: 'http://example.org/' }] }),
+  ], goingAround: [
+    reportOf('ok', { approvedOn: '2026-11-20' }), reportOf('waiting', {}),
+    reportOf('elsewhere', { approvedOn: '2026-11-20', region: 'FR' }),
+    reportOf('plain', { approvedOn: '2026-11-20', source: { name: 'Blog', url: 'http://example.org/' } }),
   ] }));
   const reviewed = createApp({ ...options, dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'germily-reviewed-')),
     lessonsFile: reviewFile });
   await new Promise((resolve) => reviewed.listen(0, resolve));
   const feed = await (await fetch(`http://127.0.0.1:${reviewed.address().port}/lessons.json`)).json();
   assert.deepEqual(feed.lessons.map((lesson) => lesson.id), ['approved']);
+  // A report goes out only with an approval day, a known country and an https source
+  assert.deepEqual(feed.goingAround.map((report) => report.id), ['ok']);
   await new Promise((resolve) => reviewed.close(resolve));
 
   // The lesson drafts in the repository read and carry no review day yet
   const drafts = JSON.parse(fs.readFileSync(path.join(__dirname, 'drafts', 'lessons.json'), 'utf8')).lessons;
   assert.ok(Array.isArray(drafts));
   assert.ok(drafts.every((lesson) => !lesson.reviewedOn && !lesson.released));
+  const reportDrafts = JSON.parse(fs.readFileSync(path.join(__dirname, 'drafts', 'going-around.json'), 'utf8')).goingAround;
+  assert.ok(Array.isArray(reportDrafts));
+  assert.ok(reportDrafts.every((report) => !report.approvedOn));
 
   // Small changes are grouped into one write; membership changes are written at once
   const slowDir = fs.mkdtempSync(path.join(os.tmpdir(), 'germily-slow-'));

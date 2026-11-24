@@ -1,8 +1,8 @@
 import StoreKit
 import SwiftUI
 
-/// The Season Pass offer. It leads with the door the person touched, shows how the trial goes,
-/// and keeps the button in reach. Prices and terms come from the App Store.
+/// The Season Pass offer. One promise leads, the door the person touched says what it gives,
+/// then how the trial goes, with the button in reach. Prices and terms come from the App Store.
 struct PaywallView: View {
     var reason = PassReason.general
     var onFinish: (() -> Void)?
@@ -37,7 +37,7 @@ struct PaywallView: View {
             VStack(spacing: 22) {
                 hero
                 VStack(spacing: 8) {
-                    Text(reason.headline)
+                    Text(tr("The whole family, all season."))
                         .font(.title.weight(.bold))
                     Text(reason.detail)
                         .font(.subheadline)
@@ -126,15 +126,19 @@ struct PaywallView: View {
         return String(year) + "–" + String((year + 1) % 100)
     }
 
-    /// The door's character in a spotlight, with the stub of the Pass.
+    /// The family in a spotlight, with the stub of the Pass.
     private var hero: some View {
         ZStack(alignment: .bottom) {
             Circle()
                 .fill(frost)
                 .frame(width: 140, height: 140)
                 .shadow(color: glow.opacity(0.55), radius: 26)
-            PassArt(reason: reason)
-                .frame(width: 140, height: 140)
+            HStack(alignment: .bottom, spacing: -14) {
+                BuddyView(look: model.data.partnerLook, size: 46, lively: true)
+                BuddyView(look: model.data.kids.first?.colorIndex ?? 0, size: 58, leads: true, pokes: true)
+                BuddyView(look: model.data.hostLook, size: 46, lively: true)
+            }
+            .frame(width: 140, height: 140)
             HStack(spacing: 6) {
                 Image(systemName: "ticket.fill")
                 Text(tr("Season Pass"))
@@ -202,10 +206,12 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(tr("Everything in the Season Pass"))
                 .font(.headline)
-            benefit("person.2.fill", tr("Your whole household"), tr("Your partner, the couple duel and every kid"))
-            benefit("face.smiling.inverse", tr("Every character"), tr("Dinos, unicorns, wizards and more for the family"))
-            benefit("calendar", tr("The whole history"), tr("Past weeks, photos and the file for the doctor"))
-            benefit("chart.bar.fill", tr("Your season in numbers"), tr("Top supplier, germs by month and the longest chain"))
+            benefit("person.2.fill", tr("The whole family"), tr("Every kid, the couple duel and every character"))
+            benefit("calendar", tr("The whole season"), tr("Every week, every photo and the doctor's PDF"))
+            if AppConfig.lessonsURL != nil {
+                benefit("books.vertical.fill", tr("Something new every week"), tr("A new lesson or guide in the Guide"))
+            }
+            benefit("chart.bar.fill", tr("Your season in numbers"), tr("The full recap, the family league and your top supplier"))
             if AppConfig.crewEnabled {
                 benefit("dot.radiowaves.left.and.right", tr("Daycare Crew"), tr("An outbreak radar for your group"))
             }
@@ -437,76 +443,6 @@ struct PaywallView: View {
         .foregroundStyle(frost.opacity(0.75))
         .buttonStyle(.plain)
         .frame(minHeight: 44)
-    }
-}
-
-/// The character that stands for a door to the Season Pass.
-private struct PassArt: View {
-    let reason: PassReason
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        switch reason {
-        case .general:
-            LivelyCharacter(mood: .stalking) {
-                picture("mascot-awake", side: 104)
-            }
-        case .household:
-            HStack(alignment: .bottom, spacing: -14) {
-                BuddyView(look: model.data.partnerLook, size: 46, lively: true)
-                BuddyView(look: model.data.kids.first?.colorIndex ?? 0, size: 58, leads: true, pokes: true)
-                BuddyView(look: model.data.hostLook, size: 46, lively: true)
-            }
-        case .history:
-            picture("record-logbook", side: 100)
-        case .photos:
-            picture("record-album", side: 100)
-        case .doctor:
-            picture("record-doctor", side: 100)
-        case .stats:
-            BuddyView(look: Looks.crown, size: 78, leads: true, pokes: true)
-        case .crew:
-            HStack(spacing: -10) {
-                picture("sticker-tissue", side: 46)
-                picture("sticker-soup", side: 58)
-                picture("sticker-tea", side: 46)
-            }
-        case .characters:
-            HStack(alignment: .bottom, spacing: -14) {
-                BuddyView(look: Looks.showcase[0], size: 46, lively: true)
-                BuddyView(look: Looks.showcase[1], size: 58, leads: true, pokes: true)
-                BuddyView(look: Looks.showcase[2], size: 46, lively: true)
-            }
-        case .looks:
-            HStack(spacing: -8) {
-                icon("icon-preview-snowDay", tilt: -9)
-                icon("icon-preview-golden", tilt: 0)
-                icon("icon-preview-holo", tilt: 9)
-            }
-        case .holo:
-            if let germ = model.catalog.germs.max(by: { model.count(of: $0.id) < model.count(of: $1.id) }) {
-                GermCardView(germ: germ, width: 68, finish: .holo)
-                    .rotationEffect(.degrees(4))
-            }
-        }
-    }
-
-    private func picture(_ name: String, side: CGFloat) -> some View {
-        Image(name)
-            .resizable()
-            .scaledToFit()
-            .frame(width: side, height: side)
-            .accessibilityHidden(true)
-    }
-
-    private func icon(_ name: String, tilt: Double) -> some View {
-        Image(name)
-            .resizable()
-            .scaledToFit()
-            .frame(width: 46, height: 46)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
-            .rotationEffect(.degrees(tilt))
-            .accessibilityHidden(true)
     }
 }
 

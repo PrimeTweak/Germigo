@@ -462,10 +462,12 @@ struct NoticeScreen: View {
     let id: String
     @Environment(AppModel.self) private var model
     @Environment(DaycareStore.self) private var daycare
+    @Environment(CrewStore.self) private var crew
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var confirmReport = false
     @State private var reported = false
+    @State private var showCrewPaywall = false
 
     var body: some View {
         Group {
@@ -513,6 +515,60 @@ struct NoticeScreen: View {
         } message: {
             Text(tr("Thanks. Every report is reviewed within 24 hours."))
         }
+        .sheet(isPresented: $showCrewPaywall) {
+            PaywallView(reason: .crew)
+        }
+    }
+
+    /// For a parent outside a crew: the outbreak radar shared with the group's parents.
+    /// With the Season Pass it leads back to the Crew tab's start, otherwise to the offer.
+    private var crewInvite: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "dot.radiowaves.left.and.right")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(Color(hex: palette.isDark ? Swatch.coralSoft : Swatch.coralInk))
+                    .frame(width: 34, height: 34)
+                    .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+                    .accessibilityHidden(true)
+                Text(tr("Daycare Crew"))
+                    .font(.headline)
+                    .foregroundStyle(palette.ink)
+                Spacer(minLength: 8)
+                if !model.hasPass {
+                    PassOfferTag()
+                }
+            }
+            Text(tr("Share what's going around with the parents of your group."))
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(palette.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 12) {
+                HStack(spacing: -8) {
+                    ForEach([0, 9, 4, 2], id: \.self) { look in
+                        BuddyView(look: look, size: 34)
+                    }
+                }
+                .accessibilityHidden(true)
+                Spacer(minLength: 8)
+                Button(tr("Start or join")) {
+                    if model.hasPass {
+                        dismiss()
+                    } else {
+                        showCrewPaywall = true
+                    }
+                }
+                .buttonStyle(PillButtonStyle(kind: .ink, height: 42))
+                .fixedSize()
+            }
+        }
+        .padding(14)
+        .background(Color(hex: Swatch.coral).opacity(palette.isDark ? 0.18 : 0.1),
+                    in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+    }
+
+    private var showsCrewInvite: Bool {
+        AppConfig.crewEnabled && !crew.isMember && (crew.isConfigured || crew.isDemo)
     }
 
     private func content(_ notice: DaycareNotice, membership: DaycareStore.Membership, germ: Germ) -> some View {
@@ -610,6 +666,9 @@ struct NoticeScreen: View {
                     .germilyCard(padding: 12)
                 }
                 .buttonStyle(PressableStyle())
+                if showsCrewInvite {
+                    crewInvite
+                }
                 HStack(spacing: 10) {
                     if !kids.isEmpty {
                         Button {

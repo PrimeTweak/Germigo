@@ -32,6 +32,7 @@ struct TrophiesScreen: View {
                     if !earned.isEmpty {
                         titlesCard(earned: earned)
                     }
+                    tricksRow
                     if !model.caughtGermIDs.isEmpty {
                         mugshotsRow
                     }
@@ -518,7 +519,66 @@ struct TrophiesScreen: View {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: - Microbe cards and the season story
+    // MARK: - Tricks, microbe cards and the season story
+
+    /// The napping germ's tricks found so far, and the way to the notebook of all ten.
+    private var tricksRow: some View {
+        let found = MascotTrick.allCases.filter { model.data.mascotTricks.contains($0.rawValue) }
+        return NavigationLink {
+            TricksScreen()
+        } label: {
+            HStack(spacing: 14) {
+                HStack(spacing: -12) {
+                    ForEach(found.suffix(3), id: \.self) { trick in
+                        Image(trick.face)
+                            .resizable()
+                            .scaledToFit()
+                            .padding(4)
+                            .frame(width: 44, height: 44)
+                            .background(palette.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(palette.surface, lineWidth: 2.5)
+                            }
+                    }
+                    if found.count < MascotTrick.allCases.count {
+                        Text(verbatim: "?")
+                            .font(.headline.weight(.heavy))
+                            .foregroundStyle(palette.inkTertiary)
+                            .frame(width: 44, height: 44)
+                            .background(palette.ink.opacity(0.06), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(palette.surface, lineWidth: 2.5)
+                            }
+                    }
+                }
+                .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tr("Napping germ's tricks"))
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("%1$lld of %2$lld found", found.count, MascotTrick.allCases.count))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                    HStack(spacing: 4) {
+                        ForEach(MascotTrick.allCases, id: \.self) { trick in
+                            Capsule()
+                                .fill(found.contains(trick) ? palette.accent : palette.ink.opacity(0.1))
+                                .frame(width: 14, height: 5)
+                        }
+                    }
+                    .padding(.top, 4)
+                    .accessibilityHidden(true)
+                }
+                .multilineTextAlignment(.leading)
+                Spacer(minLength: 8)
+                RowChevron()
+            }
+            .germilyCard(padding: 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+    }
 
     /// The last three germs caught, as their mugshots, and the way to the microbe cards in the Guide.
     private var mugshotsRow: some View {

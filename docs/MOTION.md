@@ -89,7 +89,7 @@ On a calm Today it has tricks to find. Each face is an image, `mascot-<face>`, f
 | Tilt | Lean the phone, mascot awake | Leans up to 14° the same way and looks there | None |
 | Night | From 10 PM to 7 AM, touch it asleep | Opens one eye and says "Shh… it's late." for 2.5 s, still asleep; a second touch then wakes it | Tick |
 
-Finding all ten tricks, dizzy counted on its own, earns the secret Ticklish badge: a toast, the success haptic and the badge sound, without the reward screen. With Reduce Motion the faces still change and the haptics stay; the mascot does not move, the pacifier lies on the counter at once, and the tilt is not read. VoiceOver offers Wake up, Tickle, Make it sneeze and Give back the pacifier.
+Until the first trick is found, a bubble over the napping mascot says "Psst… poke me."; the couch in Family has its own, "Tap us. Gently.", until someone on it is touched (`HintKeys.couch`). The bubbles bob gently, never take a touch, and stay still with Reduce Motion. Each trick found shows a toast with its face, the count out of ten and the clue to the next one. Finding all ten tricks, dizzy counted on its own, earns the secret Ticklish badge: a toast, the success haptic and the badge sound, without the reward screen. With Reduce Motion the faces still change and the haptics stay; the mascot does not move, the pacifier lies on the counter at once, and the tilt is not read. VoiceOver offers Wake up, Tickle, Make it sneeze and Give back the pacifier.
 
 ### Props
 

@@ -187,7 +187,6 @@ private struct DayCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var seed: PhotoSeed?
-    @State private var showPaywall = false
 
     var body: some View {
         if let germ = model.catalog.germ(entry.germID) {
@@ -226,10 +225,6 @@ private struct DayCard: View {
                     }
                 }
                 PhotoRow(photos: photos) {
-                    guard model.hasPass else {
-                        showPaywall = true
-                        return
-                    }
                     seed = PhotoSeed(person: entry.person, takenAt: moment, link: PhotoLink(entry))
                 }
                 actions(name: name)
@@ -248,9 +243,6 @@ private struct DayCard: View {
             }
             .sheet(item: $seed) { seed in
                 AddPhotoSheet(seed: seed)
-            }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView(reason: .photos)
             }
         }
     }

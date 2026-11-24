@@ -131,6 +131,9 @@ struct LabScreen: View {
             .navigationDestination(for: GuideShelf.self) { shelf in
                 ShelfScreen(shelf: shelf)
             }
+            .navigationDestination(for: GoingAroundReport.self) { report in
+                GoingAroundScreen(report: report)
+            }
             .fullScreenCover(isPresented: $showQuiz) {
                 QuizScreen()
             }
@@ -698,7 +701,7 @@ private struct QuizBanner: View {
     }
 }
 
-/// What is new this week, side by side: a myth to judge, a lesson to open, the germ of the week.
+/// What is new this week, side by side: what is going around, a myth to judge, a lesson to open, the germ of the week.
 private struct WeekShelf: View {
     private static let mythAnchor = "myth"
 
@@ -715,12 +718,19 @@ private struct WeekShelf: View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(alignment: .top, spacing: 10) {
+                    if let report = model.goingAround(now: now) {
+                        NavigationLink(value: report) {
+                            GoingAroundCard(report: report)
+                                .frame(width: width)
+                        }
+                        .buttonStyle(PressableStyle())
+                    }
                     if let myth = QuizEngine.mythOfTheWeek(model.catalog.myths, germs: germs, now: now) {
                         WeekMythCard(myth: myth)
                             .frame(width: answers.right(myth.id) != nil ? width * 1.45 : width)
                             .id(Self.mythAnchor)
                     }
-                    if let article = model.lessonsToRead(now: now).first, !model.data.readArticles.contains(article.id) {
+                    if let article = lesson(now: now) {
                         WeekLessonCard(article: article)
                             .frame(width: width)
                     }
@@ -743,6 +753,72 @@ private struct WeekShelf: View {
                 }
             }
         }
+    }
+
+    /// This week's new lesson while unread, open or not; otherwise the next one to read.
+    private func lesson(now: Date) -> Article? {
+        let read = Set(model.data.readArticles)
+        return model.lessonsThisWeek(now: now).first { !read.contains($0.id) }
+            ?? model.lessonsToRead(now: now).first { !read.contains($0.id) }
+    }
+}
+
+/// This week's public health report for the phone's country: its headline and the germs it names.
+private struct GoingAroundCard: View {
+    let report: GoingAroundReport
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let blue = Color(hex: Swatch.azure)
+        VStack(alignment: .leading, spacing: 0) {
+            Label(tr("Going around · %@", GoingAroundText.country(report.region)), systemImage: "dot.radiowaves.left.and.right")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color(hex: palette.isDark ? Swatch.skyLight : Swatch.azureInk))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Text(report.headline.value)
+                .font(.callout.weight(.bold))
+                .foregroundStyle(palette.ink)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 5)
+            Spacer(minLength: 10)
+            HStack(spacing: 8) {
+                ForEach(report.germs.prefix(3), id: \.germID) { item in
+                    if let germ = model.catalog.germ(item.germID) {
+                        TrendFace(germ: germ, trend: item.trend)
+                    }
+                }
+            }
+        }
+        .modifier(WeekCardFrame())
+        .background(blue.opacity(palette.isDark ? 0.22 : 0.12), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A germ's face with an arrow for where it is heading.
+private struct TrendFace: View {
+    let germ: Germ
+    let trend: GoingAroundTrend
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        GermImage(germ: germ, size: 30)
+            .frame(width: 38, height: 38)
+            .background(palette.background, in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+            .overlay(alignment: .topTrailing) {
+                Image(systemName: trend.symbol)
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundStyle(Color.white)
+                    .frame(width: 17, height: 17)
+                    .background(trend.ink(palette), in: Circle())
+                    .offset(x: 5, y: -5)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(germ.illness.value + ", " + trend.title)
     }
 }
 
@@ -898,35 +974,44 @@ private struct WeekMythCard: View {
     }
 }
 
-/// The lesson to open next: new this week, ready to read, or the next one the quiz unlocks.
+/// The lesson to open next: new this week, ready to read, or the next one the quiz or the Season Pass opens.
 private struct WeekLessonCard: View {
     let article: Article
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    @State private var showPaywall = false
 
     var body: some View {
-        let now = Date()
-        let open = model.isArticleUnlocked(article, now: now)
-        let fresh = LessonEngine.isOpenToAll(article, now: now)
+        let open = model.isArticleUnlocked(article)
+        let fresh = LessonEngine.isNew(article, now: Date())
         Group {
             if open {
                 NavigationLink(value: article) {
-                    card(open: open, fresh: fresh, now: now)
+                    card(open: open, fresh: fresh)
+                }
+            } else if article.needsPass {
+                Button {
+                    showPaywall = true
+                } label: {
+                    card(open: open, fresh: fresh)
                 }
             } else {
                 NavigationLink {
                     LessonsScreen()
                 } label: {
-                    card(open: open, fresh: fresh, now: now)
+                    card(open: open, fresh: fresh)
                 }
             }
         }
         .buttonStyle(PressableStyle())
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: .library)
+        }
     }
 
-    private func card(open: Bool, fresh: Bool, now: Date) -> some View {
+    private func card(open: Bool, fresh: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(fresh ? tr("New lesson") : (open ? tr("Lesson to read") : tr("Next lesson")))
+            Text(fresh ? tr("New this week") : (open ? tr("Lesson to read") : tr("Next lesson")))
                 .font(.caption.weight(.bold))
                 .foregroundStyle(palette.accent)
             Text(article.title.value)
@@ -935,11 +1020,13 @@ private struct WeekLessonCard: View {
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 5)
-            if fresh {
-                let left = LessonEngine.daysLeft(article, now: now)
-                footer(trCount(left, one: "Open to all · %lld day", other: "Open to all · %lld days"), symbol: "clock")
-                    .foregroundStyle(palette.accent)
-            } else if !open {
+            if open {
+                footer(tr("%lld min read", article.minutes), symbol: "clock")
+                    .foregroundStyle(palette.inkSecondary)
+            } else if article.needsPass {
+                PassOfferTag()
+                    .padding(.top, 8)
+            } else {
                 let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
                 footer(trCount(remaining, one: "%lld more right answer", other: "%lld more right answers"), symbol: "lock.fill")
                     .foregroundStyle(palette.inkSecondary)

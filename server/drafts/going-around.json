@@ -1,0 +1,68 @@
+{
+  "goingAround": [
+    {
+      "id": "ca-2026-45",
+      "region": "CA",
+      "week": "2026-11-08",
+      "published": "2026-11-20",
+      "headline": {
+        "en": "Flu holds at about one positive test in seven.",
+        "fr": "La grippe se maintient à environ un test positif sur sept."
+      },
+      "germs": [
+        {
+          "germID": "flu",
+          "trend": "steady",
+          "line": {
+            "en": "Share of positive tests stable. Outbreaks and hospital stays are up.",
+            "fr": "Part de tests positifs stable. Éclosions et hospitalisations en hausse."
+          }
+        }
+      ],
+      "source": {
+        "name": "Public Health Agency of Canada: FluWatch+",
+        "url": "https://health-infobase.canada.ca/respiratory-virus-surveillance/influenza.html"
+      }
+    },
+    {
+      "id": "us-2026-45",
+      "region": "US",
+      "week": "2026-11-08",
+      "published": "2026-11-20",
+      "headline": {
+        "en": "Flu is climbing. COVID-19 and RSV stay low.",
+        "fr": "La grippe monte. La COVID-19 et le VRS restent bas."
+      },
+      "germs": [
+        {
+          "germID": "flu",
+          "trend": "rising",
+          "line": {
+            "en": "Still climbing in many parts of the country.",
+            "fr": "Encore en hausse dans plusieurs régions du pays."
+          }
+        },
+        {
+          "germID": "rona",
+          "trend": "low",
+          "line": {
+            "en": "Low across the country.",
+            "fr": "Bas à l'échelle du pays."
+          }
+        },
+        {
+          "germID": "arsy",
+          "trend": "low",
+          "line": {
+            "en": "Low in most areas.",
+            "fr": "Bas dans la plupart des régions."
+          }
+        }
+      ],
+      "source": {
+        "name": "CDC: Respiratory Illnesses Data Channel",
+        "url": "https://www.cdc.gov/respiratory-viruses/data/"
+      }
+    }
+  ]
+}

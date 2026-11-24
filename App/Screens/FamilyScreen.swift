@@ -125,6 +125,8 @@ struct FamilyScreen: View {
             }
         case .partner:
             editing = .partner
+        case .duel:
+            door = .household
         case nil:
             break
         }
@@ -136,7 +138,7 @@ struct FamilyScreen: View {
         VStack(spacing: 4) {
             Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
             if !model.hasPass {
-                Text(tr("You and one kid are free. The Season Pass covers the whole household."))
+                Text(tr("You, your partner and one kid are free. The Season Pass covers every kid."))
             }
         }
         .font(.footnote)
@@ -368,6 +370,8 @@ private struct FamilyCouch: View {
     let takeSeat: () -> Void
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    /// Set by the first touch on someone of the household; the invitation bubble then goes for good.
+    @AppStorage(HintKeys.couch) private var couchTouched = false
 
     var body: some View {
         let people = model.people
@@ -380,6 +384,11 @@ private struct FamilyCouch: View {
                               sick: FamilyStatus.status(of: item.element, model: model).sick,
                               size: seats.head, leads: true, pokes: true,
                               phase: Double(item.offset) * CharacterPose.accentCycle / Double(max(1, people.count)))
+                        .simultaneousGesture(TapGesture().onEnded {
+                            withAnimation(Tempo.quick) {
+                                couchTouched = true
+                            }
+                        })
                         .position(seats.center(of: item.offset))
                 }
                 Button(action: takeSeat) {
@@ -399,6 +408,13 @@ private struct FamilyCouch: View {
                 .position(seats.center(of: people.count))
             }
             .frame(width: CouchSeats.width, height: CouchSeats.height)
+            .overlay(alignment: .top) {
+                if !couchTouched && !people.isEmpty {
+                    WhisperBubble(text: tr("Tap us. Gently."))
+                        .offset(y: -26)
+                        .transition(.opacity)
+                }
+            }
             .accessibilityElement(children: .contain)
             Text(line)
                 .font(.title3.weight(.bold))
@@ -431,13 +447,15 @@ private struct FamilyCouch: View {
     }
 }
 
-/// Who takes the free seat on the couch.
+/// Who takes the free seat on the couch, or the couple duel's offer.
 private enum SeatChoice {
     case kid
     case partner
+    case duel
 }
 
-/// The free seat's question: a kid or the partner. A second kid without the Season Pass shows its lock.
+/// The free seat's question: a kid or the partner. A second kid without the Season Pass shows its lock;
+/// the partner is free, and the couple duel they open comes with the Pass.
 private struct CouchChooser: View {
     let pick: (SeatChoice) -> Void
     @Environment(AppModel.self) private var model
@@ -453,11 +471,16 @@ private struct CouchChooser: View {
                          locked: !model.canAddKid) {
                         pick(.kid)
                     }
-                    card(look: model.data.partnerLook, title: tr("Your partner"), detail: tr("Opens the couple duel"), locked: false) {
+                    card(look: model.data.partnerLook, title: tr("Your partner"),
+                         detail: model.hasPass ? tr("Opens the couple duel") : tr("Free. Their own file and their germs"),
+                         locked: false) {
                         pick(.partner)
                     }
                 }
                 .fixedSize(horizontal: false, vertical: true)
+                if !model.hasPass {
+                    duelRow
+                }
                 Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
@@ -480,6 +503,32 @@ private struct CouchChooser: View {
             }
         }
         .presentationDetents([.medium])
+    }
+
+    /// The couple duel, which the Season Pass adds to a partner.
+    private var duelRow: some View {
+        Button {
+            pick(.duel)
+        } label: {
+            HStack(spacing: 12) {
+                IconTile(symbol: "flag.2.crossed.fill", size: 40, tint: Color(hex: Swatch.pink))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(tr("Couple duel"))
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Who catches more this season"))
+                        .font(.footnote)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .multilineTextAlignment(.leading)
+                Spacer(minLength: 8)
+                PassOfferTag()
+            }
+            .germilyCard(padding: 12)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityElement(children: .combine)
     }
 
     private func card(look: Int, title: String, detail: String, locked: Bool, action: @escaping () -> Void) -> some View {
@@ -672,8 +721,6 @@ private struct PersonFileScreen: View {
     @Environment(\.palette) private var palette
     @Environment(\.dismiss) private var dismiss
     @State private var editing: FamilyMember?
-    /// The big numbers, the same size as on Trophies and following the text size set in iOS.
-    @ScaledMetric(relativeTo: .title) private var figureSize: CGFloat = 28
 
     private var member: FamilyMember? {
         switch person {
@@ -685,8 +732,9 @@ private struct PersonFileScreen: View {
 
     var body: some View {
         let status = FamilyStatus.status(of: person, model: model)
+        let illnesses = PersonFileEngine.illnesses(of: person, data: model.data, catalog: model.catalog, now: Date())
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 VStack(spacing: 8) {
                     BuddyView(look: model.look(of: person), sick: status.sick, size: 96, leads: true, pokes: true)
                         .frame(width: 140, height: 140)
@@ -697,8 +745,29 @@ private struct PersonFileScreen: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
-                numbers
-                history
+                if let current = illnesses.first(where: { $0.goingOn }) {
+                    PersonNowCard(person: person, illness: current)
+                }
+                PersonNumbers(person: person, illnesses: illnesses)
+                if model.hasPass {
+                    PersonSeasonCard(illnesses: illnesses)
+                }
+                if person == .me || person == .partner {
+                    PersonSuppliersCard(person: person, illnesses: illnesses)
+                }
+                PersonHistoryCard(person: person, illnesses: illnesses)
+                if model.hasPass {
+                    if !illnesses.isEmpty {
+                        PersonComingBackCard(illnesses: illnesses)
+                    }
+                    if illnesses.count > 1 {
+                        PersonPatternsCard(illnesses: illnesses)
+                    }
+                    PersonDoctorRow(person: person)
+                    PersonPhotosCard(person: person)
+                } else {
+                    PersonPassCard()
+                }
             }
             .padding(.horizontal, Spacing.page)
             .padding(.bottom, 28)
@@ -722,95 +791,6 @@ private struct PersonFileScreen: View {
         }
         .onChange(of: model.people) { _, people in
             if !people.contains(person) { dismiss() }
-        }
-    }
-
-    /// One line for this person's illnesses: the logbook holds them, opened on this person.
-    private var history: some View {
-        let entries = model.logbook(for: person)
-        let latest = entries.first.flatMap { model.catalog.germ($0.germID) }
-        return NavigationLink {
-            LogbookScreen(person: person)
-        } label: {
-            HStack(spacing: 14) {
-                HStack(spacing: -14) {
-                    ForEach(Array(entries.prefix(3).enumerated()), id: \.element.id) { item in
-                        let germ = model.catalog.germ(item.element.germID)
-                        ZStack {
-                            if let germ {
-                                GermImage(germ: germ, size: 30)
-                            }
-                        }
-                        .frame(width: 40, height: 40)
-                        .background(germ?.tileTint(palette) ?? palette.surfaceAlt,
-                                    in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 13, style: .continuous)
-                                .stroke(palette.surface, lineWidth: 2.5)
-                        }
-                        .zIndex(Double(3 - item.offset))
-                    }
-                    if entries.isEmpty {
-                        Image("record-logbook")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40)
-                    }
-                }
-                .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("History"))
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                    Text(latest.map { trCount(entries.count, one: "%lld germ", other: "%lld germs") + " · " + tr("Last: %@", $0.illness.value) }
-                         ?? tr("Nothing logged yet."))
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
-                }
-                Spacer(minLength: 8)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.inkTertiary)
-            }
-            .germilyCard(padding: 14)
-            .contentShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
-        }
-        .buttonStyle(PressableStyle())
-    }
-
-    /// Up to three numbers about this person, from the journal.
-    private var numbers: some View {
-        let values: [(Int, String)]
-        switch person {
-        case .kid(let id):
-            let illnesses = model.data.kidIllnesses.filter { $0.kidID == id }
-            values = [(illnesses.count, tr("brought home")),
-                      (model.data.logs.filter { $0.source == .kid(id) }.count, tr("got you")),
-                      (illnesses.filter { $0.outcome == .dodged }.count, tr("you dodged"))]
-        case .me:
-            let logs = model.data.logs.filter { $0.sufferer.includesMe }
-            values = [(logs.count, tr("germs caught")), (logs.reduce(0) { $0 + $1.dayCount() }, tr("days sick")),
-                      (model.data.kidIllnesses.filter { $0.outcome == .dodged }.count, tr("germs dodged"))]
-        case .partner:
-            let logs = model.data.logs.filter { $0.sufferer.includesPartner }
-            values = [(logs.count, tr("germs caught")), (logs.reduce(0) { $0 + $1.dayCount() }, tr("days sick"))]
-        }
-        return HStack(alignment: .top, spacing: 8) {
-            ForEach(Array(values.enumerated()), id: \.offset) { item in
-                VStack(alignment: .leading, spacing: 0) {
-                    RollingNumber(value: item.element.0)
-                        .font(.system(size: figureSize, weight: .bold))
-                        .foregroundStyle(palette.ink)
-                    Text(item.element.1)
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .germilyCard(padding: 12)
-                .accessibilityElement(children: .combine)
-            }
         }
     }
 }

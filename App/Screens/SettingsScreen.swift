@@ -487,10 +487,7 @@ private struct PassTicket: View {
     private var active: Bool { model.hasPass }
 
     private var pitch: String {
-        if let partner = model.data.partnerName {
-            return tr("%@, every kid, the whole history and photos for the doctor.", partner)
-        }
-        return tr("Your partner, every kid, the whole history and photos for the doctor.")
+        tr("Every kid, the couple duel, the whole season and the doctor's PDF.")
     }
 
     private var planLine: String {

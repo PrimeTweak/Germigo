@@ -50,6 +50,13 @@ function isReviewedLesson(lesson) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(lesson && lesson.reviewedOn))
     && sources.length > 0 && sources.every((source) => /^https:\/\//.test(String(source && source.url)));
 }
+
+// A "Going around" report approved on a given day, for Canada or the US, backed by an https source.
+function isApprovedReport(report) {
+  return Boolean(report) && /^\d{4}-\d{2}-\d{2}$/.test(String(report.approvedOn))
+    && ['CA', 'US'].includes(report.region) && Array.isArray(report.germs) && report.germs.length > 0
+    && /^https:\/\//.test(String(report.source && report.source.url));
+}
 const PUBLIC_PAGES = new Set(['GET /', 'GET /get', 'GET /privacy', 'GET /terms', 'GET /health-data', 'GET /support', 'GET /lessons.json']);
 const LIMITS = {
   all: [120, MINUTE],
@@ -1148,8 +1155,8 @@ document.getElementById('form').addEventListener('submit', (event) => {
     'Strict-Transport-Security': 'max-age=31536000',
   };
 
-  // The online lesson file, read once at start; a changed file arrives with the next deploy.
-  // Only lessons with a review day and https sources go out.
+  // The online Guide file, read once at start; a changed file arrives with the next deploy.
+  // Only lessons with a review day and reports with an approval day, each with https sources, go out.
   function loadLessons(file) {
     try {
       const raw = fs.readFileSync(file);
@@ -1162,7 +1169,12 @@ document.getElementById('form').addEventListener('submit', (event) => {
       if (kept.length < list.length) {
         console.error(`lessons: ${list.length - kept.length} lesson(s) without a review day or https sources; not served`);
       }
-      const body = Buffer.from(JSON.stringify({ lessons: kept }));
+      const reports = JSON.parse(raw.toString('utf8')).goingAround;
+      const approved = Array.isArray(reports) ? reports.filter(isApprovedReport) : [];
+      if (Array.isArray(reports) && approved.length < reports.length) {
+        console.error(`lessons: ${reports.length - approved.length} report(s) without an approval day or https source; not served`);
+      }
+      const body = Buffer.from(JSON.stringify({ lessons: kept, goingAround: approved }));
       return { body, etag: '"' + crypto.createHash('sha256').update(body).digest('hex').slice(0, 32) + '"' };
     } catch (error) {
       if (error.code !== 'ENOENT') console.error(`lessons: ${file} does not read; not served`);

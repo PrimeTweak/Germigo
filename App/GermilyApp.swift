@@ -167,8 +167,11 @@ struct MainTabs: View {
                 model.stagedReward = result
             }
         }
-        .fullScreenCover(item: $model.pendingReward) { reward in
+        .fullScreenCover(item: $model.pendingReward, onDismiss: { model.offerTrialIfDue() }) { reward in
             RewardView(reward: reward)
+        }
+        .sheet(isPresented: $model.showTrialOffer) {
+            TrialOfferSheet()
         }
         .fullScreenCover(item: $model.pendingVictory, onDismiss: askForReview) { victory in
             VictoryView(victory: victory)
@@ -193,9 +196,17 @@ struct MainTabs: View {
                             try? await Task.sleep(nanoseconds: 2_200_000_000)
                             model.toast = nil
                         }
+                } else if let trick = model.trickFound {
+                    TrickToast(trick: trick)
+                        .motionTransition(.move(edge: .top).combined(with: .opacity))
+                        .task(id: trick) {
+                            try? await Task.sleep(nanoseconds: 3_400_000_000)
+                            model.trickFound = nil
+                        }
                 }
             }
             .animation(Tempo.settle, value: model.toast)
+            .animation(Tempo.settle, value: model.trickFound)
         }
         .confirmationDialog(tr("Feeling better?"), isPresented: $model.askBetter, titleVisibility: .visible) {
             Button(tr("Yes, I'm better")) {
@@ -232,6 +243,47 @@ private struct ToastView: View {
             .liftShadow()
             .padding(.top, 6)
             .accessibilityAddTraits(.isStaticText)
+    }
+}
+
+/// A trick of the Today mascot just found: its face, how many are found, and the clue to the next one.
+private struct TrickToast: View {
+    let trick: MascotTrick
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let found = MascotTrick.allCases.filter { model.data.mascotTricks.contains($0.rawValue) }
+        let next = MascotTrick.allCases.first { !found.contains($0) }
+        let total = MascotTrick.allCases.count
+        HStack(spacing: 12) {
+            Image(trick.face)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 38, height: 38)
+                .padding(4)
+                .background(palette.accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(tr("Trick found: %@", trick.title))
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(palette.ink)
+                Text(next.map { tr("%1$lld of %2$lld · Next clue: %3$@", found.count, total, $0.clue) }
+                     ?? tr("%1$lld of %2$lld", found.count, total))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .frame(maxWidth: 440)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .liftShadow()
+        .padding(.horizontal, Spacing.page)
+        .padding(.top, 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isStaticText)
     }
 }
 

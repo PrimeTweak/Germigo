@@ -50,6 +50,21 @@ enum DayEngine {
         return calendar.startOfDay(for: kidEnd(illness, catalog: catalog, now: now)) >= calendar.startOfDay(for: now)
     }
 
+    /// Days of the season up to today on which someone, or the given person, was sick.
+    static func loggedDays(in season: Season, person: Person? = nil, data: AppData, catalog: GermCatalog, now: Date) -> Int {
+        let calendar = Calendar.current
+        var day = calendar.startOfDay(for: max(season.start, firstDay(data: data)))
+        let last = calendar.startOfDay(for: min(now, season.end))
+        var count = 0
+        while day <= last {
+            let entries = entries(on: day, data: data, catalog: catalog, now: now)
+            if entries.contains(where: { person == nil || $0.person == person }) { count += 1 }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        return count
+    }
+
     /// The first day worth opening: install day, or the oldest entry when it was dated earlier.
     static func firstDay(data: AppData) -> Date {
         let starts = data.logs.map { $0.startedAt } + data.kidIllnesses.map { $0.startedAt }

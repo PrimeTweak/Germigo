@@ -81,7 +81,7 @@ struct TodayScreen: View {
             .sheet(item: $flow, onDismiss: handOff) { flow in
                 SymptomFlowSheet(flow: flow, onAdded: { pendingWanted = $0 })
             }
-            .sheet(item: $wanted) { illness in
+            .sheet(item: $wanted, onDismiss: { model.offerTrialIfDue() }) { illness in
                 WantedSheet(illness: illness)
             }
         }
@@ -563,30 +563,24 @@ private struct SickStage: View {
 }
 
 /// The weeks under the counter: a germ marks each sick day, and each day opens its page.
+/// A free journal shows two weeks; the days before its last seven wear a lock and open the archive's door.
 private struct WeekStrip: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var shownWeek: Date?
-    @State private var showPaywall = false
 
     var body: some View {
         let now = Date()
         let first = DayEngine.firstDay(data: model.data)
         let all = Self.weekStarts(from: first, to: now)
         let weeks = model.hasPass ? all : Array(all.suffix(2))
-        let lockedWeek = model.hasPass || weeks.count < 2 ? nil : weeks.first
+        let opensFrom = model.historyStart
         VStack(spacing: 4) {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(weeks, id: \.self) { start in
-                        Group {
-                            if start == lockedWeek {
-                                locked
-                            } else {
-                                week(start, first: first, now: now)
-                            }
-                        }
-                        .containerRelativeFrame(.horizontal)
+                        week(start, first: first, opensFrom: opensFrom, now: now)
+                            .containerRelativeFrame(.horizontal)
                     }
                 }
                 .scrollTargetLayout()
@@ -599,32 +593,6 @@ private struct WeekStrip: View {
             caption(current: weeks.last)
                 .frame(height: 20)
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView(reason: .history)
-        }
-    }
-
-    /// The week before this one, on a free journal: a door to the Season Pass.
-    private var locked: some View {
-        Button {
-            Haptics.tap()
-            showPaywall = true
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "lock.fill")
-                    .symbolEffect(.wiggle, value: shownWeek)
-                PassOfferText(reason: .history)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(palette.accent)
-            .padding(.horizontal, 16)
-            .frame(height: 44)
-            .background(palette.accent.opacity(0.12), in: Capsule())
-        }
-        .buttonStyle(PressableStyle())
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// The start of every week from the first day to now, oldest first, two years at most.
@@ -636,13 +604,14 @@ private struct WeekStrip: View {
         return (0...span).reversed().compactMap { calendar.date(byAdding: .weekOfYear, value: -$0, to: current) }
     }
 
-    private func week(_ start: Date, first: Date, now: Date) -> some View {
+    private func week(_ start: Date, first: Date, opensFrom: Date?, now: Date) -> some View {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: now)
         return HStack(spacing: 0) {
             ForEach(0..<7, id: \.self) { offset in
                 let day = calendar.date(byAdding: .day, value: offset, to: start) ?? start
-                DayDot(day: day, today: today, first: first, germ: germ(on: day, now: now))
+                DayDot(day: day, today: today, first: first, archived: opensFrom.map { day < $0 } ?? false,
+                       germ: germ(on: day, now: now))
                     .cascadeIn(offset)
             }
         }
@@ -678,10 +647,12 @@ private struct WeekStrip: View {
 }
 
 /// One day of the week: its germ when someone was sick, its number otherwise.
+/// An archived day, before the free week, wears a lock and opens the archive's page.
 private struct DayDot: View {
     let day: Date
     let today: Date
     let first: Date
+    let archived: Bool
     let germ: Germ?
     @Environment(\.palette) private var palette
 
@@ -728,10 +699,22 @@ private struct DayDot: View {
             }
         }
         .frame(width: 40, height: 40)
+        .opacity(archived && opens ? 0.45 : 1)
         .overlay {
             if isToday, germ != nil {
                 Circle()
                     .strokeBorder(palette.ink, lineWidth: 2.5)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if archived && opens {
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(palette.onAccent)
+                    .frame(width: 16, height: 16)
+                    .background(palette.accent, in: Circle())
+                    .offset(x: 3, y: -3)
+                    .accessibilityHidden(true)
             }
         }
         .animation(Tempo.pop, value: germ?.id)

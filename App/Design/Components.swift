@@ -270,9 +270,10 @@ struct ConfettiView: View {
     }
 }
 
-/// Entries older than the free week: how many there are, and the way to the Season Pass.
+/// What the free week leaves out, counted, and the way to the Season Pass that keeps it.
 struct LockedHistoryRow: View {
-    let count: Int
+    var reason = PassReason.history
+    let title: String
     @Environment(\.palette) private var palette
     @State private var showPaywall = false
 
@@ -287,10 +288,10 @@ struct LockedHistoryRow: View {
                     .frame(width: 44, height: 44)
                     .background(palette.ink.opacity(0.07), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(trCount(count, one: "%lld older entry", other: "%lld older entries"))
+                    Text(title)
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.ink)
-                    PassOfferText(reason: .history)
+                    PassOfferText(reason: reason)
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(palette.accent)
                 }
@@ -304,7 +305,7 @@ struct LockedHistoryRow: View {
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showPaywall) {
-            PaywallView(reason: .history)
+            PaywallView(reason: reason)
         }
     }
 }
@@ -654,5 +655,58 @@ struct ChoiceChip: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// Where first-time hints remember they were seen, outside the journal.
+enum HintKeys {
+    static let couch = "hint.couch"
+}
+
+/// A speech bubble that invites a first touch, with its tail pointing down at what to touch.
+/// It never catches touches itself; the screen hides it once the touch has happened.
+struct WhisperBubble: View {
+    let text: String
+    @Environment(\.palette) private var palette
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var bob = false
+
+    var body: some View {
+        Label {
+            Text(text)
+        } icon: {
+            Image(systemName: "hand.point.up.left.fill")
+                .foregroundStyle(palette.accent)
+        }
+        .font(.subheadline.weight(.bold))
+        .foregroundStyle(palette.ink)
+        .lineLimit(1)
+        .fixedSize()
+        .padding(.horizontal, 14)
+        .frame(height: 40)
+        .background {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(palette.surface)
+                .overlay(alignment: .bottom) {
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(palette.surface)
+                        .frame(width: 15, height: 15)
+                        .rotationEffect(.degrees(45))
+                        .offset(y: 6)
+                }
+        }
+        .compositingGroup()
+        .liftShadow()
+        .rotationEffect(.degrees(-3))
+        .offset(y: bob ? -4 : 0)
+        .allowsHitTesting(false)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) {
+                bob = true
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isStaticText)
     }
 }

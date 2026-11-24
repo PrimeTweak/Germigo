@@ -127,7 +127,7 @@ struct GermCatalog {
     let germs: [Germ]
     /// Every myth: each germ's first one in album order, then each germ's second one, and so on.
     let myths: [Myth]
-    /// Lessons already out, in ladder order.
+    /// Lessons already out: the bundled ones in ladder order, then the online ones.
     let articles: [Article]
     /// Online lessons still waiting for their release day.
     let upcoming: [Article]
@@ -141,7 +141,7 @@ struct GermCatalog {
         self.myths = (0..<(cards.map { $0.count }.max() ?? 0)).flatMap { round in
             cards.compactMap { round < $0.count ? $0[round] : nil }
         }
-        let all = LessonEngine.merge(bundled: articles, feed: feed).sorted { $0.unlockAtAnswers < $1.unlockAtAnswers }
+        let all = LessonEngine.merge(bundled: articles, feed: feed)
         self.articles = all.filter { LessonEngine.isReleased($0, now: now) }
         self.upcoming = all.filter { !LessonEngine.isReleased($0, now: now) }
         self.bundled = articles

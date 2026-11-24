@@ -147,6 +147,11 @@ struct DoctorSummaryScreen: View {
     @Environment(\.palette) private var palette
     @State private var person: Person?
 
+    /// Opens on one person, or on the first one of the household.
+    init(person: Person? = nil) {
+        _person = State(initialValue: person)
+    }
+
     private var people: [Person] {
         model.data.kids.map { Person.kid($0.id) } + [.me] + (model.data.partnerName == nil ? [] : [.partner])
     }
@@ -319,7 +324,7 @@ struct HealthHistory: View {
         VStack(alignment: .leading, spacing: 14) {
             paper(found, others: others)
             if all.count > found.count {
-                LockedHistoryRow(count: all.count - found.count)
+                LockedHistoryRow(title: model.lockedHistoryTitle(for: person, hidden: all.count - found.count))
             }
             paperActions(found, others: others)
         }

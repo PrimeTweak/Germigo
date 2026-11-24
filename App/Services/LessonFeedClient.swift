@@ -1,6 +1,6 @@
 import Foundation
 
-/// Downloads the online lesson file and keeps the last copy that read correctly.
+/// Downloads the online Guide file and keeps the last copy that read correctly.
 enum LessonFeedClient {
     /// A lesson file larger than this is ignored.
     private static let maxBytes = 1_000_000
@@ -16,14 +16,14 @@ enum LessonFeedClient {
     }
 
     /// The saved copy; empty while no address is set.
-    static func cached() -> [FeedLesson] {
-        guard AppConfig.lessonsURL != nil, let raw = try? Data(contentsOf: cacheURL) else { return [] }
-        return decode(raw) ?? []
+    static func cached() -> LessonFeed {
+        guard AppConfig.lessonsURL != nil, let raw = try? Data(contentsOf: cacheURL) else { return .empty }
+        return decode(raw) ?? .empty
     }
 
     /// Nil without an address or a network, when the file was checked within the hour or did not change,
     /// or when it does not read; the saved copy stays then.
-    static func fetch(now: Date = Date()) async -> [FeedLesson]? {
+    static func fetch(now: Date = Date()) async -> LessonFeed? {
         guard let url = AppConfig.lessonsURL else { return nil }
         let defaults = UserDefaults.standard
         let saved = FileManager.default.fileExists(atPath: cacheURL.path)
@@ -43,16 +43,16 @@ enum LessonFeedClient {
             defaults.set(now, forKey: Keys.checkedAt)
             return nil
         }
-        guard http.statusCode == 200, data.count <= maxBytes, let lessons = decode(data) else { return nil }
+        guard http.statusCode == 200, data.count <= maxBytes, let feed = decode(data) else { return nil }
         try? FileManager.default.createDirectory(at: Persistence.directory, withIntermediateDirectories: true)
         try? data.write(to: cacheURL, options: .atomic)
         defaults.set(now, forKey: Keys.checkedAt)
         defaults.set(http.value(forHTTPHeaderField: "ETag"), forKey: Keys.etag)
         defaults.set(http.value(forHTTPHeaderField: "Last-Modified"), forKey: Keys.modified)
-        return lessons
+        return feed
     }
 
-    private static func decode(_ raw: Data) -> [FeedLesson]? {
-        (try? JSONDecoder().decode(LessonFeed.self, from: raw))?.lessons
+    private static func decode(_ raw: Data) -> LessonFeed? {
+        try? JSONDecoder().decode(LessonFeed.self, from: raw)
     }
 }

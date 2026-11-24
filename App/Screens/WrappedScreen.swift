@@ -1,12 +1,18 @@
 import SwiftUI
 
-/// The season told in a few story cards, each one shareable.
+/// The season told in a few story cards, each one shareable. Without the Season Pass,
+/// the opening card stays free to share and the others wait under a veil.
 struct WrappedScreen: View {
     let season: Season
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var page = WrapPage.intro
     @State private var sharing: WrapPage?
+    @State private var showPaywall = false
+
+    private func isVeiled(_ page: WrapPage) -> Bool {
+        page != .intro && !model.hasPass
+    }
 
     var body: some View {
         let wrap = WrapEngine.wrap(data: model.data, catalog: model.catalog, season: season, now: Date())
@@ -19,6 +25,15 @@ struct WrappedScreen: View {
                     ForEach(pages) { item in
                         card(item, wrap: wrap, stats: stats)
                             .frame(width: 360, height: 640)
+                            .blur(radius: isVeiled(item) ? 14 : 0)
+                            .allowsHitTesting(!isVeiled(item))
+                            .overlay {
+                                if isVeiled(item) {
+                                    RecapVeil(count: pages.count - 1) {
+                                        showPaywall = true
+                                    }
+                                }
+                            }
                             .clipShape(RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                             .scaleEffect(scale)
                             .frame(width: 360 * scale, height: 640 * scale)
@@ -45,7 +60,7 @@ struct WrappedScreen: View {
                             .frame(height: 52)
                     }
                     .buttonStyle(.glass)
-                    .disabled(page == .guess)
+                    .disabled(page == .guess || isVeiled(page))
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 8)
@@ -59,6 +74,9 @@ struct WrappedScreen: View {
             SharePreviewSheet(title: tr("Season recap")) {
                 card(item, wrap: wrap, stats: stats)
             }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: .recap)
         }
     }
 
@@ -76,6 +94,45 @@ struct WrappedScreen: View {
         } else {
             WrapCard(page: item, wrap: wrap, supplier: stats.topSupplier)
         }
+    }
+}
+
+/// Over a veiled card: how many cards the Season Pass opens, and the way to it.
+private struct RecapVeil: View {
+    let count: Int
+    let open: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "lock.fill")
+                .font(.headline)
+                .foregroundStyle(Color(hex: Swatch.navy))
+                .frame(width: 48, height: 48)
+                .background(Color(hex: Swatch.irisSoft), in: Circle())
+                .padding(.bottom, 4)
+            Text(trCount(count, one: "%lld more card", other: "%lld more cards"))
+                .font(.system(size: 24, weight: .bold))
+            Text(PassReason.recap.detail)
+                .font(.system(size: 15, weight: .medium))
+                .opacity(0.75)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(action: open) {
+                Text(PurchaseManager.shared.offerLabel)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(Color(hex: Swatch.navy))
+                    .padding(.horizontal, 26)
+                    .frame(height: 50)
+                    .background(Color(hex: Swatch.frost), in: Capsule())
+            }
+            .buttonStyle(PressableStyle())
+            .padding(.top, 10)
+        }
+        .foregroundStyle(Color(hex: Swatch.frost))
+        .padding(.horizontal, 22)
+        .padding(.vertical, 26)
+        .background(Color(hex: Swatch.navy).opacity(0.88), in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .padding(.horizontal, 28)
     }
 }
 

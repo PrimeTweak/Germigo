@@ -273,6 +273,9 @@ struct Article: Codable, Identifiable, Hashable {
     /// The day a health professional approved the lesson, written `yyyy-MM-dd`.
     var reviewedOn: String?
 
+    /// Online lessons open with the Season Pass; bundled ones climb the quiz ladder.
+    var needsPass: Bool { releasedOn != nil }
+
     /// About how long it takes to read, at 200 words a minute.
     var minutes: Int {
         let words = ([summary] + paragraphs).reduce(0) { $0 + $1.value.split(whereSeparator: \.isWhitespace).count }

@@ -116,7 +116,7 @@ private struct WhoPage: View {
         }
         if model.data.partnerName != nil {
             list.append(Choice(patient: .partner, name: model.partnerDisplayName, look: model.data.partnerLook,
-                               line: partnerLine(now: now), locked: !model.hasPass))
+                               line: partnerLine(now: now), locked: false))
         }
         return list
     }

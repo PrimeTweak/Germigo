@@ -20,7 +20,7 @@ private enum PieceState {
 }
 
 /// The head of a collection page: how many pieces are open, and a line about how the rest open.
-private struct CollectionHead: View {
+struct CollectionHead: View {
     let open: Int
     let total: Int
     let note: String
@@ -313,15 +313,18 @@ struct CharactersScreen: View {
     @Environment(\.palette) private var palette
     @State private var nudges: [Int: Int] = [:]
     @State private var blocked = false
+    @State private var showPaywall = false
 
     private var hidden: Set<Int> { model.data.settings.hiddenLooks }
 
     var body: some View {
         let columns = Array(repeating: GridItem(.flexible(), spacing: 10, alignment: .top), count: 4)
+        let locked = Looks.order.filter { !model.isLookOpen($0) }
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                CollectionHead(open: Looks.order.filter { !hidden.contains($0) }.count, total: Looks.count,
-                               note: tr("Shown when you add someone. Tap one to hide it or bring it back."))
+                CollectionHead(open: Looks.order.filter { model.isLookOpen($0) && !hidden.contains($0) }.count, total: Looks.count,
+                               note: locked.isEmpty ? tr("Shown when you add someone. Tap one to hide it or bring it back.")
+                                                    : tr("Yours to pick. Tap one to hide it or bring it back."))
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(Looks.order, id: \.self) { look in
                         cell(look)
@@ -340,6 +343,14 @@ struct CharactersScreen: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 4)
+                if !locked.isEmpty {
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        Label(tr("%lld more with the Season Pass", locked.count), systemImage: "lock.fill")
+                    }
+                    .buttonStyle(PillButtonStyle(kind: .ink, height: 50))
+                }
                 Button(tr("Show all")) {
                     Haptics.tap()
                     withAnimation(Tempo.quick) {
@@ -357,6 +368,9 @@ struct CharactersScreen: View {
         .background(palette.background.ignoresSafeArea())
         .navigationTitle(tr("Characters"))
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: .characters)
+        }
     }
 
     private func cell(_ look: Int) -> some View {
@@ -364,7 +378,12 @@ struct CharactersScreen: View {
         let open = model.isLookOpen(look)
         let name = tr("Character %lld", look + 1)
         return Button {
-            toggle(look)
+            if open {
+                toggle(look)
+            } else {
+                Haptics.tap()
+                showPaywall = true
+            }
         } label: {
             VStack(spacing: 6) {
                 Circle()
@@ -388,23 +407,24 @@ struct CharactersScreen: View {
                         }
                     }
                 HStack(spacing: 3) {
-                    Image(systemName: shown ? "checkmark" : "eye.slash")
+                    Image(systemName: open ? (shown ? "checkmark" : "eye.slash") : "lock.fill")
                         .font(.caption2.weight(.bold))
                         .symbolEffect(.wiggle, value: nudges[look, default: 0])
-                    Text(shown ? tr("Shown") : tr("Hidden"))
+                    Text(open ? (shown ? tr("Shown") : tr("Hidden")) : tr("Pass"))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(shown ? palette.accent : palette.inkTertiary)
+                .foregroundStyle(open && !shown ? palette.inkTertiary : palette.accent)
             }
             .contentShape(Rectangle())
         }
         .buttonStyle(PressableStyle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(open ? name : name + ", " + tr("Needs the Season Pass"))
-        .accessibilityValue(shown ? tr("Shown") : tr("Hidden"))
-        .accessibilityHint(shown ? tr("Hides it from the choices.") : tr("Brings it back to the choices."))
+        .accessibilityValue(open ? (shown ? tr("Shown") : tr("Hidden")) : "")
+        .accessibilityHint(open ? (shown ? tr("Hides it from the choices.") : tr("Brings it back to the choices."))
+                                : tr("Opens the Season Pass."))
     }
 
     /// Hides or brings back a look; the last look that can be picked stays and wiggles instead.

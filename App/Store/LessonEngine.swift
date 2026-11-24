@@ -14,17 +14,21 @@ struct FeedLesson: Codable, Hashable {
     let reviewedOn: String?
 }
 
-/// The online lesson file.
+/// The online Guide file: the lessons, and the weekly "Going around" reports.
 struct LessonFeed: Codable {
     let lessons: [FeedLesson]
+    let goingAround: [GoingAroundReport]?
+
+    static let empty = LessonFeed(lessons: [], goingAround: nil)
 }
 
-/// When lessons come out and open: open to everyone for their first week, then by right answers.
+/// When lessons come out and open: a bundled lesson with right answers in the daily quiz,
+/// an online lesson with the Season Pass.
 enum LessonEngine {
     /// Right answers between two steps of the ladder.
     static let step = 5
-    /// Days a new lesson stays open to everyone.
-    static let openDays = 7
+    /// Days a lesson counts as new.
+    static let newDays = 7
     /// Least time between two checks of the online lesson file.
     static let checkGap: TimeInterval = 3600
 
@@ -41,21 +45,19 @@ enum LessonEngine {
         return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
     }
 
-    /// The bundled articles, then the online ones in release order, each one step above the last.
+    /// The bundled lessons up their ladder, then the online ones in release order.
     static func merge(bundled: [Article], feed: [FeedLesson], calendar: Calendar = .current) -> [Article] {
         var seen = Set(bundled.map { $0.id })
-        var top = bundled.map { $0.unlockAtAnswers }.max() ?? 0
         let dated = feed.compactMap { lesson -> (lesson: FeedLesson, day: Date)? in
             guard let day = calendarDay(lesson.released, calendar: calendar) else { return nil }
             return (lesson, day)
         }
         .sorted { ($0.day, $0.lesson.id) < ($1.day, $1.lesson.id) }
-        var merged = bundled
+        var merged = bundled.sorted { $0.unlockAtAnswers < $1.unlockAtAnswers }
         for item in dated {
             guard seen.insert(item.lesson.id).inserted else { continue }
-            top += step
             let lesson = item.lesson
-            merged.append(Article(id: lesson.id, icon: lesson.icon ?? "graduationcap", unlockAtAnswers: top,
+            merged.append(Article(id: lesson.id, icon: lesson.icon ?? "graduationcap", unlockAtAnswers: 0,
                                   title: lesson.title, summary: lesson.summary, paragraphs: lesson.paragraphs,
                                   sources: lesson.sources, releasedOn: item.day, reviewedOn: lesson.reviewedOn))
         }
@@ -67,32 +69,26 @@ enum LessonEngine {
         return now >= day
     }
 
-    static func isOpenToAll(_ article: Article, now: Date, calendar: Calendar = .current) -> Bool {
+    /// An online lesson in its first week.
+    static func isNew(_ article: Article, now: Date, calendar: Calendar = .current) -> Bool {
         guard let day = article.releasedOn, now >= day,
-              let end = calendar.date(byAdding: .day, value: openDays, to: day) else { return false }
+              let end = calendar.date(byAdding: .day, value: newDays, to: day) else { return false }
         return now < end
     }
 
-    /// Days left in the open week, today included.
-    static func daysLeft(_ article: Article, now: Date, calendar: Calendar = .current) -> Int {
-        guard let day = article.releasedOn else { return 0 }
-        let passed = calendar.dateComponents([.day], from: day, to: calendar.startOfDay(for: now)).day ?? 0
-        return max(0, openDays - passed)
-    }
-
     /// A lesson read once stays open.
-    static func isUnlocked(_ article: Article, data: AppData, now: Date) -> Bool {
-        data.readArticles.contains(article.id) || isOpenToAll(article, now: now)
-            || data.quiz.rightTotal >= article.unlockAtAnswers
+    static func isUnlocked(_ article: Article, data: AppData, hasPass: Bool) -> Bool {
+        if data.readArticles.contains(article.id) { return true }
+        return article.needsPass ? hasPass : data.quiz.rightTotal >= article.unlockAtAnswers
     }
 
-    /// The lessons in reading order: this week's unread ones, the other open unread ones,
-    /// the locked ones by step, then those already read.
-    static func readingOrder(_ articles: [Article], data: AppData, now: Date) -> [Article] {
+    /// The lessons in reading order: this week's open unread ones, the other open unread ones,
+    /// the locked ones, then those already read.
+    static func readingOrder(_ articles: [Article], data: AppData, hasPass: Bool, now: Date) -> [Article] {
         func rank(_ article: Article) -> Int {
             if data.readArticles.contains(article.id) { return 3 }
-            if isOpenToAll(article, now: now) { return 0 }
-            return isUnlocked(article, data: data, now: now) ? 1 : 2
+            guard isUnlocked(article, data: data, hasPass: hasPass) else { return 2 }
+            return isNew(article, now: now) ? 0 : 1
         }
         return articles.enumerated()
             .sorted { (rank($0.element), $0.offset) < (rank($1.element), $1.offset) }

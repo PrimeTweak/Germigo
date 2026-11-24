@@ -28,6 +28,11 @@ def collect():
             for lesson in json.loads(path.read_text(encoding="utf-8")).get("lessons", []):
                 for source in lesson.get("sources", []):
                     links.setdefault(source["url"], f"{name}: {lesson['id']}")
+    for name in ("server/lessons.json", "server/drafts/going-around.json"):
+        path = ROOT / name
+        if path.is_file():
+            for report in json.loads(path.read_text(encoding="utf-8")).get("goingAround", []):
+                links.setdefault(report["source"]["url"], f"{name}: {report['id']}")
     for url in EXTRA:
         links.setdefault(url, "legal screen")
     return links

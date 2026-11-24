@@ -30,6 +30,9 @@ NUMBER = re.compile(r"\d+(?:[.,]\d+)?")
 THOUSANDS = re.compile(r"(?<=\d)[,\s\u00a0\u202f](?=\d{3}\b)")
 # A Fahrenheit conversion given only in English, beside its Celsius figure.
 FAHRENHEIT = re.compile(r"\d+(?:[.,]\d+)?\s*°F")
+REPORT_HEADLINE_LIMIT = 70
+REPORT_LINE_LIMIT = 90
+TRENDS = ("rising", "steady", "falling", "low")
 MYTH_CLAIM_LIMIT = 90
 MYTH_EXPLANATION_LIMIT = 200
 # A review older than this is flagged as due for a new one.
@@ -335,6 +338,69 @@ def check_lesson(lesson, where, live):
     check_review(lesson.get("reviewedOn"), where, required=live)
 
 
+def real_day(value, where, field):
+    """A day written yyyy-mm-dd, or None after a failure."""
+    try:
+        return datetime.date.fromisoformat(value) if DAY.fullmatch(str(value)) else fail(f"{where}: {field} must be yyyy-mm-dd")
+    except ValueError:
+        return fail(f"{where}: {field} must be a real day")
+
+
+def check_report(report, where, live, germ_ids):
+    """A "Going around" report: a known country, real days, known germs, a trusted source, short lines."""
+    if not report.get("id"):
+        fail(f"{where}: needs an id")
+    if report.get("region") not in ("CA", "US"):
+        fail(f"{where}: region must be CA or US")
+    real_day(report.get("week"), where, "week")
+    published = real_day(report.get("published"), where, "published")
+    if published and published > datetime.date.today():
+        fail(f"{where}: published is in the future")
+    check_texts(report, where)
+    for language in ("en", "fr"):
+        headline = (report.get("headline") or {}).get(language, "")
+        if len(headline) > REPORT_HEADLINE_LIMIT:
+            fail(f"{where}.headline.{language}: {len(headline)} characters, over {REPORT_HEADLINE_LIMIT}")
+    if not report.get("germs"):
+        fail(f"{where}: needs germs")
+    for index, item in enumerate(report.get("germs") or []):
+        place = f"{where}.germs[{index}]"
+        if item.get("germID") not in germ_ids:
+            fail(f"{place}: germID {item.get('germID')!r} is not in germs.json")
+        if item.get("trend") not in TRENDS:
+            fail(f"{place}: trend must be one of {', '.join(TRENDS)}")
+        for language in ("en", "fr"):
+            line = (item.get("line") or {}).get(language, "")
+            if len(line) > REPORT_LINE_LIMIT:
+                fail(f"{place}.line.{language}: {len(line)} characters, over {REPORT_LINE_LIMIT}")
+    source = report.get("source") or {}
+    if not source.get("name"):
+        fail(f"{where}: the source needs a name")
+    check_trusted([source.get("url", "")], where)
+    if live:
+        approved = real_day(report.get("approvedOn"), where, "approvedOn")
+        if approved and approved > datetime.date.today():
+            fail(f"{where}: approvedOn is in the future")
+    elif "approvedOn" in report:
+        fail(f"{where}: a draft gets its approval day when it moves to server/lessons.json")
+
+
+def check_reports(germs):
+    """The weekly "Going around" reports, served and in draft."""
+    germ_ids = {germ.get("id") for germ in germs}
+    live = (read_json("server/lessons.json") or {}).get("goingAround", [])
+    drafts_file = ROOT / "server/drafts/going-around.json"
+    drafts = (read_json("server/drafts/going-around.json") or {}).get("goingAround", []) if drafts_file.is_file() else []
+    for name, reports, is_live in (("server/lessons.json", live, True), ("server/drafts/going-around.json", drafts, False)):
+        for report in reports:
+            check_report(report, f"{name} report {report.get('id', '?')}", is_live, germ_ids)
+    ids = [report.get("id") for report in live + drafts]
+    for duplicate in sorted({item for item in ids if ids.count(item) > 1}):
+        fail(f"going around: id {duplicate!r} is used more than once across server/lessons.json and its drafts")
+    if drafts:
+        notes.append(f"{len(drafts)} Going around reports await approval in server/drafts/going-around.json")
+
+
 def check_editorial(germs):
     """The content rule for the Guide: sourced, reviewed, bilingual, no dosing, myths short and unique.
     It covers the bundled germs and lessons, the online lesson file and its drafts."""
@@ -562,6 +628,7 @@ def main():
     check_plists()
     germs = check_content()
     check_editorial(germs)
+    check_reports(germs)
     check_assets(germs)
     check_strings()
     if errors:

@@ -206,17 +206,14 @@ enum NotificationManager {
         "symptoms-" + id.uuidString
     }
 
-    /// One announcement at 10 AM on each upcoming lesson's release day.
-    static func scheduleLessons(_ upcoming: [Article], known: [String], settings: AppSettings) {
+    /// One announcement at 10 AM on each upcoming lesson's release day, for those whose Season Pass opens it.
+    static func scheduleLessons(_ upcoming: [Article], known: [String], settings: AppSettings, hasPass: Bool) {
         center.removePendingNotificationRequests(withIdentifiers: known.map(lessonKey))
-        guard settings.lessonAlertsOn else { return }
+        guard settings.lessonAlertsOn, hasPass else { return }
         let dated = upcoming.compactMap { article in article.releasedOn.map { (article, $0) } }
             .sorted { $0.1 < $1.1 }
         for (article, day) in dated.prefix(lessonLimit) {
-            let title = article.title.value
-            let joint = title.hasSuffix("?") || title.hasSuffix("!") || title.hasSuffix(".") ? " " : ". "
-            addMorning(id: lessonKey(article.id), on: day, title: tr("New lesson in the Guide"),
-                       body: title + joint + tr("Open to everyone this week."))
+            addMorning(id: lessonKey(article.id), on: day, title: tr("New lesson in the Guide"), body: article.title.value)
         }
     }
 

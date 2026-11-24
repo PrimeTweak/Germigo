@@ -7,7 +7,7 @@ struct LessonsScreen: View {
 
     var body: some View {
         let fresh = model.lessonsThisWeek()
-        let ladder = model.catalog.articles.filter { !fresh.contains($0) }
+        let others = model.catalog.articles.filter { !fresh.contains($0) }
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 if !fresh.isEmpty {
@@ -15,10 +15,10 @@ struct LessonsScreen: View {
                     LessonCard(articles: fresh)
                     SectionHeader(title: tr("All lessons"))
                 }
-                LessonCard(articles: ladder)
+                LessonCard(articles: others)
                 Text(AppConfig.lessonsURL == nil
                      ? tr("Lessons open with right answers in the daily quiz.")
-                     : tr("New lessons come out regularly. Each one is open to everyone for 7 days, then opens with right answers in the daily quiz."))
+                     : tr("A new lesson comes out every week with the Season Pass. The others open with right answers in the daily quiz."))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
@@ -50,12 +50,14 @@ struct LessonCard: View {
     }
 }
 
-/// One lesson: its title and summary once open, or what opens it. A locked one wiggles its padlock when tapped.
+/// One lesson: its title and summary once open, or what opens it. A lesson waiting for right answers
+/// wiggles its padlock when tapped; one waiting for the Season Pass leads to the offer.
 struct LessonRow: View {
     let article: Article
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var nudges = 0
+    @State private var showPaywall = false
 
     var body: some View {
         if model.isArticleUnlocked(article) {
@@ -66,18 +68,24 @@ struct LessonRow: View {
         } else {
             Button {
                 Haptics.tap()
-                nudges += 1
+                if article.needsPass {
+                    showPaywall = true
+                } else {
+                    nudges += 1
+                }
             } label: {
                 label(locked: true)
             }
             .buttonStyle(.plain)
+            .sheet(isPresented: $showPaywall) {
+                PaywallView(reason: .library)
+            }
         }
     }
 
     private func label(locked: Bool) -> some View {
-        let now = Date()
         let remaining = max(1, article.unlockAtAnswers - model.data.quiz.rightTotal)
-        let openWeek = LessonEngine.isOpenToAll(article, now: now)
+        let waitsForPass = locked && article.needsPass
         return HStack(spacing: 12) {
             IconTile(symbol: article.icon, size: 36, tint: locked ? nil : palette.accent)
             VStack(alignment: .leading, spacing: 2) {
@@ -85,25 +93,17 @@ struct LessonRow: View {
                     .font(.body.weight(.semibold))
                     .foregroundStyle(locked ? palette.inkSecondary : palette.ink)
                     .multilineTextAlignment(.leading)
-                Text(locked ? trCount(remaining, one: "%lld more right answer", other: "%lld more right answers")
-                            : tr("%lld min read", article.minutes))
+                Text(locked && !waitsForPass ? trCount(remaining, one: "%lld more right answer", other: "%lld more right answers")
+                                             : tr("%lld min read", article.minutes))
                     .font(.footnote)
                     .foregroundStyle(palette.inkSecondary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
-                if openWeek {
-                    let left = LessonEngine.daysLeft(article, now: now)
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                        Text(trCount(left, one: "Open to everyone · %lld day left", other: "Open to everyone · %lld days left"))
-                    }
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.accent)
-                    .padding(.top, 5)
-                }
             }
             Spacer(minLength: 4)
-            if locked {
+            if waitsForPass {
+                PassOfferTag()
+            } else if locked {
                 Image(systemName: "lock.fill")
                     .font(.footnote)
                     .foregroundStyle(palette.inkTertiary)

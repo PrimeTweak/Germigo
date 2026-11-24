@@ -153,7 +153,7 @@ struct LogbookScreen: View {
                     .cascadeIn(min(item.offset, 8))
                 }
                 if shown.count < all.count {
-                    LockedHistoryRow(count: all.count - shown.count)
+                    LockedHistoryRow(title: model.lockedHistoryTitle(for: filter, hidden: all.count - shown.count))
                 }
             }
             .padding(.horizontal, Spacing.page)
@@ -178,7 +178,7 @@ struct LogbookScreen: View {
         .sheet(item: $opened) { ref in
             LogbookEntrySheet(id: ref.id)
         }
-        .sheet(isPresented: $addsKidGerm) {
+        .sheet(isPresented: $addsKidGerm, onDismiss: { model.offerTrialIfDue() }) {
             KidIllnessSheet()
         }
         .confirmationDialog(pendingDelete?.deleteTitle ?? "", isPresented: deleteBinding, titleVisibility: .visible) {
@@ -534,7 +534,6 @@ private struct IllnessDays: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
     @State private var seed: PhotoSeed?
-    @State private var door: PassReason?
 
     private var range: (start: Date, end: Date, link: PhotoLink, symptoms: [String]) {
         switch entry {
@@ -616,9 +615,6 @@ private struct IllnessDays: View {
         .sheet(item: $seed) { seed in
             AddPhotoSheet(seed: seed)
         }
-        .sheet(item: $door) { reason in
-            PaywallView(reason: reason)
-        }
     }
 
     private func dayRow(_ day: Date, number: Int, shots: [PatientPhoto]) -> some View {
@@ -643,10 +639,6 @@ private struct IllnessDays: View {
 
     /// A new photo for that day of the illness: now for today, midday for a past day.
     private func addPhoto(on day: Date, today: Bool) {
-        guard model.hasPass else {
-            door = .photos
-            return
-        }
         let moment = today ? Date() : Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day) ?? day
         seed = PhotoSeed(person: person, takenAt: moment, link: range.link)
     }
@@ -697,7 +689,7 @@ private struct LogEditSheet: View {
                                 .foregroundStyle(palette.inkSecondary)
                         }
                     }
-                    if model.hasPass, let partner = model.data.partnerName {
+                    if let partner = model.data.partnerName {
                         Picker(tr("Who was sick?"), selection: $draft.sufferer) {
                             Text(tr("Me")).tag(Sufferer.me)
                             Text(verbatim: partner).tag(Sufferer.partner)

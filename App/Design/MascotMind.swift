@@ -11,6 +11,70 @@ enum MascotFace: String, CaseIterable {
 enum MascotTrick: String, CaseIterable {
     case popZ = "pop_z"
     case wake, squish, dizzy, tickle, pacifier, pull, sneeze, tilt, shush
+
+    /// The trick's name in the notebook.
+    var title: String {
+        switch self {
+        case .popZ: return tr("Pop a z")
+        case .wake: return tr("Grumpy wake-up")
+        case .squish: return tr("Squish")
+        case .dizzy: return tr("Dizzy")
+        case .tickle: return tr("Tickle")
+        case .pacifier: return tr("Pacifier")
+        case .pull: return tr("Stretch")
+        case .sneeze: return tr("Sneeze")
+        case .tilt: return tr("Lean")
+        case .shush: return tr("Shh")
+        }
+    }
+
+    /// How to do it again, once found.
+    var how: String {
+        switch self {
+        case .popZ: return tr("Tap a letter of its snore.")
+        case .wake: return tr("Tap it while it naps.")
+        case .squish: return tr("Tap it once it's awake.")
+        case .dizzy: return tr("Four quick taps.")
+        case .tickle: return tr("Keep a finger still on it.")
+        case .pacifier: return tr("Tap the pacifier to give it back.")
+        case .pull: return tr("Drag it around.")
+        case .sneeze: return tr("Rub it back and forth.")
+        case .tilt: return tr("Lean your phone while it's awake.")
+        case .shush: return tr("Touch it after 10 PM.")
+        }
+    }
+
+    /// The clue shown while it is still to find.
+    var clue: String {
+        switch self {
+        case .popZ: return tr("Its snores look poppable.")
+        case .wake: return tr("It hates being woken up.")
+        case .squish: return tr("Awake, it's squishy.")
+        case .dizzy: return tr("One tap too many…")
+        case .tickle: return tr("Hold still. Wait for it.")
+        case .pacifier: return tr("What flies out when it laughs?")
+        case .pull: return tr("It stretches more than you think.")
+        case .sneeze: return tr("Rub it the wrong way.")
+        case .tilt: return tr("Lean in. It's curious.")
+        case .shush: return tr("Try it late at night.")
+        }
+    }
+
+    /// The mascot drawing that stands for the trick.
+    var face: String {
+        switch self {
+        case .popZ: return "mascot-asleep"
+        case .wake: return "mascot-grumpy"
+        case .squish: return "mascot-giggle"
+        case .dizzy: return "mascot-dizzy"
+        case .tickle: return "mascot-laugh"
+        case .pacifier: return "mascot-pacifier"
+        case .pull: return "mascot-gasp"
+        case .sneeze: return "mascot-sneeze"
+        case .tilt: return "mascot-look-right"
+        case .shush: return "mascot-drowsy"
+        }
+    }
 }
 
 /// What the Today mascot shows over time, from the touches it got. Times are in seconds.
