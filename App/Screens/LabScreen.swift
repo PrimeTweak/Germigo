@@ -594,7 +594,7 @@ private struct TallyMarks: View {
 }
 
 /// The daily quiz as a slim bar: the mascot, what today's quiz holds, the streak and the way in.
-struct QuizBanner: View {
+private struct QuizBanner: View {
     @Binding var showQuiz: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette

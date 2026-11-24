@@ -9,6 +9,7 @@ struct TodayScreen: View {
     @State private var wanted: KidIllness?
     @State private var exposurePage = 0
     @State private var pageHeight: CGFloat = 0
+    @State private var showQuiz = false
 
     var body: some View {
         let exposures = model.openExposures
@@ -67,6 +68,13 @@ struct TodayScreen: View {
                         .accessibilityLabel(tr("Someone's sick"))
                     }
                     ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        QuizStreakButton {
+                            showQuiz = true
+                        }
+                    }
+                    ToolbarSpacer(.fixed, placement: .topBarTrailing)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     SettingsButton()
@@ -77,6 +85,9 @@ struct TodayScreen: View {
             }
             .navigationDestination(for: DayRoute.self) { route in
                 DayScreen(day: route.day)
+            }
+            .fullScreenCover(isPresented: $showQuiz) {
+                QuizScreen()
             }
             .sheet(item: $flow, onDismiss: handOff) { flow in
                 SymptomFlowSheet(flow: flow, onAdded: { pendingWanted = $0 })
@@ -261,25 +272,21 @@ private struct StageActions: View {
 }
 
 /// Nobody is sick: the mascot sleeps on the counter, ready to play, and the streak runs toward its soap.
-/// While the whole family is fine, today's quiz sits under the week, and the mascot shrinks to make room.
 private struct CalmStage: View {
     let side: CGFloat
     @Binding var flow: SymptomFlow?
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
-    @State private var showQuiz = false
 
     var body: some View {
         let days = model.streakDays()
         let firstDay = StreakMath.isFirstDay(data: model.data, now: Date())
-        let allFine = model.sickKidIllnesses.isEmpty
-        let stage = allFine ? side * 0.8 : side
         VStack(spacing: 0) {
             Spacer(minLength: 8)
-            PlayfulMascot(side: allFine ? stage * 0.92 : stage * 0.76)
+            PlayfulMascot(side: side * 0.76)
                 .zIndex(1)
             Text(firstDay ? tr("Day 1") : String(days))
-                .font(.system(size: stage >= 190 ? 112 : 84, weight: .bold))
+                .font(.system(size: side >= 190 ? 112 : 84, weight: .bold))
                 .monospacedDigit()
                 .foregroundStyle(palette.ink)
                 .lineLimit(1)
@@ -294,10 +301,6 @@ private struct CalmStage: View {
             StageActions()
             WeekStrip()
                 .padding(.top, 12)
-            if allFine {
-                QuizBanner(showQuiz: $showQuiz)
-                    .padding(.top, 10)
-            }
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 if model.canCheckIn {
@@ -317,9 +320,6 @@ private struct CalmStage: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
-        .fullScreenCover(isPresented: $showQuiz) {
-            QuizScreen()
-        }
     }
 
     /// The kids' and the partner's characters, two at most, or a plus when the parent is alone.
@@ -342,6 +342,31 @@ private struct CalmStage: View {
                 .frame(width: 62, height: 62)
                 .background(palette.ink.opacity(0.07), in: Circle())
         }
+    }
+}
+
+/// The daily quiz from the top of Today: the streak's flame, gray until today's quiz is done, then amber.
+private struct QuizStreakButton: View {
+    let open: () -> Void
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let done = model.quizDone()
+        let streak = model.labStreak()
+        Button(action: open) {
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill")
+                    .foregroundStyle(done ? Color(hex: Swatch.amber) : palette.inkSecondary)
+                Text(verbatim: "\(streak)")
+                    .monospacedDigit()
+                    .foregroundStyle(done ? palette.ink : palette.inkSecondary)
+            }
+            .font(.body.weight(.semibold))
+        }
+        .accessibilityLabel(tr("Daily quiz"))
+        .accessibilityValue(trCount(streak, one: "Quiz streak: %lld day", other: "Quiz streak: %lld days")
+                            + (done ? ", " + tr("Done for today") : ""))
     }
 }
 
