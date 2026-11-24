@@ -856,9 +856,7 @@ final class AppModel {
 
     func eraseEverything() {
         for illness in data.kidIllnesses { retire(illness) }
-        for log in data.logs { NotificationManager.cancelSymptomCheck(id: log.id) }
-        NotificationManager.cancelSickCheckIn()
-        NotificationManager.cancelStreakReminders()
+        NotificationManager.removeAll()
         Persistence.erase()
         PhotoStore.eraseAll()
         data = AppData()
@@ -876,6 +874,10 @@ final class AppModel {
         showTrialOffer = false
         selectedTab = .today
         publishSnapshot()
+        // The trial's payment reminder is about billing, not the journal: the App Store gives it back.
+        Task {
+            await PurchaseManager.shared.refreshEntitlements()
+        }
     }
 
     /// Asks for notification permission the first time a reminder needs it, then schedules them.

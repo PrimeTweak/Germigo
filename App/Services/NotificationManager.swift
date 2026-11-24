@@ -176,8 +176,10 @@ enum NotificationManager {
         center.removePendingNotificationRequests(withIdentifiers: [monthID])
     }
 
-    static func cancelStreakReminders() {
-        center.removePendingNotificationRequests(withIdentifiers: [milestoneID, wrappedID, monthID])
+    /// Clears every reminder scheduled or shown, once the journal they speak of is erased.
+    static func removeAll() {
+        center.removeAllPendingNotificationRequests()
+        center.removeAllDeliveredNotifications()
     }
 
     static func cancelSickCheckIn() {

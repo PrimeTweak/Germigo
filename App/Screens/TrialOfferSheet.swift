@@ -100,6 +100,10 @@ struct TrialOfferSheet: View {
                 .foregroundStyle(frost.opacity(0.75))
                 .frame(minHeight: 44)
                 .padding(.top, 4)
+                Text(tr("The Season Pass renews automatically until you cancel. Cancel at least 24 hours before the renewal date in your App Store account settings."))
+                    .font(.caption)
+                    .opacity(0.6)
+                    .padding(.top, 6)
                 HStack(spacing: 18) {
                     Button(tr("Terms")) {
                         legal = .terms
