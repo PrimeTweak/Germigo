@@ -889,7 +889,6 @@
 "Right!" = "Bravo !";
 "Right! +%lld pts" = "Bravo ! +%lld pts";
 "Rising" = "En hausse";
-"Room for one more. Tap the seat." = "Encore une place. Touche-la.";
 "Rough Month" = "Mois difficile";
 "Rough one. The points are banked, now go lie down." = "Celle-là fait mal. Les points sont en banque, va t'étendre.";
 "Round %1$lld of up to %2$lld" = "Round %1$lld sur %2$lld au plus";
@@ -1293,7 +1292,6 @@
 "You're in the window until %@." = "Tu es dans la fenêtre jusqu'à %@.";
 "You're no longer in this crew." = "Tu ne fais plus partie de ce groupe.";
 "You're still clear" = "Rien pour l'instant";
-"You, your partner and one kid are free. The Season Pass covers every kid." = "Toi, ton partenaire et un enfant, c'est gratuit. La Passe de saison couvre tous les enfants.";
 "Your %@ recap" = "Ton récap du mois : %@";
 "Your address" = "Ton adresse";
 "Your best run yet" = "Ta meilleure série à vie";

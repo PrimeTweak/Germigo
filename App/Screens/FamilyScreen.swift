@@ -133,19 +133,14 @@ struct FamilyScreen: View {
         seatChoice = nil
     }
 
-    /// What the tab keeps private, and what the Season Pass adds for those without it.
+    /// What the tab keeps private.
     private var footnote: some View {
-        VStack(spacing: 4) {
-            Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
-            if !model.hasPass {
-                Text(tr("You, your partner and one kid are free. The Season Pass covers every kid."))
-            }
-        }
-        .font(.footnote)
-        .foregroundStyle(palette.inkSecondary)
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
-        .padding(.top, 6)
+        Label(tr("First names only. They never leave this phone."), systemImage: "lock.fill")
+            .font(.footnote)
+            .foregroundStyle(palette.inkSecondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 6)
     }
 }
 
@@ -402,10 +397,21 @@ private struct FamilyCouch: View {
                             Circle()
                                 .strokeBorder(palette.ink.opacity(0.45), style: StrokeStyle(lineWidth: 2.5, dash: [5, 5]))
                         }
+                        .overlay(alignment: .topTrailing) {
+                            if seatNeedsPass {
+                                Image(systemName: "lock.fill")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(palette.accent)
+                                    .frame(width: 20, height: 20)
+                                    .background(Color.white, in: Circle())
+                                    .offset(x: 4, y: -4)
+                            }
+                        }
                         .contentShape(Circle())
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityLabel(tr("Add someone"))
+                .accessibilityValue(seatNeedsPass ? tr("Needs the Season Pass") : "")
                 .position(seats.center(of: people.count))
                 ForEach(model.couchStickers, id: \.id) { sticker in
                     CouchStickerView(sticker: sticker)
@@ -425,10 +431,6 @@ private struct FamilyCouch: View {
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.center)
                 .padding(.top, 6)
-            Text(tr("Room for one more. Tap the seat."))
-                .font(.subheadline)
-                .foregroundStyle(palette.inkSecondary)
-                .multilineTextAlignment(.center)
             Button {
                 showBook = true
             } label: {
@@ -453,6 +455,11 @@ private struct FamilyCouch: View {
         .sheet(isPresented: $showBook) {
             StickerBookSheet()
         }
+    }
+
+    /// Only a second kid can still take the free seat, and that needs the Season Pass.
+    private var seatNeedsPass: Bool {
+        model.data.partnerName != nil && !model.canAddKid
     }
 
     /// Calm lines take turns by the day; a sick household gets its own.
