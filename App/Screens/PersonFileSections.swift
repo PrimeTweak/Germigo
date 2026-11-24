@@ -4,7 +4,7 @@ import SwiftUI
 // the history, what keeps coming back, the patterns, who brought the germs, the photos and the doctor's file.
 
 /// A germ's picture on its tint, the way rows of germs show it.
-private struct GermTile: View {
+private struct IllnessTile: View {
     let germID: String
     let side: CGFloat
     @Environment(AppModel.self) private var model
@@ -62,7 +62,7 @@ struct PersonNowCard: View {
         VStack(alignment: .leading, spacing: 12) {
             FileHeader(title: tr("Right now"), detail: tr("Since %@", illness.start.shortDay))
             HStack(spacing: 12) {
-                GermTile(germID: illness.germID, side: 54)
+                IllnessTile(germID: illness.germID, side: 54)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(tr("%1$@, day %2$lld", germ?.illness.value ?? "", illness.days))
                         .font(.headline)
@@ -320,7 +320,7 @@ struct PersonHistoryCard: View {
                     }
                     ForEach(shown.prefix(3)) { illness in
                         HStack(spacing: 11) {
-                            GermTile(germID: illness.germID, side: 38)
+                            IllnessTile(germID: illness.germID, side: 38)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(model.catalog.germ(illness.germID)?.illness.value ?? "")
                                     .font(.subheadline.weight(.semibold))
@@ -373,7 +373,7 @@ struct PersonComingBackCard: View {
                        detail: trCount(illnesses.count, one: "%lld germ", other: "%lld germs"))
             ForEach(PersonFileEngine.comingBack(illnesses).prefix(3), id: \.germID) { item in
                 HStack(spacing: 11) {
-                    GermTile(germID: item.germID, side: 38)
+                    IllnessTile(germID: item.germID, side: 38)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(model.catalog.germ(item.germID)?.illness.value ?? "")
                             .font(.subheadline.weight(.semibold))
