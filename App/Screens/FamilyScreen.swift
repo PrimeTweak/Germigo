@@ -30,13 +30,23 @@ private struct PersonStatus {
 }
 
 extension AppModel {
-    /// Everyone in the household: the kids, the parent, then the partner when there is one.
+    /// Everyone in the household, in the order chosen on the Members page; by default the kids,
+    /// the parent, then the partner. Someone added later goes after the chosen ones.
     var people: [Person] {
-        data.kids.map { Person.kid($0.id) } + [.me] + (data.partnerName == nil ? [] : [.partner])
+        let household = data.kids.map { Person.kid($0.id) } + [.me] + (data.partnerName == nil ? [] : [.partner])
+        let order = data.memberOrder
+        return household.enumerated().sorted { first, second in
+            (order.firstIndex(of: first.element) ?? order.count + first.offset)
+                < (order.firstIndex(of: second.element) ?? order.count + second.offset)
+        }.map { $0.element }
     }
 }
 
-/// The household tab: the sick ones first, each card opening that person's file.
+/// The Members page, opened from the Family tab once the household is three or more.
+private struct MembersRoute: Hashable {}
+
+/// The household tab: up to two people, a card each with the sick ones first; three or more share one card
+/// that opens the Members page.
 struct FamilyScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -51,18 +61,26 @@ struct FamilyScreen: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    ForEach(Array(people.enumerated()), id: \.element) { item in
-                        let state = status(of: item.element)
-                        NavigationLink(value: item.element) {
-                            FamilyCard(person: item.element, status: state)
+                    if everyone.count >= 3 {
+                        NavigationLink(value: MembersRoute()) {
+                            MembersCard(people: everyone)
                         }
                         .buttonStyle(PressableStyle())
-                        .overlay(alignment: .bottomTrailing) {
-                            BetterButton(person: item.element, status: state)
-                                .padding(.trailing, 16)
-                                .padding(.bottom, 12)
+                        .cascadeIn(0)
+                    } else {
+                        ForEach(Array(people.enumerated()), id: \.element) { item in
+                            let state = status(of: item.element)
+                            NavigationLink(value: item.element) {
+                                FamilyCard(person: item.element, status: state)
+                            }
+                            .buttonStyle(PressableStyle())
+                            .overlay(alignment: .bottomTrailing) {
+                                BetterButton(person: item.element, status: state)
+                                    .padding(.trailing, 16)
+                                    .padding(.bottom, 12)
+                            }
+                            .cascadeIn(item.offset)
                         }
-                        .cascadeIn(item.offset)
                     }
                     RecordTiles(door: $door)
                         .padding(.top, 4)
@@ -84,6 +102,9 @@ struct FamilyScreen: View {
             }
             .navigationDestination(for: Person.self) { person in
                 PersonFileScreen(person: person)
+            }
+            .navigationDestination(for: MembersRoute.self) { _ in
+                MembersScreen()
             }
             .sheet(item: $editing) { member in
                 PersonEditSheet(member: member)
@@ -141,6 +162,98 @@ struct FamilyScreen: View {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.top, 6)
+    }
+}
+
+/// Three people or more: everyone side by side in one card that opens the Members page.
+private struct MembersCard: View {
+    let people: [Person]
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(people, id: \.self) { person in
+                VStack(spacing: 6) {
+                    BuddyView(look: model.look(of: person),
+                              sick: FamilyStatus.status(of: person, model: model).sick,
+                              size: people.count > 4 ? 42 : 52)
+                    Text(model.name(for: person))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.inkTertiary)
+                .accessibilityHidden(true)
+        }
+        .padding(.vertical, 16)
+        .padding(.leading, 8)
+        .padding(.trailing, 16)
+        .frame(maxWidth: .infinity)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tr("Members"))
+        .accessibilityValue(people.map { model.name(for: $0) }.joined(separator: ", "))
+    }
+}
+
+/// Everyone's card on one page; the arrows let the cards be dragged into another order.
+private struct MembersScreen: View {
+    @Environment(AppModel.self) private var model
+    @State private var editMode = EditMode.inactive
+
+    var body: some View {
+        let people = model.people
+        List {
+            ForEach(people, id: \.self) { person in
+                let state = FamilyStatus.status(of: person, model: model)
+                FamilyCard(person: person, status: state)
+                    .overlay(alignment: .bottomTrailing) {
+                        if !editMode.isEditing {
+                            BetterButton(person: person, status: state)
+                                .padding(.trailing, 16)
+                                .padding(.bottom, 12)
+                        }
+                    }
+                    .background {
+                        NavigationLink(value: person) {
+                            EmptyView()
+                        }
+                        .opacity(0)
+                    }
+                    .listRowInsets(EdgeInsets(top: 6, leading: Spacing.page, bottom: 6, trailing: Spacing.page))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            }
+            .onMove { from, to in
+                var order = people
+                order.move(fromOffsets: from, toOffset: to)
+                model.setMemberOrder(order)
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(CharacterWash(tint: TabWash.family))
+        .environment(\.editMode, $editMode)
+        .navigationTitle(tr("Members"))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    withAnimation(Tempo.settle) {
+                        editMode = editMode.isEditing ? .inactive : .active
+                    }
+                } label: {
+                    Image(systemName: editMode.isEditing ? "checkmark" : "arrow.up.arrow.down")
+                }
+                .accessibilityLabel(editMode.isEditing ? tr("Done") : tr("Change the order"))
+            }
+        }
     }
 }
 
@@ -692,6 +805,8 @@ private struct FamilyCard: View {
     let status: PersonStatus
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    /// While the Members page reorders, the list's handles stand where the arrow was.
+    @Environment(\.editMode) private var editMode
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -709,10 +824,12 @@ private struct FamilyCard: View {
                         .foregroundStyle(palette.inkSecondary)
                 }
                 Spacer(minLength: 4)
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.inkTertiary)
-                    .accessibilityHidden(true)
+                if editMode?.wrappedValue.isEditing != true {
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(palette.inkTertiary)
+                        .accessibilityHidden(true)
+                }
             }
             if let germ = status.germ {
                 HStack(spacing: 8) {

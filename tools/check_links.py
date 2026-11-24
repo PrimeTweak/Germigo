@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Requests every source link of the app's content and of the lesson files, and reports the ones that do not answer.
-Usage: python3 tools/check_links.py. Informational in CI. A site that refuses scripts
-(401, 403 or 429) is listed as blocked, not verified, and does not fail the run."""
+Usage: python3 tools/check_links.py. Informational in CI. A site that refuses scripts (401, 403 or 429),
+or that still does not answer in time on a second, longer try, is listed as not verified and does not fail the run;
+some sites stall requests from build servers instead of refusing them."""
 import json
 import pathlib
 import sys
@@ -11,6 +12,7 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 EXTRA = ["https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"]
 BLOCKED = {401, 403, 429}
+TIMEOUT = "timeout"
 AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
 
 
@@ -38,13 +40,19 @@ def collect():
     return links
 
 
-def status(url):
+def status(url, timeout=20):
     request = urllib.request.Request(url, headers={"User-Agent": AGENT, "Accept": "text/html,*/*"})
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return response.status
     except urllib.error.HTTPError as error:
         return error.code
+    except TimeoutError:
+        return TIMEOUT
+    except urllib.error.URLError as error:
+        if isinstance(error.reason, TimeoutError):
+            return TIMEOUT
+        return f"URLError: {error.reason}"
     except Exception as error:
         return f"{type(error).__name__}: {error}"
 
@@ -53,19 +61,26 @@ def main():
     links = collect()
     broken = []
     blocked = []
+    silent = []
     for url, owner in sorted(links.items()):
         result = status(url)
+        if result == TIMEOUT:
+            result = status(url, timeout=45)
         if result == 200:
             label = "ok      "
         elif result in BLOCKED:
             label = "blocked "
             blocked.append(url)
+        elif result == TIMEOUT:
+            label = "silent  "
+            silent.append(url)
         else:
             label = "BROKEN  "
             broken.append(url)
         print(f"{label}{result}  {url}  ({owner})")
-    answered = len(links) - len(broken) - len(blocked)
-    print(f"check_links: {answered} answered 200, {len(blocked)} refused this script (not verified), {len(broken)} broken")
+    answered = len(links) - len(broken) - len(blocked) - len(silent)
+    print(f"check_links: {answered} answered 200, {len(blocked)} refused this script, "
+          f"{len(silent)} did not answer in time (both not verified), {len(broken)} broken")
     sys.exit(1 if broken else 0)
 
 

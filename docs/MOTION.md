@@ -52,7 +52,7 @@ The routine runs all the time while the person is sick. It replaces the accent.
 | 4 | Sneezy | Winds up, sneezes forward, every 3.2 s |
 | 5 | Weary | Sags 3.5 % and lifts over 5 s |
 | 6 | Coughing | Two short forward jolts of 4° every 3 s |
-| 7 | Shivering | Fast tremble of ±1.6 pt |
+| 7 | Shivering | Short shivers of ±1.2 pt, 0.6 s every 3 s, easing in and out |
 
 ### Germs: by where they live
 

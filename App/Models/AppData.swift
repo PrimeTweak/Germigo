@@ -278,11 +278,13 @@ struct AppData: Codable {
     var eveningOffered = false
     /// The stickers put on the Family couch, where they were left.
     var couchStickers: [CouchSticker] = []
+    /// The household in the order chosen on the Members page; empty keeps kids, parent, partner.
+    var memberOrder: [Person] = []
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
         case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook, photos, mascotTricks, trialOffered
-        case checkIns, eveningOffered, couchStickers
+        case checkIns, eveningOffered, couchStickers, memberOrder
     }
 }
 
@@ -412,6 +414,7 @@ extension AppData {
         checkIns = container.value(.checkIns, default: [String]())
         eveningOffered = container.value(.eveningOffered, default: false)
         couchStickers = container.value(.couchStickers, default: [CouchSticker]())
+        memberOrder = container.value(.memberOrder, default: [Person]())
     }
 }
 

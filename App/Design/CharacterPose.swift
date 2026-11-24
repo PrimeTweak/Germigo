@@ -229,7 +229,10 @@ struct CharacterPose: Equatable {
                 lift += 1.5 * jolt
             }
         case .shivering:
-            shiftX = 1.6 * sin(time * 2 * .pi / 0.11)
+            let shiver = Self.beat(time, every: 3)
+            if shiver >= 0.5, shiver < 0.7 {
+                shiftX = 1.2 * sin(time * 2 * .pi / 0.12) * sin(.pi * (shiver - 0.5) / 0.2)
+            }
         default:
             break
         }

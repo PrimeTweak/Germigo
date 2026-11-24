@@ -560,6 +560,12 @@ final class AppModel {
         }
     }
 
+    /// Keeps the household in the order chosen on the Members page.
+    func setMemberOrder(_ people: [Person]) {
+        data.memberOrder = people
+        commit()
+    }
+
     // MARK: - Stickers
 
     /// The stickers earned so far: one per level reached, the full weeks', and the quiz run's.
