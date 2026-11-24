@@ -20,6 +20,11 @@ enum StreakMath {
         return days(from: start, to: now)
     }
 
+    /// The install day with nothing logged yet: Today shows "Day 1" instead of a zero.
+    static func isFirstDay(data: AppData, now: Date) -> Bool {
+        data.logs.isEmpty && data.kidIllnesses.isEmpty && days(from: data.installedAt, to: now) == 0
+    }
+
     /// Every germ-free gap so far, in chronological order.
     static func gaps(data: AppData, now: Date) -> [Int] {
         var result: [Int] = []

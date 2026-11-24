@@ -310,6 +310,7 @@
 "day" = "day";
 "Day %1$lld · %2$@" = "Day %1$lld · %2$@";
 "Day %lld" = "Day %lld";
+"Day 1" = "Day 1";
 "day sick" = "day sick";
 "day without a germ" = "day without a germ";
 "Daycare" = "Daycare";
@@ -702,6 +703,7 @@
 "No crew matches that code." = "No crew matches that code.";
 "No daycare matches that code." = "No daycare matches that code.";
 "No germ logged for %1$@ since %2$@. The page fills itself as you log." = "No germ logged for %1$@ since %2$@. The page fills itself as you log.";
+"No germ so far." = "No germ so far.";
 "No germs logged yet. It won't last." = "No germs logged yet. It won't last.";
 "No kid is sick right now. Enjoy it." = "No kid is sick right now. Enjoy it.";
 "No notices lately. Good news." = "No notices lately. Good news.";
@@ -732,6 +734,7 @@
 "Not yet" = "Not yet";
 "Note (optional)" = "Note (optional)";
 "Nothing brought home yet" = "Nothing brought home yet";
+"Nothing caught yet" = "Nothing caught yet";
 "Nothing in here yet" = "Nothing in here yet";
 "Nothing in the guide fits these signs yet." = "Nothing in the guide fits these signs yet.";
 "Nothing in the last 7 days." = "Nothing in the last 7 days.";
@@ -935,6 +938,7 @@
 "Share this card" = "Share this card";
 "Share what's going around with the parents of your group." = "Share what's going around with the parents of your group.";
 "Sharing" = "Sharing";
+"Sharing opens with your first germ." = "Sharing opens with your first germ.";
 "Shh" = "Shh";
 "Shh… it's late." = "Shh… it's late.";
 "Show %lld more" = "Show %lld more";
@@ -946,6 +950,7 @@
 "Shows the signs" = "Shows the signs";
 "Shows up" = "Shows up";
 "Sick %1$lld days out of %2$lld this season." = "Sick %1$lld days out of %2$lld this season.";
+"Sick %1$lld days since %2$@." = "Sick %1$lld days since %2$@.";
 "Sick %1$lld weeks out of %2$lld." = "Sick %1$lld weeks out of %2$lld.";
 "Sick leave: your streak waits for you." = "Sick leave: your streak waits for you.";
 "Sick Points" = "Sick Points";
@@ -1134,7 +1139,7 @@
 "Tickle" = "Tickle";
 "Ticklish" = "Ticklish";
 "Tied" = "Tied";
-"Tied for first: nobody's been sick yet. Enjoy it." = "Tied for first: nobody's been sick yet. Enjoy it.";
+"Tied at zero. The podium opens with the first germ." = "Tied at zero. The podium opens with the first germ.";
 "Timing" = "Timing";
 "Tissue Apprentice" = "Tissue Apprentice";
 "Tissue Tester" = "Tissue Tester";

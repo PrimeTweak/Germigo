@@ -23,7 +23,7 @@ struct TrophiesScreen: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
-                    playerCard
+                    playerCard(showsGoal: !earned.isEmpty)
                     leagueCard
                     if earned.isEmpty {
                         starterCard
@@ -41,6 +41,7 @@ struct TrophiesScreen: View {
                 .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
+            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.trophies))
             .navigationTitle(tr("Trophies"))
             .toolbar {
@@ -71,9 +72,10 @@ struct TrophiesScreen: View {
 
     // MARK: - Player card
 
-    private var playerCard: some View {
+    /// The goal row waits while the empty trophy case lists the first badges, so the quiz is not asked for twice.
+    private func playerCard(showsGoal: Bool) -> some View {
         let level = model.level
-        let goal = GoalEngine.next(data: model.data, catalog: model.catalog, now: Date())
+        let goal = showsGoal ? GoalEngine.next(data: model.data, catalog: model.catalog, now: Date()) : nil
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 14) {
                 ZStack {
@@ -172,14 +174,17 @@ struct TrophiesScreen: View {
         let entries = LeagueEngine.standings(data: model.data, catalog: model.catalog, season: model.season, now: Date())
         if !model.hasPass {
             lockedLeague
+        } else if entries.count > 1, entries.allSatisfy({ $0.sickDays == 0 }) {
+            leagueRow(looks: entries.map { model.look(of: $0.person) },
+                      line: tr("Tied at zero. The podium opens with the first germ.")) {
+                EmptyView()
+            }
         } else if entries.count > 1 {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: tr("Family league"), trailing: tr("Season %lld", model.season.number))
                 Podium(places: places(entries, you: tr("You")))
                     .padding(.top, 14)
-                if entries.allSatisfy({ $0.sickDays == 0 }) {
-                    leagueLine(tr("Tied for first: nobody's been sick yet. Enjoy it."))
-                } else if entries.allSatisfy({ $0.title == nil }) {
+                if entries.allSatisfy({ $0.title == nil }) {
                     leagueLine(tr("Nobody stands out yet this season."))
                 }
                 ShareCapsule(title: tr("Share the standings")) {
@@ -227,30 +232,39 @@ struct TrophiesScreen: View {
 
     /// The league without the pass: the household's characters and the way to the pass.
     private var lockedLeague: some View {
-        let looks = [model.data.hostLook, model.data.partnerLook] + model.data.kids.prefix(1).map { $0.colorIndex }
+        let partner: [Int] = model.data.partnerName == nil ? [] : [model.data.partnerLook]
+        let looks = [model.data.hostLook] + partner + model.data.kids.prefix(1).map { $0.colorIndex }
         return Button {
             showPaywall = true
         } label: {
-            HStack(spacing: 14) {
-                HStack(spacing: -14) {
-                    ForEach(Array(looks.enumerated()), id: \.offset) { item in
-                        BuddyView(look: item.element, size: 46)
-                    }
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tr("Family league"))
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(palette.ink)
-                    Text(tr("Podium, titles and the couple duel"))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                }
-                Spacer(minLength: 8)
+            leagueRow(looks: looks, line: tr("Podium, titles and the couple duel")) {
                 PassOfferTag()
             }
-            .germilyCard(padding: 14)
         }
         .buttonStyle(.plain)
+    }
+
+    /// The league on one row: the household's characters overlapping, the title, one line and what trails.
+    private func leagueRow<Trailing: View>(looks: [Int], line: String, @ViewBuilder trailing: () -> Trailing) -> some View {
+        HStack(spacing: 14) {
+            HStack(spacing: -14) {
+                ForEach(Array(looks.enumerated()), id: \.offset) { item in
+                    BuddyView(look: item.element, size: 46)
+                }
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tr("Family league"))
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.ink)
+                Text(line)
+                    .font(.subheadline)
+                    .foregroundStyle(palette.inkSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            trailing()
+        }
+        .germilyCard(padding: 14)
     }
 
     private func places(_ entries: [LeagueEntry], you: String) -> [PodiumPlace] {
@@ -395,20 +409,22 @@ struct TrophiesScreen: View {
                     PassOfferTag()
                 }
             }
-            HStack(alignment: .top, spacing: 8) {
-                SeasonFigure(value: stats.germsCaught, label: tr("germs caught"))
-                SeasonFigure(value: stats.daysSick, label: tr("days sick"))
-                SeasonFigure(value: stats.dodged, label: tr("germs dodged"))
-            }
-            .padding(.top, 10)
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
-                ForEach(Array(weeks.enumerated()), id: \.offset) { item in
-                    SeasonWeekCell(germ: item.element.flatMap { model.catalog.germ($0) }, isNow: item.offset == weeks.count - 1)
-                        .cascadeIn(item.offset / 4)
+            if !StatsEngine.isUntouched(data: model.data, season: season) {
+                HStack(alignment: .top, spacing: 8) {
+                    SeasonFigure(value: stats.germsCaught, label: tr("germs caught"))
+                    SeasonFigure(value: stats.daysSick, label: tr("days sick"))
+                    SeasonFigure(value: stats.dodged, label: tr("germs dodged"))
                 }
+                .padding(.top, 10)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
+                    ForEach(Array(weeks.enumerated()), id: \.offset) { item in
+                        SeasonWeekCell(germ: item.element.flatMap { model.catalog.germ($0) }, isNow: item.offset == weeks.count - 1)
+                            .cascadeIn(item.offset / 4)
+                    }
+                }
+                .padding(.top, 12)
+                .accessibilityHidden(true)
             }
-            .padding(.top, 12)
-            .accessibilityHidden(true)
             Text(seasonLine(weeks, season: season))
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)

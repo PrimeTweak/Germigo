@@ -44,6 +44,7 @@ struct TodayScreen: View {
                     settle(newHeight)
                 }
             }
+            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: washTint(exposures: exposures, index: index)))
             .navigationTitle(tr("Today"))
             .toolbar {
@@ -243,27 +244,32 @@ private struct StageActions: View {
 }
 
 /// Nobody is sick: the mascot sleeps on the counter, ready to play, and the streak runs toward its soap.
+/// While the whole family is fine, today's quiz sits under the week, and the mascot shrinks to make room.
 private struct CalmStage: View {
     let side: CGFloat
     @Binding var flow: SymptomFlow?
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
+    @State private var showQuiz = false
 
     var body: some View {
         let days = model.streakDays()
+        let firstDay = StreakMath.isFirstDay(data: model.data, now: Date())
+        let allFine = model.sickKidIllnesses.isEmpty
+        let stage = allFine ? side * 0.8 : side
         VStack(spacing: 0) {
             Spacer(minLength: 8)
-            PlayfulMascot(side: model.sickKidIllnesses.isEmpty ? side * 0.92 : side * 0.76)
+            PlayfulMascot(side: allFine ? stage * 0.92 : stage * 0.76)
                 .zIndex(1)
-            Text(verbatim: String(days))
-                .font(.system(size: side >= 190 ? 112 : 84, weight: .bold))
+            Text(firstDay ? tr("Day 1") : String(days))
+                .font(.system(size: stage >= 190 ? 112 : 84, weight: .bold))
                 .monospacedDigit()
                 .foregroundStyle(palette.ink)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .contentTransition(.numericText())
                 .animation(Tempo.quick, value: days)
-            Text(trCount(days, one: "day without a germ", other: "days without a germ"))
+            Text(firstDay ? tr("No germ so far.") : trCount(days, one: "day without a germ", other: "days without a germ"))
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(palette.ink)
             RunTrack(goal: RunGoal(days: days, record: model.recordDays()))
@@ -271,6 +277,10 @@ private struct CalmStage: View {
             StageActions()
             WeekStrip()
                 .padding(.top, 12)
+            if allFine {
+                QuizBanner(showQuiz: $showQuiz)
+                    .padding(.top, 10)
+            }
             Spacer(minLength: 8)
             HStack(spacing: 10) {
                 FaceTile(tr("I'm sick")) {
@@ -287,6 +297,9 @@ private struct CalmStage: View {
         }
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
+        .fullScreenCover(isPresented: $showQuiz) {
+            QuizScreen()
+        }
     }
 
     /// The kids' and the partner's characters, two at most, or a plus when the parent is alone.

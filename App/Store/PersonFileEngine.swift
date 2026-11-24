@@ -110,4 +110,16 @@ enum PersonFileEngine {
     static func seasonDaysSoFar(_ season: Season, now: Date) -> Int {
         StreakMath.days(from: season.start, to: min(now, season.end)) + 1
     }
+
+    /// The first day the journal covers: the install day, or an earlier illness logged after the fact.
+    static func trackedSince(data: AppData) -> Date {
+        let starts = data.logs.map { $0.startedAt } + data.kidIllnesses.map { $0.startedAt }
+        return Calendar.current.startOfDay(for: (starts + [data.installedAt]).min() ?? data.installedAt)
+    }
+
+    /// Where the doctor's page starts: six months back, or the first day the journal covers when that is later.
+    static func doctorSince(data: AppData, now: Date) -> Date {
+        let sixMonths = Calendar.current.date(byAdding: .month, value: -6, to: now) ?? now
+        return max(sixMonths, trackedSince(data: data))
+    }
 }

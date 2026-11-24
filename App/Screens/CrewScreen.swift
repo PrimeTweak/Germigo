@@ -34,6 +34,7 @@ struct CrewScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.crew))
             .navigationTitle(tr("Crew"))
             .toolbar {

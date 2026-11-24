@@ -78,6 +78,11 @@ enum StatsEngine {
         return best.map { Nemesis(germID: $0.key, count: $0.value) }
     }
 
+    /// Nothing logged this season yet, for a parent or a kid: the cards wait for the first germ.
+    static func isUntouched(data: AppData, season: Season) -> Bool {
+        !data.logs.contains { season.contains($0.startedAt) } && !data.kidIllnesses.contains { season.contains($0.startedAt) }
+    }
+
     static func stats(data: AppData, catalog: GermCatalog, season: Season, now: Date) -> SeasonStats {
         let calendar = Calendar.current
         let logs = data.logs.filter { season.contains($0.startedAt) }.sorted { $0.startedAt < $1.startedAt }

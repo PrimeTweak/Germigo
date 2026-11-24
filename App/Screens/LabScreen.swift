@@ -113,6 +113,7 @@ struct LabScreen: View {
                 .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
+            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.lab))
             .navigationTitle(tr("Guide"))
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
@@ -618,7 +619,7 @@ private struct TallyMarks: View {
 }
 
 /// The daily quiz as a slim bar: the mascot, what today's quiz holds, the streak and the way in.
-private struct QuizBanner: View {
+struct QuizBanner: View {
     @Binding var showQuiz: Bool
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette

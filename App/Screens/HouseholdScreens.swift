@@ -177,7 +177,7 @@ struct DoctorSummaryScreen: View {
                     .scrollIndicators(.hidden)
                     .accessibilityLabel(tr("Who"))
                 }
-                HealthHistory(person: current, since: Calendar.current.date(byAdding: .month, value: -6, to: Date()) ?? Date())
+                HealthHistory(person: current, since: PersonFileEngine.doctorSince(data: model.data, now: Date()))
                     .id(current)
                     .transition(.opacity)
             }
@@ -338,7 +338,10 @@ struct HealthHistory: View {
         let ink = Color(hex: Swatch.ink)
         let soft = ink.opacity(0.72)
         let from = since
-        let period = tr("%1$@ to %2$@", day(from), Date().formatted(.dateTime.month(.abbreviated).day().year()))
+        let today = Date().formatted(.dateTime.month(.abbreviated).day().year())
+        let period = Calendar.current.isDateInToday(from)
+            ? tr("Since %@", from.formatted(.dateTime.month(.abbreviated).day().year()))
+            : tr("%1$@ to %2$@", day(from), today)
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 Image("record-doctor")

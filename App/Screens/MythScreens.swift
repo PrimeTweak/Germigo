@@ -84,17 +84,10 @@ struct MythTile: View {
             if answered {
                 MythStamp(isTrue: myth.isTrue)
                     .padding(10)
-            } else {
-                Text(verbatim: "?")
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(palette.background)
-                    .frame(width: 32, height: 32)
-                    .background(palette.ink, in: Circle())
-                    .padding(10)
-                    .accessibilityLabel(tr("Myth or fact?"))
             }
         }
         .accessibilityElement(children: .combine)
+        .accessibilityHint(answered ? "" : tr("Myth or fact?"))
     }
 }
 

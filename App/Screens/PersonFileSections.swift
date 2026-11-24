@@ -203,13 +203,14 @@ struct PersonSeasonCard: View {
     var body: some View {
         let season = model.season
         let sick = PersonFileEngine.sickDays(illnesses, in: season)
+        let since = PersonFileEngine.trackedSince(data: model.data)
         let year = Calendar.current.component(.year, from: season.start)
         let germs = illnesses.filter { season.contains($0.start) }.reduce(into: [String]()) { list, illness in
             if !list.contains(illness.germID) { list.append(illness.germID) }
         }
         VStack(alignment: .leading, spacing: 10) {
             FileHeader(title: tr("This season"), detail: "\(year)–\(String(year + 1).suffix(2))")
-            SeasonStrip(season: season, sick: sick)
+            SeasonStrip(season: season, sick: sick, since: since)
             if !germs.isEmpty {
                 ChipRows(spacing: 10) {
                     ForEach(germs, id: \.self) { id in
@@ -225,8 +226,7 @@ struct PersonSeasonCard: View {
                 }
                 .accessibilityHidden(true)
             }
-            Text(tr("Sick %1$lld days out of %2$lld this season.", sick.count,
-                    PersonFileEngine.seasonDaysSoFar(season, now: Date())))
+            Text(seasonSickLine(sick.count, season: season, since: since))
                 .font(.footnote)
                 .foregroundStyle(palette.inkSecondary)
         }
@@ -234,10 +234,20 @@ struct PersonSeasonCard: View {
     }
 }
 
+/// How many days of the season were sick, counted from the first day the journal covers when that came later.
+private func seasonSickLine(_ count: Int, season: Season, since: Date) -> String {
+    guard since > season.start else {
+        return tr("Sick %1$lld days out of %2$lld this season.", count, PersonFileEngine.seasonDaysSoFar(season, now: Date()))
+    }
+    return tr("Sick %1$lld days since %2$@.", count, since.formatted(.dateTime.month(.abbreviated).day()))
+}
+
 /// The squares of a season, a column per week, with the months underneath.
+/// Days before the journal began look like days to come: nothing was followed then.
 private struct SeasonStrip: View {
     let season: Season
     let sick: [Date: String]
+    let since: Date
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
 
@@ -259,7 +269,7 @@ private struct SeasonStrip: View {
                 let slot = index + offset
                 let rect = CGRect(x: CGFloat(slot / 7) * step, y: CGFloat(slot % 7) * step, width: cell, height: cell)
                 let color: Color = sick[calendar.startOfDay(for: day)].map { Self.color(of: $0, model: model, palette: palette) }
-                    ?? palette.ink.opacity(day > today ? 0.035 : 0.08)
+                    ?? palette.ink.opacity(day > today || day < since ? 0.035 : 0.08)
                 context.fill(Path(roundedRect: rect, cornerRadius: cell * 0.28), with: .color(color))
             }
             for month in stride(from: 0, to: 12, by: 2) {
@@ -273,8 +283,7 @@ private struct SeasonStrip: View {
         }
         .aspectRatio(CGFloat(weeks) / 9.6, contentMode: .fit)
         .accessibilityElement()
-        .accessibilityLabel(tr("Sick %1$lld days out of %2$lld this season.", sick.count,
-                               PersonFileEngine.seasonDaysSoFar(season, now: Date())))
+        .accessibilityLabel(seasonSickLine(sick.count, season: season, since: since))
     }
 }
 

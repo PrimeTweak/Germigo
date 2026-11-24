@@ -75,6 +75,7 @@ struct FamilyScreen: View {
                 .padding(.bottom, 28)
                 .animation(Tempo.settle, value: people)
             }
+            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.family))
             .navigationTitle(tr("Family"))
             .toolbar {
@@ -600,7 +601,9 @@ private enum FamilyStatus {
                 return PersonStatus(germ: germ, line: tr("%1$@, day %2$lld", germ.illness.value, log.dayCount(now: now)),
                                     illnessIDs: [], logID: log.id)
             }
-            let last = logs.compactMap { $0.endedAt }.max() ?? model.data.installedAt
+            guard let last = logs.compactMap({ $0.endedAt }).max() else {
+                return PersonStatus(germ: nil, line: tr("Nothing caught yet"), illnessIDs: [], logID: nil)
+            }
             return PersonStatus(germ: nil, line: fine(since: last, now: now), illnessIDs: [], logID: nil)
         }
     }

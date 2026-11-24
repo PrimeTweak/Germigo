@@ -1,7 +1,7 @@
 import Foundation
 
 // Logic checks for the journal rules, streaks, badges, stats, days, lessons, journal decoding, character motion,
-// the Today mascot and the Season Pass offer.
+// the Today mascot, the Season Pass offer and day one.
 // They need no simulator: tools/run_logic_tests.sh compiles them with the files they exercise.
 
 var failures = 0
@@ -890,6 +890,34 @@ do {
     if case .from(.kid(kid.id))? = mine.first?.note {} else { check(false, "a parent's germ says which kid it came from") }
     check(PersonFileEngine.illnesses(of: .partner, data: parent, catalog: catalog, now: now).isEmpty,
           "the partner's file leaves out the parent's germs")
+}
+
+// MARK: - Day one
+
+do {
+    let kid = Kid(name: "Lou", colorIndex: 0)
+    let fresh = makeData()
+    check(StreakMath.isFirstDay(data: fresh, now: day(0, hour: 20)), "the install day with nothing logged is day 1")
+    check(!StreakMath.isFirstDay(data: fresh, now: day(1)), "the next day counts a germ-free day again")
+    let withKid = makeData(illnesses: [KidIllness(kidID: kid.id, germID: "noro", startedAt: day(0), watching: false, outcome: .open)])
+    check(!StreakMath.isFirstDay(data: withKid, now: day(0)), "a logged kid illness ends day 1")
+
+    let calendar = Calendar.current
+    check(PersonFileEngine.trackedSince(data: fresh) == calendar.startOfDay(for: day(0)), "the journal covers the days since install")
+    let backdated = makeData(logs: [makeLog("rhino", from: day(-12), to: day(-9))])
+    check(PersonFileEngine.trackedSince(data: backdated) == calendar.startOfDay(for: day(-12)),
+          "an illness logged after the fact moves the start back")
+    check(PersonFileEngine.doctorSince(data: fresh, now: day(0)) == calendar.startOfDay(for: day(0)),
+          "the doctor's page starts at install when that is within six months")
+    var old = makeData()
+    old.installedAt = day(-400)
+    let sixMonths = calendar.date(byAdding: .month, value: -6, to: day(0)) ?? day(0)
+    check(PersonFileEngine.doctorSince(data: old, now: day(0)) == sixMonths, "the doctor's page goes back six months at most")
+
+    let season = Season(number: 1, start: calendar.startOfDay(for: day(-30)), end: day(335))
+    check(StatsEngine.isUntouched(data: fresh, season: season), "a season with nothing logged waits for its first germ")
+    check(!StatsEngine.isUntouched(data: withKid, season: season), "a kid's illness counts as the season's first germ")
+    check(!StatsEngine.isUntouched(data: backdated, season: season), "a parent's germ counts as the season's first germ")
 }
 
 if failures == 0 {

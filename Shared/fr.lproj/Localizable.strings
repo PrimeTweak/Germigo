@@ -310,6 +310,7 @@
 "day" = "jour";
 "Day %1$lld · %2$@" = "Jour %1$lld · %2$@";
 "Day %lld" = "Jour %lld";
+"Day 1" = "Jour 1";
 "day sick" = "jour malade";
 "day without a germ" = "jour sans microbe";
 "Daycare" = "Garderie";
@@ -702,6 +703,7 @@
 "No crew matches that code." = "Aucun groupe ne correspond à ce code.";
 "No daycare matches that code." = "Aucune garderie ne correspond à ce code.";
 "No germ logged for %1$@ since %2$@. The page fills itself as you log." = "Aucun microbe noté pour %1$@ depuis le %2$@. La page se remplit à mesure que tu notes.";
+"No germ so far." = "Aucun microbe jusqu'ici.";
 "No germs logged yet. It won't last." = "Aucun microbe noté pour l'instant. Ça ne durera pas.";
 "No kid is sick right now. Enjoy it." = "Aucun enfant malade en ce moment. Profites-en.";
 "No notices lately. Good news." = "Aucun avis ces temps-ci. Bonne nouvelle.";
@@ -732,6 +734,7 @@
 "Not yet" = "Pas encore";
 "Note (optional)" = "Note (facultative)";
 "Nothing brought home yet" = "Encore rien ramené";
+"Nothing caught yet" = "Rien attrapé pour l'instant";
 "Nothing in here yet" = "Rien ici pour l'instant";
 "Nothing in the guide fits these signs yet." = "Rien dans le guide ne colle à ces signes pour l'instant.";
 "Nothing in the last 7 days." = "Rien dans les 7 derniers jours.";
@@ -935,6 +938,7 @@
 "Share this card" = "Partager cette carte";
 "Share what's going around with the parents of your group." = "Partage ce qui circule avec les parents de ton groupe.";
 "Sharing" = "Partage";
+"Sharing opens with your first germ." = "Le partage s'ouvre avec ton premier microbe.";
 "Shh" = "Chut";
 "Shh… it's late." = "Chut… il est tard.";
 "Show %lld more" = "Afficher %lld de plus";
@@ -946,6 +950,7 @@
 "Shows the signs" = "Affiche les signes";
 "Shows up" = "Apparaît";
 "Sick %1$lld days out of %2$lld this season." = "Malade %1$lld jours sur %2$lld cette saison.";
+"Sick %1$lld days since %2$@." = "Malade %1$lld jours depuis le %2$@.";
 "Sick %1$lld weeks out of %2$lld." = "Malade %1$lld semaines sur %2$lld.";
 "Sick leave: your streak waits for you." = "Congé de maladie : ta série t'attend.";
 "Sick Points" = "Points malades";
@@ -1134,7 +1139,7 @@
 "Tickle" = "Chatouiller";
 "Ticklish" = "Chatouilleux";
 "Tied" = "Égalité";
-"Tied for first: nobody's been sick yet. Enjoy it." = "Égalité au premier rang : personne n'a été malade. Profites-en.";
+"Tied at zero. The podium opens with the first germ." = "Égalité à zéro. Le podium s'ouvre au premier microbe.";
 "Timing" = "Délais";
 "Tissue Apprentice" = "Apprenti mouchoir";
 "Tissue Tester" = "Testeur de mouchoirs";

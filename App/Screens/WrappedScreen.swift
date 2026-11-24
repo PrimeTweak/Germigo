@@ -51,16 +51,24 @@ struct WrappedScreen: View {
                     }
                     .buttonStyle(.glass)
                     .accessibilityLabel(tr("Close"))
-                    Button {
-                        sharing = page
-                    } label: {
-                        Label(tr("Share this card"), systemImage: "square.and.arrow.up")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 52)
+                    if StatsEngine.isUntouched(data: model.data, season: season) {
+                        Text(tr("Sharing opens with your first germ."))
+                            .font(.subheadline.weight(.semibold))
+                            .opacity(0.75)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 12)
+                    } else {
+                        Button {
+                            sharing = page
+                        } label: {
+                            Label(tr("Share this card"), systemImage: "square.and.arrow.up")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 52)
+                        }
+                        .buttonStyle(.glass)
+                        .disabled(page == .guess || isVeiled(page))
                     }
-                    .buttonStyle(.glass)
-                    .disabled(page == .guess || isVeiled(page))
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 8)
