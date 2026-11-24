@@ -75,7 +75,6 @@ struct FamilyScreen: View {
                 .padding(.bottom, 28)
                 .animation(Tempo.settle, value: people)
             }
-            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.family))
             .navigationTitle(tr("Family"))
             .toolbar {

@@ -113,7 +113,6 @@ struct LabScreen: View {
                 .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
-            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.lab))
             .navigationTitle(tr("Guide"))
             .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),

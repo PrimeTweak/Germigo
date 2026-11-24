@@ -44,7 +44,6 @@ struct TodayScreen: View {
                     settle(newHeight)
                 }
             }
-            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: washTint(exposures: exposures, index: index)))
             .navigationTitle(tr("Today"))
             .toolbar {

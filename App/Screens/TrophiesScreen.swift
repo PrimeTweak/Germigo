@@ -41,7 +41,6 @@ struct TrophiesScreen: View {
                 .padding(.horizontal, Spacing.page)
                 .padding(.bottom, 28)
             }
-            .scrollEdgeEffectStyle(.hard, for: .top)
             .background(CharacterWash(tint: TabWash.trophies))
             .navigationTitle(tr("Trophies"))
             .toolbar {
@@ -325,7 +324,7 @@ struct TrophiesScreen: View {
             }
             if let badge = BadgeCatalog.badge(BadgeCatalog.patientOne) {
                 starter(badge, title: tr("Log a germ when one hits"), line: tr("Earns %@", badge.title)) {
-                    model.selectedTab = .today
+                    model.logRequest = LogRequest()
                 }
             }
         }
@@ -642,10 +641,7 @@ struct TrophiesScreen: View {
             showWrapped = true
         } label: {
             HStack(spacing: 10) {
-                Image(systemName: "sparkles")
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(palette.inkSecondary)
-                    .frame(width: 26)
+                RecapCardsIcon()
                 ValueRow(title: tr("Season story"),
                          value: weeksLeft > 0 ? trCount(weeksLeft, one: "In %lld week", other: "In %lld weeks") : tr("Ready"))
             }
@@ -653,6 +649,54 @@ struct TrophiesScreen: View {
             .germilyCard(padding: 0)
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Two of the recap's cards, fanned out: what the season story opens.
+private struct RecapCardsIcon: View {
+    private let shape = RoundedRectangle(cornerRadius: 3, style: .continuous)
+
+    var body: some View {
+        ZStack {
+            face
+                .overlay(Color(hex: Swatch.limeInk).opacity(0.3), in: shape)
+                .rotationEffect(.degrees(-14))
+                .offset(x: -4)
+            face
+                .overlay(alignment: .topLeading) {
+                    marks
+                }
+                .rotationEffect(.degrees(6))
+                .offset(x: 3, y: 1)
+        }
+        .frame(width: 26, height: 30)
+        .accessibilityHidden(true)
+    }
+
+    private var face: some View {
+        shape
+            .fill(LinearGradient(colors: [Color(hex: Swatch.limeLight), Color(hex: Swatch.grass)], startPoint: .top, endPoint: .bottom))
+            .frame(width: 18, height: 25)
+    }
+
+    /// The card's title, the line under it and its code in the corner, in miniature.
+    private var marks: some View {
+        let ink = Color(hex: Swatch.night)
+        return ZStack(alignment: .topLeading) {
+            Capsule()
+                .fill(ink)
+                .frame(width: 12, height: 3.3)
+                .offset(x: 3, y: 5)
+            Capsule()
+                .fill(ink.opacity(0.6))
+                .frame(width: 9.5, height: 1.4)
+                .offset(x: 4.3, y: 10)
+            RoundedRectangle(cornerRadius: 0.8, style: .continuous)
+                .fill(Color.white)
+                .frame(width: 4.4, height: 4.4)
+                .offset(x: 10.6, y: 18)
+        }
+        .frame(width: 18, height: 25, alignment: .topLeading)
     }
 }
 
