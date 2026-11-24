@@ -10,6 +10,7 @@ enum NotificationManager {
     private static let wrappedID = "season-wrapped"
     private static let monthID = "month-recap"
     private static let trialID = "trial-ending"
+    private static let eveningID = "evening-report"
 
     /// The morning check-in comes this many days in a row, then stops on its own.
     private static let sickCheckInDays = 7
@@ -45,11 +46,16 @@ enum NotificationManager {
         let dodged = UNNotificationAction(identifier: ReminderAction.dodged, title: tr("Dodged it"), options: [.authenticationRequired])
         let kidCaught = UNNotificationAction(identifier: ReminderAction.kidCaught, title: tr("Caught it"), options: [.foreground])
         let allGood = UNNotificationAction(identifier: ReminderAction.allGood, title: tr("All good"), options: [])
+        let fineToday = UNNotificationAction(identifier: ReminderAction.fineToday, title: tr("All good"),
+                                             options: [.authenticationRequired])
+        let someoneSick = UNNotificationAction(identifier: ReminderAction.someoneSick, title: tr("Someone's sick"),
+                                               options: [.foreground])
         let categories = [
             (ReminderCategory.sick, [better, stillSick]),
             (ReminderCategory.windowOpens, [caught, stillFine]),
             (ReminderCategory.windowCloses, [dodged, caught]),
-            (ReminderCategory.daycareWatch, [kidCaught, allGood])
+            (ReminderCategory.daycareWatch, [kidCaught, allGood]),
+            (ReminderCategory.evening, [fineToday, someoneSick])
         ]
         center.setNotificationCategories(Set(categories.map { id, actions in
             UNNotificationCategory(identifier: id, actions: actions, intentIdentifiers: [], options: [])
@@ -176,6 +182,28 @@ enum NotificationManager {
         center.removePendingNotificationRequests(withIdentifiers: [monthID])
     }
 
+    /// Replaces the evening reports of the coming week with one at each of these times.
+    static func scheduleEveningReports(at evenings: [Date]) {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let days = (-1...7).compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
+        center.removePendingNotificationRequests(withIdentifiers: days.map(eveningKey))
+        for evening in evenings {
+            let content = UNMutableNotificationContent()
+            content.title = tr("Evening report")
+            content.body = tr("Everyone fine today? One tap keeps your week going.")
+            content.sound = .default
+            content.categoryIdentifier = ReminderCategory.evening
+            let parts = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: evening)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)
+            center.add(UNNotificationRequest(identifier: eveningKey(evening), content: content, trigger: trigger))
+        }
+    }
+
+    private static func eveningKey(_ day: Date) -> String {
+        eveningID + "-" + QuizEngine.dayKey(day)
+    }
+
     /// Clears every reminder scheduled or shown, once the journal they speak of is erased.
     static func removeAll() {
         center.removeAllPendingNotificationRequests()
@@ -297,6 +325,7 @@ enum ReminderCategory {
     static let windowOpens = "window-opens"
     static let windowCloses = "window-closes"
     static let daycareWatch = "daycare-watch"
+    static let evening = "evening-report"
 }
 
 enum ReminderAction {
@@ -307,6 +336,8 @@ enum ReminderAction {
     static let dodged = "dodged"
     static let kidCaught = "kid-caught"
     static let allGood = "all-good"
+    static let fineToday = "fine-today"
+    static let someoneSick = "someone-sick"
 }
 
 /// Shows a reminder as a banner while the app is on screen, and runs the buttons under it.
@@ -346,6 +377,8 @@ final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate {
             } else {
                 action = nil
             }
+        case ReminderAction.fineToday: action = .allGood
+        case ReminderAction.someoneSick: action = .someoneSick
         default: action = nil
         }
         guard let action else {

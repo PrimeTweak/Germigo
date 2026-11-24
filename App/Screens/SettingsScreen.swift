@@ -72,15 +72,12 @@ struct SettingsScreen: View {
                     notificationCard
                         .cascadeIn(3)
                     quietNote
-                    SectionHeader(title: tr("Help"))
-                    helpCard
-                        .cascadeIn(4)
                     SectionHeader(title: tr("Data"))
                     dataCard
-                        .cascadeIn(5)
+                        .cascadeIn(4)
                     SectionHeader(title: tr("About"))
                     aboutCard
-                        .cascadeIn(6)
+                        .cascadeIn(5)
                     SneezyFooter()
                         .padding(.top, 22)
                 }
@@ -175,6 +172,19 @@ struct SettingsScreen: View {
                 set: { value in model.updateSettings { $0[keyPath: keyPath] = value } })
     }
 
+    /// Turning the evening report on asks for notification permission the first time.
+    private var eveningReport: Binding<Bool> {
+        Binding(get: { model.data.settings.eveningReportOn }, set: { on in
+            model.updateSettings { $0.eveningReportOn = on }
+            if on {
+                Task {
+                    await model.enableReminders()
+                    notificationsDenied = await NotificationManager.isDenied()
+                }
+            }
+        })
+    }
+
     /// Turning the lock on asks for Face ID first, so it never locks out someone it cannot recognize.
     private var appLock: Binding<Bool> {
         Binding(get: { model.data.settings.appLockOn }, set: { on in
@@ -242,6 +252,29 @@ struct SettingsScreen: View {
                                  detail: tr("Window and symptom reminders"), trigger: settings.checkInsOn)
             }
             .frame(minHeight: 54)
+            Divider()
+                .padding(.leading, 44)
+            Toggle(isOn: eveningReport) {
+                SettingsRowLabel(symbol: "moon.stars.fill", title: tr("Evening report"),
+                                 detail: tr("On evenings when nobody is sick"), trigger: settings.eveningReportOn)
+            }
+            .frame(minHeight: 54)
+            if settings.eveningReportOn {
+                HStack {
+                    Text(tr("Time"))
+                        .foregroundStyle(palette.ink)
+                    Spacer()
+                    Picker(tr("Time"), selection: setting(\.eveningReportMinute)) {
+                        ForEach(EveningReport.minutes, id: \.self) { minute in
+                            Text(EveningReport.label(minute)).tag(minute)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .tint(palette.accent)
+                }
+                .padding(.leading, 44)
+                .frame(minHeight: 44)
+            }
             if AppConfig.lessonsURL != nil {
                 Divider()
                     .padding(.leading, 44)
@@ -272,19 +305,6 @@ struct SettingsScreen: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 14)
-        .germilyCard(padding: 0)
-    }
-
-    private var helpCard: some View {
-        NavigationLink {
-            HelpLinesScreen()
-        } label: {
-            SettingsRow(symbol: "phone.fill", title: tr("Help lines"), detail: tr("Emergency and health lines")) {
-                RowChevron()
-            }
-        }
-        .buttonStyle(.plain)
         .padding(.horizontal, 14)
         .germilyCard(padding: 0)
     }

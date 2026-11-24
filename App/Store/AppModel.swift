@@ -96,6 +96,10 @@ final class AppModel {
     var trickFound: MascotTrick?
     /// The free trial's offer after the first illness.
     var showTrialOffer = false
+    /// Today asks once, after the third "All good", whether to send the evening report.
+    var offersEveningReport = false
+    /// "Someone's sick" on the evening report: Today opens the symptom pages.
+    var opensSomeoneFlow = false
 
     /// False while the journal file exists but cannot be read; nothing is saved over it then.
     @ObservationIgnored private var journalAvailable = true
@@ -528,6 +532,102 @@ final class AppModel {
         MonthRecapEngine.recap(data: data, catalog: catalog, month: MonthRecapEngine.previousMonth(now), now: now)
     }
 
+    // MARK: - All good
+
+    /// "All good" can be said while nobody in the family is sick.
+    var canCheckIn: Bool {
+        activeLog == nil && sickKidIllnesses.isEmpty
+    }
+
+    func isCheckedIn(_ day: Date) -> Bool {
+        data.checkIns.contains(QuizEngine.dayKey(day))
+    }
+
+    /// Today's "All good": points once a day, a bonus when it fills the week.
+    func checkIn(now: Date = Date()) {
+        guard canCheckIn, !isCheckedIn(now) else { return }
+        let weeksBefore = RewardEngine.fullWeeks(data.checkIns)
+        data.checkIns.append(QuizEngine.dayKey(now))
+        commit()
+        Haptics.success()
+        if RewardEngine.fullWeeks(data.checkIns) > weeksBefore {
+            toast = tr("A full week of All good. +%lld pts", RewardEngine.fullWeekPoints)
+        }
+        if data.checkIns.count >= 3, !data.eveningOffered, !data.settings.eveningReportOn {
+            data.eveningOffered = true
+            commit()
+            offersEveningReport = true
+        }
+    }
+
+    // MARK: - Stickers
+
+    /// The stickers earned so far: one per level reached, the full weeks', and the quiz run's.
+    func earnedStickers() -> Set<String> {
+        var earned = Set(LevelRewards.stickers.prefix(level.number))
+        let weeks = RewardEngine.fullWeeks(data.checkIns)
+        for week in StickerBook.weeks where weeks >= week.count {
+            earned.insert(week.sticker)
+        }
+        if QuizEngine.longestRun(data.quiz.doneDays) >= StickerBook.quizRun {
+            earned.insert(StickerBook.quizSticker)
+        }
+        return earned
+    }
+
+    /// The stickers on the couch, leaving out any the journal no longer earns.
+    var couchStickers: [CouchSticker] {
+        let earned = earnedStickers()
+        return data.couchStickers.filter { earned.contains($0.id) }
+    }
+
+    func isOnCouch(_ sticker: String) -> Bool {
+        data.couchStickers.contains { $0.id == sticker }
+    }
+
+    /// Puts an earned sticker on the first free spot of the couch, or takes it off.
+    func toggleCouch(_ sticker: String) {
+        if isOnCouch(sticker) {
+            data.couchStickers.removeAll { $0.id == sticker }
+        } else {
+            guard earnedStickers().contains(sticker) else { return }
+            let taken = couchStickers
+            let slot = StickerBook.couchSlots.first { slot in
+                !taken.contains { abs($0.x - slot.x) < 20 && abs($0.y - slot.y) < 20 }
+            } ?? StickerBook.couchSlots[taken.count % StickerBook.couchSlots.count]
+            data.couchStickers.append(CouchSticker(id: sticker, x: slot.x, y: slot.y))
+        }
+        commit()
+    }
+
+    /// Leaves a sticker where it was dropped, kept inside the couch scene.
+    func moveCouchSticker(_ sticker: String, x: Double, y: Double) {
+        guard let index = data.couchStickers.firstIndex(where: { $0.id == sticker }) else { return }
+        data.couchStickers[index].x = min(max(x, 16), 304)
+        data.couchStickers[index].y = min(max(y, 16), 150)
+        commit()
+    }
+
+    /// The evenings of the coming week that get the report: none while a parent is sick,
+    /// none while a kid is expected to still be sick, and not tonight once "All good" is in.
+    private func syncEveningReports(now: Date = Date()) {
+        guard data.settings.eveningReportOn, data.onboardingDone, activeLog == nil else {
+            NotificationManager.scheduleEveningReports(at: [])
+            return
+        }
+        let calendar = Calendar.current
+        let minute = data.settings.eveningReportMinute
+        let sickUntil = sickKidIllnesses.map { DayEngine.kidEnd($0, catalog: catalog, now: .distantFuture) }.max()
+        let evenings = (0..<7).compactMap { offset -> Date? in
+            guard let day = calendar.date(byAdding: .day, value: offset, to: now),
+                  let evening = calendar.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: day),
+                  evening > now, !(offset == 0 && isCheckedIn(now)) else { return nil }
+            if let sickUntil, calendar.startOfDay(for: evening) <= calendar.startOfDay(for: sickUntil) { return nil }
+            return evening
+        }
+        NotificationManager.scheduleEveningReports(at: evenings)
+    }
+
     /// Records a trick of the Today mascot the first time it is found; the last one earns the Ticklish badge.
     func discoverTrick(_ trick: MascotTrick, now: Date = Date()) {
         guard !data.mascotTricks.contains(trick.rawValue) else { return }
@@ -750,6 +850,7 @@ final class AppModel {
         }
         if changed { commit() } else { publishSnapshot() }
         syncStreakReminders(now: now)
+        syncEveningReports(now: now)
     }
 
     /// Opens what a widget or a link asked for.
@@ -846,6 +947,11 @@ final class AppModel {
             addKidIllness(kidID: id, germID: germID, startedAt: Date())
             selectedTab = .family
             toast = tr("Added to %@'s history.", kid.name)
+        case .allGood:
+            checkIn()
+        case .someoneSick:
+            selectedTab = .today
+            opensSomeoneFlow = true
         }
     }
 
@@ -985,6 +1091,7 @@ final class AppModel {
             journalNotice = .saveFailed
         }
         publishSnapshot()
+        if journalAvailable { syncEveningReports() }
     }
 
     private func publishSnapshot() {

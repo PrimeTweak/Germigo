@@ -145,6 +145,31 @@ struct PersonNumbers: View {
     let person: Person
     let illnesses: [PersonIllness]
     @Environment(AppModel.self) private var model
+
+    var body: some View {
+        NumberStrip(values: values)
+    }
+
+    private var values: [(Int, String)] {
+        let days = illnesses.reduce(0) { $0 + $1.days }
+        switch person {
+        case .kid(let id):
+            return [(illnesses.count, tr("brought home")), (days, tr("days sick")),
+                    (model.data.logs.filter { $0.source == .kid(id) }.count, tr("got you")),
+                    (illnesses.filter { $0.dodged }.count, tr("you dodged"))]
+        case .me:
+            return [(illnesses.count, tr("germs caught")), (days, tr("days sick")),
+                    (model.data.kidIllnesses.filter { $0.outcome == .dodged }.count, tr("dodged")),
+                    (StreakMath.record(data: model.data, now: Date()), tr("best run"))]
+        case .partner:
+            return [(illnesses.count, tr("germs caught")), (days, tr("days sick"))]
+        }
+    }
+}
+
+/// Numbers side by side in one card, split by thin lines: the person file and the season page.
+struct NumberStrip: View {
+    let values: [(Int, String)]
     @Environment(\.palette) private var palette
     /// The big numbers, the same size as on Trophies and following the text size set in iOS.
     @ScaledMetric(relativeTo: .title) private var figureSize: CGFloat = 26
@@ -175,22 +200,6 @@ struct PersonNumbers: View {
             }
         }
         .germilyCard(padding: 12)
-    }
-
-    private var values: [(Int, String)] {
-        let days = illnesses.reduce(0) { $0 + $1.days }
-        switch person {
-        case .kid(let id):
-            return [(illnesses.count, tr("brought home")), (days, tr("days sick")),
-                    (model.data.logs.filter { $0.source == .kid(id) }.count, tr("got you")),
-                    (illnesses.filter { $0.dodged }.count, tr("you dodged"))]
-        case .me:
-            return [(illnesses.count, tr("germs caught")), (days, tr("days sick")),
-                    (model.data.kidIllnesses.filter { $0.outcome == .dodged }.count, tr("dodged")),
-                    (StreakMath.record(data: model.data, now: Date()), tr("best run"))]
-        case .partner:
-            return [(illnesses.count, tr("germs caught")), (days, tr("days sick"))]
-        }
     }
 }
 
@@ -339,6 +348,9 @@ struct PersonHistoryCard: View {
                                     .foregroundStyle(palette.inkSecondary)
                             }
                             Spacer(minLength: 0)
+                            if let severity = illness.severity {
+                                SeverityGauge(level: severity, germ: model.catalog.germ(illness.germID))
+                            }
                         }
                         .padding(.top, 6)
                         .accessibilityElement(children: .combine)

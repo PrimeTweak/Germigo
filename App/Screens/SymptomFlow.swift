@@ -579,13 +579,6 @@ private struct UrgentPage: View {
                     .foregroundStyle(palette.inkSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                NavigationLink {
-                    HelpLinesScreen()
-                } label: {
-                    Text(tr("Help lines"))
-                }
-                .buttonStyle(PillButtonStyle(kind: .ink))
-                .padding(.top, 10)
                 if chosen.count > 1 {
                     NavigationLink {
                         SuspectsPage(flow: flow, patient: patient, chosen: chosen, exits: exits)
@@ -593,6 +586,7 @@ private struct UrgentPage: View {
                         Text(tr("See the suspects anyway"))
                     }
                     .buttonStyle(PillButtonStyle(kind: .ghost))
+                    .padding(.top, 10)
                 }
                 Text(HealthNotice.text)
                     .font(.footnote)

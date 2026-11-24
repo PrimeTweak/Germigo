@@ -17,6 +17,7 @@ struct TrophiesScreen: View {
     @State private var showWrapped = false
     @State private var showLeagueShare = false
     @State private var showQuiz = false
+    @State private var showRewards = false
 
     var body: some View {
         let earned = BadgeCatalog.all.filter { model.hasBadge($0.id) }
@@ -66,6 +67,9 @@ struct TrophiesScreen: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView(reason: .stats)
             }
+            .sheet(isPresented: $showRewards) {
+                LevelRewardsSheet()
+            }
         }
     }
 
@@ -100,17 +104,37 @@ struct TrophiesScreen: View {
                         .font(.callout.weight(.semibold))
                         .foregroundStyle(palette.accent)
                     if level.span > 0 {
-                        ThinGauge(fraction: level.fraction, fill: palette.accent)
-                            .padding(.top, 8)
-                        Text(tr("%1$lld of %2$lld points to level %3$lld", level.progress, level.span, level.number + 1))
-                            .font(.footnote)
-                            .foregroundStyle(palette.inkSecondary)
-                            .padding(.top, 4)
+                        HStack(spacing: 10) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                ThinGauge(fraction: level.fraction, fill: palette.accent)
+                                Text(tr("%1$lld of %2$lld points to level %3$lld", level.progress, level.span, level.number + 1))
+                                    .font(.footnote)
+                                    .foregroundStyle(palette.inkSecondary)
+                            }
+                            if let next = LevelRewards.asset(level.number + 1) {
+                                Button {
+                                    showRewards = true
+                                } label: {
+                                    Image(next)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 34, height: 34)
+                                        .padding(5)
+                                        .background(palette.surface.opacity(0.85),
+                                                    in: RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
+                                }
+                                .buttonStyle(PressableStyle())
+                            }
+                        }
+                        .padding(.top, 8)
                     }
                 }
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(model.displayName + ". " + tr("%1$@, level %2$lld", model.displayTitle, level.number))
+            .accessibilityAction(named: tr("Level rewards")) {
+                showRewards = true
+            }
             if let goal {
                 Rectangle()
                     .fill(palette.ink.opacity(0.1))
@@ -652,54 +676,6 @@ struct TrophiesScreen: View {
     }
 }
 
-/// Two of the recap's cards, fanned out: what the season story opens.
-private struct RecapCardsIcon: View {
-    private let shape = RoundedRectangle(cornerRadius: 3, style: .continuous)
-
-    var body: some View {
-        ZStack {
-            face
-                .overlay(Color(hex: Swatch.limeInk).opacity(0.3), in: shape)
-                .rotationEffect(.degrees(-14))
-                .offset(x: -4)
-            face
-                .overlay(alignment: .topLeading) {
-                    marks
-                }
-                .rotationEffect(.degrees(6))
-                .offset(x: 3, y: 1)
-        }
-        .frame(width: 26, height: 30)
-        .accessibilityHidden(true)
-    }
-
-    private var face: some View {
-        shape
-            .fill(LinearGradient(colors: [Color(hex: Swatch.limeLight), Color(hex: Swatch.grass)], startPoint: .top, endPoint: .bottom))
-            .frame(width: 18, height: 25)
-    }
-
-    /// The card's title, the line under it and its code in the corner, in miniature.
-    private var marks: some View {
-        let ink = Color(hex: Swatch.night)
-        return ZStack(alignment: .topLeading) {
-            Capsule()
-                .fill(ink)
-                .frame(width: 12, height: 3.3)
-                .offset(x: 3, y: 5)
-            Capsule()
-                .fill(ink.opacity(0.6))
-                .frame(width: 9.5, height: 1.4)
-                .offset(x: 4.3, y: 10)
-            RoundedRectangle(cornerRadius: 0.8, style: .continuous)
-                .fill(Color.white)
-                .frame(width: 4.4, height: 4.4)
-                .offset(x: 10.6, y: 18)
-        }
-        .frame(width: 18, height: 25, alignment: .topLeading)
-    }
-}
-
 /// A big season number over its label, following the text size set in iOS.
 struct SeasonFigure: View {
     let value: Int
@@ -792,5 +768,99 @@ struct BadgeMedal: View {
             }
             .shadow(color: won ? tint.opacity(0.35) : Color.clear, radius: 4, y: 2)
             .accessibilityLabel(badge.title)
+    }
+}
+
+/// Every level and the sticker it unlocks: the earned ones in color, the next two in gray, the rest a surprise.
+private struct LevelRewardsSheet: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        let current = model.level.number
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(tr("Every level unlocks a sticker for the couch."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                        .padding(.horizontal, 4)
+                    VStack(spacing: 0) {
+                        ForEach(1...Levels.thresholds.count, id: \.self) { number in
+                            row(number, current: current)
+                            if number < Levels.thresholds.count {
+                                Divider()
+                                    .padding(.leading, 66)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .germilyCard(padding: 0)
+                }
+                .padding(.horizontal, Spacing.page)
+                .padding(.bottom, 24)
+            }
+            .background(palette.background.ignoresSafeArea())
+            .navigationTitle(tr("Level rewards"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "checkmark")
+                    }
+                    .accessibilityLabel(tr("Done"))
+                    .tint(palette.ink)
+                }
+            }
+        }
+    }
+
+    private func row(_ number: Int, current: Int) -> some View {
+        let got = number <= current
+        let shown = number <= current + 2
+        let isNext = number == current + 1
+        return HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: Radius.small, style: .continuous)
+                    .fill(got || isNext ? palette.accent.opacity(0.12) : palette.ink.opacity(0.05))
+                if shown, let asset = LevelRewards.asset(number) {
+                    Image(asset)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(7)
+                        .saturation(got ? 1 : 0)
+                        .opacity(got ? 1 : 0.4)
+                } else {
+                    Image(systemName: "questionmark")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(palette.inkTertiary)
+                }
+            }
+            .frame(width: 52, height: 52)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tr("Level %1$lld · %2$@", number, Levels.info(for: Levels.thresholds[number - 1]).title))
+                    .font(.caption)
+                    .foregroundStyle(palette.inkSecondary)
+                Text(shown ? LevelRewards.name(number) : tr("Surprise"))
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(shown ? palette.ink : palette.inkSecondary)
+            }
+            Spacer(minLength: 8)
+            if got {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(palette.accent)
+            } else {
+                Text(tr("%lld pts", Levels.thresholds[number - 1]))
+                    .font(.footnote.weight(isNext ? .semibold : .regular))
+                    .monospacedDigit()
+                    .foregroundStyle(isNext ? palette.accent : palette.inkTertiary)
+            }
+        }
+        .padding(.vertical, 10)
+        .accessibilityElement(children: .combine)
     }
 }

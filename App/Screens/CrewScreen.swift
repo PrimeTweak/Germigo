@@ -117,34 +117,33 @@ private struct CrewTeaser: View {
         ScrollView {
             VStack(spacing: 18) {
                 DaycareSection()
-                SectionHeader(title: tr("Crew"))
-                ZStack {
-                    Circle()
-                        .fill(palette.accent.opacity(0.14))
-                        .frame(width: 150, height: 150)
-                    Circle()
-                        .fill(palette.accent.opacity(0.2))
-                        .frame(width: 104, height: 104)
-                    Image(systemName: "dot.radiowaves.left.and.right")
-                        .font(.system(size: 44, weight: .semibold))
-                        .foregroundStyle(palette.accent)
-                }
-                .padding(.top, 12)
-                .accessibilityHidden(true)
-                Text(crew.isMember ? tr("Your crew is waiting") : tr("Know what's going around"))
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(palette.ink)
-                    .multilineTextAlignment(.center)
-                Text(tr("Start a private crew with the parents from your daycare group. See which germs are going around before they reach your couch."))
-                    .font(.subheadline)
-                    .foregroundStyle(palette.inkSecondary)
-                    .multilineTextAlignment(.center)
+                SectionHeader(title: tr("Parent crew"))
+                pitch
                 VStack(alignment: .leading, spacing: 0) {
-                    row("dot.radiowaves.left.and.right", tr("Going around"), tr("A germ shows up once 3 families report it. No names."))
+                    feature(tr("Soup, tissues, tea"), tr("Send a little support when someone goes down.")) {
+                        HStack(spacing: -12) {
+                            ForEach(Array(["sticker-soup", "sticker-tissue", "sticker-tea"].enumerated()), id: \.offset) { item in
+                                Image(item.element)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 32, height: 32)
+                                    .rotationEffect(.degrees([-10, 4, 12][item.offset]))
+                            }
+                        }
+                    }
                     Divider()
-                    row("hand.thumbsup.fill", tr("Soup, tissues, tea"), tr("Send a little support when someone goes down."))
-                    Divider()
-                    row("trophy.fill", tr("Most valuable patient"), tr("A leaderboard nobody wants to win."))
+                        .padding(.leading, 86)
+                    feature(tr("Most valuable patient"), tr("A leaderboard nobody wants to win.")) {
+                        BuddyView(look: 11, sick: true, size: 46)
+                            .overlay(alignment: .bottomTrailing) {
+                                Image(systemName: "crown.fill")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(palette.onAccent)
+                                    .frame(width: 22, height: 22)
+                                    .background(palette.accent, in: Circle())
+                                    .offset(x: 6, y: 4)
+                            }
+                    }
                 }
                 .padding(.horizontal, 16)
                 .germilyCard(padding: 0)
@@ -152,6 +151,9 @@ private struct CrewTeaser: View {
                     showPaywall = true
                 }
                 .buttonStyle(PillButtonStyle(kind: .ink))
+                Text(tr("Crew comes with the Season Pass."))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
                 if crew.isMember {
                     Button(tr("Leave crew and delete my data")) {
                         confirmLeave = true
@@ -181,9 +183,63 @@ private struct CrewTeaser: View {
         }
     }
 
-    private func row(_ symbol: String, _ title: String, _ detail: String) -> some View {
-        HStack(alignment: .top, spacing: 13) {
-            IconTile(symbol: symbol)
+    /// The pitch: a few parents' faces, what a crew is for, and a sample of the radar it gets.
+    private var pitch: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: -14) {
+                ForEach([0, 2, 7, 11, 15], id: \.self) { look in
+                    BuddyView(look: look, size: 46)
+                        .padding(2)
+                        .background(palette.surface, in: Circle())
+                }
+                Text(verbatim: "+2")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(palette.inkSecondary)
+                    .frame(width: 46, height: 46)
+                    .background(palette.ink.opacity(0.07), in: Circle())
+                    .padding(2)
+                    .background(palette.surface, in: Circle())
+            }
+            .accessibilityHidden(true)
+            Text(crew.isMember ? tr("Your crew is waiting") : tr("Know what's going around"))
+                .font(.title2.weight(.bold))
+                .foregroundStyle(palette.ink)
+            Text(tr("Start a private crew with the parents from your daycare group. See which germs are going around before they reach your couch."))
+                .font(.subheadline)
+                .foregroundStyle(palette.inkSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text(tr("Going around"))
+                        .font(.headline)
+                        .foregroundStyle(palette.ink)
+                    Spacer(minLength: 8)
+                    Text(tr("Example"))
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(palette.accent)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(palette.accent.opacity(0.12), in: Capsule())
+                }
+                RadarRow(entry: RadarEntry(germID: "rhino", families: 4), families: 7)
+                RadarRow(entry: RadarEntry(germID: "coxy", families: 3), families: 7)
+                Label(tr("A germ shows up once 3 families report it. No names."), systemImage: "shield.lefthalf.filled")
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
+            .padding(12)
+            .background(palette.ink.opacity(0.05), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+            .padding(.top, 4)
+        }
+        .germilyCard()
+    }
+
+    /// One thing the crew does, with a picture of it on the left.
+    private func feature<Picture: View>(_ title: String, _ detail: String, @ViewBuilder picture: () -> Picture) -> some View {
+        HStack(alignment: .center, spacing: 14) {
+            picture()
+                .frame(width: 72)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.callout.weight(.semibold))
@@ -194,7 +250,7 @@ private struct CrewTeaser: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
     }
 }
 

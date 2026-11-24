@@ -189,10 +189,6 @@ struct LogForm: View {
     @State private var didPrefill = false
     @State private var submitted = false
 
-    private var severityNames: [String] {
-        [tr("Sniffles"), tr("Meh"), tr("Couch day"), tr("Bathroom floor"), tr("Send soup")]
-    }
-
     private var suggestion: KidIllness? {
         if let id = request.kidIllnessID {
             return model.data.kidIllnesses.first { $0.id == id }
@@ -228,8 +224,11 @@ struct LogForm: View {
                 group(tr("Who gave it to you?")) {
                     sourceRow
                 }
-                group(tr("How bad?"), trailing: severityNames[severity - 1]) {
-                    severityRow
+                group(tr("How bad?")) {
+                    SeverityPicker(level: $severity, looks: model.looks(of: sufferer),
+                                   germ: germID.flatMap { model.catalog.germ($0) })
+                        .padding(12)
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
                 }
                 detailsCard
             }
@@ -262,21 +261,12 @@ struct LogForm: View {
         }
     }
 
-    private func group<Content: View>(_ title: String, trailing: String? = nil,
-                                      @ViewBuilder content: () -> Content) -> some View {
+    private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(title)
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.inkSecondary)
-                Spacer()
-                if let trailing {
-                    Text(trailing)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(palette.ink)
-                }
-            }
-            .padding(.horizontal, 4)
+            Text(title)
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(palette.inkSecondary)
+                .padding(.horizontal, 4)
             content()
         }
     }
@@ -377,28 +367,6 @@ struct LogForm: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
-    private var severityRow: some View {
-        HStack {
-            ForEach(1...5, id: \.self) { level in
-                Button {
-                    Haptics.tap()
-                    severity = level
-                } label: {
-                    SeverityFace(level: level, selected: severity == level)
-                        .frame(width: severity == level ? 54 : 40, height: severity == level ? 54 : 40)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(severityNames[level - 1])
-                .accessibilityAddTraits(severity == level ? .isSelected : [])
-            }
-        }
-        .frame(height: 76)
-        .padding(.horizontal, 10)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: Radius.large, style: .continuous))
-        .animation(Tempo.quick, value: severity)
     }
 
     private var detailsCard: some View {

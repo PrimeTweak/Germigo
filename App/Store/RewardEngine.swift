@@ -55,7 +55,13 @@ enum RewardEngine {
     static let speedrunMinimum: TimeInterval = 3600
 
     /// Each right answer in the daily quiz.
-    static let quizAnswerPoints = 5
+    static let quizAnswerPoints = 2
+
+    /// "All good" on Today, once a day.
+    static let checkInPoints = 2
+
+    /// Each calendar week with an "All good" on all seven days.
+    static let fullWeekPoints = 10
 
     /// Saying "I'm better", once per germ.
     static let recoveryPoints = 30
@@ -76,7 +82,20 @@ enum RewardEngine {
         let dodged = data.kidIllnesses.filter { $0.outcome == .dodged }.count
         let guesses = data.wrapGuesses.values.filter { $0 }.count
         return data.logs.reduce(0) { $0 + $1.points } + dodged * dodgePoints + data.quiz.rightTotal * quizAnswerPoints
-            + guesses * wrapGuessPoints
+            + guesses * wrapGuessPoints + Set(data.checkIns).count * checkInPoints + fullWeeks(data.checkIns) * fullWeekPoints
+    }
+
+    /// The calendar weeks whose seven days all have an "All good".
+    static func fullWeeks(_ days: [String], calendar: Calendar = .current) -> Int {
+        var perWeek: [Date: Set<String>] = [:]
+        for key in Set(days) {
+            let parts = key.split(separator: "-").compactMap { Int($0) }
+            guard parts.count == 3,
+                  let date = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2])),
+                  let week = calendar.dateInterval(of: .weekOfYear, for: date)?.start else { continue }
+            perWeek[week, default: []].insert(key)
+        }
+        return perWeek.values.filter { $0.count == 7 }.count
     }
 
     static func earnedBadges(data: AppData, catalog: GermCatalog, now: Date) -> Set<String> {

@@ -13,7 +13,6 @@
 "%1$@ is at %2$lld%%" = "%1$@ est à %2$lld %%";
 "%1$@ is your nemesis: %2$lld times already." = "%1$@ est ton ennemi juré : déjà %2$lld fois.";
 "%1$@ to %2$@" = "De %1$@ à %2$@";
-"%1$@ to %2$@ · Week %3$lld" = "De %1$@ à %2$@ · Semaine %3$lld";
 "%1$@ was going around the daycare. Tap Caught it to add it to %2$@'s history." = "%1$@ circulait à la garderie. Touche Attrapé pour l'ajouter à l'historique de %2$@.";
 "%1$@ was the worst: %2$lld days sick." = "%1$@ a été le pire : %2$lld jours malade.";
 "%1$@ · caught %2$@" = "%1$@ · attrapé %2$@";
@@ -76,6 +75,8 @@
 "%lld entry" = "%lld entrée";
 "%lld families" = "%lld familles";
 "%lld family" = "%lld famille";
+"%lld full week" = "%lld semaine pleine";
+"%lld full weeks" = "%lld semaines pleines";
 "%lld germ" = "%lld microbe";
 "%lld germs" = "%lld microbes";
 "%lld group" = "%lld groupe";
@@ -91,6 +92,7 @@
 "%lld more right answers" = "Encore %lld bonnes réponses";
 "%lld more suspect" = "%lld autre suspect";
 "%lld more suspects" = "%lld autres suspects";
+"%lld more to find." = "Encore %lld à trouver.";
 "%lld more with the Season Pass" = "%lld de plus avec la Passe de saison";
 "%lld myth busted in a row" = "%lld mythe démoli d'affilée";
 "%lld myths busted in a row" = "%lld mythes démolis d'affilée";
@@ -129,6 +131,7 @@
 "A clean couch" = "Un divan propre";
 "A clean file for the doctor" = "Un dossier clair pour le médecin";
 "A cup of broth" = "Une tasse de bouillon";
+"A full week of All good. +%lld pts" = "Une semaine complète de « Tout va bien ». +%lld pts";
 "A germ shows up once 3 families report it. No names." = "Un microbe apparaît quand 3 familles le signalent. Sans nom.";
 "A guess for your logbook, not a diagnosis." = "Une piste pour ton journal, pas un diagnostic.";
 "A hot coffee, still hot" = "Un café chaud, encore chaud";
@@ -143,7 +146,6 @@
 "A new quiz tomorrow." = "Un nouveau quiz demain.";
 "A newer germ is in your journal, so this one has an end date." = "Un microbe plus récent est dans ton journal, alors celui-ci a une date de fin.";
 "A note can't hold a link, an email address or an insult." = "Une note ne peut pas contenir de lien, d'adresse courriel ni d'injure.";
-"A nurse answers day and night in most provinces. In Québec it's Info-Santé." = "Une infirmière répond jour et nuit dans la plupart des provinces. Au Québec, c'est Info-Santé.";
 "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses." = "Pour un enfant d'un an, la première année de garderie, c'est environ 12 à 15 infections respiratoires, 2 gastros et 1 ou 2 maladies avec éruption.";
 "A PDF for the doctor" = "Un PDF pour le médecin";
 "A pot for the whole daycare" = "Un chaudron pour toute la garderie";
@@ -170,7 +172,7 @@
 "Add to %@'s album" = "Ajouter à l'album de %@";
 "Add to your album" = "Ajouter à ton album";
 "Add your partner" = "Ajoute ton ou ta partenaire";
-"Add your partner to start the couple duel." = "Ajoute ton partenaire pour lancer le duel de couple.";
+"Add your partner to start it." = "Ajoute ton ou ta partenaire pour le lancer.";
 "Added to %@'s history." = "Ajouté à l'historique de %@.";
 "Adds 1 to the radar and posts to the feed." = "Ajoute 1 au radar et publie dans le fil.";
 "Adds 1 to the radar. No name shared." = "Ajoute 1 au radar. Aucun nom partagé.";
@@ -186,6 +188,7 @@
 "All ten found. The Ticklish badge is yours." = "Les dix sont trouvés. Le badge Chatouilleux est à toi.";
 "Also caught at home:" = "Aussi attrapé à la maison :";
 "Always yours" = "Toujours à toi";
+"An evening reminder?" = "Un rappel le soir ?";
 "An outbreak radar for your group" = "Un radar des éclosions pour ton groupe";
 "Antibiotics" = "Antibiotiques";
 "Antibiotics?" = "Antibiotiques ?";
@@ -256,7 +259,6 @@
 "Caught %lld times" = "Attrapé %lld fois";
 "Caught %lld times this season" = "Attrapé %lld fois cette saison";
 "Caught it" = "Attrapé";
-"Centre antipoison du Québec." = "Centre antipoison du Québec.";
 "Change groups" = "Changer de groupe";
 "Character" = "Personnage";
 "Character %lld" = "Personnage %lld";
@@ -272,6 +274,7 @@
 "Close for good" = "Fermer pour de bon";
 "Close the daycare" = "Fermer la garderie";
 "Close the daycare?" = "Fermer la garderie ?";
+"Clover sticker" = "Autocollant trèfle";
 "Code" = "Code";
 "Code and poster" = "Code et affiche";
 "Collector" = "Collectionneur";
@@ -295,10 +298,13 @@
 "Create the daycare" = "Créer la garderie";
 "Crew" = "Groupe";
 "Crew alerts" = "Alertes du groupe";
+"Crew comes with the Season Pass." = "Le groupe vient avec la Passe de saison.";
 "Crew is offline" = "Groupe hors ligne";
 "Crew name" = "Nom du groupe";
 "Crew settings" = "Réglages du groupe";
 "Crews are private and invite only. The server stores your crew name, the name you pick here and the germs you choose to share. Nothing else leaves your phone." = "Les groupes sont privés, sur invitation seulement. Le serveur conserve le nom du groupe, le nom que tu choisis ici et les microbes que tu décides de partager. Rien d'autre ne quitte ton téléphone.";
+"Crown sticker" = "Autocollant couronne";
+"Cushion sticker" = "Autocollant coussin";
 "Daily quiz" = "Quiz du jour";
 "Dark" = "Sombre";
 "Data" = "Données";
@@ -368,8 +374,6 @@
 "Electrolyte Sommelier" = "Sommelier d'électrolytes";
 "Email (optional)" = "Courriel (facultatif)";
 "Emblem %lld" = "Emblème %lld";
-"Emergency" = "Urgence";
-"Emergency and health lines" = "Urgences et lignes santé";
 "Empty trophy case." = "Vitrine vide.";
 "Ended" = "Fin";
 "Enough for every runny nose" = "Assez pour tous les nez qui coulent";
@@ -377,6 +381,7 @@
 "Erase this phone only" = "Effacer ce téléphone seulement";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe et de garderie du serveur.";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone." = "Efface ton journal, tes enfants, tes photos, tes badges et tes réglages de ce téléphone, et tes données de groupe et de garderie du serveur. Impossible à annuler.";
+"Evening report" = "Bilan du soir";
 "Every card of your season story, ready to share." = "Toutes les cartes de l'histoire de ta saison, prêtes à partager.";
 "Every character" = "Tous les bonhommes";
 "Every clean week gets its soap." = "Chaque semaine sans microbe gagne son savon.";
@@ -390,16 +395,17 @@
 "Every kid, every week and every photo, kept all season." = "Chaque enfant, chaque semaine et chaque photo, gardés toute la saison.";
 "Every kid, the couple duel and every character" = "Tous les enfants, le duel de couple et tous les bonhommes";
 "Every kid, the couple duel, the whole season and the doctor's PDF." = "Tous les enfants, le duel de couple, toute la saison et le PDF pour le médecin.";
+"Every level unlocks a sticker for the couch." = "Chaque niveau débloque un autocollant pour le divan.";
 "Every theme and icon" = "Tous les thèmes et les icônes";
 "Every theme, every icon and the incubation widget." = "Tous les thèmes, toutes les icônes et le widget d'incubation.";
 "Every week stays, not just the last 7 days" = "Chaque semaine reste, pas juste les 7 derniers jours";
 "Every week, every photo and the doctor's PDF" = "Chaque semaine, chaque photo et le PDF pour le médecin";
 "Everyone" = "Tout le monde";
+"Everyone fine today? One tap keeps your week going." = "Tout le monde va bien aujourd'hui ? Un tap et ta semaine continue.";
 "Everyone's down. Send soup." = "Tout le monde est au tapis. Envoyez de la soupe.";
 "Everyone's fine. Suspicious." = "Tout le monde va bien. Louche.";
 "Everything in the Season Pass" = "Tout ce qu'il y a dans la Passe de saison";
 "Everything opens. No charge." = "Tout s'ouvre. Aucun paiement.";
-"Everywhere in Canada except Québec and Nunavut." = "Partout au Canada, sauf au Québec et au Nunavut.";
 "Example" = "Exemple";
 "Export" = "Exporter";
 "Export the journal that couldn't be read" = "Exporter le journal illisible";
@@ -441,7 +447,6 @@
 "Found every trick of the napping germ" = "Tous les trucs du microbe découverts";
 "Found on Today, while it naps. Each one left has a clue." = "À trouver dans Aujourd'hui, pendant sa sieste. Chaque tour qui reste a son indice.";
 "Four quick taps." = "Quatre touches rapides.";
-"Free and confidential, day and night." = "Gratuit et confidentiel, jour et nuit.";
 "Free for families. No names, no photos, no journal leave your phone." = "Gratuit pour les familles. Aucun nom, aucune photo, aucun journal ne quitte ton téléphone.";
 "Free. Their own file and their germs" = "Gratuit. Sa fiche et ses microbes";
 "Frequent flyer" = "Client fidèle";
@@ -474,8 +479,8 @@
 "Germily · Admit one household" = "Germily · Valide pour une maisonnée";
 "Germily · For the doctor" = "Germily · Pour le médecin";
 "Germily. Daycare germs, collected." = "Germily. Les microbes de garderie, en collection.";
-"Germs" = "Microbes";
 "Germs by month" = "Microbes par mois";
+"Germs by month, your top supplier and the longest chain fill this page." = "Les microbes par mois, ton fournisseur numéro un et la plus longue chaîne remplissent cette page.";
 "germs caught" = "microbes attrapés";
 "germs dodged" = "microbes esquivés";
 "Germs dodged" = "Microbes esquivés";
@@ -489,7 +494,6 @@
 "going on" = "en cours";
 "Golden" = "Doré";
 "Good for one uninterrupted nap." = "Bon pour une sieste sans interruption.";
-"Good to have" = "Bon à savoir";
 "Good to know" = "Bon à savoir";
 "Got every myth right" = "Tous les mythes réussis";
 "got you" = "t'ont eu";
@@ -504,9 +508,7 @@
 "Headache" = "Mal de tête";
 "Health data policy" = "Données de santé";
 "Health Data Policy" = "Politique sur les données de santé";
-"Health line" = "Ligne santé";
-"Help" = "Aide";
-"Help lines" = "Lignes d'aide";
+"Heart sticker" = "Autocollant cœur";
 "Hidden" = "Caché";
 "Hidden somewhere on Today." = "Caché quelque part dans Aujourd'hui.";
 "Hides it from the choices." = "Le retire des choix.";
@@ -542,7 +544,6 @@
 "In %lld weeks" = "Dans %lld semaines";
 "In a crew" = "Dans un groupe";
 "In an emergency, call your local emergency number." = "En cas d'urgence, appelle ton numéro d'urgence local.";
-"In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "En cas d'urgence, appelle ton numéro d'urgence local. Pour un conseil, appelle ton médecin ou ta ligne santé locale.";
 "In short" = "En bref";
 "In the feed and the leaderboard, with your name" = "Dans le fil et au classement, avec ton nom";
 "In the window" = "Dans la fenêtre";
@@ -590,6 +591,7 @@
 "Know the enemy." = "Connais l'ennemi.";
 "Know what's going around" = "Sache ce qui court";
 "Know what's going around." = "Sache ce qui court.";
+"Lab flask sticker" = "Autocollant fiole du labo";
 "Lab Rat" = "Rat de labo";
 "Last updated %@" = "Dernière mise à jour : %@";
 "Last: %@" = "Dernier : %@";
@@ -613,6 +615,8 @@
 "Lessons open with right answers in the daily quiz." = "Les leçons s'ouvrent avec les bonnes réponses du quiz du jour.";
 "Let us know if your child has symptoms." = "Avise-nous si ton enfant a des symptômes.";
 "Level %1$lld · %2$@" = "Niveau %1$lld · %2$@";
+"Level %lld" = "Niveau %lld";
+"Level rewards" = "Récompenses de niveau";
 "Lice Comb Ninja" = "Ninja du peigne fin";
 "Life of a germ" = "La vie d'un microbe";
 "Light" = "Clair";
@@ -637,12 +641,14 @@
 "Low" = "Bas";
 "Lucky Dodger" = "Esquiveur chanceux";
 "Lv %lld" = "Niv. %lld";
+"Magnet sticker" = "Autocollant aimant";
 "Make it a game." = "Fais-en un jeu.";
 "Make it sneeze" = "Le faire éternuer";
 "Manage" = "Gérer";
 "Marathon" = "Marathon";
 "Master of the Nasal Aspirator" = "Maître du mouche-bébé";
 "Me" = "Moi";
+"Medal sticker" = "Autocollant médaille";
 "Meh" = "Bof";
 "Members" = "Membres";
 "Messages (optional)" = "Messages (facultatifs)";
@@ -650,7 +656,6 @@
 "Milestone reached. Open Germily to frame it." = "Cap franchi. Ouvre Germily pour l'encadrer.";
 "Milestone unlocked" = "Cap franchi";
 "Mint" = "Menthe";
-"Month" = "Mois";
 "Month recap" = "Récap du mois";
 "Month's nemesis" = "Ennemi juré du mois";
 "Monthly" = "Mensuel";
@@ -728,7 +733,6 @@
 "Not one sick week so far." = "Aucune semaine malade jusqu'ici.";
 "Not quite." = "Pas tout à fait.";
 "Not sure" = "Pas certain";
-"Not sure? A nurse answers at 811, day and night." = "Pas sûr ? Une infirmière répond au 811, jour et nuit.";
 "Not sure? Ask your doctor or your local health line." = "Pas sûr ? Demande à ton médecin ou à ta ligne santé locale.";
 "Not this one. Swipe to see." = "Pas celui-là. Glisse pour voir.";
 "Not yet" = "Pas encore";
@@ -761,9 +765,12 @@
 "Official info" = "Info officielle";
 "OK" = "OK";
 "On" = "Activé";
+"On evenings when nobody is sick" = "Les soirs où personne n'est malade";
+"On the couch" = "Sur le divan";
 "On this phone" = "Sur ce téléphone";
 "One full night of sleep" = "Une nuit complète de sommeil";
 "One germ, ten days or more" = "Un microbe, dix jours ou plus";
+"One notification at %@, only on days nobody is sick. You can change it in Settings." = "Une notification à %@, seulement les jours où personne n'est malade. Tu peux changer ça dans les Réglages.";
 "One suspect" = "Un suspect";
 "One tap too many…" = "Une touche de trop…";
 "Only a first name, and it never leaves this phone. More kids? Add them later in Family." = "Seulement un prénom, et il ne quitte jamais ce téléphone. D'autres enfants ? Ajoute-les plus tard dans Famille.";
@@ -784,6 +791,7 @@
 "Owed by" = "Dû par";
 "Pacifier" = "Suce";
 "Parasite" = "Parasite";
+"Parent crew" = "Groupe de parents";
 "Parents open Germily, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has." = "Les parents ouvrent Germily, puis Groupe, touchent Rejoindre une garderie et scannent ce code ou le tapent. Ils choisissent le groupe de leur enfant; tu vois seulement combien de familles compte chaque groupe.";
 "Parents pick their child's group. Up to 12 groups, and you can change them later." = "Les parents choisissent le groupe de leur enfant. Jusqu'à 12 groupes, modifiables plus tard.";
 "Partner" = "Partenaire";
@@ -810,9 +818,6 @@
 "Point at the daycare's QR code." = "Vise le code QR de la garderie.";
 "Points" = "Points";
 "Points stay as they were when the germ was logged." = "Les points restent tels qu'ils étaient au moment de la saisie.";
-"Poison centre" = "Centre antipoison";
-"Poison centre, Québec" = "Centre antipoison du Québec";
-"Poison Help" = "Centre antipoison";
 "Pop a z" = "Éclater un z";
 "Porcelain Diplomat" = "Diplomate de la porcelaine";
 "Poster" = "Affiche";
@@ -834,7 +839,10 @@
 "Quiz streak" = "Série du quiz";
 "Quiz streak: %lld day" = "Série du quiz : %lld jour";
 "Quiz streak: %lld days" = "Série du quiz : %lld jours";
+"Quiz, %lld day in a row" = "Quiz, %lld jour de suite";
+"Quiz, %lld days in a row" = "Quiz, %lld jours de suite";
 "Québec's official criteria" = "Les critères officiels du Québec";
+"Rainbow sticker" = "Autocollant arc-en-ciel";
 "Rare" = "Rare";
 "Rash Cartographer" = "Cartographe des rougeurs";
 "Rash or sores" = "Éruption ou plaies";
@@ -852,6 +860,7 @@
 "Recovery points" = "Points de guérison";
 "Red eye" = "Œil rouge";
 "Redeem a code" = "Utiliser un code";
+"Remind me" = "Me le rappeler";
 "Remind me when the window opens" = "Me prévenir à l'ouverture de la fenêtre";
 "Remove" = "Retirer";
 "Remove %@" = "Retirer %@";
@@ -898,7 +907,6 @@
 "Search an illness, a myth or a lesson" = "Chercher une maladie, un mythe ou une leçon";
 "Season" = "Saison";
 "Season %lld" = "Saison %lld";
-"Season %lld recap" = "Bilan de la saison %lld";
 "Season Pass" = "Passe de saison";
 "Season recap" = "Bilan de saison";
 "Season story" = "Récit de la saison";
@@ -974,6 +982,7 @@
 "Sniffle Scout" = "Éclaireur du reniflement";
 "Sniffles" = "Reniflements";
 "Snow Day" = "Jour de neige";
+"So far" = "Jusqu'ici";
 "Somebody had to hold the bucket." = "Fallait bien que quelqu'un tienne le seau.";
 "Someone's sick" = "Quelqu'un est malade";
 "Something else" = "Autre chose";
@@ -985,6 +994,7 @@
 "Sounds stay off from 10 PM to 7 AM" = "Les sons restent coupés de 22 h à 7 h";
 "Soup Bowl" = "Bol de soupe";
 "Soup Sommelier" = "Sommelier de soupe";
+"Soup sticker" = "Autocollant soupe";
 "Soup, tissues, tea" = "Soupe, mouchoirs, thé";
 "Source" = "Source";
 "Source: Clinical Microbiology Reviews, 2026" = "Source : Clinical Microbiology Reviews, 2026";
@@ -1005,6 +1015,8 @@
 "Started %@" = "Début : %@";
 "Status" = "Statut";
 "Steady" = "Stable";
+"Sticker book" = "Carnet d'autocollants";
+"Sticker book · %1$lld of %2$lld" = "Carnet d'autocollants · %1$lld sur %2$lld";
 "Still a mystery" = "Toujours un mystère";
 "Still fine" = "Ça va encore";
 "Still fine. What now?" = "Ça va encore. Et maintenant ?";
@@ -1018,6 +1030,9 @@
 "Subject:" = "Objet :";
 "Subscribe" = "M'abonner";
 "Summarized in our words. Tap a germ for its page." = "Résumé dans nos mots. Touche un microbe pour voir sa fiche.";
+"Sun sticker" = "Autocollant soleil";
+"Surprise" = "Surprise";
+"Survival kit sticker" = "Autocollant trousse de survie";
 "Survived it %lld time." = "J'y ai survécu %lld fois.";
 "Survived it %lld times." = "J'y ai survécu %lld fois.";
 "Symptoms" = "Symptômes";
@@ -1030,6 +1045,7 @@
 "Take it off" = "L'enlever";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Touche « Je vais mieux » quand le microbe est parti. Le compteur attend.";
 "Tap a letter of its snore." = "Touche une lettre de son ronflement.";
+"Tap a sticker to put it on the couch. Hold it there to move it." = "Touche un autocollant pour le mettre sur le divan. Garde le doigt dessus pour le déplacer.";
 "Tap a symptom first" = "Touche d'abord un symptôme";
 "Tap an unlocked title to wear it." = "Touche un titre obtenu pour le porter.";
 "Tap everything that fits. You can change it later." = "Touche tout ce qui colle. Tu pourras changer plus tard.";
@@ -1044,6 +1060,7 @@
 "Tap us. Gently." = "Touche-nous. Doucement.";
 "Tap, or swipe the card: left for myth, right for fact." = "Touche, ou glisse la carte : à gauche pour mythe, à droite pour fait.";
 "Target" = "Cible";
+"Tea sticker" = "Autocollant thé";
 "Tell %@" = "Avertir %@";
 "Tell families when an illness is going around, from the app or by email. Free for daycares." = "Préviens les familles quand une maladie circule, depuis l'app ou par courriel. Gratuit pour les garderies.";
 "Tell families when an illness is going around, right from the app. Free for daycares." = "Préviens les familles quand une maladie circule, directement depuis l'app. Gratuit pour les garderies.";
@@ -1122,6 +1139,7 @@
 "Their own file, and what they bring home" = "Sa fiche, et ce qu'il ramène à la maison";
 "Theme" = "Thème";
 "Then %@ a year. Cancel anytime." = "Ensuite %@ par année. Annule quand tu veux.";
+"Thermometer sticker" = "Autocollant thermomètre";
 "They fit everything you ticked." = "Ils collent à tout ce que tu as coché.";
 "Thirty days without a germ" = "Trente jours sans microbe";
 "This crew is full." = "Ce groupe est complet.";
@@ -1140,8 +1158,10 @@
 "Ticklish" = "Chatouilleux";
 "Tied" = "Égalité";
 "Tied at zero. The podium opens with the first germ." = "Égalité à zéro. Le podium s'ouvre au premier microbe.";
+"Time" = "Heure";
 "Timing" = "Délais";
 "Tissue Apprentice" = "Apprenti mouchoir";
+"Tissue box sticker" = "Autocollant mouchoirs";
 "Tissue Tester" = "Testeur de mouchoirs";
 "Titles and badges" = "Titres et badges";
 "Titles follow your journal: delete a log and its titles can go with it." = "Les titres suivent ton journal : supprime une entrée et ses titres peuvent partir avec.";
@@ -1159,7 +1179,6 @@
 "Trophies" = "Trophées";
 "Trouble breathing" = "Difficulté à respirer";
 "Trouble breathing can't wait" = "Une difficulté à respirer n'attend pas";
-"Trouble breathing, a seizure, or a child who won't wake up." = "Difficulté à respirer, convulsions ou enfant impossible à réveiller.";
 "Try %lld days free" = "Essaie %lld jours gratuits";
 "Try again" = "Réessayer";
 "Try it late at night." = "Essaie tard le soir.";
@@ -1202,6 +1221,7 @@
 "Weakness" = "Point faible";
 "Wear this title" = "Porter ce titre";
 "Wearing" = "Porté";
+"Week %1$lld for you · %2$@ to %3$@" = "Semaine %1$lld pour toi · de %2$@ à %3$@";
 "Week %lld" = "Semaine %lld";
 "Week %lld for you" = "Semaine %lld pour toi";
 "Week of %@" = "Semaine du %@";
@@ -1268,6 +1288,7 @@
 "you dodged it" = "tu l'as évité";
 "You get the daycare's notices for these groups and for the whole daycare. Nothing about your family is sent: no names, no photos, no journal." = "Tu reçois les avis de la garderie pour ces groupes et pour toute la garderie. Rien sur ta famille n'est envoyé : aucun nom, aucune photo, aucun journal.";
 "You have the Season Pass" = "Tu as la Passe de saison";
+"You started on %@." = "Tu as commencé le %@.";
 "You're down. Hold the line." = "Tu es au tapis. On tient bon.";
 "You're in the window until %@." = "Tu es dans la fenêtre jusqu'à %@.";
 "You're no longer in this crew." = "Tu ne fais plus partie de ce groupe.";
@@ -1306,10 +1327,9 @@
 "your passcode" = "ton code";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Ton achat doit être approuvé. La Passe de saison s'active toute seule une fois l'approbation donnée.";
 "Your season in numbers" = "Ta saison en chiffres";
-"Your season in story cards, ready to share." = "Ta saison en cartes à partager.";
 "Your Season Pass is active on this phone." = "Ta Passe de saison est active sur ce téléphone.";
 "Your season recap" = "Le bilan de ta saison";
-"Your season so far" = "Ta saison jusqu'ici";
+"Your season starts with the first germ." = "Ta saison commence au premier microbe.";
 "Your sleeves have seen things." = "Tes manches en ont vu d'autres.";
 "Your soup needs an approval. It goes through by itself once it's approved." = "Ta soupe doit être approuvée. Elle passe toute seule une fois l'approbation donnée.";
 "Your window for %@ opens now. Still fine?" = "Ta fenêtre pour %@ s'ouvre maintenant. Ça va encore ?";

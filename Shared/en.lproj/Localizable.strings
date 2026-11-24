@@ -13,7 +13,6 @@
 "%1$@ is at %2$lld%%" = "%1$@ is at %2$lld%%";
 "%1$@ is your nemesis: %2$lld times already." = "%1$@ is your nemesis: %2$lld times already.";
 "%1$@ to %2$@" = "%1$@ to %2$@";
-"%1$@ to %2$@ · Week %3$lld" = "%1$@ to %2$@ · Week %3$lld";
 "%1$@ was going around the daycare. Tap Caught it to add it to %2$@'s history." = "%1$@ was going around the daycare. Tap Caught it to add it to %2$@'s history.";
 "%1$@ was the worst: %2$lld days sick." = "%1$@ was the worst: %2$lld days sick.";
 "%1$@ · caught %2$@" = "%1$@ · caught %2$@";
@@ -76,6 +75,8 @@
 "%lld entry" = "%lld entry";
 "%lld families" = "%lld families";
 "%lld family" = "%lld family";
+"%lld full week" = "%lld full week";
+"%lld full weeks" = "%lld full weeks";
 "%lld germ" = "%lld germ";
 "%lld germs" = "%lld germs";
 "%lld group" = "%lld group";
@@ -91,6 +92,7 @@
 "%lld more right answers" = "%lld more right answers";
 "%lld more suspect" = "%lld more suspect";
 "%lld more suspects" = "%lld more suspects";
+"%lld more to find." = "%lld more to find.";
 "%lld more with the Season Pass" = "%lld more with the Season Pass";
 "%lld myth busted in a row" = "%lld myth busted in a row";
 "%lld myths busted in a row" = "%lld myths busted in a row";
@@ -129,6 +131,7 @@
 "A clean couch" = "A clean couch";
 "A clean file for the doctor" = "A clean file for the doctor";
 "A cup of broth" = "A cup of broth";
+"A full week of All good. +%lld pts" = "A full week of All good. +%lld pts";
 "A germ shows up once 3 families report it. No names." = "A germ shows up once 3 families report it. No names.";
 "A guess for your logbook, not a diagnosis." = "A guess for your logbook, not a diagnosis.";
 "A hot coffee, still hot" = "A hot coffee, still hot";
@@ -143,7 +146,6 @@
 "A new quiz tomorrow." = "A new quiz tomorrow.";
 "A newer germ is in your journal, so this one has an end date." = "A newer germ is in your journal, so this one has an end date.";
 "A note can't hold a link, an email address or an insult." = "A note can't hold a link, an email address or an insult.";
-"A nurse answers day and night in most provinces. In Québec it's Info-Santé." = "A nurse answers day and night in most provinces. In Québec it's Info-Santé.";
 "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses." = "A one-year-old's first daycare year brings about 12 to 15 respiratory infections, 2 stomach bugs and 1 or 2 rash illnesses.";
 "A PDF for the doctor" = "A PDF for the doctor";
 "A pot for the whole daycare" = "A pot for the whole daycare";
@@ -170,7 +172,7 @@
 "Add to %@'s album" = "Add to %@'s album";
 "Add to your album" = "Add to your album";
 "Add your partner" = "Add your partner";
-"Add your partner to start the couple duel." = "Add your partner to start the couple duel.";
+"Add your partner to start it." = "Add your partner to start it.";
 "Added to %@'s history." = "Added to %@'s history.";
 "Adds 1 to the radar and posts to the feed." = "Adds 1 to the radar and posts to the feed.";
 "Adds 1 to the radar. No name shared." = "Adds 1 to the radar. No name shared.";
@@ -186,6 +188,7 @@
 "All ten found. The Ticklish badge is yours." = "All ten found. The Ticklish badge is yours.";
 "Also caught at home:" = "Also caught at home:";
 "Always yours" = "Always yours";
+"An evening reminder?" = "An evening reminder?";
 "An outbreak radar for your group" = "An outbreak radar for your group";
 "Antibiotics" = "Antibiotics";
 "Antibiotics?" = "Antibiotics?";
@@ -256,7 +259,6 @@
 "Caught %lld times" = "Caught %lld times";
 "Caught %lld times this season" = "Caught %lld times this season";
 "Caught it" = "Caught it";
-"Centre antipoison du Québec." = "Centre antipoison du Québec.";
 "Change groups" = "Change groups";
 "Character" = "Character";
 "Character %lld" = "Character %lld";
@@ -272,6 +274,7 @@
 "Close for good" = "Close for good";
 "Close the daycare" = "Close the daycare";
 "Close the daycare?" = "Close the daycare?";
+"Clover sticker" = "Clover sticker";
 "Code" = "Code";
 "Code and poster" = "Code and poster";
 "Collector" = "Collector";
@@ -295,10 +298,13 @@
 "Create the daycare" = "Create the daycare";
 "Crew" = "Crew";
 "Crew alerts" = "Crew alerts";
+"Crew comes with the Season Pass." = "Crew comes with the Season Pass.";
 "Crew is offline" = "Crew is offline";
 "Crew name" = "Crew name";
 "Crew settings" = "Crew settings";
 "Crews are private and invite only. The server stores your crew name, the name you pick here and the germs you choose to share. Nothing else leaves your phone." = "Crews are private and invite only. The server stores your crew name, the name you pick here and the germs you choose to share. Nothing else leaves your phone.";
+"Crown sticker" = "Crown sticker";
+"Cushion sticker" = "Cushion sticker";
 "Daily quiz" = "Daily quiz";
 "Dark" = "Dark";
 "Data" = "Data";
@@ -368,8 +374,6 @@
 "Electrolyte Sommelier" = "Electrolyte Sommelier";
 "Email (optional)" = "Email (optional)";
 "Emblem %lld" = "Emblem %lld";
-"Emergency" = "Emergency";
-"Emergency and health lines" = "Emergency and health lines";
 "Empty trophy case." = "Empty trophy case.";
 "Ended" = "Ended";
 "Enough for every runny nose" = "Enough for every runny nose";
@@ -377,6 +381,7 @@
 "Erase this phone only" = "Erase this phone only";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server." = "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server.";
 "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone." = "Erases your journal, kids, photos, badges and settings from this phone, and your crew and daycare data from the server. This can't be undone.";
+"Evening report" = "Evening report";
 "Every card of your season story, ready to share." = "Every card of your season story, ready to share.";
 "Every character" = "Every character";
 "Every clean week gets its soap." = "Every clean week gets its soap.";
@@ -390,16 +395,17 @@
 "Every kid, every week and every photo, kept all season." = "Every kid, every week and every photo, kept all season.";
 "Every kid, the couple duel and every character" = "Every kid, the couple duel and every character";
 "Every kid, the couple duel, the whole season and the doctor's PDF." = "Every kid, the couple duel, the whole season and the doctor's PDF.";
+"Every level unlocks a sticker for the couch." = "Every level unlocks a sticker for the couch.";
 "Every theme and icon" = "Every theme and icon";
 "Every theme, every icon and the incubation widget." = "Every theme, every icon and the incubation widget.";
 "Every week stays, not just the last 7 days" = "Every week stays, not just the last 7 days";
 "Every week, every photo and the doctor's PDF" = "Every week, every photo and the doctor's PDF";
 "Everyone" = "Everyone";
+"Everyone fine today? One tap keeps your week going." = "Everyone fine today? One tap keeps your week going.";
 "Everyone's down. Send soup." = "Everyone's down. Send soup.";
 "Everyone's fine. Suspicious." = "Everyone's fine. Suspicious.";
 "Everything in the Season Pass" = "Everything in the Season Pass";
 "Everything opens. No charge." = "Everything opens. No charge.";
-"Everywhere in Canada except Québec and Nunavut." = "Everywhere in Canada except Québec and Nunavut.";
 "Example" = "Example";
 "Export" = "Export";
 "Export the journal that couldn't be read" = "Export the journal that couldn't be read";
@@ -441,7 +447,6 @@
 "Found every trick of the napping germ" = "Found every trick of the napping germ";
 "Found on Today, while it naps. Each one left has a clue." = "Found on Today, while it naps. Each one left has a clue.";
 "Four quick taps." = "Four quick taps.";
-"Free and confidential, day and night." = "Free and confidential, day and night.";
 "Free for families. No names, no photos, no journal leave your phone." = "Free for families. No names, no photos, no journal leave your phone.";
 "Free. Their own file and their germs" = "Free. Their own file and their germs";
 "Frequent flyer" = "Frequent flyer";
@@ -474,8 +479,8 @@
 "Germily · Admit one household" = "Germily · Admit one household";
 "Germily · For the doctor" = "Germily · For the doctor";
 "Germily. Daycare germs, collected." = "Germily. Daycare germs, collected.";
-"Germs" = "Germs";
 "Germs by month" = "Germs by month";
+"Germs by month, your top supplier and the longest chain fill this page." = "Germs by month, your top supplier and the longest chain fill this page.";
 "germs caught" = "germs caught";
 "germs dodged" = "germs dodged";
 "Germs dodged" = "Germs dodged";
@@ -489,7 +494,6 @@
 "going on" = "going on";
 "Golden" = "Golden";
 "Good for one uninterrupted nap." = "Good for one uninterrupted nap.";
-"Good to have" = "Good to have";
 "Good to know" = "Good to know";
 "Got every myth right" = "Got every myth right";
 "got you" = "got you";
@@ -504,9 +508,7 @@
 "Headache" = "Headache";
 "Health data policy" = "Health data policy";
 "Health Data Policy" = "Health Data Policy";
-"Health line" = "Health line";
-"Help" = "Help";
-"Help lines" = "Help lines";
+"Heart sticker" = "Heart sticker";
 "Hidden" = "Hidden";
 "Hidden somewhere on Today." = "Hidden somewhere on Today.";
 "Hides it from the choices." = "Hides it from the choices.";
@@ -542,7 +544,6 @@
 "In %lld weeks" = "In %lld weeks";
 "In a crew" = "In a crew";
 "In an emergency, call your local emergency number." = "In an emergency, call your local emergency number.";
-"In an emergency, call your local emergency number. For advice, call your doctor or your local health line." = "In an emergency, call your local emergency number. For advice, call your doctor or your local health line.";
 "In short" = "In short";
 "In the feed and the leaderboard, with your name" = "In the feed and the leaderboard, with your name";
 "In the window" = "In the window";
@@ -590,6 +591,7 @@
 "Know the enemy." = "Know the enemy.";
 "Know what's going around" = "Know what's going around";
 "Know what's going around." = "Know what's going around.";
+"Lab flask sticker" = "Lab flask sticker";
 "Lab Rat" = "Lab Rat";
 "Last updated %@" = "Last updated %@";
 "Last: %@" = "Last: %@";
@@ -613,6 +615,8 @@
 "Lessons open with right answers in the daily quiz." = "Lessons open with right answers in the daily quiz.";
 "Let us know if your child has symptoms." = "Let us know if your child has symptoms.";
 "Level %1$lld · %2$@" = "Level %1$lld · %2$@";
+"Level %lld" = "Level %lld";
+"Level rewards" = "Level rewards";
 "Lice Comb Ninja" = "Lice Comb Ninja";
 "Life of a germ" = "Life of a germ";
 "Light" = "Light";
@@ -637,12 +641,14 @@
 "Low" = "Low";
 "Lucky Dodger" = "Lucky Dodger";
 "Lv %lld" = "Lv %lld";
+"Magnet sticker" = "Magnet sticker";
 "Make it a game." = "Make it a game.";
 "Make it sneeze" = "Make it sneeze";
 "Manage" = "Manage";
 "Marathon" = "Marathon";
 "Master of the Nasal Aspirator" = "Master of the Nasal Aspirator";
 "Me" = "Me";
+"Medal sticker" = "Medal sticker";
 "Meh" = "Meh";
 "Members" = "Members";
 "Messages (optional)" = "Messages (optional)";
@@ -650,7 +656,6 @@
 "Milestone reached. Open Germily to frame it." = "Milestone reached. Open Germily to frame it.";
 "Milestone unlocked" = "Milestone unlocked";
 "Mint" = "Mint";
-"Month" = "Month";
 "Month recap" = "Month recap";
 "Month's nemesis" = "Month's nemesis";
 "Monthly" = "Monthly";
@@ -728,7 +733,6 @@
 "Not one sick week so far." = "Not one sick week so far.";
 "Not quite." = "Not quite.";
 "Not sure" = "Not sure";
-"Not sure? A nurse answers at 811, day and night." = "Not sure? A nurse answers at 811, day and night.";
 "Not sure? Ask your doctor or your local health line." = "Not sure? Ask your doctor or your local health line.";
 "Not this one. Swipe to see." = "Not this one. Swipe to see.";
 "Not yet" = "Not yet";
@@ -761,9 +765,12 @@
 "Official info" = "Official info";
 "OK" = "OK";
 "On" = "On";
+"On evenings when nobody is sick" = "On evenings when nobody is sick";
+"On the couch" = "On the couch";
 "On this phone" = "On this phone";
 "One full night of sleep" = "One full night of sleep";
 "One germ, ten days or more" = "One germ, ten days or more";
+"One notification at %@, only on days nobody is sick. You can change it in Settings." = "One notification at %@, only on days nobody is sick. You can change it in Settings.";
 "One suspect" = "One suspect";
 "One tap too many…" = "One tap too many…";
 "Only a first name, and it never leaves this phone. More kids? Add them later in Family." = "Only a first name, and it never leaves this phone. More kids? Add them later in Family.";
@@ -784,6 +791,7 @@
 "Owed by" = "Owed by";
 "Pacifier" = "Pacifier";
 "Parasite" = "Parasite";
+"Parent crew" = "Parent crew";
 "Parents open Germily, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has." = "Parents open Germily, then Crew, tap Join a daycare and scan this code or type it. They choose their child's group; you only see how many families each group has.";
 "Parents pick their child's group. Up to 12 groups, and you can change them later." = "Parents pick their child's group. Up to 12 groups, and you can change them later.";
 "Partner" = "Partner";
@@ -810,9 +818,6 @@
 "Point at the daycare's QR code." = "Point at the daycare's QR code.";
 "Points" = "Points";
 "Points stay as they were when the germ was logged." = "Points stay as they were when the germ was logged.";
-"Poison centre" = "Poison centre";
-"Poison centre, Québec" = "Poison centre, Québec";
-"Poison Help" = "Poison Help";
 "Pop a z" = "Pop a z";
 "Porcelain Diplomat" = "Porcelain Diplomat";
 "Poster" = "Poster";
@@ -834,7 +839,10 @@
 "Quiz streak" = "Quiz streak";
 "Quiz streak: %lld day" = "Quiz streak: %lld day";
 "Quiz streak: %lld days" = "Quiz streak: %lld days";
+"Quiz, %lld day in a row" = "Quiz, %lld day in a row";
+"Quiz, %lld days in a row" = "Quiz, %lld days in a row";
 "Québec's official criteria" = "Québec's official criteria";
+"Rainbow sticker" = "Rainbow sticker";
 "Rare" = "Rare";
 "Rash Cartographer" = "Rash Cartographer";
 "Rash or sores" = "Rash or sores";
@@ -852,6 +860,7 @@
 "Recovery points" = "Recovery points";
 "Red eye" = "Red eye";
 "Redeem a code" = "Redeem a code";
+"Remind me" = "Remind me";
 "Remind me when the window opens" = "Remind me when the window opens";
 "Remove" = "Remove";
 "Remove %@" = "Remove %@";
@@ -898,7 +907,6 @@
 "Search an illness, a myth or a lesson" = "Search an illness, a myth or a lesson";
 "Season" = "Season";
 "Season %lld" = "Season %lld";
-"Season %lld recap" = "Season %lld recap";
 "Season Pass" = "Season Pass";
 "Season recap" = "Season recap";
 "Season story" = "Season story";
@@ -974,6 +982,7 @@
 "Sniffle Scout" = "Sniffle Scout";
 "Sniffles" = "Sniffles";
 "Snow Day" = "Snow Day";
+"So far" = "So far";
 "Somebody had to hold the bucket." = "Somebody had to hold the bucket.";
 "Someone's sick" = "Someone's sick";
 "Something else" = "Something else";
@@ -985,6 +994,7 @@
 "Sounds stay off from 10 PM to 7 AM" = "Sounds stay off from 10 PM to 7 AM";
 "Soup Bowl" = "Soup Bowl";
 "Soup Sommelier" = "Soup Sommelier";
+"Soup sticker" = "Soup sticker";
 "Soup, tissues, tea" = "Soup, tissues, tea";
 "Source" = "Source";
 "Source: Clinical Microbiology Reviews, 2026" = "Source: Clinical Microbiology Reviews, 2026";
@@ -1005,6 +1015,8 @@
 "Started %@" = "Started %@";
 "Status" = "Status";
 "Steady" = "Steady";
+"Sticker book" = "Sticker book";
+"Sticker book · %1$lld of %2$lld" = "Sticker book · %1$lld of %2$lld";
 "Still a mystery" = "Still a mystery";
 "Still fine" = "Still fine";
 "Still fine. What now?" = "Still fine. What now?";
@@ -1018,6 +1030,9 @@
 "Subject:" = "Subject:";
 "Subscribe" = "Subscribe";
 "Summarized in our words. Tap a germ for its page." = "Summarized in our words. Tap a germ for its page.";
+"Sun sticker" = "Sun sticker";
+"Surprise" = "Surprise";
+"Survival kit sticker" = "Survival kit sticker";
 "Survived it %lld time." = "Survived it %lld time.";
 "Survived it %lld times." = "Survived it %lld times.";
 "Symptoms" = "Symptoms";
@@ -1030,6 +1045,7 @@
 "Take it off" = "Take it off";
 "Tap \"I'm better\" when the germ is gone. The counter is waiting." = "Tap \"I'm better\" when the germ is gone. The counter is waiting.";
 "Tap a letter of its snore." = "Tap a letter of its snore.";
+"Tap a sticker to put it on the couch. Hold it there to move it." = "Tap a sticker to put it on the couch. Hold it there to move it.";
 "Tap a symptom first" = "Tap a symptom first";
 "Tap an unlocked title to wear it." = "Tap an unlocked title to wear it.";
 "Tap everything that fits. You can change it later." = "Tap everything that fits. You can change it later.";
@@ -1044,6 +1060,7 @@
 "Tap us. Gently." = "Tap us. Gently.";
 "Tap, or swipe the card: left for myth, right for fact." = "Tap, or swipe the card: left for myth, right for fact.";
 "Target" = "Target";
+"Tea sticker" = "Tea sticker";
 "Tell %@" = "Tell %@";
 "Tell families when an illness is going around, from the app or by email. Free for daycares." = "Tell families when an illness is going around, from the app or by email. Free for daycares.";
 "Tell families when an illness is going around, right from the app. Free for daycares." = "Tell families when an illness is going around, right from the app. Free for daycares.";
@@ -1122,6 +1139,7 @@
 "Their own file, and what they bring home" = "Their own file, and what they bring home";
 "Theme" = "Theme";
 "Then %@ a year. Cancel anytime." = "Then %@ a year. Cancel anytime.";
+"Thermometer sticker" = "Thermometer sticker";
 "They fit everything you ticked." = "They fit everything you ticked.";
 "Thirty days without a germ" = "Thirty days without a germ";
 "This crew is full." = "This crew is full.";
@@ -1140,8 +1158,10 @@
 "Ticklish" = "Ticklish";
 "Tied" = "Tied";
 "Tied at zero. The podium opens with the first germ." = "Tied at zero. The podium opens with the first germ.";
+"Time" = "Time";
 "Timing" = "Timing";
 "Tissue Apprentice" = "Tissue Apprentice";
+"Tissue box sticker" = "Tissue box sticker";
 "Tissue Tester" = "Tissue Tester";
 "Titles and badges" = "Titles and badges";
 "Titles follow your journal: delete a log and its titles can go with it." = "Titles follow your journal: delete a log and its titles can go with it.";
@@ -1159,7 +1179,6 @@
 "Trophies" = "Trophies";
 "Trouble breathing" = "Trouble breathing";
 "Trouble breathing can't wait" = "Trouble breathing can't wait";
-"Trouble breathing, a seizure, or a child who won't wake up." = "Trouble breathing, a seizure, or a child who won't wake up.";
 "Try %lld days free" = "Try %lld days free";
 "Try again" = "Try again";
 "Try it late at night." = "Try it late at night.";
@@ -1202,6 +1221,7 @@
 "Weakness" = "Weakness";
 "Wear this title" = "Wear this title";
 "Wearing" = "Wearing";
+"Week %1$lld for you · %2$@ to %3$@" = "Week %1$lld for you · %2$@ to %3$@";
 "Week %lld" = "Week %lld";
 "Week %lld for you" = "Week %lld for you";
 "Week of %@" = "Week of %@";
@@ -1268,6 +1288,7 @@
 "you dodged it" = "you dodged it";
 "You get the daycare's notices for these groups and for the whole daycare. Nothing about your family is sent: no names, no photos, no journal." = "You get the daycare's notices for these groups and for the whole daycare. Nothing about your family is sent: no names, no photos, no journal.";
 "You have the Season Pass" = "You have the Season Pass";
+"You started on %@." = "You started on %@.";
 "You're down. Hold the line." = "You're down. Hold the line.";
 "You're in the window until %@." = "You're in the window until %@.";
 "You're no longer in this crew." = "You're no longer in this crew.";
@@ -1306,10 +1327,9 @@
 "your passcode" = "your passcode";
 "Your purchase needs an approval. The Season Pass turns on by itself once it's approved." = "Your purchase needs an approval. The Season Pass turns on by itself once it's approved.";
 "Your season in numbers" = "Your season in numbers";
-"Your season in story cards, ready to share." = "Your season in story cards, ready to share.";
 "Your Season Pass is active on this phone." = "Your Season Pass is active on this phone.";
 "Your season recap" = "Your season recap";
-"Your season so far" = "Your season so far";
+"Your season starts with the first germ." = "Your season starts with the first germ.";
 "Your sleeves have seen things." = "Your sleeves have seen things.";
 "Your soup needs an approval. It goes through by itself once it's approved." = "Your soup needs an approval. It goes through by itself once it's approved.";
 "Your window for %@ opens now. Still fine?" = "Your window for %@ opens now. Still fine?";

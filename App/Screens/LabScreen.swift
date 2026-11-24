@@ -264,34 +264,10 @@ struct LabScreen: View {
         .hitTarget(height: 20)
     }
 
-    /// What is worth having at hand: the help lines, and who to ask when unsure.
-    @ViewBuilder
+    /// Who to ask when unsure, at the foot of the Guide.
     private var extras: some View {
-        SectionHeader(title: tr("Good to have"))
-        NavigationLink {
-            HelpLinesScreen()
-        } label: {
-            HStack(spacing: 12) {
-                IconTile(symbol: "phone.fill", size: 36)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(tr("Help lines"))
-                        .font(.body)
-                        .foregroundStyle(palette.ink)
-                    Text(tr("Emergency and health lines"))
-                        .font(.footnote)
-                        .foregroundStyle(palette.inkSecondary)
-                }
-                .multilineTextAlignment(.leading)
-                Spacer(minLength: 8)
-                RowChevron()
-            }
-            .frame(minHeight: 54)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 14)
-        .germilyCard(padding: 0)
         HealthLineNote()
+            .padding(.top, 8)
     }
 
     /// What the search finds: illnesses by any of their names, myths by their claim, lessons by title or summary.

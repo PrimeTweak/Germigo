@@ -358,6 +358,16 @@ do {
     learner.wrapGuesses = ["1": true, "2": false]
     check(RewardEngine.totalPoints(data: learner) == 2 * RewardEngine.quizAnswerPoints + RewardEngine.wrapGuessPoints,
           "only a right nemesis guess adds points")
+    let weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: day(3))?.start ?? day(3)
+    let fullWeek = (0..<7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: weekStart) }.map(QuizEngine.dayKey)
+    check(RewardEngine.fullWeeks(fullWeek) == 1 && RewardEngine.fullWeeks(Array(fullWeek.dropLast())) == 0,
+          "a week counts as full with all seven days")
+    check(QuizEngine.longestRun(fullWeek + [QuizEngine.dayKey(day(30))]) == 7 && QuizEngine.longestRun([]) == 0,
+          "the longest quiz run counts days in a row only")
+    var checker = makeData()
+    checker.checkIns = fullWeek + [fullWeek[0]]
+    check(RewardEngine.totalPoints(data: checker) == 7 * RewardEngine.checkInPoints + RewardEngine.fullWeekPoints,
+          "each day of All good counts once, and a full week adds its bonus")
     let quizCatalog = GermCatalog(germs: quizGerms, articles: [])
     check(RewardEngine.earnedBadges(data: learner, catalog: quizCatalog, now: day(3)).contains(BadgeCatalog.labRat),
           "a finished quiz earns the Lab Rat badge")
@@ -888,6 +898,8 @@ do {
                            points: 80, bonuses: [], sufferer: .me, kidIllnessID: nil)]
     let mine = PersonFileEngine.illnesses(of: .me, data: parent, catalog: catalog, now: now)
     if case .from(.kid(kid.id))? = mine.first?.note {} else { check(false, "a parent's germ says which kid it came from") }
+    check(mine.first?.severity == 3 && list.allSatisfy { $0.severity == nil },
+          "a parent's germ keeps how bad it was, a kid's illness has no severity")
     check(PersonFileEngine.illnesses(of: .partner, data: parent, catalog: catalog, now: now).isEmpty,
           "the partner's file leaves out the parent's germs")
 }
@@ -918,6 +930,14 @@ do {
     check(StatsEngine.isUntouched(data: fresh, season: season), "a season with nothing logged waits for its first germ")
     check(!StatsEngine.isUntouched(data: withKid, season: season), "a kid's illness counts as the season's first germ")
     check(!StatsEngine.isUntouched(data: backdated, season: season), "a parent's germ counts as the season's first germ")
+
+    let september = Season(number: 1, start: calendar.date(from: DateComponents(year: 2026, month: 9, day: 1)) ?? day(0),
+                           end: calendar.date(from: DateComponents(year: 2027, month: 9, day: 1)) ?? day(365))
+    let november = calendar.date(from: DateComponents(year: 2026, month: 11, day: 23)) ?? day(0)
+    check(StatsEngine.monthsBeforeJournal(since: november, season: september) == 2,
+          "September and October come before a journal begun in November")
+    check(StatsEngine.monthsBeforeJournal(since: september.start, season: september) == 0,
+          "a journal begun on the first day leaves no month before it")
 }
 
 if failures == 0 {

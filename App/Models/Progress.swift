@@ -64,6 +64,66 @@ struct LevelInfo: Hashable {
     var fraction: Double { span == 0 ? 0 : Double(progress) / Double(span) }
 }
 
+/// What each level unlocks: a sticker, the first one from the start.
+enum LevelRewards {
+    static let stickers = ["heart", "tissue", "tea", "cushion", "soup", "thermometer", "magnet", "kit", "medal", "crown"]
+
+    static func asset(_ level: Int) -> String? {
+        stickers.indices.contains(level - 1) ? "sticker-" + stickers[level - 1] : nil
+    }
+
+    static func name(_ level: Int) -> String {
+        switch level {
+        case 1: return tr("Heart sticker")
+        case 2: return tr("Tissue box sticker")
+        case 3: return tr("Tea sticker")
+        case 4: return tr("Cushion sticker")
+        case 5: return tr("Soup sticker")
+        case 6: return tr("Thermometer sticker")
+        case 7: return tr("Magnet sticker")
+        case 8: return tr("Survival kit sticker")
+        case 9: return tr("Medal sticker")
+        default: return tr("Crown sticker")
+        }
+    }
+}
+
+/// The stickers beyond the levels: full weeks of "All good", and a week of quizzes in a row.
+enum StickerBook {
+    static let weeks: [(count: Int, sticker: String)] = [(1, "sun"), (4, "rainbow"), (10, "clover")]
+    static let quizSticker = "flask"
+    static let quizRun = 7
+
+    /// Where a sticker lands when it is put on the couch, in the couch scene's points (320 by 166).
+    static let couchSlots: [(x: Double, y: Double)] = [
+        (296, 146), (26, 146), (282, 74), (160, 150), (254, 20), (84, 150), (236, 150), (122, 22)
+    ]
+
+    /// Every sticker in the book's order: the levels', then the weeks', then the quiz's.
+    static var all: [String] {
+        LevelRewards.stickers + weeks.map { $0.sticker } + [quizSticker]
+    }
+
+    static func name(_ sticker: String) -> String {
+        if let index = LevelRewards.stickers.firstIndex(of: sticker) { return LevelRewards.name(index + 1) }
+        switch sticker {
+        case "sun": return tr("Sun sticker")
+        case "rainbow": return tr("Rainbow sticker")
+        case "clover": return tr("Clover sticker")
+        default: return tr("Lab flask sticker")
+        }
+    }
+
+    /// How a sticker is earned, in a few words.
+    static func how(_ sticker: String) -> String {
+        if let index = LevelRewards.stickers.firstIndex(of: sticker) { return tr("Level %lld", index + 1) }
+        if let week = weeks.first(where: { $0.sticker == sticker }) {
+            return trCount(week.count, one: "%lld full week", other: "%lld full weeks")
+        }
+        return trCount(quizRun, one: "Quiz, %lld day in a row", other: "Quiz, %lld days in a row")
+    }
+}
+
 enum Levels {
     /// Points needed for each level: the first ones come within weeks, the last takes a hard season.
     static let thresholds = [0, 150, 350, 600, 900, 1300, 1800, 2400, 3100, 4000]

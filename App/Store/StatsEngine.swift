@@ -78,6 +78,13 @@ enum StatsEngine {
         return best.map { Nemesis(germID: $0.key, count: $0.value) }
     }
 
+    /// How many months of the season ended before the journal began; the season page hatches them.
+    static func monthsBeforeJournal(since: Date, season: Season) -> Int {
+        (0..<12).filter { offset in
+            (Calendar.current.date(byAdding: .month, value: offset + 1, to: season.start) ?? season.end) <= since
+        }.count
+    }
+
     /// Nothing logged this season yet, for a parent or a kid: the cards wait for the first germ.
     static func isUntouched(data: AppData, season: Season) -> Bool {
         !data.logs.contains { season.contains($0.startedAt) } && !data.kidIllnesses.contains { season.contains($0.startedAt) }

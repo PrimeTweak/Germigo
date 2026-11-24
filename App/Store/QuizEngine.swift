@@ -49,6 +49,28 @@ enum QuizEngine {
         return String(format: "%04ld-%02ld-%02ld", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
+    /// The longest run of days in a row with the quiz done.
+    static func longestRun(_ days: [String], calendar: Calendar = .current) -> Int {
+        let dates = Set(days).compactMap { key -> Date? in
+            let parts = key.split(separator: "-").compactMap { Int($0) }
+            guard parts.count == 3 else { return nil }
+            return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+        }.sorted()
+        var best = 0
+        var run = 0
+        var previous: Date?
+        for date in dates {
+            if let previous, calendar.date(byAdding: .day, value: 1, to: previous) == date {
+                run += 1
+            } else {
+                run = 1
+            }
+            best = max(best, run)
+            previous = date
+        }
+        return best
+    }
+
     /// A stable number for a text, unlike `hashValue`, which changes at every launch.
     static func seed(_ text: String) -> UInt64 {
         var hash: UInt64 = 5381

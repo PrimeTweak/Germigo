@@ -180,6 +180,23 @@ enum Theme: String, Codable, CaseIterable {
     }
 }
 
+/// A sticker on the Family couch, at a point of the couch scene.
+struct CouchSticker: Codable, Hashable {
+    var id: String
+    var x: Double
+    var y: Double
+}
+
+/// The times offered for the evening report: every half hour, ending before the quiet hours.
+enum EveningReport {
+    static let minutes = Array(stride(from: 17 * 60, through: 21 * 60 + 30, by: 30))
+
+    static func label(_ minute: Int) -> String {
+        let date = Calendar.current.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: Date()) ?? Date()
+        return date.formatted(date: .omitted, time: .shortened)
+    }
+}
+
 struct AppSettings: Codable, Hashable {
     var appearance = AppearanceMode.system
     var theme = Theme.agar
@@ -194,10 +211,13 @@ struct AppSettings: Codable, Hashable {
     var appLockOn = false
     /// Characters left out of the choices when someone is added.
     var hiddenLooks: Set<Int> = []
+    /// The evening report asks whether everyone is fine, at this time in minutes after midnight.
+    var eveningReportOn = false
+    var eveningReportMinute = 19 * 60 + 30
 
     enum CodingKeys: String, CodingKey {
         case appearance, theme, soundsOn, checkInsOn, lessonAlertsOn, crewAlertsOn, sideloadPass, wornTitle, appLockOn
-        case hiddenLooks
+        case hiddenLooks, eveningReportOn, eveningReportMinute
     }
 }
 
@@ -252,10 +272,17 @@ struct AppData: Codable {
     var mascotTricks: [String] = []
     /// True once the free trial was offered after the first illness; it is offered only once.
     var trialOffered = false
+    /// The days someone tapped "All good" on Today, as day keys.
+    var checkIns: [String] = []
+    /// True once Today asked about the evening report; it asks only once.
+    var eveningOffered = false
+    /// The stickers put on the Family couch, where they were left.
+    var couchStickers: [CouchSticker] = []
 
     enum CodingKeys: String, CodingKey {
         case onboardingDone, profileName, installedAt, kids, partnerName, logs, kidIllnesses, badges, settings, readArticles
         case celebratedMilestone, quiz, wrapGuesses, hostLook, partnerLook, photos, mascotTricks, trialOffered
+        case checkIns, eveningOffered, couchStickers
     }
 }
 
@@ -344,6 +371,8 @@ extension AppSettings {
         wornTitle = try? container.decodeIfPresent(String.self, forKey: .wornTitle)
         appLockOn = container.value(.appLockOn, default: false)
         hiddenLooks = container.value(.hiddenLooks, default: Set<Int>())
+        eveningReportOn = container.value(.eveningReportOn, default: false)
+        eveningReportMinute = container.value(.eveningReportMinute, default: 19 * 60 + 30)
     }
 }
 
@@ -380,6 +409,9 @@ extension AppData {
         photos = try container.decodeIfPresent([PatientPhoto].self, forKey: .photos) ?? []
         mascotTricks = container.value(.mascotTricks, default: [String]())
         trialOffered = container.value(.trialOffered, default: false)
+        checkIns = container.value(.checkIns, default: [String]())
+        eveningOffered = container.value(.eveningOffered, default: false)
+        couchStickers = container.value(.couchStickers, default: [CouchSticker]())
     }
 }
 

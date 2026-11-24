@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The home on one page: one character, one number or headline, the week, and two answers.
+/// The home on one page: one character, one number or headline, the week, and the answers: all good, or who is sick.
 struct TodayScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -83,6 +83,24 @@ struct TodayScreen: View {
             }
             .sheet(item: $wanted, onDismiss: { model.offerTrialIfDue() }) { illness in
                 WantedSheet(illness: illness)
+            }
+            .onChange(of: model.opensSomeoneFlow, initial: true) { _, opens in
+                guard opens else { return }
+                model.opensSomeoneFlow = false
+                flow = .someone
+            }
+            .alert(tr("An evening reminder?"), isPresented: Binding(get: { model.offersEveningReport },
+                                                                   set: { model.offersEveningReport = $0 })) {
+                Button(tr("Remind me")) {
+                    model.updateSettings { $0.eveningReportOn = true }
+                    Task {
+                        await model.enableReminders()
+                    }
+                }
+                Button(tr("Not now"), role: .cancel) {}
+            } message: {
+                Text(tr("One notification at %@, only on days nobody is sick. You can change it in Settings.",
+                        EveningReport.label(model.data.settings.eveningReportMinute)))
             }
         }
     }
@@ -282,6 +300,9 @@ private struct CalmStage: View {
             }
             Spacer(minLength: 8)
             HStack(spacing: 10) {
+                if model.canCheckIn {
+                    AllGoodTile()
+                }
                 FaceTile(tr("I'm sick")) {
                     flow = .me
                 } face: {
@@ -321,6 +342,39 @@ private struct CalmStage: View {
                 .frame(width: 62, height: 62)
                 .background(palette.ink.opacity(0.07), in: Circle())
         }
+    }
+}
+
+/// "All good" beside the two sick answers: once a day it earns points and puts a heart under the day.
+private struct AllGoodTile: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let done = model.isCheckedIn(Date())
+        FaceTile(tr("All good")) {
+            model.checkIn()
+        } face: {
+            Image(done ? "sticker-heart" : "mascot-giggle")
+                .resizable()
+                .scaledToFit()
+                .padding(done ? 6 : 0)
+                .contentTransition(.opacity)
+        }
+        .overlay(alignment: .topTrailing) {
+            if done {
+                Text(tr("+%lld pts", RewardEngine.checkInPoints))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(palette.onAccent)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(palette.accent, in: Capsule())
+                    .offset(x: 4, y: -6)
+                    .motionTransition(.scale(scale: 0.4).combined(with: .opacity))
+            }
+        }
+        .animation(Tempo.pop, value: done)
+        .accessibilityValue(done ? tr("Done for today") : "")
     }
 }
 
@@ -623,7 +677,7 @@ private struct WeekStrip: View {
             ForEach(0..<7, id: \.self) { offset in
                 let day = calendar.date(byAdding: .day, value: offset, to: start) ?? start
                 DayDot(day: day, today: today, first: first, archived: opensFrom.map { day < $0 } ?? false,
-                       germ: germ(on: day, now: now))
+                       germ: germ(on: day, now: now), checkedIn: model.isCheckedIn(day))
                     .cascadeIn(offset)
             }
         }
@@ -666,6 +720,8 @@ private struct DayDot: View {
     let first: Date
     let archived: Bool
     let germ: Germ?
+    /// "All good" was said that day: a small heart sits on its corner.
+    let checkedIn: Bool
     @Environment(\.palette) private var palette
 
     private var opens: Bool { day >= first && day <= today }
@@ -683,7 +739,7 @@ private struct DayDot: View {
                 }
                 .buttonStyle(PressableStyle())
                 .accessibilityLabel(Text(day, format: .dateTime.weekday(.wide).month(.wide).day()))
-                .accessibilityValue(germ.map { $0.illness.value } ?? "")
+                .accessibilityValue(germ.map { $0.illness.value } ?? (checkedIn ? tr("All good") : ""))
             } else {
                 dot
                     .accessibilityHidden(true)
@@ -718,6 +774,16 @@ private struct DayDot: View {
                     .strokeBorder(palette.ink, lineWidth: 2.5)
             }
         }
+        .overlay(alignment: .bottomTrailing) {
+            if checkedIn, germ == nil {
+                Image("sticker-heart")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+                    .offset(x: 4, y: 3)
+                    .motionTransition(.scale(scale: 0.3).combined(with: .opacity))
+            }
+        }
         .overlay(alignment: .topTrailing) {
             if archived && opens {
                 Image(systemName: "lock.fill")
@@ -730,6 +796,7 @@ private struct DayDot: View {
             }
         }
         .animation(Tempo.pop, value: germ?.id)
+        .animation(Tempo.pop, value: checkedIn)
     }
 }
 

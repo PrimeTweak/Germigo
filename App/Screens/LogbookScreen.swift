@@ -327,9 +327,12 @@ struct LogbookScreen: View {
         if model.isGoingOn(entry) {
             PillLabel(text: tr("Now"), foreground: palette.onAccent, background: palette.accent)
         } else if case .log(let log) = entry {
-            Text(tr("+%lld pts", log.points))
-                .font(.footnote.monospacedDigit())
-                .foregroundStyle(palette.inkSecondary)
+            VStack(alignment: .trailing, spacing: 5) {
+                Text(tr("+%lld pts", log.points))
+                    .font(.footnote.monospacedDigit())
+                    .foregroundStyle(palette.inkSecondary)
+                SeverityGauge(level: log.severity, germ: model.catalog.germ(log.germID))
+            }
         }
     }
 
@@ -644,7 +647,7 @@ private struct IllnessDays: View {
     }
 }
 
-/// Fixes the dates or the severity of a logged germ.
+/// Fixes the dates, the severity or who had a logged germ.
 private struct LogEditSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -681,14 +684,12 @@ private struct LogEditSheet: View {
                     }
                 }
                 Section {
-                    Stepper(value: $draft.severity, in: 1...5) {
-                        HStack {
-                            Text(tr("How bad?"))
-                            Spacer()
-                            Text(String(draft.severity) + " / 5")
-                                .foregroundStyle(palette.inkSecondary)
-                        }
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(tr("How bad?"))
+                        SeverityPicker(level: $draft.severity, looks: model.looks(of: draft.sufferer),
+                                       germ: model.catalog.germ(draft.germID))
                     }
+                    .padding(.vertical, 6)
                     if let partner = model.data.partnerName {
                         Picker(tr("Who was sick?"), selection: $draft.sufferer) {
                             Text(tr("Me")).tag(Sufferer.me)

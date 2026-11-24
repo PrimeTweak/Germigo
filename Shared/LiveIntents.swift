@@ -9,6 +9,10 @@ enum IntentAction {
     case better
     /// From a daycare watch: the kid caught the germ the daycare announced.
     case kidCaught(kidID: String, germID: String)
+    /// From the evening report: nobody was sick today.
+    case allGood
+    /// From the evening report: open Today on the symptom pages.
+    case someoneSick
 }
 
 /// Set by the app at launch; stays nil inside the widget extension.

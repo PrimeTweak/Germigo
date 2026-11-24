@@ -555,7 +555,18 @@ def check_assets(germs):
             if not imageset_ok(catalog, f"germ-{germ.get('id')}"):
                 fail(f"{catalog}: missing image germ-{germ.get('id')}")
     mascot = tuple(f"mascot-{face}" for face in mascot_faces() + ["pacifier"])
-    for name in ("dish", "sticker-soup", "sticker-tissue", "sticker-tea", "sticker-heart") + mascot:
+    levels_source = (ROOT / "App/Models/Progress.swift").read_text(encoding="utf-8")
+    rewards = re.search(r"enum LevelRewards \{\s*static let stickers = \[([^\]]*)\]", levels_source)
+    thresholds = re.search(r"static let thresholds = \[([^\]]*)\]", levels_source)
+    stickers = tuple(f"sticker-{name}" for name in re.findall(r'"(\w+)"', rewards.group(1))) if rewards else ()
+    if not thresholds or len(stickers) != len(thresholds.group(1).split(",")):
+        fail("App/Models/Progress.swift: LevelRewards needs one sticker per level")
+    book = re.search(r"enum StickerBook \{(.*?)\n    /// Where a sticker lands", levels_source, re.S)
+    extras = tuple(f"sticker-{name}" for name in re.findall(r'"(\w+)"', book.group(1))) if book else ()
+    if not extras:
+        fail("App/Models/Progress.swift: StickerBook lists no stickers")
+    stickers += extras
+    for name in ("dish", "sticker-soup", "sticker-tissue", "sticker-tea", "sticker-heart") + stickers + mascot:
         if not imageset_ok("App/Assets.xcassets", name):
             fail(f"App/Assets.xcassets: missing image {name}")
     for catalog, colors in (("App/Assets.xcassets", ("AccentColor", "LaunchBackground")),

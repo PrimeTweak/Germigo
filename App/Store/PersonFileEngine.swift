@@ -16,6 +16,8 @@ struct PersonIllness: Identifiable {
     let goingOn: Bool
     let symptoms: [String]
     let note: Note?
+    /// How bad it was, for a parent's germ; kids' illnesses have none.
+    var severity: Int?
 
     var days: Int { StreakMath.days(from: start, to: end) + 1 }
 
@@ -51,7 +53,7 @@ enum PersonFileEngine {
             list = data.logs.filter { person == .me ? $0.sufferer.includesMe : $0.sufferer.includesPartner }.map { log in
                 PersonIllness(id: log.id, germID: log.germID, start: log.startedAt, end: log.endedAt ?? now,
                               goingOn: log.isActive, symptoms: log.symptoms,
-                              note: log.source == .unknown ? nil : .from(log.source))
+                              note: log.source == .unknown ? nil : .from(log.source), severity: log.severity)
             }
         }
         return list.sorted { $0.start > $1.start }

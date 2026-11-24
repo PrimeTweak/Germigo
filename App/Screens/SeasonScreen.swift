@@ -1,7 +1,6 @@
-import Charts
 import SwiftUI
 
-/// The daycare year in numbers, opened from Trophies.
+/// The daycare year in numbers, opened from Trophies. Before the season's first germ it says what will fill it.
 struct SeasonScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.palette) private var palette
@@ -17,24 +16,30 @@ struct SeasonScreen: View {
         let seasonCount = model.season.number
         let season = model.season(back: min(seasonsBack, seasonCount - 1))
         let stats = model.seasonStats(for: season)
+        let untouched = StatsEngine.isUntouched(data: model.data, season: season)
+        let hatched = StatsEngine.monthsBeforeJournal(since: PersonFileEngine.trackedSince(data: model.data), season: season)
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 Text(rangeLabel(season))
                     .font(.subheadline)
                     .foregroundStyle(palette.inkSecondary)
                     .padding(.horizontal, 4)
-                wrappedBanner(season)
-                if seasonsBack == 0 {
-                    monthRecapRow
+                if untouched && seasonsBack == 0 {
+                    startCard(stats, season: season, hatched: hatched)
+                } else {
+                    NumberStrip(values: [(stats.germsCaught, tr("germs caught")), (stats.daysSick, tr("days sick")),
+                                         (stats.dodged, tr("germs dodged"))])
+                    chartCard(stats, season: season, hatched: hatched)
+                    if let supplier = stats.topSupplier {
+                        supplierCard(supplier)
+                    }
+                    if let chain = stats.longestChain {
+                        chainCard(chain)
+                    }
                 }
-                tiles(stats)
                 duelCard(season)
-                if let supplier = stats.topSupplier {
-                    supplierCard(supplier)
-                }
-                chartCard(stats, season: season)
-                if let chain = stats.longestChain {
-                    chainCard(chain)
+                if !untouched {
+                    shareCard(season)
                 }
             }
             .padding(.horizontal, Spacing.page)
@@ -58,13 +63,15 @@ struct SeasonScreen: View {
                     .accessibilityLabel(tr("Seasons"))
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showWrapped = true
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
+            if !untouched {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showWrapped = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .accessibilityLabel(tr("Season recap"))
                 }
-                .accessibilityLabel(tr("Season recap"))
             }
         }
         .fullScreenCover(isPresented: $showWrapped) {
@@ -87,49 +94,70 @@ struct SeasonScreen: View {
         }
     }
 
-    /// Last month's card, once there is something to tell.
-    @ViewBuilder
-    private var monthRecapRow: some View {
-        let recap = model.lastMonthRecap()
-        if !recap.isEmpty {
-            Button {
-                showMonth = true
-            } label: {
-                ValueRow(title: tr("Your %@ recap", recap.monthName))
-                    .padding(.horizontal, 16)
-                    .germilyCard(padding: 0)
+    /// Before the season's first germ: what this page will hold, and where the season stands.
+    private func startCard(_ stats: SeasonStats, season: Season, hatched: Int) -> some View {
+        let since = PersonFileEngine.trackedSince(data: model.data)
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top, spacing: 12) {
+                Image("mascot-giggle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 66, height: 66)
+                    .rotationEffect(.degrees(-6))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(tr("Your season starts with the first germ."))
+                        .font(.headline)
+                        .foregroundStyle(palette.ink)
+                    Text(tr("Germs by month, your top supplier and the longest chain fill this page."))
+                        .font(.subheadline)
+                        .foregroundStyle(palette.inkSecondary)
+                }
+                .fixedSize(horizontal: false, vertical: true)
             }
-            .buttonStyle(.plain)
+            MonthRibbon(months: stats.months, hatched: hatched)
+            if since > season.start {
+                Text(tr("You started on %@.", since.formatted(.dateTime.month(.abbreviated).day())))
+                    .font(.footnote)
+                    .foregroundStyle(palette.inkSecondary)
+            }
         }
+        .germilyCard()
     }
 
-    /// Nothing to wrap before the first germ; the full story is announced on the reveal date.
-    @ViewBuilder
-    private func wrappedBanner(_ season: Season) -> some View {
-        if model.data.logs.contains(where: { season.contains($0.startedAt) }) {
-            let revealed = Date() >= WrapEngine.revealDate(for: season)
-            Button {
-                showWrapped = true
-            } label: {
-                HStack(spacing: 13) {
-                    IconTile(symbol: "sparkles", size: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(revealed ? tr("Season %lld recap", season.number) : tr("Your season so far"))
-                            .font(.headline)
-                            .foregroundStyle(palette.ink)
-                        Text(tr("Your season in story cards, ready to share."))
-                            .font(.subheadline)
-                            .foregroundStyle(palette.inkSecondary)
-                            .multilineTextAlignment(.leading)
+    /// The season's story cards and last month's card: what this page shares.
+    private func shareCard(_ season: Season) -> some View {
+        let recap = model.lastMonthRecap()
+        let revealed = Date() >= WrapEngine.revealDate(for: season)
+        return VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: tr("Share"))
+            VStack(spacing: 0) {
+                Button {
+                    showWrapped = true
+                } label: {
+                    HStack(spacing: 10) {
+                        RecapCardsIcon()
+                        ValueRow(title: tr("Season story"), value: revealed ? tr("Ready") : tr("So far"))
                     }
-                    Spacer(minLength: 4)
-                    Image(systemName: "chevron.right")
-                        .font(.footnote.weight(.bold))
-                        .foregroundStyle(palette.inkTertiary)
+                    .padding(.horizontal, 16)
                 }
-                .germilyCard()
+                .buttonStyle(.plain)
+                if seasonsBack == 0, !recap.isEmpty {
+                    Divider()
+                        .padding(.leading, 52)
+                    Button {
+                        showMonth = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            IconTile(symbol: "calendar", size: 26)
+                            ValueRow(title: tr("Your %@ recap", recap.monthName))
+                        }
+                        .padding(.horizontal, 16)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .buttonStyle(.plain)
+            .germilyCard(padding: 0)
         }
     }
 
@@ -156,19 +184,24 @@ struct SeasonScreen: View {
             Button {
                 showPartner = true
             } label: {
-                HStack(spacing: 12) {
-                    BuddyView(look: model.data.partnerLook, size: 40)
-                    Text(tr("Add your partner to start the couple duel."))
-                        .font(.subheadline)
-                        .foregroundStyle(palette.inkSecondary)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 14) {
+                    BuddyView(look: model.data.partnerLook, size: 46)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(tr("Couple duel"))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(palette.ink)
+                        Text(tr("Add your partner to start it."))
+                            .font(.subheadline)
+                            .foregroundStyle(palette.inkSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .multilineTextAlignment(.leading)
                     Spacer(minLength: 8)
                     Image(systemName: "plus")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(palette.inkTertiary)
                 }
-                .germilyCard()
+                .germilyCard(padding: 14)
             }
             .buttonStyle(.plain)
         }
@@ -215,41 +248,13 @@ struct SeasonScreen: View {
         guard season.contains(Date()) else {
             return tr("%1$@ to %2$@", season.start.formatted(style), lastDay.formatted(style))
         }
-        return tr("%1$@ to %2$@ · Week %3$lld", season.start.formatted(style), lastDay.formatted(style),
-                  season.week(for: Date()))
+        let weeks = StatsEngine.sickWeekGerms(data: model.data, season: season, now: Date()).count
+        return tr("Week %1$lld for you · %2$@ to %3$@", weeks, season.start.formatted(style), lastDay.formatted(style))
     }
 
     private func monthName(_ offset: Int, season: Season) -> String {
         let date = Calendar.current.date(byAdding: .month, value: offset, to: season.start) ?? season.start
         return date.formatted(.dateTime.month(.wide)).localizedCapitalized
-    }
-
-    private func tiles(_ stats: SeasonStats) -> some View {
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
-        return LazyVGrid(columns: columns, spacing: 10) {
-            tile(String(stats.germsCaught), tr("germs caught"))
-            tile(String(stats.daysSick), tr("days sick"))
-            tile(String(stats.dodged), tr("germs dodged"))
-        }
-    }
-
-    private func tile(_ value: String, _ label: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.title.weight(.bold))
-                .monospacedDigit()
-                .foregroundStyle(palette.ink)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-            Text(label)
-                .font(.footnote)
-                .foregroundStyle(palette.inkSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .germilyCard(padding: 14)
-        .accessibilityElement(children: .combine)
     }
 
     private func supplierCard(_ supplier: SupplierStat) -> some View {
@@ -282,41 +287,33 @@ struct SeasonScreen: View {
         .germilyCard()
     }
 
-    private func chartCard(_ stats: SeasonStats, season: Season) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            SectionHeader(title: tr("Germs by month"), trailing: tr("This season"))
+    /// The season month by month, then a key to the germs whose colors the bars use.
+    private func chartCard(_ stats: SeasonStats, season: Season, hatched: Int) -> some View {
+        let germs = stats.months.flatMap { $0.entries.map { $0.germ } }.reduce(into: [Germ]()) { list, germ in
+            if !list.contains(where: { $0.id == germ.id }) { list.append(germ) }
+        }
+        return VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(title: tr("Germs by month"))
             VStack(alignment: .leading, spacing: 12) {
                 Text(chartCaption(stats, season: season))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(palette.ink)
-                Chart {
-                    ForEach(stats.months) { bucket in
-                        ForEach(bucket.entries) { entry in
-                            BarMark(x: .value("Month", Double(bucket.id)),
-                                    y: .value("Germs", entry.count),
-                                    width: .fixed(15))
-                                .foregroundStyle(entry.germ.deepTint)
-                                .cornerRadius(4)
-                        }
-                    }
-                }
-                .chartXScale(domain: -0.6...11.6)
-                .chartYScale(domain: 0...max(3, stats.months.map { $0.total }.max() ?? 0))
-                .chartXAxis {
-                    AxisMarks(values: stats.months.map { Double($0.id) }) { value in
-                        AxisValueLabel {
-                            if let raw = value.as(Double.self), Int(raw) >= 0, Int(raw) < stats.months.count {
-                                Text(stats.months[Int(raw)].label)
-                                    .fontWeight(stats.months[Int(raw)].isCurrent ? .bold : .regular)
+                MonthBars(months: stats.months, hatched: hatched)
+                if !germs.isEmpty {
+                    ChipRows(spacing: 10) {
+                        ForEach(germs) { germ in
+                            HStack(spacing: 4) {
+                                RoundedRectangle(cornerRadius: 2.5, style: .continuous)
+                                    .fill(germ.deepTint)
+                                    .frame(width: 9, height: 9)
+                                Text(germ.illness.value)
+                                    .font(.caption)
+                                    .foregroundStyle(palette.inkSecondary)
                             }
                         }
                     }
+                    .accessibilityHidden(true)
                 }
-                .chartYAxis {
-                    AxisMarks(values: .automatic(desiredCount: 3))
-                }
-                .frame(height: 150)
-                .accessibilityLabel(tr("Germs by month"))
             }
             .germilyCard()
         }
@@ -375,5 +372,113 @@ struct SeasonScreen: View {
         }
         .frame(minWidth: 58)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Diagonal stripes for the months the journal did not follow.
+private struct Hatch: View {
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            var x = -size.height
+            while x < size.width {
+                path.move(to: CGPoint(x: x, y: size.height))
+                path.addLine(to: CGPoint(x: x + size.height, y: 0))
+                x += 6
+            }
+            context.stroke(path, with: .color(palette.ink.opacity(0.16)), lineWidth: 1.2)
+        }
+        .background(palette.ink.opacity(0.03))
+    }
+}
+
+/// The twelve months of an empty season as pills: hatched before the journal began, the current one in the accent.
+private struct MonthRibbon: View {
+    let months: [MonthBucket]
+    let hatched: Int
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(months) { month in
+                VStack(spacing: 6) {
+                    Group {
+                        if month.id < hatched {
+                            Hatch()
+                                .clipShape(Capsule())
+                        } else {
+                            Capsule()
+                                .fill(month.isCurrent ? palette.accent : palette.ink.opacity(0.08))
+                        }
+                    }
+                    .frame(height: 10)
+                    MonthLetter(month: month)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// The season's germs month by month, stacked in each germ's color with the count on top.
+/// Months before the journal began are hatched.
+private struct MonthBars: View {
+    let months: [MonthBucket]
+    let hatched: Int
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        let scale = CGFloat(max(3, months.map { $0.total }.max() ?? 0))
+        HStack(alignment: .bottom, spacing: 0) {
+            ForEach(months) { month in
+                VStack(spacing: 6) {
+                    ZStack(alignment: .bottom) {
+                        if month.id < hatched {
+                            Hatch()
+                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                .padding(.horizontal, 2)
+                        }
+                        VStack(spacing: 3) {
+                            if month.total > 0 {
+                                Text(verbatim: "\(month.total)")
+                                    .font(.caption.weight(.semibold))
+                                    .monospacedDigit()
+                                    .foregroundStyle(palette.ink)
+                            }
+                            VStack(spacing: 2) {
+                                ForEach(month.entries) { entry in
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(entry.germ.deepTint)
+                                        .frame(width: 15, height: CGFloat(entry.count) / scale * 104)
+                                }
+                            }
+                        }
+                        Rectangle()
+                            .fill(palette.ink.opacity(0.1))
+                            .frame(height: 1)
+                    }
+                    .frame(height: 130, alignment: .bottom)
+                    MonthLetter(month: month)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tr("Germs by month"))
+    }
+}
+
+/// A month's initial, in the accent while it is the current one.
+private struct MonthLetter: View {
+    let month: MonthBucket
+    @Environment(\.palette) private var palette
+
+    var body: some View {
+        Text(month.label)
+            .font(.caption.weight(month.isCurrent ? .bold : .regular))
+            .foregroundStyle(month.isCurrent ? palette.accent : palette.inkTertiary)
     }
 }

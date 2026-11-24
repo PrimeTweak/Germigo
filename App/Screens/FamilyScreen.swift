@@ -372,6 +372,7 @@ private struct FamilyCouch: View {
     @Environment(\.palette) private var palette
     /// Set by the first touch on someone of the household; the invitation bubble then goes for good.
     @AppStorage(HintKeys.couch) private var couchTouched = false
+    @State private var showBook = false
 
     var body: some View {
         let people = model.people
@@ -406,6 +407,9 @@ private struct FamilyCouch: View {
                 .buttonStyle(PressableStyle())
                 .accessibilityLabel(tr("Add someone"))
                 .position(seats.center(of: people.count))
+                ForEach(model.couchStickers, id: \.id) { sticker in
+                    CouchStickerView(sticker: sticker)
+                }
             }
             .frame(width: CouchSeats.width, height: CouchSeats.height)
             .overlay(alignment: .top) {
@@ -425,9 +429,30 @@ private struct FamilyCouch: View {
                 .font(.subheadline)
                 .foregroundStyle(palette.inkSecondary)
                 .multilineTextAlignment(.center)
+            Button {
+                showBook = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image("sticker-heart")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    Text(tr("Sticker book · %1$lld of %2$lld", model.earnedStickers().count, StickerBook.all.count))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(palette.ink)
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 40)
+                .background(palette.surface, in: Capsule())
+            }
+            .buttonStyle(PressableStyle())
+            .padding(.top, 12)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 18)
+        .sheet(isPresented: $showBook) {
+            StickerBookSheet()
+        }
     }
 
     /// Calm lines take turns by the day; a sick household gets its own.
@@ -444,6 +469,47 @@ private struct FamilyCouch: View {
             return sick.count == people.count ? tr("Everyone's down. Send soup.") : tr("%lld down. Hold the line.", sick.count)
         }
         return sick[0] == .me ? tr("You're down. Hold the line.") : tr("%@ is down. Hold the line.", model.name(for: sick[0]))
+    }
+}
+
+/// A sticker on the couch: hold it, then drag it somewhere else.
+private struct CouchStickerView: View {
+    let sticker: CouchSticker
+    @Environment(AppModel.self) private var model
+    @State private var drag = CGSize.zero
+    @State private var lifted = false
+
+    var body: some View {
+        Image("sticker-" + sticker.id)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 38, height: 38)
+            .scaleEffect(lifted ? 1.25 : 1)
+            .shadow(color: .black.opacity(lifted ? 0.22 : 0), radius: 6, y: 3)
+            .gesture(LongPressGesture(minimumDuration: 0.25)
+                .sequenced(before: DragGesture())
+                .onChanged { value in
+                    switch value {
+                    case .first(true):
+                        if !lifted { Haptics.tick() }
+                        lifted = true
+                    case .second(true, let move?):
+                        drag = move.translation
+                    default:
+                        break
+                    }
+                }
+                .onEnded { value in
+                    if case .second(true, let move?) = value {
+                        model.moveCouchSticker(sticker.id, x: sticker.x + move.translation.width,
+                                               y: sticker.y + move.translation.height)
+                    }
+                    drag = .zero
+                    lifted = false
+                })
+            .animation(Tempo.quick, value: lifted)
+            .position(x: sticker.x + drag.width, y: sticker.y + drag.height)
+            .accessibilityLabel(StickerBook.name(sticker.id))
     }
 }
 

@@ -59,22 +59,11 @@ enum HealthNotice {
 }
 
 /// The same line at the foot of every Guide page, whatever the illness: who to ask when unsure.
-/// In Canada it calls 811; elsewhere it points to the doctor or the local health line.
+/// It names no number, so it stays true wherever the phone is.
 struct HealthLineNote: View {
     @Environment(\.palette) private var palette
 
     var body: some View {
-        if Locale.current.region?.identifier == "CA", let url = URL(string: "tel:811") {
-            Link(destination: url) {
-                note(tr("Not sure? A nurse answers at 811, day and night."), calls: true)
-            }
-            .buttonStyle(PressableStyle())
-        } else {
-            note(tr("Not sure? Ask your doctor or your local health line."), calls: false)
-        }
-    }
-
-    private func note(_ text: String, calls: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "stethoscope")
                 .font(.system(size: 16, weight: .semibold))
@@ -82,24 +71,17 @@ struct HealthLineNote: View {
                 .frame(width: 36, height: 36)
                 .background(palette.background, in: Circle())
                 .accessibilityHidden(true)
-            Text(text)
+            Text(tr("Not sure? Ask your doctor or your local health line."))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(palette.ink)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
-            if calls {
-                Image(systemName: "phone.fill")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(palette.accent)
-                    .accessibilityHidden(true)
-            }
         }
         .padding(12)
         .background(palette.accent.opacity(palette.isDark ? 0.2 : 0.1),
                     in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(calls ? .isLink : [])
     }
 }
 
